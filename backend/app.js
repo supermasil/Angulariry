@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const path = require('path');
 
 const postsRoutes = require('./routes/posts');
-const usersRoutes = require('./routes/users')
+const usersRoutes = require('./routes/users');
+const post = require('./models/post');
+const { read } = require('fs');
 
 mongoose.connect("mongodb+srv://supermasil:" + process.env.MONGO_ATLAS_PW + "@cluster0-8khn5.mongodb.net/node-angular?retryWrites=true&w=majority", {useNewUrlParser: true, useUnifiedTopology: true})
   .then(() => {
@@ -21,17 +23,28 @@ app.use((req, res, next) => {
   'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTION');
   next();
-});
+}); // this is used to allow angular to access backend, it's not needed if using integrated approach
 
+// ORDER MATTERS
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use('/images', express.static(path.join(__dirname, "images"))); // Allow access to images folder
-app.use('/', express.static(path.join(__dirname, "angular"))); // Allow access to images folder
+app.use('/', express.static(path.join(__dirname, "angular"))); // Allow access to angular folder (integrated approach)
 
 app.use('/api/posts', postsRoutes); // this route is reserved for backend
 app.use('/api/users', usersRoutes); // this route is reserved for backend
 app.use((req, res, next) => {
+  // if (err.status === 404) {
+  //   return res.sendFile(path.join(__dirname, "angular", "index.html"));
+  // }
+  // console.log("123");
+
+  /** The request usually go throught the backend first before the front end. So by doing this, if this route is not found in the back end,
+   * it would be forwarded to the front end through index.html and the router there will take care of this one.
+   * For example the case of /edit/:postId
+   * We will handle 404 cases in app-routing.module.ts
+   */
   res.sendFile(path.join(__dirname, "angular", "index.html"));
-}); // Handle routes other than the two routes above. This will help request reach the front end
+});
 
 module.exports = app;

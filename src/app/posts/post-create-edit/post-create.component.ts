@@ -2,11 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms'
 
 import { PostsService } from '../post.service';
-import { ActivatedRoute } from '@angular/router'; // to distinguish between create and edit
+import { ActivatedRoute } from '@angular/router'; // to get info of the route through params
 import { Post } from '../post.model';
 import { mimeType } from "./mime-type.validator";
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-post-create',
@@ -27,7 +28,8 @@ export class PostCreateComponent implements OnInit, OnDestroy{
   constructor(
     public postsService: PostsService,
     public route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnDestroy(): void {
@@ -50,27 +52,31 @@ export class PostCreateComponent implements OnInit, OnDestroy{
     });
     // Subcribe to see the active route
     this.route.paramMap.subscribe((paramMap) => {
-      if (paramMap.has('postId')) {
+      if (paramMap.has('postId')) { // Edit case
         this.mode = 'edit';
         this.postId = paramMap.get('postId');
         this.isLoading = true;
 
-        this.postsService.getPost(this.postId).subscribe(postData => {
-          this.isLoading = false;
-          this.post = {
-            id: postData._id,
-            title: postData.title,
-            content: postData.content,
-            imagePath: postData.imagePath,
-            creator: postData.creator
-          };
-          // Initialize the form
-          this.form.setValue({
-            title: this.post.title,
-            content: this.post.content,
-            image: this.post.imagePath
+        this.postsService.getPost(this.postId).subscribe(
+          postData => {
+            this.isLoading = false;
+            this.post = {
+              id: postData._id,
+              title: postData.title,
+              content: postData.content,
+              imagePath: postData.imagePath,
+              creator: postData.creator
+            }
+            // Initialize the form
+            this.form.setValue({
+              title: this.post.title,
+              content: this.post.content,
+              image: this.post.imagePath
+            });
+          },
+          err => {
+            this.router.navigate(['/404']);
           });
-        });
       } else {
         this.mode = 'create';
         this.postId = null;

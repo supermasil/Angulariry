@@ -7,7 +7,6 @@ import { Subscription } from 'rxjs';
   templateUrl: 'login.component.html',
   styleUrls: ['login.component.css']
 })
-
 export class LoginComponent implements OnInit, OnDestroy{
   private authStatusSub: Subscription;
   isLoading = false;
