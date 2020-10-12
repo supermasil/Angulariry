@@ -12,6 +12,8 @@ import { ErrorComponent } from './error/error.component';
 import { AngularMaterialModule } from './angular-material.module';
 import { PostModule } from './posts/post.module';
 import { FrontPageModule } from './front-page/front-page.module';
+import { AngularFireModule } from '@angular/fire';
+import { environment } from 'src/environments/environment';
 // import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
 
 @NgModule({
@@ -27,7 +29,8 @@ import { FrontPageModule } from './front-page/front-page.module';
     HttpClientModule,
     AngularMaterialModule,
     PostModule,
-    FrontPageModule
+    FrontPageModule,
+    AngularFireModule.initializeApp(environment.firebaseConfig)
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},

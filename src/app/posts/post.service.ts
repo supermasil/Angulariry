@@ -74,7 +74,7 @@ export class PostsService {
         };
         console.log(responseData.message);
         this.posts.push(post);
-        this.router.navigate(['/']); // Will reload, no need to emit
+        this.router.navigate(['/posts']); // Will reload, no need to emit
     });
 
   }
@@ -114,7 +114,7 @@ export class PostsService {
         }
         updatedPosts[oldPostIndex] = post;
         this.posts = updatedPosts;
-        this.router.navigate(['/']); // Will reload, no need to emit
+        this.router.navigate(['/posts']); // Will reload, no need to emit
       });
   }
 

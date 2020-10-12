@@ -1,4 +1,5 @@
 const multer = require('multer');
+const path = require('path');
 
 const MIME_TYPE_MAP = {
   'image/png': 'png',
@@ -13,7 +14,7 @@ const storage = multer.diskStorage ({
     if (isValid) {
       error = null;
     }
-    cb(null, "images"); // path to images folder, relative to server.js folder
+    cb(null, path.join(__dirname, '../images')); // path to images folder, relative to server.js folder
   },
   filename: (req, file, cb) => {
     const name = file.originalname.toLowerCase().split(' ').join('-');
@@ -21,5 +22,4 @@ const storage = multer.diskStorage ({
     cb(null, name + '-' + Date.now() + '.' + ext);
   }
 });
-
 module.exports = multer({storage: storage}).single("image");

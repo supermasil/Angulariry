@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { Subscription } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core/';
 
 @Component({
   selector: 'app-header',
@@ -9,16 +10,17 @@ import { Subscription } from 'rxjs';
 })
 
 export class HeaderComponent implements OnInit, OnDestroy{
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private changeDetector: ChangeDetectorRef) {}
   userIsAuthenticated = false;
   private authListenerSub: Subscription;
   ngOnInit() {
-    this.userIsAuthenticated = this.authService.getIsAuth();
     this.authListenerSub = this.authService.getAuthStatusListener().subscribe(
       isAuthenticated => {
         this.userIsAuthenticated = isAuthenticated;
+        this.changeDetector.detectChanges();
       }
     );
+    this.userIsAuthenticated = this.authService.getIsAuth();
   }
 
   onLogOut() {

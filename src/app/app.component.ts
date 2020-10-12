@@ -8,8 +8,6 @@ import { AuthService } from './auth/auth.service';
 })
 export class AppComponent implements OnInit {
   constructor(private authSerice: AuthService) {}
-  ngOnInit() {
-    this.authSerice.autoAuthUser();
-  }
+  ngOnInit() {}
 
 }

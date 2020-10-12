@@ -1,13 +1,14 @@
-const jwt = require("jsonwebtoken");
+const admin = require('firebase-admin');
 
-
-module.exports = (req, res, next) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-    req.userData = {email: decodedToken.email, userId: decodedToken.userId}; // req will be passed on the the next func in next();
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "You are not authenticated!"});
+module.exports = {
+  isAuthenticated: (req, res, next) => {
+    var idToken = req.headers.authorization.split(" ")[1];
+    admin.auth().verifyIdToken(idToken)
+    .then(function(decodedToken) {
+      req.userData = {email: decodedToken.email, uid: decodedToken.uid};
+      next();
+    }).catch(function(error) {
+      res.status(401).json({ message: "You are not authorized!"});
+    });
   }
-};
+}

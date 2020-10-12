@@ -4,124 +4,116 @@ import { AuthData } from './auth-data.model';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { AngularFireAuth } from '@angular/fire/auth';
+import * as firebase from 'firebase/app';
+
+
 
 const BACKEND_URL = environment.apiURL + "/users/"
 
 @Injectable({ providedIn: 'root'} )
 export class AuthService {
-  private isAuthenticated = false;
-  private token: string;
-  private tokenTimer: NodeJS.Timer; // Or type Any is fine
   private authStatusListener = new Subject<boolean>();
-  private userId: string;
-  constructor(private http: HttpClient, private router: Router) {}
+  private user: firebase.User;
+  constructor(private http: HttpClient, private router: Router, public firebaseAuth: AngularFireAuth) {
+    this.firebaseAuth.onAuthStateChanged(user => {
+      if (user) {
+        this.user = user;
+        this.setupSessionStorage();
+        this.authStatusListener.next(true);
+      } else {
+        this.user = null;
+        this.clearSessionStorage();
+        this.authStatusListener.next(false);
+      }
+    });
+  }
 
-  getToken() {
-    return this.token;
+  setupSessionStorage() {
+    sessionStorage.setItem("isAuthenticated", "true");
+    sessionStorage.setItem("uid", this.user.uid);
+
+    this.user.getIdToken(true).then(idToken => {
+        sessionStorage.setItem('utoken', idToken);
+      }).catch((error) => {
+        console.log(error);
+      })
+  }
+
+  clearSessionStorage() {
+    sessionStorage.clear();
+  }
+
+  getUser() {
+    return this.user;
   }
 
   getIsAuth() {
-    return this.isAuthenticated;
+    return sessionStorage.getItem("isAuthenticated") == "true" ? true : false;
   }
 
   getAuthStatusListener() {
     return this.authStatusListener.asObservable();
   }
 
-  getUserId (){
-    return this.userId;
+  getUserId(){
+    return sessionStorage.getItem("uid");
+  }
+
+  getToken() {
+    return sessionStorage.getItem("utoken");
   }
 
   createUser(email: string, password: string) {
-    const authData: AuthData = {email, password};
-    this.http.post<{message: string}>(BACKEND_URL + "signup", authData)
-      .subscribe(response => {
-        console.log(response.message);
+    // const authData: AuthData = {email, password};
+    // this.http.post<{user: Object, message: string}>(BACKEND_URL + "signup", authData)
+    //   .subscribe(response => {
+    //     console.log(response.message);
+    //     this.login(email, password);
+    //     this.router.navigate(["/"]);
+    //   }, error => {
+    //     console.log(error.error.message);
+    //     this.authStatusListener.next(false);
+    //   });
+
+    this.firebaseAuth.createUserWithEmailAndPassword(email, password)
+      .then((user) => {
+        console.log("User created!");
+        this.login(email, password);
         this.router.navigate(["/"]);
-      }, err => {
-        console.log(err.error.message);
+      })
+      .catch((error) => {
+        console.log(error.message);
         this.authStatusListener.next(false);
-      });
+    });
   }
 
   login(email: string, password: string) {
-    const authData: AuthData = {email, password};
-    this.http.post<{token: string, expiresIn: number, userId: string}>(BACKEND_URL + "login", authData)
-      .subscribe(response => {
-        this.token = response.token;
-        if (this.token) {
-          const expiresInDuration = response.expiresIn;
-          this.setAuthTimer(expiresInDuration);
-          this.isAuthenticated = true;
-          this.userId = response.userId;
-          this.authStatusListener.next(true); // Notify about login status
-          const expiration = new Date(new Date().getTime() + expiresInDuration * 1000);
-          this.saveAuthData(this.token, expiration, this.userId);
-          this.router.navigate(["/"]);
-        }
-      },
-      error => {
-        this.authStatusListener.next(false);
+    this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .catch(function(error) {
+      console.log(error.message);
+    });
 
-      }
-    );
+    this.firebaseAuth.signInWithEmailAndPassword(email, password)
+    .then((userCredentials) => {
+      this.user = userCredentials.user;
+      this.authStatusListener.next(true);
+      console.log('User authenticated!');
+      this.router.navigate(["/"]);
+    })
+    .catch(function(error) {
+      this.userId = null;
+      this.isAuthenticated = false;
+      this.authStatusListener.next(false);
+      console.log(error.message);
+    });
   }
 
   logout() {
-    this.token = null;
-    this.isAuthenticated = false;
-    this.authStatusListener.next(false);
-    clearTimeout(this.tokenTimer);
-    this.clearAuthData();
-    this.userId = null;
-    this.router.navigate(["/"]);
-  }
-
-  autoAuthUser() {
-    const authInformation = this.getAuthData();
-    if (!authInformation) {
-      return;
-    }
-    const now = new Date();
-    const expiresIn = new Date(authInformation.expiration).getTime() - now.getTime();
-    if (expiresIn > 0) {
-      this.token = authInformation.token;
-      this.isAuthenticated = true;
-      this.userId = authInformation.userId;
-      this.authStatusListener.next(true);
-      this.setAuthTimer(expiresIn / 1000);
-    }
-  }
-
-  private setAuthTimer(duration: number) {
-    this.tokenTimer = setTimeout(() => {
-      this.logout();
-    }, duration * 1000)
-  }
-  private saveAuthData(token: string, expirationDate: Date, userId: string) {
-    localStorage.setItem("token", token);
-    localStorage.setItem("expiration", expirationDate.toISOString());
-    localStorage.setItem("userId", userId);
-  }
-
-  private clearAuthData() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("expiration");
-    localStorage.removeItem("userId");
-  }
-
-  private getAuthData() {
-    const token = localStorage.getItem("token");
-    const expiration = localStorage.getItem("expiration");
-    const userId = localStorage.getItem("userId");
-    if (!token || !expiration) {
-      return;
-    }
-
-    return {
-      token: token,
-      expiration: expiration,
-      userId: userId
-    };
+    this.firebaseAuth.signOut().then(() => {
+      console.log('User logged out!');
+    }).catch(error => {
+      console.log(error.message);
+    });
   }
 }

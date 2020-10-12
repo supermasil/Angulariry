@@ -6,8 +6,25 @@ const path = require('path');
 
 const postsRoutes = require('./routes/posts');
 const usersRoutes = require('./routes/users');
-const post = require('./models/post');
-const { read } = require('fs');
+
+// Firebase App (the core Firebase SDK) is always required and
+// must be listed before other Firebase SDKs
+const firebase = require('firebase/app');
+const admin = require('firebase-admin');
+
+const firebaseConfig = {
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  databaseURL: process.env.databaseURL,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId
+}
+
+firebase.initializeApp(firebaseConfig);
+admin.initializeApp(firebaseConfig);
 
 mongoose.connect("mongodb+srv://supermasil:" + process.env.MONGO_ATLAS_PW + "@cluster0-8khn5.mongodb.net/node-angular?retryWrites=true&w=majority", {useNewUrlParser: true, useUnifiedTopology: true})
   .then(() => {

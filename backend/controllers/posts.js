@@ -6,7 +6,7 @@ exports.createPost = (req, res, next) => {
     title: req.body.title,
     content: req.body.content,
     imagePath: url + '/images/' + req.file.filename,
-    creator: req.userData.userId
+    creator: req.userData.uid
   });
   post.save().then(createdPost => {
     return res.status(201).json({
@@ -23,6 +23,7 @@ exports.createPost = (req, res, next) => {
     });
   })
   .catch(err => {
+    console.log(err);
     return res.status(500).json({message: "Post creation failed"});
   });
 }
@@ -40,9 +41,10 @@ exports.updatePost = (req, res, next) => {
     title: req.body.title,
     content: req.body.content,
     imagePath: imagePath,
-    creator: req.userData.userId
+    creator: req.userData.uid
   });
-  Post.updateOne({ _id: req.params.id, creator: req.userData.userId }, post).then(updatedPost => {
+
+  Post.updateOne({ _id: req.params.id, creator: req.userData.uid }, post).then(updatedPost => {
     if (updatedPost.n > 0) { // Should not use nModified because of the case save unchanged post
       return res.status(201).json({updatedPost: updatedPost, message: "Put sucessfully"});
     } else {
@@ -99,7 +101,7 @@ exports.getPost = (req, res, next) => {
 }
 
 exports.deletePost = (req, res, next) => {
-  Post.deleteOne({ _id: req.params.id, creator: req.userData.userId }).then(deletedPost => {
+  Post.deleteOne({ _id: req.params.id, creator: req.userData.uid }).then(deletedPost => {
 
     if (deletedPost.n > 0) {
       return res.status(201).json({message: "Delete sucessfully"});
