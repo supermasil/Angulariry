@@ -8,7 +8,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSliderModule } from '@angular/material/slider';
-import { MatIconModule } from '@angular/material/icon'
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import {MatTabsModule} from '@angular/material/tabs';
 
 @NgModule({
   // imports: [ // Not needed
@@ -31,7 +33,9 @@ import { MatIconModule } from '@angular/material/icon'
     MatPaginatorModule,
     MatDialogModule,
     MatSliderModule,
-    MatIconModule
+    MatIconModule,
+    MatDividerModule,
+    MatTabsModule
   ]
 })
 

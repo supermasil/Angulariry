@@ -2,7 +2,6 @@
   "env": {
     "MONGO_ATLAS_PW": "82184756Abc",
     "JWT_KEY": "secret_this_should_be_longer",
-
     "apiKey": "AIzaSyC486KOce4Pxch0PUoGypgI88wUKz4ztMM",
     "authDomain": "musicacademy-fac23.firebaseapp.com",
     "databaseURL": "https://musicacademy-fac23.firebaseio.com",
@@ -13,4 +12,3 @@
     "measurementId": "G-CHLV454M2D"
   }
 }
-

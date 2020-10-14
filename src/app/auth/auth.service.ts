@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AuthData } from './auth-data.model';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { AngularFireAuth } from '@angular/fire/auth';
 import * as firebase from 'firebase/app';
-
-
+import{ GlobalConstants } from '../global-constants';
+import { AlertService } from '../alert-message';
 
 const BACKEND_URL = environment.apiURL + "/users/"
 
@@ -15,7 +14,7 @@ const BACKEND_URL = environment.apiURL + "/users/"
 export class AuthService {
   private authStatusListener = new Subject<boolean>();
   private user: firebase.User;
-  constructor(private http: HttpClient, private router: Router, public firebaseAuth: AngularFireAuth) {
+  constructor(private http: HttpClient, private router: Router, private firebaseAuth: AngularFireAuth, private alertService: AlertService) {
     this.firebaseAuth.onAuthStateChanged(user => {
       if (user) {
         this.user = user;
@@ -78,19 +77,19 @@ export class AuthService {
 
     this.firebaseAuth.createUserWithEmailAndPassword(email, password)
       .then((user) => {
-        console.log("User created!");
         this.login(email, password);
         this.router.navigate(["/"]);
+        this.alertService.success(GlobalConstants.signupSucessMessage, GlobalConstants.flashMessageOptions);
       })
       .catch((error) => {
-        console.log(error.message);
         this.authStatusListener.next(false);
+        this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
   }
 
   login(email: string, password: string) {
     this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(function(error) {
+    .catch(error => {
       console.log(error.message);
     });
 
@@ -98,22 +97,30 @@ export class AuthService {
     .then((userCredentials) => {
       this.user = userCredentials.user;
       this.authStatusListener.next(true);
-      console.log('User authenticated!');
       this.router.navigate(["/"]);
+      this.alertService.success(GlobalConstants.loginSuccessMessage, GlobalConstants.flashMessageOptions);
     })
-    .catch(function(error) {
-      this.userId = null;
-      this.isAuthenticated = false;
+    .catch(error => {
+      this.user = null;
       this.authStatusListener.next(false);
-      console.log(error.message);
+      this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
   }
 
   logout() {
     this.firebaseAuth.signOut().then(() => {
-      console.log('User logged out!');
+      this.router.navigate(["/"]);
+      this.alertService.success(GlobalConstants.logoutSuccessMessage, GlobalConstants.flashMessageOptions);
     }).catch(error => {
-      console.log(error.message);
+      this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+    });
+  }
+
+  resetPassword(email: string) {
+    this.firebaseAuth.sendPasswordResetEmail(email).then(() => {
+      this.alertService.success(GlobalConstants.passwordResetSentMessage, GlobalConstants.flashMessageOptions);
+    }).catch(error => {
+      this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
   }
 }

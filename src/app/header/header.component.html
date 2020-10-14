@@ -1,32 +1,25 @@
-<mat-toolbar color='primary'>
+<mat-toolbar color="primary">
+  <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+    <mat-icon>menu</mat-icon>
+  </button>
   <a routerLink="/">MyMessages</a>
+  <a routerLink="/posts">Posts</a>
   <span class="spacer"></span>
+  <!-- <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+    <mat-icon>favorite</mat-icon>
+  </button>
+  <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+    <mat-icon>share</mat-icon>
+  </button> -->
   <ul>
     <li *ngIf="userIsAuthenticated">
       <a mat-button routerLink='/create' routerLinkActive="mat-accent">Create</a>
     </li>
     <li *ngIf="!userIsAuthenticated">
-      <a mat-button routerLink='/auth/login' routerLinkActive="mat-accent">Login</a>
-    </li>
-    <li *ngIf="!userIsAuthenticated">
-      <a mat-button routerLink='/auth/signup' routerLinkActive="mat-accent">Signup</a>
+      <a mat-button routerLink='/auth' routerLinkActive="mat-accent">Login/out</a>
     </li>
     <li *ngIf="userIsAuthenticated">
       <a mat-button (click)="onLogOut()">Logout</a>
     </li>
   </ul>
-</mat-toolbar>
-
-<mat-toolbar color="primary">
-  <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <span>My App</span>
-  <span class="example-spacer"></span>
-  <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-    <mat-icon>favorite</mat-icon>
-  </button>
-  <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
-    <mat-icon>share</mat-icon>
-  </button>
 </mat-toolbar>

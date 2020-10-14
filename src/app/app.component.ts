@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from './auth/auth.service';
 
 @Component({
@@ -6,8 +7,13 @@ import { AuthService } from './auth/auth.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
-  constructor(private authSerice: AuthService) {}
-  ngOnInit() {}
 
+export class AppComponent implements OnInit {
+  constructor(private authSerice: AuthService, public router: Router) {
+    this.router.routeReuseStrategy.shouldReuseRoute =  () => {
+      return false;
+    };
+    this.router.onSameUrlNavigation = 'reload';
+  }
+  ngOnInit() {}
 }
