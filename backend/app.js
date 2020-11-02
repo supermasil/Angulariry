@@ -15,7 +15,7 @@ const admin = require('firebase-admin');
 
 // Connected to dev config in nodemon but prod config in Elastic Beanstalk
 const firebaseConfig = {
-  apiKey: process.env.apiKey,
+  apiKey: process.env.fireBaseApiKey,
   authDomain: process.env.authDomain,
   databaseURL: process.env.databaseURL,
   projectId: process.env.projectId,
