@@ -26,7 +26,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       return;
     }
     this.isLoading = true;
-    this.authService.createUser(form.value.email, form.value.password);
+    this.authService.createUser(form.value.name, form.value.email, form.value.password);
   }
 
   onLogin(form: NgForm) {

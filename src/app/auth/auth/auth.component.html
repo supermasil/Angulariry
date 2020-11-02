@@ -38,6 +38,17 @@
           <mat-form-field>
             <input
             matInput
+            type='text'
+            placeholder='Full Name'
+            name='name'
+            ngModel
+            #nameInput='ngModel'
+            required>
+            <mat-error *ngIf="nameInput.invalid">Please enter your name</mat-error>
+          </mat-form-field>
+          <mat-form-field>
+            <input
+            matInput
             type='email'
             placeholder='Email'
             name='email'

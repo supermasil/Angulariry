@@ -14,7 +14,9 @@ import { AuthService } from 'src/app/auth/auth.service';
 
 export class PostListComponent implements OnInit, OnDestroy {
   posts: Post[] = [];
+  subscribedPosts: String[] = [];
   private postsSub: Subscription;
+  private subscribedPostsSub: Subscription;
   private authListenerSub: Subscription;
   userIsAuthenticated = false;
   isLoading = false;
@@ -34,13 +36,7 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.isLoading = true;
-    this.postsService.getPosts(this.postsPerPage, 1); // This will update the getPostUpdateListener observable
-    this.postsSub = this.postsService.getPostUpdateListener()
-      .subscribe((postData: {posts: Post[], maxPosts: number}) => {
-        this.isLoading = false;
-        this.posts = postData.posts;
-        this.totalPosts = postData.maxPosts;
-    });
+
     this.userIsAuthenticated = this.authService.getIsAuth(); // Get current login status
     this.userId = this.authService.getUserId();
     // Since the post list component is loaded after logging in
@@ -51,15 +47,43 @@ export class PostListComponent implements OnInit, OnDestroy {
         this.userId = this.authService.getUserId();
       }
     );
+
+    this.postsService.getPosts(this.postsPerPage, 1); // This will update the getPostUpdateListener observable
+    this.postsSub = this.postsService.getPostUpdateListener()
+      .subscribe((postData: {posts: Post[], maxPosts: number}) => {
+        this.posts = postData.posts;
+        this.totalPosts = postData.maxPosts;
+      });
+
+    if (this.userIsAuthenticated) {
+      this.postsService.getSubscribedPosts();
+      this.subscribedPostsSub = this.postsService.getSubscribedPostsListener()
+        .subscribe((postData: {subscribedPosts: []}) => {
+          this.subscribedPosts = postData.subscribedPosts;
+        });
+    }
+
+    this.isLoading = false;
   }
 
   onDelete(postId: string) {
     this.isLoading = true;
     this.postsService.deletePost(postId).subscribe(() => {
       this.postsService.getPosts(this.postsPerPage, this.currentPage); // refetch after deletion
-    }, () => {
-      this.isLoading = false;
     });
+    this.isLoading = false;
+  }
+
+  onSubscribe(postId: string) {
+    this.isLoading = true
+    this.postsService.subscribePost(postId);
+    this.isLoading = false;
+  }
+
+  onUnSubscribe(postId: string) {
+    this.isLoading = true
+    this.postsService.unSubscribePost(postId);
+    this.isLoading = false;
   }
 
   onChangedPage(pageData: PageEvent) {
@@ -69,8 +93,12 @@ export class PostListComponent implements OnInit, OnDestroy {
     this.postsService.getPosts(this.postsPerPage, this.currentPage);
   }
 
+  // Always remember to unsub
   ngOnDestroy() {
     this.postsSub.unsubscribe();
     this.authListenerSub.unsubscribe();
+    if (this.subscribedPostsSub) {
+      this.subscribedPostsSub.unsubscribe();
+    }
   }
 }

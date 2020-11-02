@@ -9,11 +9,11 @@ import { AuthService } from './auth/auth.service';
 })
 
 export class AppComponent implements OnInit {
-  constructor(private authSerice: AuthService, public router: Router) {
-    this.router.routeReuseStrategy.shouldReuseRoute =  () => {
-      return false;
-    };
-    this.router.onSameUrlNavigation = 'reload';
-  }
+  // constructor(private authSerice: AuthService, public router: Router) {
+  //   this.router.routeReuseStrategy.shouldReuseRoute =  () => {
+  //     return false;
+  //   };
+  //   this.router.onSameUrlNavigation = 'reload';
+  // }
   ngOnInit() {}
 }

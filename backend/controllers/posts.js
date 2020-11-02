@@ -10,7 +10,7 @@ exports.createPost = (req, res, next) => {
   });
   post.save().then(createdPost => {
     return res.status(201).json({
-      message: 'Post added successfully',
+      message: 'Post created successfully',
       postId: createdPost._id,
       post: {
        // ...createdPost // Copy all existing properties
@@ -22,8 +22,8 @@ exports.createPost = (req, res, next) => {
       }
     });
   })
-  .catch(err => {
-    console.log(err);
+  .catch(error => {
+    console.log("createPost: " + error.message);
     return res.status(500).json({message: "Post creation failed"});
   });
 }
@@ -46,13 +46,13 @@ exports.updatePost = (req, res, next) => {
 
   Post.updateOne({ _id: req.params.id, creator: req.userData.uid }, post).then(updatedPost => {
     if (updatedPost.n > 0) { // Should not use nModified because of the case save unchanged post
-      return res.status(201).json({updatedPost: updatedPost, message: "Put sucessfully"});
+      return res.status(201).json({updatedPost: updatedPost, message: "Post updated sucessfully"});
     } else {
-      return res.status(401).json({message: "Not authorized to put"});
+      return res.status(500).json({message: "No post was updated"});
     }
   })
-  .catch(err => {
-    console.log(err.message);
+  .catch(error => {
+    console.log("updatePost: " + error.message);
     return res.status(500).json({message: "Couldn't update post"});
   });
 }
@@ -75,42 +75,37 @@ exports.getPosts = (req, res, next) => {
     })
     .then(count => {
       return res.status(200).json({
-        message: 'Get all posts successfully',
         posts: fetchedPosts,
         maxPosts: count
       });
     })
-    .catch(err => {
-      console.log(err);
-      return res.status(500).json({message: "Fetching posts failed"});
+    .catch(error => {
+      console.log("getPosts: " + error.message);
+      return res.status(500).json({message: "Couldn't fetch posts"});
     });
 }
 
 exports.getPost = (req, res, next) => {
   Post.findById(req.params.id)
   .then(post => {
-    if (post) {
       return res.status(200).json(post);
-    } else {
-      return res.status(404).json({message: 'Post not found!'});
-    }
   })
-  .catch(err => {
-      return res.status(500).json({message: "Fetching posts failed"});
+  .catch(error => {
+      onsole.log("getPost: " + error.message);
+      return res.status(500).json({message: "Couldn't fetch post"});
   });
 }
 
 exports.deletePost = (req, res, next) => {
   Post.deleteOne({ _id: req.params.id, creator: req.userData.uid }).then(deletedPost => {
-
     if (deletedPost.n > 0) {
-      return res.status(201).json({message: "Delete sucessfully"});
+      return res.status(201).json({message: "Post deleted sucessfully"});
     } else {
-      return res.status(401).json({message: "Not authorized to delete"});
+      return res.status(401).json({message: "No post was deleted"});
     }
   })
-  .catch(err => {
-    console.log(err.message);
-    return res.status(500).json({message: "Some error happens while deleting"});
+  .catch(error => {
+    console.log(error.message);
+    return res.status(500).json({message: "Couldn't delete post"});
   });
 }

@@ -6,15 +6,19 @@ import { map } from 'rxjs/operators';
 import { Post } from './post.model';
 import { Router } from '@angular/router'; // For navigation
 import { environment } from 'src/environments/environment';
+import { AlertService } from '../alert-message';
+import { GlobalConstants } from '../global-constants';
 
 const BACKEND_URL = environment.apiURL + "/posts/"
 
 @Injectable({providedIn: 'root'}) // Or add PostService to providers in app.module
 export class PostsService {
   private posts: Post[] = [];
+  private subscribedPosts: String[] =[];
   private postsUpdated = new Subject<{posts: Post[], maxPosts: number}>(); // Like an event emitter
+  private postsSubscribedUpdated = new Subject<{subscribedPosts: String[]}>();
 
-  constructor(private httpClient: HttpClient, private router: Router) {}
+  constructor(private httpClient: HttpClient, private router: Router, private alertService: AlertService) {}
 
   getPosts(postsPerPage: number, currentPage:number) {
     const queryParams = `?pageSize=${postsPerPage}&currentPage=${currentPage}`;
@@ -76,7 +80,6 @@ export class PostsService {
         this.posts.push(post);
         this.router.navigate(['/posts']); // Will reload, no need to emit
     });
-
   }
 
   deletePost(postId: string) {
@@ -116,6 +119,45 @@ export class PostsService {
         this.posts = updatedPosts;
         this.router.navigate(['/posts']); // Will reload, no need to emit
       });
+  }
+
+  getSubscribedPosts() {
+    this.httpClient
+      .get<{message: string, subscribedPosts: String[]}>(environment.apiURL + '/subscriptions/')
+      .subscribe(response => {
+        this.subscribedPosts = response.subscribedPosts
+        this.postsSubscribedUpdated.next({
+          subscribedPosts: [...this.subscribedPosts]
+        });
+      }, error => {
+        return this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+      })
+  }
+
+  getSubscribedPostsListener() {
+    return this.postsSubscribedUpdated.asObservable();
+  }
+
+  subscribePost(postId: String) {
+    return this.subcriptionHelper(postId, "subscribe");
+  }
+
+  unSubscribePost(postId: String) {
+    return this.subcriptionHelper(postId, "unsubscribe");
+  }
+
+  subcriptionHelper(postId: String, subType: String) {
+    let postData = {
+      postId: postId
+    }
+    this.httpClient
+      .post<{subscribedPosts: [],message: string}>(environment.apiURL + `/subscriptions/${subType}`, postData)
+      .subscribe(response => {
+        console.log(response.subscribedPosts);
+          this.postsSubscribedUpdated.next({
+            subscribedPosts: [...response.subscribedPosts]
+          });
+    }, error => {});
   }
 
 }

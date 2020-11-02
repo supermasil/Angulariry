@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -11,7 +11,7 @@ import { AlertService } from '../alert-message';
 const BACKEND_URL = environment.apiURL + "/users/"
 
 @Injectable({ providedIn: 'root'} )
-export class AuthService {
+export class AuthService implements OnInit {
   private authStatusListener = new Subject<boolean>();
   private user: firebase.User;
   constructor(private http: HttpClient, private router: Router, private firebaseAuth: AngularFireAuth, private alertService: AlertService) {
@@ -25,6 +25,13 @@ export class AuthService {
         this.clearSessionStorage();
         this.authStatusListener.next(false);
       }
+    });
+  }
+
+  ngOnInit() {
+    this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .catch(error => {
+      console.log(error.message);
     });
   }
 
@@ -63,42 +70,41 @@ export class AuthService {
     return sessionStorage.getItem("utoken");
   }
 
-  createUser(email: string, password: string) {
-    // const authData: AuthData = {email, password};
-    // this.http.post<{user: Object, message: string}>(BACKEND_URL + "signup", authData)
-    //   .subscribe(response => {
-    //     console.log(response.message);
-    //     this.login(email, password);
-    //     this.router.navigate(["/"]);
-    //   }, error => {
-    //     console.log(error.error.message);
-    //     this.authStatusListener.next(false);
-    //   });
-
+  createUser(name: string, email: string, password: string) {
     this.firebaseAuth.createUserWithEmailAndPassword(email, password)
-      .then((user) => {
-        this.login(email, password);
-        this.router.navigate(["/"]);
-        this.alertService.success(GlobalConstants.signupSucessMessage, GlobalConstants.flashMessageOptions);
-      })
-      .catch((error) => {
+    .then((user) => {
+      const authData = {name, email};
+      this.http.post<{}>(BACKEND_URL + "signup", authData)
+      .subscribe(response => {
         this.authStatusListener.next(false);
-        this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+        return this.router.navigate(["/"]);
+      }, error => {
+        this.authStatusListener.next(false);
+        this.deleteCurrentUser();
+        return this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+      });
+    })
+    .catch((error) => {
+      this.authStatusListener.next(false);
+      return this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+    });
+  }
+
+  deleteCurrentUser() {
+    var user = firebase.auth().currentUser;
+    user.delete().then(() => {
+      return this.alertService.error("Deleted user after failed database creation", GlobalConstants.flashMessageOptions);
+    }).catch(function(error) {
+      return this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
   }
 
   login(email: string, password: string) {
-    this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(error => {
-      console.log(error.message);
-    });
-
     this.firebaseAuth.signInWithEmailAndPassword(email, password)
     .then((userCredentials) => {
       this.user = userCredentials.user;
       this.authStatusListener.next(true);
       this.router.navigate(["/"]);
-      this.alertService.success(GlobalConstants.loginSuccessMessage, GlobalConstants.flashMessageOptions);
     })
     .catch(error => {
       this.user = null;
@@ -110,7 +116,6 @@ export class AuthService {
   logout() {
     this.firebaseAuth.signOut().then(() => {
       this.router.navigate(["/"]);
-      this.alertService.success(GlobalConstants.logoutSuccessMessage, GlobalConstants.flashMessageOptions);
     }).catch(error => {
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
@@ -118,7 +123,6 @@ export class AuthService {
 
   resetPassword(email: string) {
     this.firebaseAuth.sendPasswordResetEmail(email).then(() => {
-      this.alertService.success(GlobalConstants.passwordResetSentMessage, GlobalConstants.flashMessageOptions);
     }).catch(error => {
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
