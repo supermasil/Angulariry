@@ -50,6 +50,7 @@ export class PostCreateComponent implements OnInit, OnDestroy{
       content: new FormControl(null, {validators: [Validators.required]}),
       image: new FormControl(null, {validators: [Validators.required], asyncValidators: [mimeType]})
     });
+
     // Subcribe to see the active route
     this.route.paramMap.subscribe((paramMap) => {
       if (paramMap.has('postId')) { // Edit case

@@ -16,6 +16,8 @@ import { FrontPageModule } from './front-page/front-page.module';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { AlertModule } from './alert-message';
+import { TrackingComponent } from './tracking/tracking.component';
+import { TrackingModule } from './tracking/tracking.module';
 // import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
 
 @NgModule({
@@ -30,8 +32,6 @@ import { AlertModule } from './alert-message';
     BrowserAnimationsModule,
     HttpClientModule,
     AngularMaterialModule,
-    PostModule,
-    FrontPageModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AlertModule
   ],

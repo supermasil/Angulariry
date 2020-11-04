@@ -10,28 +10,30 @@ import { AlertService } from '../alert-message';
 
 const BACKEND_URL = environment.apiURL + "/users/"
 
-@Injectable({ providedIn: 'root'} )
-export class AuthService implements OnInit {
+@Injectable({ providedIn: 'root'})
+export class AuthService {
   private authStatusListener = new Subject<boolean>();
   private user: firebase.User;
+  public redirectUrl: string;
+
   constructor(private http: HttpClient, private router: Router, private firebaseAuth: AngularFireAuth, private alertService: AlertService) {
     this.firebaseAuth.onAuthStateChanged(user => {
       if (user) {
         this.user = user;
         this.setupSessionStorage();
+        user.getIdTokenResult().then(idTokenResult => {
+          const authTime = idTokenResult.claims.auth_time * 1000;
+          const sessionDuration = 1000 * 60 * 60 * 8;
+          const millisecondsUntilExpiration = sessionDuration - (Date.now() - authTime);
+          setTimeout(() => firebaseAuth.signOut(), millisecondsUntilExpiration);
+        })
         this.authStatusListener.next(true);
+
       } else {
         this.user = null;
         this.clearSessionStorage();
         this.authStatusListener.next(false);
       }
-    });
-  }
-
-  ngOnInit() {
-    this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(error => {
-      console.log(error.message);
     });
   }
 
@@ -100,15 +102,26 @@ export class AuthService implements OnInit {
   }
 
   login(email: string, password: string) {
-    this.firebaseAuth.signInWithEmailAndPassword(email, password)
-    .then((userCredentials) => {
-      this.user = userCredentials.user;
-      this.authStatusListener.next(true);
-      this.router.navigate(["/"]);
+    this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+    .then(() => {
+        this.firebaseAuth.signInWithEmailAndPassword(email, password)
+      .then((userCredentials) => {
+        this.user = userCredentials.user;
+        this.authStatusListener.next(true);
+        if (this.redirectUrl) {
+          this.router.navigate([this.redirectUrl]);
+          this.redirectUrl = null
+          return;
+        }
+        this.router.navigate(["/"]);
+      })
+      .catch(error => {
+        this.user = null;
+        this.authStatusListener.next(false);
+        this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+      });
     })
     .catch(error => {
-      this.user = null;
-      this.authStatusListener.next(false);
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
   }

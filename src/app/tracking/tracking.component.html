@@ -1,0 +1,16 @@
+<div>
+  <mat-card>
+    <form [formGroup]='form' (submit)='onSearch()' *ngIf='!isLoading'>
+      <mat-form-field class="w-100">
+        <input
+          matInput
+          placeholder="Search anything"
+          type='search'
+          formControlName='searchInput'
+        >
+        <mat-error *ngIf="form.get('searchInput').invalid">Please enter something to search</mat-error>
+      </mat-form-field>
+      <button class="ml-auto" mat-raised-button color='warn' onclick="">Search</button>
+    </form>
+  </mat-card>
+</div>

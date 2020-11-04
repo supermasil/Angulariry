@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "mean-course": {
+    "angularity": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -81,18 +81,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "mean-course:build"
+            "browserTarget": "angularity:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "mean-course:build:production"
+              "browserTarget": "angularity:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "mean-course:build"
+            "browserTarget": "angularity:build"
           }
         },
         "test": {
@@ -130,16 +130,16 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "mean-course:serve"
+            "devServerTarget": "angularity:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "mean-course:serve:production"
+              "devServerTarget": "angularity:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "mean-course"
+  "defaultProject": "angularity"
 }

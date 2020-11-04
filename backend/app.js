@@ -7,6 +7,7 @@ const path = require('path');
 const postsRoutes = require('./routes/posts');
 const usersRoutes = require('./routes/users');
 const subscriptionsRoutes = require('./routes/subscriptions');
+const trackingsRoutes = require('./routes/trackings');
 
 // Firebase App (the core Firebase SDK) is always required and
 // must be listed before other Firebase SDKs
@@ -54,6 +55,7 @@ app.use('/', express.static(path.join(__dirname, "angular"))); // Allow access t
 app.use('/api/posts', postsRoutes); // this route is reserved for backend
 app.use('/api/users', usersRoutes); // this route is reserved for backend
 app.use('/api/subscriptions', subscriptionsRoutes); // this route is reserved for backend
+app.use('/api/trackings', trackingsRoutes); // this route is reserved for backend
 app.use((req, res, next) => {
   // if (err.status === 404) {
   //   return res.sendFile(path.join(__dirname, "angular", "index.html"));

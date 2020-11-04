@@ -1,4 +1,13 @@
+<mat-card>
+  <form [formGroup]='' class="search-bar">
+    <mat-form-field>
+      <mat-label>Search here</mat-label>
+      <input matInput placeholder="Search anything, really">
+    </mat-form-field>
+  </form>
+</mat-card>
 <mat-spinner *ngIf='isLoading'></mat-spinner>
+<br>
 <mat-accordion multi='true' *ngIf='posts.length > 0 && !isLoading'>
   <mat-expansion-panel *ngFor='let post of posts'>
 

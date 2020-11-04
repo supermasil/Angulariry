@@ -2,7 +2,6 @@ const Post = require('../models/post');
 const User = require('../models/user');
 const db = require('mongoose');
 const globals = require('../config/globals');
-const { resolve } = require('path');
 
 const OPERATIONS = {
   SUBSCRIBE: "subscribePost",
