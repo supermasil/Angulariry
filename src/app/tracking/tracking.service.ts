@@ -10,9 +10,8 @@ export class TrackingService {
 
   constructor(private httpClient: HttpClient, private alertService: AlertService) {}
 
-  getTrackingInfo() {
-    console.log("there");
-    this.httpClient.get<{}>(BACKEND_URL).subscribe(); // return an observable
+  getTrackingInfo(trackingNumber: String, carrier: String) {
+    const queryParams = `?trackingNumber=${trackingNumber}&carrier=${carrier}`;
+    return this.httpClient.get<Object>(BACKEND_URL + queryParams);
   }
-
 }

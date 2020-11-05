@@ -91,7 +91,7 @@ exports.getPost = (req, res, next) => {
       return res.status(200).json(post);
   })
   .catch(error => {
-      onsole.log("getPost: " + error.message);
+      console.log("getPost: " + error.message);
       return res.status(500).json({message: "Couldn't fetch post"});
   });
 }

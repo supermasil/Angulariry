@@ -81,6 +81,7 @@ export class PostCreateComponent implements OnInit, OnDestroy{
       } else {
         this.mode = 'create';
         this.postId = null;
+        this.isLoading = false;
       }
     });
   }

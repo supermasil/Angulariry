@@ -12,13 +12,17 @@ const api = new EasyPost("EZAK0777fe1395a9438f84544006152b0bf3gfhWyjEEllIE2WTw2Z
 
 
 exports.getTrackingInfo = (req, res, next) => {
-  console.log("123");
   const tracker = new api.Tracker({
-    tracking_code: "9361289711091140601966",
-    carrier: "USPS"
+    tracking_code: req.query.trackingNumber,
+    carrier: req.query.carrier
   });
 
-  tracker.save()
-    .then(response => console.log(response))
-    .catch(error => console.log(error));
+  return tracker.save()
+    .then(response => {
+      return res.status(200).json(response);
+    })
+    .catch(error => {
+      console.log("getTrackingInfo: " + error.message)
+      return res.status(500).json({message: "Something went wrong while looking for this package"})
+    });
 }

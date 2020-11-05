@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AngularMaterialModule } from '../angular-material.module';
 import { AppRoutingModule } from '../app-routing.module';
+import { PostModule } from '../posts/post.module';
 import { TrackingComponent } from './tracking.component';
 
 @NgModule({

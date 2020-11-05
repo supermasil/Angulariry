@@ -14,12 +14,13 @@
     <mat-expansion-panel-header>
       {{ post.title }}
     </mat-expansion-panel-header>
+    <ng-template matExpansionPanelContent>
+      <div class='post-image'>
+        <img [src]='post.imagePath' [alt]='post.title'>
+      </div>
+      <p>{{ post.content }}</p>
+    </ng-template>
 
-    <div class='post-image'>
-      <img [src]='post.imagePath' [alt]='post.title'>
-    </div>
-
-    <p>{{ post.content }}</p>
 
     <mat-action-row>
       <div *ngIf="userIsAuthenticated && userId === post.creator;">

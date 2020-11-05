@@ -11,6 +11,10 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import {MatTabsModule} from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import {MatGridListModule} from '@angular/material/grid-list';
+
 
 @NgModule({
   // imports: [ // Not needed
@@ -35,7 +39,10 @@ import {MatTabsModule} from '@angular/material/tabs';
     MatSliderModule,
     MatIconModule,
     MatDividerModule,
-    MatTabsModule
+    MatTabsModule,
+    MatSelectModule,
+    MatOptionModule,
+    MatGridListModule
   ]
 })
 

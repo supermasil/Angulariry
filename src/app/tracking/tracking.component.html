@@ -1,16 +1,49 @@
-<div>
-  <mat-card>
-    <form [formGroup]='form' (submit)='onSearch()' *ngIf='!isLoading'>
-      <mat-form-field class="w-100">
+<mat-card>
+  <form [formGroup]="form" (submit)="onSearch()">
+    <div class="inline-block row">
+      <mat-form-field class="col-md-9">
+        <mat-label>Tracking Number</mat-label>
         <input
           matInput
-          placeholder="Search anything"
           type='search'
-          formControlName='searchInput'
+          formControlName='trackingNumber'
         >
-        <mat-error *ngIf="form.get('searchInput').invalid">Please enter something to search</mat-error>
+        <mat-error *ngIf="form.get('trackingNumber').invalid">Please enter something to search</mat-error>
       </mat-form-field>
-      <button class="ml-auto" mat-raised-button color='warn' onclick="">Search</button>
-    </form>
-  </mat-card>
-</div>
+
+      <mat-form-field class="col-md-3">
+        <mat-label>Carrier</mat-label>
+        <mat-select formControlName="carrier">
+          <mat-option *ngFor="let carrier of carriers" [value]="carrier">
+            {{carrier}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('carrier').invalid">Please choose a carrier</mat-error>
+        <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
+      </mat-form-field>
+    </div>
+    <br>
+    <button type="submit" class="ml-auto" mat-raised-button color='primary'>Search</button>
+
+  </form>
+</mat-card>
+<mat-spinner *ngIf="isLoading" class="mx-auto mt-4"></mat-spinner>
+<br>
+
+<mat-card *ngIf="tracked">
+
+    <mat-card-title>
+      {{tracker.carrier}} {{tracker.tracking_code}}
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{tracker.status}}
+    </mat-card-subtitle>
+
+    <mat-card-content>
+      From: {{tracker.origin_location}}
+      <br>
+      To: {{tracker.destination_location}}
+    </mat-card-content>
+
+</mat-card>
+

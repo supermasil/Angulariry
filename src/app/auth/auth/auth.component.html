@@ -3,11 +3,12 @@
     <mat-tab label="Login">
       <mat-card>
         <form (submit)='onLogin(loginForm)' #loginForm='ngForm' *ngIf='!isLoading'>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
             <input
             matInput
             type='email'
-            placeholder='Email'
+            placeholder='johndoe@abc.com'
             name='email'
             ngModel
             #emailInput='ngModel'
@@ -15,7 +16,8 @@
             email>
             <mat-error *ngIf="emailInput.invalid">Please enter a valid email</mat-error>
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
             <input
             type='password'
             matInput
@@ -35,22 +37,24 @@
       <mat-card>
 
         <form (submit)='onSignup(signupForm)' #signupForm='ngForm' *ngIf='!isLoading'>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Full name</mat-label>
             <input
             matInput
             type='text'
-            placeholder='Full Name'
+            placeholder='John Doe'
             name='name'
             ngModel
             #nameInput='ngModel'
             required>
             <mat-error *ngIf="nameInput.invalid">Please enter your name</mat-error>
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
             <input
             matInput
             type='email'
-            placeholder='Email'
+            placeholder='johndoe@abc.com'
             name='email'
             ngModel
             #emailInput='ngModel'
@@ -58,7 +62,8 @@
             email>
             <mat-error *ngIf="emailInput.invalid">Please enter a valid email</mat-error>
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
             <input
             type='password'
             matInput
@@ -76,11 +81,12 @@
     <mat-tab label="Forgot password?">
       <mat-card>
         <form (submit)='onPasswordReset(loginForm)' #loginForm='ngForm' *ngIf='!isLoading'>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
             <input
             matInput
             type='email'
-            placeholder='Email'
+            placeholder='johndoe@abc.com'
             name='email'
             ngModel
             #emailInput='ngModel'
