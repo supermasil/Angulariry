@@ -1,5 +1,5 @@
 const EasyPost = require('@easypost/api');
-const api = new EasyPost("EZAK0777fe1395a9438f84544006152b0bf3gfhWyjEEllIE2WTw2ZLGmQ");
+const api = new EasyPost(process.env.easyPostApiKey);
 
 // const apiKey = new Api(process.env.easyPostApiKey, {
 //   timeout: 120000,

@@ -27,23 +27,105 @@
 
   </form>
 </mat-card>
-<mat-spinner *ngIf="isLoading" class="mx-auto mt-4"></mat-spinner>
+<mat-spinner *ngIf="isLoading" diameter="50" class="mx-auto mt-4"></mat-spinner>
 <br>
 
-<mat-card *ngIf="tracked">
+<div *ngIf="tracker">
+  <mat-card-title>
+    {{tracker.carrier}} {{tracker.tracking_code}} {{tracker.status}} {{tracker.updated_at}}
+  </mat-card-title>
 
-    <mat-card-title>
-      {{tracker.carrier}} {{tracker.tracking_code}}
-    </mat-card-title>
-    <mat-card-subtitle>
-      {{tracker.status}}
-    </mat-card-subtitle>
+  <mat-vertical-stepper linear="true">
 
-    <mat-card-content>
-      From: {{tracker.origin_location}}
-      <br>
-      To: {{tracker.destination_location}}
-    </mat-card-content>
 
-</mat-card>
+    <mat-step label="Package received" state="initiated" *ngIf="shippingProgress[0]" completed="stepCompletion[0]">
+      <mat-card *ngIf="tracker.created_at">
+        <mat-card-title>{{tracker.carrier_detail.origin_location}}</mat-card-title>
+        <mat-card-subtitle>Received at: {{tracker.created_at}}</mat-card-subtitle>
+        <mat-card-content>
+          <p>Destination: {{tracker.carrier_detail.destination_location}}</p>
+          <p>Estimated delivery date: {{tracker.est_delivery_date}}</p>
+          <p>Weight: {{tracker.weight}}</p>
+          <p>Service: {{tracker.carrier_detail.service}}</p>
+        </mat-card-content>
+      </mat-card>
+    </mat-step>
 
+    <mat-step label="Shipping in progress" state="in_progress" *ngIf="shippingProgress[1]" completed="stepCompletion[1]">
+      <ng-container *ngFor="let item of tracker.tracking_details">
+        <ng-container *ngIf="preTransitCodes.includes(item.status) || inTransitCodes.includes(item.status)">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                {{item.tracking_location.city}} {{item.tracking_location.state}} {{item.tracking_location.zip}} {{item.tracking_location.country}}
+              </mat-card-title>
+              <mat-card-subtitle>
+                {{item.datetime}}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Status: {{item.status}}</p>
+              <p>Carrier: {{item.source}}</p>
+              <p>Message: {{item.message}}</p>
+              <p>Detail: {{item.status_detail}}</p>
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+        <br>
+      </ng-container>
+    </mat-step>
+
+    <mat-step label="Delivered" state="delivered" *ngIf="shippingProgress[2]" completed="stepCompletion[2]">
+      <ng-container *ngFor="let item of tracker.tracking_details">
+        <ng-container *ngIf="deliveryCodes.includes(item.status)">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                {{item.tracking_location.city}} {{item.tracking_location.state}} {{item.tracking_location.zip}} {{item.tracking_location.country}}
+              </mat-card-title>
+              <mat-card-subtitle>
+                {{item.datetime}}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Status: {{item.status}}</p>
+              <p>Carrier: {{item.source}}</p>
+              <p>Message: {{item.message}}</p>
+              <p>Detail: {{item.status_detail}}</p>
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+        <br>
+      </ng-container>
+    </mat-step>
+
+    <!-- Icon overrides. -->
+    <ng-template matStepperIcon="initiated" >
+      <mat-icon>luggage</mat-icon>
+    </ng-template>
+    <ng-template matStepperIcon="in_progress">
+      <mat-icon>flight_takeoff</mat-icon>
+    </ng-template>
+    <ng-template matStepperIcon="delivered">
+      <mat-icon>pets</mat-icon>
+    </ng-template>
+
+    <!-- keep icons as numbers during edit-->
+
+    <!-- <ng-template matStepperIcon="edit" let-index="index">
+      {{index +1}}
+    </ng-template> -->
+
+    <!-- change default 'edit' icon -->
+    <ng-template matStepperIcon="edit">
+      <mat-icon>bubble_chart</mat-icon>
+    </ng-template>
+
+    <!-- change default 'done' icon -->
+    <!-- <ng-template matStepperIcon="done">
+      <mat-icon>done</mat-icon>
+    </ng-template> -->
+
+  </mat-vertical-stepper>
+
+</div>
