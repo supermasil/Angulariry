@@ -12,7 +12,7 @@ const routes: Routes = [
   { path: 'posts', component: PostListComponent},
   { path: 'create', component: PostCreateComponent, canActivate: [AuthGuard]},
   { path: 'edit/:postId', component: PostCreateComponent, canActivate: [AuthGuard]},
-  { path: 'tracking', component: TrackingComponent, canActivate: [AuthGuard]},
+  { path: 'trackings', component: TrackingComponent, canActivate: [AuthGuard]},
   { path: "auth", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule)}, // Lazy loading
   { path: "404", component: Component404},
   { path: "**", component: Component404} // Must be last

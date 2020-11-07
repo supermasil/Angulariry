@@ -1,26 +1,29 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
-    <mat-icon>menu</mat-icon>
+<nav class="navbar navbar-expand-sm navbar-light" style="background-color: rgb(103, 58, 182);">
+  <a class="navbar-brand" href="/"><mat-icon>near_me</mat-icon></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
   </button>
-  <a routerLink="/">MyMessages</a>
-  <a routerLink="/posts">Posts</a>
-  <a routerLink="/tracking">Tracking</a>
-  <span class="spacer"></span>
-  <!-- <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-    <mat-icon>favorite</mat-icon>
-  </button>
-  <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
-    <mat-icon>share</mat-icon>
-  </button> -->
-  <ul>
-    <li *ngIf="userIsAuthenticated">
-      <a mat-button routerLink='/create' routerLinkActive="mat-accent">Create</a>
-    </li>
-    <li *ngIf="!userIsAuthenticated">
-      <a mat-button routerLink='/auth' routerLinkActive="mat-accent">Login/out</a>
-    </li>
-    <li *ngIf="userIsAuthenticated">
-      <a mat-button (click)="onLogOut()">Logout</a>
-    </li>
-  </ul>
-</mat-toolbar>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/posts">Posts</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/trackings">Trackings</a>
+      </li>
+    </ul>
+
+    <ul class="navbar-nav ml-auto">
+      <li *ngIf="userIsAuthenticated" class="mr-2 mb-2">
+        <a mat-stroked-button color="basic" routerLink='/create' routerLinkActive="mat-accent">Create</a>
+      </li>
+      <li *ngIf="!userIsAuthenticated" class="mr-2 mb-2">
+        <a mat-stroked-button color="basic" routerLink='/auth' routerLinkActive="mat-accent">Login/out</a>
+      </li>
+      <li *ngIf="userIsAuthenticated">
+        <a mat-stroked-button color="basic" (click)="onLogOut()">Logout</a>
+      </li>
+    </ul>
+  </div>
+</nav>

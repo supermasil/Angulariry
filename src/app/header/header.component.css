@@ -13,3 +13,11 @@ a {
 .spacer {
   flex: 1 1 auto;
 }
+
+.nav-item .nav-link{
+  color: white;
+}
+
+.navbar-brand{
+  color: white;
+}

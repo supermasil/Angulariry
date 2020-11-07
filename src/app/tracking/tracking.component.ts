@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TrackingService } from './tracking.service';
 import {STEPPER_GLOBAL_OPTIONS} from '@angular/cdk/stepper';
-import { Tracker } from './tracker.model';
+import { Tracker } from './models/tracker.model';
+import { TrackingDetail } from './models/tracking-details.model';
 import { AlertService } from '../alert-message';
 import { GlobalConstants } from '../global-constants';
+import { GeneralMethods } from '../shared/general-methods';
 
 @Component({
   selector: 'app-tracking',
@@ -17,7 +19,6 @@ import { GlobalConstants } from '../global-constants';
 export class TrackingComponent implements OnInit {
   form: FormGroup;
   isLoading = false;
-
   shippingProgress = [false, false, false];
   stepCompletion = [false, false, false];
 
@@ -47,10 +48,14 @@ export class TrackingComponent implements OnInit {
     "unknown"
   ];
 
+  // To prevent ng-star-inserted issue
+  inTransitTrackingDetails = [];
+  deliveryTrackingDetails = [];
 
   tracked = false;
   tracker: Tracker;
 
+  capitalizeFirstLetter = GeneralMethods.capitalizeFirstLetter;
 
   constructor(private trackingService: TrackingService, private alertService: AlertService){}
   ngOnInit() {
@@ -82,6 +87,7 @@ export class TrackingComponent implements OnInit {
           this.tracker = trackerData as Tracker;
           console.log(this.tracker);
           this.setShippingProgress(status);
+          this.setTrackingDetails(this.tracker);
         }
         else {
           this.alertService.warn("The status of this package is unknown", GlobalConstants.flashMessageOptions);
@@ -93,7 +99,9 @@ export class TrackingComponent implements OnInit {
 
   setShippingProgress(status: string) {
     if (this.preTransitCodes.includes(status)) {
-      this.shippingProgress = [true, false, false];
+      this.shippingProgress = [true, true, false];
+      this.stepCompletion = [true, false, false];
+      console.log(this.stepCompletion)
     } else if (this.inTransitCodes.includes(status)) {
       this.shippingProgress = [true, true, false];
       this.stepCompletion = [true, false, false];
@@ -105,4 +113,16 @@ export class TrackingComponent implements OnInit {
       this.stepCompletion = [true, true, true];
     }
   }
+
+  setTrackingDetails(tracker: Tracker) {
+    tracker.tracking_details.forEach(element => {
+      if (this.preTransitCodes.includes(element.status) || this.inTransitCodes.includes(element.status)) {
+        element.tracking_location = tracker.carrier_detail.origin_tracking_location;
+        this.inTransitTrackingDetails.push(element as TrackingDetail);
+      } else if (this.deliveryCodes.includes(element.status)) {
+        this.deliveryTrackingDetails.push(element as TrackingDetail);
+      }
+    });
+  }
+
 }
