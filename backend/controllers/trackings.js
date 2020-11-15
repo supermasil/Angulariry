@@ -2,7 +2,6 @@ const EasyPost = require('@easypost/api');
 const api = new EasyPost(process.env.easyPostApiKey);
 const Tracking = require('../models/tracking');
 const db = require('mongoose');
-const { get } = require('jquery');
 
 
 // const apiKey = new Api(process.env.easyPostApiKey, {
