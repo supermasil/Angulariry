@@ -14,7 +14,7 @@ exports.createPost = (req, res, next) => {
       postId: createdPost._id,
       post: {
        // ...createdPost // Copy all existing properties
-        id: createdPost._id,
+        _id: createdPost._id,
         title: createdPost.title,
         content: createdPost.content,
         imagePath: createdPost.imagePath,
@@ -37,7 +37,7 @@ exports.updatePost = (req, res, next) => {
   }
 
   const post = new Post ({
-    _id: req.body.id,
+    _id: req.body._id,
     title: req.body.title,
     content: req.body.content,
     imagePath: imagePath,
@@ -88,6 +88,7 @@ exports.getPosts = (req, res, next) => {
 exports.getPost = (req, res, next) => {
   Post.findById(req.params.id)
   .then(post => {
+      console.log(post);
       return res.status(200).json(post);
   })
   .catch(error => {

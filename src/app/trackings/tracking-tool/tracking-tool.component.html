@@ -1,0 +1,198 @@
+<mat-card>
+  <form [formGroup]="form" (submit)="onSearch()">
+    <div class="inline-block row">
+      <mat-form-field class="col-md-9" appearance="outline">
+        <mat-label>Tracking Number</mat-label>
+        <input
+          matInput
+          type='search'
+          formControlName='trackingNumber'
+        >
+        <mat-error *ngIf="form.get('trackingNumber').invalid">Please enter something to search</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="col-md-3" appearance="outline">
+        <mat-label>Carrier</mat-label>
+        <mat-select formControlName="carrier">
+          <mat-option *ngFor="let carrier of carriers" [value]="carrier">
+            {{carrier}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('carrier').invalid">Please choose a carrier</mat-error>
+        <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
+      </mat-form-field>
+    </div>
+    <br>
+    <button type="submit" class="ml-auto" mat-raised-button color='primary'>Search</button>
+
+  </form>
+</mat-card>
+<mat-spinner *ngIf="isLoading" diameter="50" class="mx-auto mt-4"></mat-spinner>
+<br>
+
+
+<div *ngIf="tracker">
+  <hr>
+  <div class="row text-center">
+    <div class="col-md">
+      <h4 class="badge badge-warning mb-2">{{tracker.status.split("_").join(" ").toLocaleUpperCase()}}</h4>
+    </div>
+    <div class="col-md mx-auto">
+      <h4 class="badge badge-info mb-2">{{tracker.tracking_code}}</h4>
+    </div>
+    <div class="col-md mx-auto">
+      <h4 class="badge badge-primary mb-2">{{tracker.carrier}}</h4>
+    </div>
+  </div>
+  <hr>
+  <mat-vertical-stepper linear="false">
+    <ng-container *ngIf="shippingProgress[0]">
+      <mat-step label="Package received" state="initiated" completed="{{stepCompletion[0]}}">
+        <ng-container *ngIf="tracker.created_at">
+          <mat-card>
+            <mat-card-title>{{tracker.carrier_detail?.origin_location}}</mat-card-title>
+            <mat-card-subtitle>Received at (UTC): {{tracker.created_at}}</mat-card-subtitle>
+            <mat-card-content>
+              <div class="row">
+                <div class="col-md">
+                  <div class="mat-body-strong">Origin</div> <div class="mat-body">{{tracker.carrier_detail?.origin_location}}</div>
+                  <div class="mat-body-strong">Destination</div> <div class="mat-body">{{tracker.carrier_detail?.destination_location}}</div>
+                  <div class="mat-body-strong">Estimated delivery date (UTC)</div> <div class="mat-body">{{tracker.est_delivery_date}}</div>
+                </div>
+                <div class="col-md">
+                  <div class="mat-body-strong">Weight</div> <div class="mat-body">{{tracker.weight}} lbs</div>
+                  <div class="mat-body-strong">Service</div> <div class="mat-body">{{tracker.carrier_detail?.service}}</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+      </mat-step>
+    </ng-container>
+
+    <ng-container *ngIf="shippingProgress[1]" >
+      <mat-step label="Shipping in progress" state="in_progress" completed="{{stepCompletion[1]}}">
+        <ng-container *ngFor="let item of inTransitTrackingDetails">
+          <ng-container *ngIf="preTransitCodes.includes(item?.status) || inTransitCodes.includes(item?.status)">
+            <mat-card>
+              <mat-card-title>
+                {{item?.tracking_location?.city}} {{item?.tracking_location?.state}} {{item?.tracking_location?.zip}} {{item?.tracking_location?.country}}
+              </mat-card-title>
+              <mat-card-subtitle>
+                (UTC) {{item?.datetime}}
+              </mat-card-subtitle>
+              <mat-card-content>
+                <div class="row">
+                  <div class="col-md">
+                    <div class="mat-body-strong">Status</div> <div class="mat-body">{{item?.status}}</div>
+                    <div class="mat-body-strong">Message</div> <div class="mat-body">{{item?.message}}</div>
+                  </div>
+                  <div class="col-md">
+                    <div class="mat-body-strong">Carrier</div> <div class="mat-body">{{item?.source}} lbs</div>
+                    <div class="mat-body-strong">Detail</div> <div class="mat-body">{{item?.status_detail}}</div>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </ng-container>
+          <br>
+        </ng-container>
+      </mat-step>
+    </ng-container>
+
+    <ng-container *ngIf="shippingProgress[2]">
+      <mat-step label="Delivery" state="delivery" completed="{{stepCompletion[2]}}">
+        <ng-container *ngFor="let item of deliveryTrackingDetails">
+          <ng-container *ngIf="deliveryCodes.includes(item.status)">
+            <mat-card>
+              <mat-card-title>
+                {{item?.tracking_location?.city}} {{item?.tracking_location?.state}} {{item?.tracking_location?.zip}} {{item?.tracking_location?.country}}
+              </mat-card-title>
+              <mat-card-subtitle>
+                (UTC) {{item?.datetime}}
+              </mat-card-subtitle>
+              <mat-card-content>
+                <div class="row">
+                  <div class="col-md">
+                    <ng-container *ngIf="tracker.signed_by && item?.status === 'delivered'">
+                      <div class="mat-body-strong">Signed By</div> <div class="mat-body">{{tracker.signed_by}}</div>
+                    </ng-container>
+                    <div class="mat-body-strong">Status</div> <div class="mat-body">{{item?.status}}</div>
+                    <div class="mat-body-strong">Message</div> <div class="mat-body">{{item?.message}}</div>
+                  </div>
+                  <div class="col-md">
+                    <div class="mat-body-strong">Carrier</div> <div class="mat-body">{{item?.source}} lbs</div>
+                    <div class="mat-body-strong">Detail</div> <div class="mat-body">{{item?.status_detail}}</div>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </ng-container>
+          <br>
+        </ng-container>
+      </mat-step>
+    </ng-container>
+
+    <ng-container *ngIf="shippingProgress[3]" >
+      <mat-step label="Something happened :(" state="failure" completed="{{stepCompletion[3]}}">
+        <ng-container *ngFor="let item of failureTrackingDetails">
+          <ng-container *ngIf="failureCodes.includes(item?.status)">
+            <mat-card>
+              <mat-card-title>
+                {{item?.tracking_location?.city}} {{item?.tracking_location?.state}} {{item?.tracking_location?.zip}} {{item?.tracking_location?.country}}
+              </mat-card-title>
+              <mat-card-subtitle>
+                (UTC) {{item?.datetime}}
+              </mat-card-subtitle>
+              <mat-card-content>
+                <div class="row">
+                  <div class="col-md">
+                    <div class="mat-body-strong">Status</div> <div class="mat-body">{{item?.status}}</div>
+                    <div class="mat-body-strong">Message</div> <div class="mat-body">{{item?.message}}</div>
+                  </div>
+                  <div class="col-md">
+                    <div class="mat-body-strong">Carrier</div> <div class="mat-body">{{item?.source}} lbs</div>
+                    <div class="mat-body-strong">Detail</div> <div class="mat-body">{{item?.status_detail}}</div>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </ng-container>
+          <br>
+        </ng-container>
+      </mat-step>
+    </ng-container>
+
+    <!-- Icon overrides. -->
+    <ng-template matStepperIcon="initiated" >
+      <mat-icon>luggage</mat-icon>
+    </ng-template>
+    <ng-template matStepperIcon="in_progress">
+      <mat-icon>flight_takeoff</mat-icon>
+    </ng-template>
+    <ng-template matStepperIcon="delivery">
+      <mat-icon>pets</mat-icon>
+    </ng-template>
+    <ng-template matStepperIcon="failure">
+      <mat-icon>warning</mat-icon>
+    </ng-template>
+
+    <!-- keep icons as numbers during edit-->
+
+    <!-- <ng-template matStepperIcon="edit" let-index="index">
+      {{index +1}}
+    </ng-template> -->
+
+    <!-- change default 'edit' icon -->
+    <ng-template matStepperIcon="edit">
+      <mat-icon>directions_run</mat-icon>
+    </ng-template>
+
+    <!-- change default 'done' icon -->
+    <!-- <ng-template matStepperIcon="done">
+      <mat-icon>done</mat-icon>
+    </ng-template> -->
+
+  </mat-vertical-stepper>
+
+</div>

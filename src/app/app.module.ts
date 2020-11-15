@@ -11,13 +11,11 @@ import { AuthInterceptor } from './auth/auth-interceptor';
 import { ErrorInterceptor } from './error-interceptor';
 import { ErrorComponent } from './error/error.component';
 import { AngularMaterialModule } from './angular-material.module';
-import { PostModule } from './posts/post.module';
 import { FrontPageModule } from './front-page/front-page.module';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { AlertModule } from './alert-message';
-import { TrackingComponent } from './tracking/tracking.component';
-import { TrackingModule } from './tracking/tracking.module';
+import { TrackingModule } from './trackings/tracking.module';
 // import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
 
 @NgModule({
@@ -33,7 +31,9 @@ import { TrackingModule } from './tracking/tracking.module';
     HttpClientModule,
     AngularMaterialModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
-    AlertModule
+    AlertModule,
+    TrackingModule,
+    FrontPageModule,
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},

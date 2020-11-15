@@ -1,6 +1,6 @@
 <mat-card>
   <form [formGroup]='' class="search-bar">
-    <mat-form-field>
+    <mat-form-field appearance="outline">
       <mat-label>Search here</mat-label>
       <input matInput placeholder="Search anything, really">
     </mat-form-field>
@@ -24,17 +24,17 @@
 
     <mat-action-row>
       <div *ngIf="userIsAuthenticated && userId === post.creator;">
-        <a mat-button color='primary' [routerLink]="['/edit', post.id]" >Edit</a>
-        <button mat-button color='warn' (click)='onDelete(post.id)'>Delete</button>
+        <a mat-button color='primary' [routerLink]="['/edit', post._id]" >Edit</a>
+        <button mat-button color='warn' (click)='onDelete(post._id)'>Delete</button>
       </div>
 
       <div *ngIf="userIsAuthenticated && userId !== post.creator">
-        <div *ngIf="!subscribedPosts.includes(post.id); else subscribed">
-          <button mat-raised-button color='primary' (click)='onSubscribe(post.id)'>Subscribe</button>
+        <div *ngIf="!subscribedPosts.includes(post._id); else subscribed">
+          <button mat-raised-button color='primary' (click)='onSubscribe(post._id)'>Subscribe</button>
         </div>
 
         <ng-template #subscribed>
-          <button mat-raised-button color='warn' (click)='onUnSubscribe(post.id)'>Unsubscribe</button>
+          <button mat-raised-button color='warn' (click)='onUnSubscribe(post._id)'>Unsubscribe</button>
         </ng-template>
       </div>
 

@@ -2,10 +2,12 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
 const userSchema = mongoose.Schema({
+  _id: {type: String, required: true },
   name: {type: String, required: true },
-  email: { type: String, required: true, unique: true }, // unique doesn't not throw error if not unique
-  subscribedPosts: [{ type: mongoose.Types.ObjectId, ref: 'Post' }]
-});
+  email: { type: String, required: true, unique: true, index: true }, // unique doesn't not throw error if not unique
+  subscribedPosts: [{ type: mongoose.Types.ObjectId, ref: 'Post' }],
+  isAdmin: {type: Boolean, default: false}
+}, { timestamps: true });
 
 userSchema.plugin(uniqueValidator); // Throw error if not unique
 

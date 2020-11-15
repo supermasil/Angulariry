@@ -1,17 +1,23 @@
 const User = require('../models/user');
 
 exports.createUser = (req, res, next) => {
+  console.log(req.body.uid)
   const user = new User ({
+    _id: req.body.user.uid,
     name: req.body.name,
-    email: req.body.email
+    email: req.body.user.email,
+    isAdmin: false
   });
 
   user.save().then(newUser => {
-    console.log('User created successfully');
-    return res.status(201).json({});
+    return res.status(201).json({
+      message: "User created successfully",
+    });
   })
   .catch(error => {
-    console.log(error);
-    return res.status(500).json({});
+    console.log(error.message);
+    return res.status(500).json({
+      message: "User couldn't be created"
+    });
   });
 }

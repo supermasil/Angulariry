@@ -1,0 +1,41 @@
+mat-spinner {
+  margin: auto;
+}
+
+mat-paginator {
+   margin-top: 1rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.tracking-image {
+  width: 100px;
+}
+
+.tracking-image img {
+  width: 100%;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* target the element itself */
+:host {
+  display: block;
+  margin-top: 1rem;
+}
+
+.info-text {
+  text-align: center;
+}
+
+.note, .timeline {
+  min-height: 0px;
+  height: 100%;
+  max-height: 200px;
+}
+
+p {
+  max-height: 100%;
+  white-space: pre-wrap;
+}

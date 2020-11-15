@@ -27,13 +27,7 @@ export class PostsService {
       .get<{message: string, posts: any, maxPosts: number}>(BACKEND_URL + queryParams)
       .pipe(map((postData) => {
         return {posts: postData.posts.map(post => {
-            return {
-              title: post.title,
-              content: post.content,
-              id: post._id,
-              imagePath: post.imagePath,
-              creator: post.creator
-              }
+            return post as Post;
             }),
           maxPosts: postData.maxPosts};
         })
@@ -48,12 +42,7 @@ export class PostsService {
   }
 
   getPost(postId: String) {
-    return this.httpClient.get<{
-      _id: string,
-      title: string,
-      content: string,
-      imagePath: string,
-      creator: string}>(BACKEND_URL + postId); // return an observable
+    return this.httpClient.get<Post>(BACKEND_URL + postId); // return an observable
   }
 
   getPostUpdateListener() {
@@ -69,15 +58,8 @@ export class PostsService {
     this.httpClient
       .post<{message: string, post: Post}>(BACKEND_URL, postData)
       .subscribe((responseData) => {
-        const post: Post = {
-          id: responseData.post.id,
-          title: responseData.post.title,
-          content: responseData.post.content,
-          imagePath: responseData.post.imagePath,
-          creator: responseData.post.creator
-        };
-        console.log(responseData.message);
-        this.posts.push(post);
+        const post = responseData.post as Post;
+        this.posts.unshift(post);
         this.router.navigate(['/posts']); // Will reload, no need to emit
     });
   }
@@ -90,31 +72,25 @@ export class PostsService {
     let postData: Post | FormData;
     if (typeof(image) === 'object') {
       postData = new FormData();
-      postData.append('id', id);
+      postData.append('_id', id);
       postData.append('title', title);
       postData.append('content', content);
       postData.append('image', image, title);
     } else {
       postData = {
-        id: id,
+        _id: id,
         title: title,
         content: content,
         imagePath: image,
         creator: null // Get creator id from auth service to be safe
-      }
+      };
     }
 
     this.httpClient.put<{message: string, updatedPost: Post}>(BACKEND_URL + id, postData)
       .subscribe(response => {
         const updatedPosts = [...this.posts]; // create a copy
-        const oldPostIndex = updatedPosts.findIndex(p => p.id === id);
-        const post: Post = {
-          id: response.updatedPost.id,
-          title: response.updatedPost.title,
-          content: response.updatedPost.content,
-          imagePath: response.updatedPost.imagePath,
-          creator: response.updatedPost.creator
-        }
+        const oldPostIndex = updatedPosts.findIndex(p => p._id === id);
+        const post: Post = response.updatedPost as Post;
         updatedPosts[oldPostIndex] = post;
         this.posts = updatedPosts;
         this.router.navigate(['/posts']); // Will reload, no need to emit

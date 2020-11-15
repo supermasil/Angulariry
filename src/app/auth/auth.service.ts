@@ -74,8 +74,11 @@ export class AuthService {
 
   createUser(name: string, email: string, password: string) {
     this.firebaseAuth.createUserWithEmailAndPassword(email, password)
-    .then((user) => {
-      const authData = {name, email};
+    .then((userData) => {
+      const authData = {
+        user: userData.user,
+        name: name
+      };
       this.http.post<{}>(BACKEND_URL + "signup", authData)
       .subscribe(response => {
         this.authStatusListener.next(false);

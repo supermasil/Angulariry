@@ -16,7 +16,7 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatBadgeModule } from '@angular/material/badge';
-
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 
 @NgModule({
@@ -47,7 +47,8 @@ import { MatBadgeModule } from '@angular/material/badge';
     MatOptionModule,
     MatGridListModule,
     MatStepperModule,
-    MatBadgeModule
+    MatBadgeModule,
+    ScrollingModule
   ]
 })
 
