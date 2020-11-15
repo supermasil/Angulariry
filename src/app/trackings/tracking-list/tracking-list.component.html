@@ -53,8 +53,8 @@
     </div>
 
 
-    <mat-action-row>
-      <div *ngIf="userIsAuthenticated && userId === tracking.creator;">
+    <mat-action-row *ngIf="userIsAuthenticated && userId === tracking.creator">
+      <div>
         <a mat-button color='primary' [routerLink]="['/edit', tracking._id]" >Edit</a>
         <button mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</button>
       </div>
