@@ -6,11 +6,13 @@ const TrackingController = require("../controllers/trackings");
 
 router.get('/tracking-tool', checkAuth.isAuthenticated, TrackingController.getTrackingTool);
 
-router.post('', checkAuth.isAuthenticated, extractFile, TrackingController.createTracking);
+router.get('/search', TrackingController.fuzzySearch); // Has to be before get /:id
+
+router.get('/:id', TrackingController.getTracking)
 
 router.get('', TrackingController.getTrackings);
 
-router.get('/:id', TrackingController.getTracking)
+router.post('', checkAuth.isAuthenticated, extractFile, TrackingController.createTracking);
 
 router.delete('/:id', checkAuth.isAuthenticated, TrackingController.deleteTracking);
 

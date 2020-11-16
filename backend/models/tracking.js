@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
+const fuzzySearch = require('mongoose-fuzzy-searching');
 
 const timelineSchema = mongoose.Schema({
   user: {type: String, ref: 'User', index: true, required: true},
@@ -21,5 +22,5 @@ const trackingSchema = mongoose.Schema({
 }, {timestamps: true});
 
 trackingSchema.plugin(uniqueValidator); // Throw error if not unique
-
+trackingSchema.plugin(fuzzySearch, { fields: ['trackingNumber', 'status', 'carrier', 'content'] });
 module.exports = mongoose.model('Tracking', trackingSchema);

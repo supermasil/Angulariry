@@ -6,3 +6,24 @@ a {
   text-decoration: none;
   color: blue;
 }
+
+.scroll-box {
+  overflow: auto;
+  min-height: 0px;
+  height: 100%;
+  max-height: 200px;
+
+  background:
+	linear-gradient(white 70%, hsla(0,0%,100%, 0) 10px),
+	linear-gradient(hsla(0,0%,100%,0) 10px, white 70%) bottom,
+	radial-gradient(at top, #70b8e9, transparent 30%),
+	radial-gradient(at bottom, #70b8e9, transparent 30%) bottom;
+  background-repeat:no-repeat;
+  background-size: 100% 20px, 100% 20px, 100% 20px, 100% 20px;
+  background-attachment:local, local, scroll, scroll;
+}
+
+p {
+  max-height: 100%;
+  white-space: pre-wrap;
+}

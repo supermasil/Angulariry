@@ -13,7 +13,7 @@ const BACKEND_URL = environment.apiURL + "/trackings/"
 @Injectable({ providedIn: "root"})
 export class TrackingService {
   private trackings: Tracking[] = [];
-  private trackingsUpdated = new Subject<{trackings: Tracking[], maxTracking: number}>();
+  private trackingsUpdated = new Subject<{trackings: Tracking[], count: number}>();
 
   constructor(private httpClient: HttpClient, private alertService: AlertService, private router: Router) {}
 
@@ -22,22 +22,42 @@ export class TrackingService {
     return this.httpClient.get<Object>(BACKEND_URL + queryParams);
   }
 
-  getTrackings(trackingsPerPage: number, currentPage: number) {
-    const queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}`;
+  fuzzySearch(trackingsPerPage: number, currentPage: number, searchTerm: string) {
+    const queryParams = `search/?pageSize=${trackingsPerPage}&currentPage=${currentPage}&searchTerm=${searchTerm}`;
     this.httpClient
-      .get<{message: string, trackings: any, maxTracking: number}>(BACKEND_URL + queryParams)
+      .get<{message: string, trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((trackingData) => {
         return {trackings: trackingData.trackings.map(tracking => {
             return tracking as Tracking;
             }),
-          maxTracking: trackingData.maxTracking};
+          count: trackingData.count};
         })
       )
       .subscribe((transformedTrackings) => {
         this.trackings = transformedTrackings.trackings;
         this.trackingsUpdated.next({
           trackings: [...this.trackings],
-          maxTracking: transformedTrackings.maxTracking
+          count: transformedTrackings.count
+        });
+    });
+  }
+
+  getTrackings(trackingsPerPage: number, currentPage: number) {
+    const queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}`;
+    this.httpClient
+      .get<{message: string, trackings: any, count: number}>(BACKEND_URL + queryParams)
+      .pipe(map((trackingData) => {
+        return {trackings: trackingData.trackings.map(tracking => {
+            return tracking as Tracking;
+            }),
+          count: trackingData.count};
+        })
+      )
+      .subscribe((transformedTrackings) => {
+        this.trackings = transformedTrackings.trackings;
+        this.trackingsUpdated.next({
+          trackings: [...this.trackings],
+          count: transformedTrackings.count
         });
     });
   }

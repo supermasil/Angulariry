@@ -1,7 +1,6 @@
 const EasyPost = require('@easypost/api');
 const api = new EasyPost(process.env.easyPostApiKey);
 const Tracking = require('../models/tracking');
-const db = require('mongoose');
 
 
 // const apiKey = new Api(process.env.easyPostApiKey, {
@@ -28,7 +27,7 @@ exports.createTracking = async (req, res, next) => {
     return res.status(201).json({message: "Tracking created successfully", tracking: tracking});
   } catch (error) {
     console.log("createTracking: " + error.message);
-    return res.status(500).json({message: error.message.includes("**") ? error.message : "Tracking creation failed"});
+    return res.status(500).json({message: error.message.includes("**") ? error.message : "Tracking creation failed, try to search to see if it already exists"});
   }
 };
 
@@ -42,19 +41,29 @@ exports.updateTracking = async(req, res , next) => {
   }
 }
 
-exports.getTrackings = (req, res, next) => {
-  // Pagination
-  const pageSize = +req.query.pageSize; // Convert to int
-  const currentPage = +req.query.currentPage;
-  const trackingQuery = Tracking.find();
-  let fetchedTrackings;
-  if (pageSize && currentPage) {
-    trackingQuery
-      .skip(pageSize * (currentPage - 1))
-      .limit(pageSize);
-  }
+exports.fuzzySearch = (req, res, next) => {
+  const trackingQuery = Tracking.fuzzySearch({ query: req.query.searchTerm, prefixOnly: true, minSize: 4, exact: true});
+  return fetchTrackingsHelper(req, res, trackingQuery)
+    .then(documents => {
+      fetchedTrackings = documents
+      return documents.length;
+    })
+    .then(count => {
+      return res.status(200).json({
+        // No error message needed
+        trackings: fetchedTrackings,
+        count: count
+      });
+    })
+    .catch(error => {
+      console.log("fuzzySearch: " + error.message);
+      return res.status(500).json({message: "Couldn't search for this term"});
+    });
+}
 
-  trackingQuery.sort({createdAt: -1})
+exports.getTrackings = (req, res, next) => {
+  const trackingQuery = Tracking.find();
+  return fetchTrackingsHelper(req, res, trackingQuery)
     .then(documents => {
       fetchedTrackings = documents
       return Tracking.countDocuments();
@@ -63,13 +72,26 @@ exports.getTrackings = (req, res, next) => {
       return res.status(200).json({
         // No error message needed
         trackings: fetchedTrackings,
-        maxTrackings: count
+        count: count
       });
     })
     .catch(error => {
       console.log("getTrackings: " + error.message);
       return res.status(500).json({message: "Couldn't fetch trackings"});
     });
+}
+
+fetchTrackingsHelper = (req, res, trackingQuery) => {
+  // Pagination
+  const pageSize = +req.query.pageSize; // Convert to int
+  const currentPage = +req.query.currentPage;
+  let fetchedTrackings;
+  if (pageSize && currentPage) {
+    trackingQuery
+      .skip(pageSize * (currentPage - 1))
+      .limit(pageSize);
+  }
+  return trackingQuery.sort({createdAt: -1});
 }
 
 exports.getTracking = (req, res, next) => {

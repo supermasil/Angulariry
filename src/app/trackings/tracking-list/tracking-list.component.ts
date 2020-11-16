@@ -1,4 +1,5 @@
 import { Component, Inject } from "@angular/core";
+import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
@@ -25,6 +26,7 @@ export class TrackingListComponent {
   trackingsPerPage = 5;
   currentPage = 1;
   pageSizeOptions = [1, 2, 5, 10];
+  form: FormGroup;
 
   preTransitCodes = TrackingGlobals.preTransitCodes;
   inTransitCodes = TrackingGlobals.inTransitCodes
@@ -38,7 +40,12 @@ export class TrackingListComponent {
   ) {} // Public simplifies code
 
   ngOnInit() {
+
     this.isLoading = true;
+
+    this.form = new FormGroup({
+      searchTerm: new FormControl(null)
+    });
 
     this.userIsAuthenticated = this.authService.getIsAuth(); // Get current login status
     this.userId = this.authService.getUserId();
@@ -53,9 +60,9 @@ export class TrackingListComponent {
 
     this.trackingService.getTrackings(this.trackingsPerPage, 1); // This will update the getTrackingUpdateListener() observable
     this.trackingSub = this.trackingService.getTrackingUpdateListener()
-      .subscribe((trackingData: {trackings: Tracking[], maxTracking: number}) => {
+      .subscribe((trackingData: {trackings: Tracking[], count: number}) => {
         this.trackings = trackingData.trackings;
-        this.totalTrackings = trackingData.maxTracking;
+        this.totalTrackings = trackingData.count;
       });
 
     this.isLoading = false;
@@ -75,6 +82,12 @@ export class TrackingListComponent {
     this.currentPage = pageData.pageIndex + 1;
     this.trackingsPerPage = pageData.pageSize;
     this.trackingService.getTrackings(this.trackingsPerPage, this.currentPage);
+    this.isLoading = false;
+  }
+
+  onFuzzySearch() {
+    this.isLoading = true;
+    this.trackingService.fuzzySearch(this.trackingsPerPage, this.currentPage, this.form.value.searchTerm);
     this.isLoading = false;
   }
 

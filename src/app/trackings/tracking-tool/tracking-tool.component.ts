@@ -59,6 +59,7 @@ export class TrackingToolComponent implements OnInit {
     this.deliveryTrackingDetails = [];
     this.failureTrackingDetails = [];
   }
+
   async onSearch() {
     if (this.form.invalid) {
       return;

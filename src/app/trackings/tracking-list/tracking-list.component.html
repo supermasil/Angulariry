@@ -1,13 +1,16 @@
-<mat-card>
-  <form [formGroup]='' class="search-bar">
-    <mat-form-field appearance="outline">
-      <mat-label>Search here</mat-label>
-      <input matInput placeholder="Search anything, really">
-    </mat-form-field>
-  </form>
-</mat-card>
+
+<form [formGroup]='form' (submit)='onFuzzySearch()'>
+  <mat-form-field appearance="outline">
+    <mat-label>Search here</mat-label>
+    <input
+      matInput
+      type='text'
+      formControlName='searchTerm'>
+  </mat-form-field>
+</form>
+
 <mat-spinner *ngIf='isLoading'></mat-spinner>
-<br>
+
 <mat-accordion multi='true' *ngIf='trackings.length > 0 && !isLoading'>
   <mat-expansion-panel *ngFor='let tracking of trackings'>
 
@@ -25,7 +28,7 @@
         <div class="row">
           <div class="col-md-6">
             <div class="mat-title">Note</div>
-            <div class="overflow-auto note">
+            <div class="scroll-box">
               <p>{{ tracking.content }}</p>
             </div>
           </div>
@@ -33,7 +36,7 @@
 
             <div class="mat-title mt-3 mt-md-0">Timeline</div>
             <!-- <div class="mat-title">Timeline</div> -->
-            <div class="overflow-auto timeline">
+            <div class="scroll-box">
               <ng-container *ngFor="let point of tracking.timeline">
                 <div class="row">
                   <div class="col-md">
