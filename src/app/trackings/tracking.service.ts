@@ -3,10 +3,9 @@ import { Injectable } from "@angular/core";
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { AlertService } from '../alert-message';
 import { Tracking } from './tracking.model';
 import { map } from 'rxjs/operators';
-import { kMaxLength } from 'buffer';
+import { CommentService } from '../comments/comment.service';
 
 const BACKEND_URL = environment.apiURL + "/trackings/"
 
@@ -15,7 +14,15 @@ export class TrackingService {
   private trackings: Tracking[] = [];
   private trackingsUpdated = new Subject<{trackings: Tracking[], count: number}>();
 
-  constructor(private httpClient: HttpClient, private alertService: AlertService, private router: Router) {}
+  constructor(
+    private httpClient: HttpClient,
+    private router: Router,
+    public commentService: CommentService
+    ) {}
+
+  getTrackingUpdateListener() {
+    return this.trackingsUpdated.asObservable();
+  }
 
   getTrackingInfo(trackingNumber: String, carrier: String) {
     const queryParams = `tracking-tool/?trackingNumber=${trackingNumber}&carrier=${carrier}`;
@@ -66,11 +73,7 @@ export class TrackingService {
     return this.httpClient.get<Tracking>(BACKEND_URL + id); // return an observable
   }
 
-  getTrackingUpdateListener() {
-    return this.trackingsUpdated.asObservable();
-  }
-
-  addTracking(trackingNumber: string, carrier: string, content: string, image: File) {
+  createTracking(trackingNumber: string, carrier: string, content: string, image: File) {
     const trackingData = new FormData();
     trackingData.append('trackingNumber', trackingNumber);
     trackingData.append('content', content);
@@ -111,6 +114,18 @@ export class TrackingService {
         updatedTrackings[oldTrackingIndex] = tracking;
         this.trackings = updatedTrackings;
         this.router.navigate(['/trackings']); // Will reload, no need to emit
+      });
+  }
+
+  createComment(trackingId: string, content: string, imagePaths: string[], attachmentPaths: string[]) {
+    this.commentService.createComment(trackingId, content, imagePaths, attachmentPaths)
+      .subscribe(responseData => {
+        this.trackings.find(item => item._id == trackingId)?.comments.unshift(responseData.comment);
+        // console.log(this.trackings.find(item => item._id == trackingId).comments[0]);
+        this.trackingsUpdated.next({
+          trackings: [...this.trackings],
+          count: this.trackings.length
+        });
       });
   }
 

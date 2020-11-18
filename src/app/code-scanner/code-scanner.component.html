@@ -1,0 +1,14 @@
+<a
+  data-toggle="collapse" href="#cameraArea"
+  role="button"
+  (click)="onScannerClick()"
+  id="cameraButton"
+  hidden>
+</a>
+<div class="collapse" id="cameraArea">
+    <barcode-scanner-livestream
+      type="code_128"
+      (valueChanges)="onValueChanges($event)"
+      (started)="onStarted($event)">
+    </barcode-scanner-livestream>
+</div>

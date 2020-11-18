@@ -1,7 +1,6 @@
 const User = require('../models/user');
 
 exports.createUser = (req, res, next) => {
-  console.log(req.body.uid)
   const user = new User ({
     _id: req.body.user.uid,
     name: req.body.name,

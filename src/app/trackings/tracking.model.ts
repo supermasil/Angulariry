@@ -1,18 +1,21 @@
+import { Comment } from '../comments/comment.model';
+
 export interface Tracking { // From backend
-  _id: string
+  _id: string;
   trackingNumber: string;
   status: string;
   carrier: string;
   imagePath: string;
-  creator: string;
+  creatorId: string;
   trackerId: string;
   content: string;
   active: boolean;
   timeline: [{
-    user: string,
+    userId: string,
     action: string,
     timestamp: Date
-  }],
+  }];
+  comments: [Comment];
   createdAt: Date;
   updatedAt: Date;
 }

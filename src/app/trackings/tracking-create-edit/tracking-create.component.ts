@@ -91,7 +91,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
     }
     this.isLoading = true;
     if (this.mode === 'create') {
-      this.trackingService.addTracking(
+      this.trackingService.createTracking(
         this.form.value.trackingNumber,
         this.form.value.carrier,
         this.form.value.content,

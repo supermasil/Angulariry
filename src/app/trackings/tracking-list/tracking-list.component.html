@@ -1,13 +1,32 @@
 
-<form [formGroup]='form' (submit)='onFuzzySearch()'>
-  <mat-form-field appearance="outline">
-    <mat-label>Search here</mat-label>
-    <input
-      matInput
-      type='text'
-      formControlName='searchTerm'>
-  </mat-form-field>
+<form [formGroup]='trackingForm' (submit)='onFuzzySearch()'>
+  <div class="d-flex">
+    <a
+      mat-mini-fab
+      color='primary'
+      class="mt-2 d-inline mr-2"
+      onclick="document.getElementById('cameraButton').click()">
+      <mat-icon>photo_camera</mat-icon>
+    </a>
+    <mat-form-field appearance="outline">
+      <mat-label>Search here</mat-label>
+      <input
+        matInput
+        type='text'
+        formControlName='searchTerm'>
+    </mat-form-field>
+    <button
+      mat-mini-fab
+      color='primary'
+      type='submit'
+      class="mt-2 d-inline ml-2">
+      <mat-icon>search</mat-icon>
+    </button>
+  </div>
+
 </form>
+
+<app-code-scanner></app-code-scanner>
 
 <mat-spinner *ngIf='isLoading'></mat-spinner>
 
@@ -16,7 +35,8 @@
 
     <mat-expansion-panel-header class={{getHeaderColor(tracking.status)}}>
       <mat-panel-title class="text-white">
-        {{ tracking.trackingNumber }} {{tracking.carrier}} {{tracking.status}}
+        <div>{{ tracking.trackingNumber }} {{tracking.carrier}} {{tracking.status}}</div>
+        <div class="ml-auto">{{formatDateTime(tracking.updatedAt)}}</div>
       </mat-panel-title>
     </mat-expansion-panel-header>
     <div>
@@ -32,21 +52,36 @@
               <p>{{ tracking.content }}</p>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6 mt-xs-2 mt-md-0">
 
-            <div class="mat-title mt-3 mt-md-0">Timeline</div>
-            <!-- <div class="mat-title">Timeline</div> -->
-            <div class="scroll-box">
-              <ng-container *ngFor="let point of tracking.timeline">
-                <div class="row">
-                  <div class="col-md">
-                    <div class="mat-body-strong">{{point.timestamp}}</div>
-                    {{point.user}}
-                  </div>
-                  <div class="col-md">
-                    {{point.action}}
-                  </div>
+            <!-- <div class="mat-title mt-3 mt-md-0">Comment</div> -->
+            <ng-container *ngIf="userIsAuthenticated">
+              <form [formGroup]='commentForm' (submit)='onCommentSubmit(tracking._id)' (keydown.meta.Enter)="onCommentSubmit(tracking._id)">
+                <div class="d-flex">
+                  <mat-form-field appearance="outline" class="mr-2">
+                    <mat-label>Comment</mat-label>
+                    <textarea
+                      matInput
+                      formControlName='commentContent'
+                      cdkTextareaAutosize>
+                    </textarea>
+                  </mat-form-field>
+                  <button
+                    mat-icon-button
+                    color='primary'
+                    type='submit'
+                    class="mt-2 d-inline">
+                    <mat-icon>send</mat-icon>
+                  </button>
                 </div>
+              </form>
+            </ng-container>
+
+            <div class="scroll-box">
+              <ng-container *ngFor="let comment of tracking.comments">
+                <div class="mat-body-strong">{{comment?.name}}</div>
+                <div>{{formatDateTime(comment?.updatedAt)}}</div>
+                <div>{{comment?.content}}</div>
                 <hr>
               </ng-container>
             </div>
@@ -56,13 +91,13 @@
     </div>
 
 
-    <mat-action-row *ngIf="userIsAuthenticated && userId === tracking.creator">
+    <mat-action-row *ngIf="userIsAuthenticated && userId === tracking.creatorId">
       <div>
         <a mat-button color='primary' [routerLink]="['/edit', tracking._id]" >Edit</a>
         <button mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</button>
       </div>
 
-      <!-- <div *ngIf="userIsAuthenticated && userId !== tracking.creator">
+      <!-- <div *ngIf="userIsAuthenticated && userId !== tracking.creatorId">
         <div *ngIf="!subscribedTrackings.includes(tracking._id); else subscribed">
           <button mat-raised-button color='primary' (click)='onSubscribe(tracking._id)'>Subscribe</button>
         </div>

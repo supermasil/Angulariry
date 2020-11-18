@@ -1,5 +1,5 @@
 import { Component, Inject } from "@angular/core";
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
@@ -7,6 +7,8 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { TrackingGlobals } from '../tracking-globals';
 import { Tracking } from '../tracking.model';
 import { TrackingService } from '../tracking.service';
+import * as moment from 'moment';
+import { CodeScannerService } from '../../code-scanner/code-scanner.service';
 
 @Component({
   selector: 'app-tracking-list',
@@ -17,6 +19,7 @@ export class TrackingListComponent {
   trackings: Tracking[] = [];
   // subscribedTrackings: String[] = [];
   private trackingSub: Subscription;
+  private codeSub: Subscription;
   // private subscribedPostsSub: Subscription;
   private authListenerSub: Subscription;
   userIsAuthenticated = false;
@@ -26,7 +29,8 @@ export class TrackingListComponent {
   trackingsPerPage = 5;
   currentPage = 1;
   pageSizeOptions = [1, 2, 5, 10];
-  form: FormGroup;
+  trackingForm: FormGroup;
+  commentForm: FormGroup;
 
   preTransitCodes = TrackingGlobals.preTransitCodes;
   inTransitCodes = TrackingGlobals.inTransitCodes
@@ -35,6 +39,7 @@ export class TrackingListComponent {
 
   constructor(
     public trackingService: TrackingService,
+    public codeScannerService: CodeScannerService,
     private authService: AuthService,
     public dialog: MatDialog
   ) {} // Public simplifies code
@@ -43,8 +48,12 @@ export class TrackingListComponent {
 
     this.isLoading = true;
 
-    this.form = new FormGroup({
+    this.trackingForm = new FormGroup({
       searchTerm: new FormControl(null)
+    });
+
+    this.commentForm = new FormGroup({
+      commentContent: new FormControl(null, {validators: [Validators.required]})
     });
 
     this.userIsAuthenticated = this.authService.getIsAuth(); // Get current login status
@@ -58,13 +67,18 @@ export class TrackingListComponent {
       }
     );
 
-    this.trackingService.getTrackings(this.trackingsPerPage, 1); // This will update the getTrackingUpdateListener() observable
     this.trackingSub = this.trackingService.getTrackingUpdateListener()
       .subscribe((trackingData: {trackings: Tracking[], count: number}) => {
         this.trackings = trackingData.trackings;
         this.totalTrackings = trackingData.count;
       });
+    this.trackingService.getTrackings(this.trackingsPerPage, 1); // This will update the getTrackingUpdateListener() observable
 
+    this.codeSub = this.codeScannerService.getCodeScannerUpdateListener()
+      .subscribe((code: {code: string}) => {
+        this.trackingForm.controls['searchTerm'].setValue(code.code);
+        console.log(code.code);
+      });
     this.isLoading = false;
   }
 
@@ -87,7 +101,19 @@ export class TrackingListComponent {
 
   onFuzzySearch() {
     this.isLoading = true;
-    this.trackingService.fuzzySearch(this.trackingsPerPage, this.currentPage, this.form.value.searchTerm);
+    this.trackingService.fuzzySearch(this.trackingsPerPage, this.currentPage, this.trackingForm.value.searchTerm);
+    this.isLoading = false;
+  }
+
+  onCommentSubmit(trackingId: string) {
+    if (this.commentForm.invalid) {
+      return;
+    }
+    this.isLoading = true;
+    let imagePaths: string[] = [];
+    let attachmentPaths: string[] = [];
+    this.trackingService.createComment(trackingId, this.commentForm.value.commentContent, imagePaths, attachmentPaths);
+    this.commentForm.reset();
     this.isLoading = false;
   }
 
@@ -95,6 +121,7 @@ export class TrackingListComponent {
   ngOnDestroy() {
     this.trackingSub.unsubscribe();
     this.authListenerSub.unsubscribe();
+    this.codeSub.unsubscribe();
   }
 
   openDialog(imagePath: string) {
@@ -116,6 +143,10 @@ export class TrackingListComponent {
     } else if (this.failureCodes.includes(status)) {
       return "bg-danger"
     }
+  }
+
+  formatDateTime(date: Date) {
+    return moment(moment.utc(date).toDate()).fromNow(); //.local().format("MM-DD-YY hh:mm:ss")
   }
 }
 

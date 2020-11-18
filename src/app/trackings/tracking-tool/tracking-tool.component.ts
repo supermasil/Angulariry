@@ -22,17 +22,17 @@ export class TrackingToolComponent implements OnInit {
   isLoading = false;
   shippingProgress = [false, false, false, false];
   stepCompletion = [false, false, false, false];
-
-  carriers = TrackingGlobals.carriers;
-  preTransitCodes = TrackingGlobals.preTransitCodes;
-  inTransitCodes = TrackingGlobals.inTransitCodes
-  deliveryCodes = TrackingGlobals.deliveryCodes
-  failureCodes = TrackingGlobals.failureCodes;
-
   // To prevent ng-star-inserted issue
   inTransitTrackingDetails = [];
   deliveryTrackingDetails = [];
   failureTrackingDetails = [];
+
+  carriers = TrackingGlobals.carriers;
+  preTransitCodes = TrackingGlobals.preTransitCodes;
+  inTransitCodes = TrackingGlobals.inTransitCodes;
+  deliveryCodes = TrackingGlobals.deliveryCodes;
+  failureCodes = TrackingGlobals.failureCodes;
+  codesMapping = TrackingGlobals.codesMapping;
 
   tracked = false;
   tracker: Tracker;

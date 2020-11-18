@@ -26,4 +26,14 @@ export class TrackingGlobals {
     "failure",
     "unknown"
   ];
+
+  public static codesMapping = new Map([
+    ["pre_transit", "Pre Transit"],
+    ["in_transit", "In Transit"],
+    ["out_for_delivery", "Out For Delivery"],
+    ["delivered", "Delivered"],
+    ["return_to_sender", "Return to Sender"],
+    ["failure", "Failures"],
+    ["unknown", "Unknown"]
+  ])
 }

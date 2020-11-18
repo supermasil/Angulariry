@@ -27,7 +27,10 @@
     "bootstrap": "^4.5.3",
     "firebase": "^7.23.0",
     "jquery": "^3.5.1",
+    "moment": "^2.29.1",
+    "ngx-barcode-scanner": "0.0.11",
     "popper.js": "^1.16.1",
+    "quagga": "^0.12.1",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "^0.11.1"

@@ -6,7 +6,7 @@ const userSchema = mongoose.Schema({
   name: {type: String, required: true },
   email: { type: String, required: true, unique: true, index: true }, // unique doesn't not throw error if not unique
   subscribedPosts: [{ type: mongoose.Types.ObjectId, ref: 'Post' }],
-  isAdmin: {type: Boolean, default: false}
+  role: {type: String, default: ""}
 }, { timestamps: true });
 
 userSchema.plugin(uniqueValidator); // Throw error if not unique
