@@ -54,7 +54,7 @@ export class TrackingListComponent {
 
     this.commentForm = new FormGroup({
       commentContent: new FormControl(null, {validators: [Validators.required]})
-    });
+    }, {updateOn: 'submit'});
 
     this.userIsAuthenticated = this.authService.getIsAuth(); // Get current login status
     this.userId = this.authService.getUserId();

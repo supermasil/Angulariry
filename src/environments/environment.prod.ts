@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiURL: "http://angularity-prod.eba-3zp3qgyj.us-west-2.elasticbeanstalk.com/api",
+  apiURL: "https://weshippee.com/api",
   firebaseConfig: {
     apiKey: "AIzaSyCCf75DB3dY0I3Vjk8Q-VGlqJKkubK6MtM",
     authDomain: "musicacademyprod.firebaseapp.com",
