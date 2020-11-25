@@ -8,7 +8,7 @@ const commentSchema = mongoose.Schema({
   imagePaths: [{ type: String }],
   content: { type: String },
   attachmentPaths: [{ type: String }]
-}, { timestamps: true });
+}, { timestamps: true, autoCreate: true }); // AutoCreate is needed to create with session
 
 commentSchema.plugin(uniqueValidator); // Throw error if not unique
 

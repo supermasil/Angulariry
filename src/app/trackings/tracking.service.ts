@@ -73,14 +73,16 @@ export class TrackingService {
     return this.httpClient.get<Tracking>(BACKEND_URL + id); // return an observable
   }
 
-  createTracking(trackingNumber: string, carrier: string, content: string, image: File) {
+  async createTracking(trackingNumber: string, carrier: string, content: string, files: Set<File>) {
     const trackingData = new FormData();
     trackingData.append('trackingNumber', trackingNumber);
     trackingData.append('content', content);
-    if (image) {
-      trackingData.append('image', image, trackingNumber);
-    }
     trackingData.append('carrier', carrier);
+
+    files.forEach(file => {
+      trackingData.append("files[]", file, files['name']);
+    });
+
     this.httpClient
       .post<{message: string, tracking: Tracking}>(BACKEND_URL, trackingData)
       .subscribe((responseData) => {
@@ -92,29 +94,27 @@ export class TrackingService {
     return this.httpClient.delete(BACKEND_URL + id);
   }
 
-  updateTracking(id: string, trackingNumber: string, carrier: string, content: string, image: File | string) {
+  updateTracking(id: string, trackingNumber: string, carrier: string, content: string, files: Set<File>, filesToDelete: string[]) {
     let trackingData = new FormData();
     trackingData.append('_id', id);
     trackingData.append('trackingNumber', trackingNumber);
     trackingData.append('content', content);
     trackingData.append('carrier', carrier);
-    if (image && typeof(image) === 'object') {
-      console.log(image);
-      trackingData.append('image', image, trackingNumber);
-    } else if (image && typeof(image) === 'string') { // no change in edit
-      console.log(image);
-      trackingData.append('image', image);
-    }
+    files.forEach(file => {
+      trackingData.append("files[]", file, files['name']);
+    });
+    trackingData.append("filesToDelete", JSON.stringify(filesToDelete));
 
-      this.httpClient.put<{message: string, updatedTracking: Tracking}>(BACKEND_URL + id, trackingData)
-      .subscribe(response => {
-        const updatedTrackings = [...this.trackings]; // create a copy
-        const oldTrackingIndex = updatedTrackings.findIndex(p => p._id === id);
-        const tracking: Tracking = response.updatedTracking as Tracking;
-        updatedTrackings[oldTrackingIndex] = tracking;
-        this.trackings = updatedTrackings;
-        this.router.navigate(['/trackings']); // Will reload, no need to emit
-      });
+
+    this.httpClient.put<{message: string, updatedTracking: Tracking}>(BACKEND_URL + id, trackingData)
+    .subscribe(response => {
+      const updatedTrackings = [...this.trackings]; // create a copy
+      const oldTrackingIndex = updatedTrackings.findIndex(p => p._id === id);
+      const tracking: Tracking = response.updatedTracking as Tracking;
+      updatedTrackings[oldTrackingIndex] = tracking;
+      this.trackings = updatedTrackings;
+      this.router.navigate(['/trackings']); // Will reload, no need to emit
+    });
   }
 
   createComment(trackingId: string, content: string, imagePaths: string[], attachmentPaths: string[]) {

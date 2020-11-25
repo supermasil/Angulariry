@@ -5,7 +5,8 @@ const MIME_TYPE_MAP = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/jpg': 'jpg',
-  'image/png': 'png'
+  'image/png': 'png',
+  'image/heic': 'heic'
 };
 const storage = multer.diskStorage ({
   destination: (req, file, cb) => {
@@ -14,7 +15,8 @@ const storage = multer.diskStorage ({
     if (isValid) {
       error = null;
     }
-    cb(null, path.join(__dirname, '../images')); // path to images folder, relative to server.js folder
+    let directory = path.join(__dirname, '../tmp');
+    cb(null, directory); // path to images folder, relative to server.js folder
   },
   filename: (req, file, cb) => {
     const name = file.originalname.toLowerCase().split(' ').join('-');
@@ -22,4 +24,4 @@ const storage = multer.diskStorage ({
     cb(null, name + '-' + Date.now() + '.' + ext);
   }
 });
-module.exports = multer({storage: storage}).single("image");
+module.exports = multer({storage: storage});

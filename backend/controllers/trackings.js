@@ -3,15 +3,9 @@ const api = new EasyPost(process.env.easyPostApiKey);
 const Tracking = require('../models/tracking');
 const Comment = require('../models/comment');
 const db = require('mongoose');
-
-
-// const apiKey = new Api(process.env.easyPostApiKey, {
-//   timeout: 120000,
-//   baseUrl: "https://api.easypost.com/v2/",
-//   useProxy: false,
-//   superagentMiddleware: s => s,
-//   requestMiddleware: r => r,
-// });
+const S3 = require('../shared/upload-files');
+const { assert } = require('console');
+const { assertNotNull } = require('@angular/compiler/src/output/output_ast');
 
 exports.getTrackingTool = async (req, res, next) => {
   try {
@@ -24,37 +18,46 @@ exports.getTrackingTool = async (req, res, next) => {
 };
 
 exports.createTracking = async (req, res, next) => {
-  tracker = null;
   try {
-    tracker = await getTrackerHelper(req);
+    tracker = null;
+    try {
+      tracker = await getTrackerHelper(req);
+    } catch (error) {
+      console.log("getTrackerHelper: " + error.message)
+      return res.status(404).json({message: "Check your tracking number and carrier"});
+    }
+
+    const tracking = new Tracking({
+      trackingNumber: req.body.trackingNumber,
+      status: tracker.status,
+      carrier: req.body.carrier,
+      filePaths: [],
+      creatorId: req.userData.uid,
+      trackerId: tracker.id,
+      content: req.body.content !== "null" ? req.body.content : null,
+      active: true,
+      timeline: [{
+        userId: req.userData.uid,
+        action: "Tracking created"
+      }]
+    });
+
+    // Validate before uploading files
+    await tracking.validate();
+
+    tracking.filePaths = await S3.uploadFiles(req.files);
+
+    return await Tracking.create(tracking)
+      .then(createdTracking => {
+        return res.status(201).json({message: "Tracking created successfully", tracking: createdTracking});
+      });
+
   } catch (error) {
-    console.log("getTrackerHelper: " + error.message)
-    return res.status(404).json({message: "Check your tracking number and carrier"});
+    console.log("createTracking: " + error.message);
+    return res.status(500).json({message: "Tracking creation failed, try to search to see if it already exists"});
+
   }
 
-  const tracking = new Tracking({
-    trackingNumber: req.body.trackingNumber,
-    status: tracker.status,
-    carrier: req.body.carrier,
-    imagePath: getImagePathHelper(req),
-    creatorId: req.userData.uid,
-    trackerId: tracker.id,
-    content: req.body.content !== "null" ? req.body.content : null,
-    active: true,
-    timeline: [{
-      userId: req.userData.uid,
-      action: "Tracking created"
-    }]
-  });
-
-  return await Tracking.create(tracking)
-    .then(createdTracking => {
-      return res.status(201).json({message: "Tracking created successfully", tracking: createdTracking});
-    })
-    .catch(error => {
-      console.log("createTracking: " + error.message);
-      return res.status(500).json({message: "Tracking creation failed, try to search to see if it already exists"});
-    });
 };
 
 exports.updateTracking = async(req, res , next) => {
@@ -72,7 +75,6 @@ exports.updateTracking = async(req, res , next) => {
         foundTracking.trackingNumber = req.body.trackingNumber;
         foundTracking.status = tracker.status,
         foundTracking.carrier = req.body.carrier,
-        foundTracking.imagePath = getImagePathHelper(req),
         foundTracking.creatorId = req.userData.uid,
         foundTracking.trackerId = tracker.id,
         foundTracking.content = req.body.content,
@@ -81,8 +83,21 @@ exports.updateTracking = async(req, res , next) => {
           userId: req.userData.uid,
           action: "Tracking updated"
         })
+
+        let tempFilePaths = foundTracking.filePaths;
+
+        let filesToDelete = JSON.parse(req.body.filesToDelete); // Parse the array
+        S3.deleteFiles(filesToDelete);
+        tempFilePaths = tempFilePaths.filter(item => !filesToDelete.includes(item));
+
+        let newFilePaths = await S3.uploadFiles(req.files);
+        tempFilePaths = [...tempFilePaths, ...newFilePaths];
+
+        foundTracking.filePaths = tempFilePaths;
         await foundTracking.save();
         return res.status(201).json({message: "Tracking updated successfully", tracking: foundTracking});
+
+
       })
     .catch (error => {
       console.log("updateTracking: " + error.message);
@@ -146,11 +161,18 @@ exports.deleteTracking = async (req, res, next) => {
   try {
     const session = await db.startSession();
     return await session.withTransaction(async () => {
+      let foundTracking = await Tracking.findById(req.params.id)
+      .then();
+
+      assertNotNull(foundTracking);
+
       await Tracking.deleteOne({ _id: req.params.id, creatorId: req.userData.uid }).session(session)
       .then();
 
       await Comment.deleteMany({trackingId: req.params.id}).session(session)
       .then();
+
+      S3.deleteFiles(foundTracking.filePaths);
 
       return res.status(200).json({message: "Tracking deleted successfully"});
     })
@@ -173,14 +195,14 @@ fetchTrackingsHelper = (req, res, trackingQuery) => {
   return trackingQuery.sort({createdAt: -1});
 }
 
-getImagePathHelper = (req) => {
-  if (req.file) { // New image
-    const url = req.protocol + '://' + req.get('host');
-    return imagePath = url + '/images/' + req.file.filename;
-  } else { // Old image
-    return imagePath = req.body.image;
-  }
-}
+// getImagePathHelper = (req) => {
+//   if (req.file) { // New image
+//     const url = req.protocol + '://' + req.get('host');
+//     return imagePath = url + '/images/' + req.file.filename;
+//   } else { // Old image
+//     return imagePath = req.body.image;
+//   }
+// }
 
 getTrackerHelper = async (req) => {
   const tracker = new api.Tracker({

@@ -27,3 +27,20 @@ p {
   max-height: 100%;
   white-space: pre-wrap;
 }
+
+.mat-spinner {
+  margin: 1rem auto;
+}
+
+.image-preview img {
+  margin: .5rem .5rem;
+  height: 80px;
+  width: 80px;
+  /* height: 100%; */
+  object-fit: cover;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+.image-preview img:hover {
+  box-shadow: 0 0 8px #673AB7;
+}

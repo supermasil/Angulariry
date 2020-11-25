@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import bootstrap from "bootstrap";
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
@@ -16,6 +16,9 @@ import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { AlertModule } from './alert-message';
 import { TrackingModule } from './trackings/tracking.module';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import { SpinnerInterceptor } from './spinner-interceptor';
+
 // import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
 
 @NgModule({
@@ -34,11 +37,14 @@ import { TrackingModule } from './trackings/tracking.module';
     AlertModule,
     TrackingModule,
     FrontPageModule,
+    NgxSpinnerModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA], // For Ngx-spinner
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
-  ], // For services
+    {provide: HTTP_INTERCEPTORS, useClass: SpinnerInterceptor, multi: true},
+  ], // For services/ Interceptors
   bootstrap: [AppComponent],
   entryComponents: [ErrorComponent] // for components that are dynamically created
 })

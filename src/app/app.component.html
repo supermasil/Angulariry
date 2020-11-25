@@ -1,6 +1,14 @@
 <app-header></app-header>
 
 <main>
-  <alert></alert>
-  <router-outlet></router-outlet>
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <alert></alert>
+        <ngx-spinner name="spinner"></ngx-spinner>
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+
 </main>

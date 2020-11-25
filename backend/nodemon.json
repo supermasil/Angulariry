@@ -10,7 +10,9 @@
     "messagingSenderId": "272643700943",
     "appId": "1:272643700943:web:1fb2bcd9dc29580285dfba",
     "measurementId": "G-CHLV454M2D",
-
-    "easyPostApiKey": "EZTK0777fe1395a9438f84544006152b0bf3DB2V29dpdSJa2p597KZQeA"
+    "easyPostApiKey": "EZTK0777fe1395a9438f84544006152b0bf3DB2V29dpdSJa2p597KZQeA",
+    "s3AccessKeyId": "AKIAZTDDKMEE3MACJHXC",
+    "s3SecretAccessKey": "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",
+    "s3BucketName": "angularity-user-files"
   }
 }

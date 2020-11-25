@@ -5,7 +5,7 @@ export interface Tracking { // From backend
   trackingNumber: string;
   status: string;
   carrier: string;
-  imagePath: string;
+  filePaths: [string];
   creatorId: string;
   trackerId: string;
   content: string;

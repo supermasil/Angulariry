@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms'
 
 import { TrackingService } from '../tracking.service';
@@ -21,18 +21,21 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
   private trackingId: string;
   private carrier: string;
   tracking: Tracking;
-  isLoading = false;
   form: FormGroup;
-  imagePreview: string;
+  imagesPreview = new Set<string>();
   private authStatusSub: Subscription;
+  filePaths: string[] = [];
 
   carriers = TrackingGlobals.carriers;
+  selectedFiles = new Set<File>();
+  filesToDelete = [];
 
   constructor(
     public trackingService: TrackingService,
     public route: ActivatedRoute,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnDestroy(): void {
@@ -42,7 +45,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
   ngOnInit() {
     this.authStatusSub = this.authService.getAuthStatusListener().subscribe(
       authStatus => {
-        this.isLoading = false; // Remove spinner every time auth status changes
+        // this.isLoading = false; // Remove spinner every time auth status changes
       }
     );
     // Set up form
@@ -52,7 +55,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
       }),
       carrier: new FormControl(null, {validators: [Validators.required]}),
       content: new FormControl(null),
-      image: new FormControl(null, {asyncValidators: [mimeType]})
+      fileValidator: new FormControl(null, {asyncValidators: [mimeType]})
     }, {updateOn: 'blur'});
 
     // Subcribe to see the active route
@@ -60,18 +63,21 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
       if (paramMap.has('trackingId')) { // Edit case
         this.mode = 'edit';
         this.trackingId = paramMap.get('trackingId');
-        this.isLoading = true;
 
         this.trackingService.getTracking(this.trackingId).subscribe(
           trackingData => {
-            this.isLoading = false;
             this.tracking = trackingData as Tracking;
             // Initialize the form
             this.form.setValue({
               trackingNumber: this.tracking.trackingNumber,
               carrier: this.tracking.carrier,
               content: this.tracking.content ? this.tracking.content : "",
-              image: this.tracking.imagePath ? this.tracking.imagePath : null
+              fileValidator: null
+            });
+            this.filePaths = this.tracking.filePaths;
+            // Load images preview
+            this.filePaths.forEach(file => {
+              this.imagesPreview.add(file);
             });
           },
           err => {
@@ -80,42 +86,61 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
       } else {
         this.mode = 'create';
         this.trackingId = null;
-        this.isLoading = false;
       }
     });
   }
 
-  onSaveTracking() {
+  async onSaveTracking() {
     if (this.form.invalid) {
       return;
     }
-    this.isLoading = true;
     if (this.mode === 'create') {
-      this.trackingService.createTracking(
+      await this.trackingService.createTracking(
         this.form.value.trackingNumber,
         this.form.value.carrier,
         this.form.value.content,
-        this.form.value.image);
+        this.selectedFiles);
     } else {
-      this.trackingService.updateTracking(
+      await this.trackingService.updateTracking(
         this.trackingId,
         this.form.value.trackingNumber,
         this.form.value.carrier,
         this.form.value.content,
-        this.form.value.image);
+        this.selectedFiles,
+        this.filesToDelete);
     }
-    this.isLoading = false;
-    // this.form.reset();
   }
 
-  onImagePicked(event: Event) {
+  onFilePicked(event: Event) {
     const file = (event.target as HTMLInputElement).files[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Trigger mimetype validator
     this.form.patchValue({image: file}); // Target a single control
-    this.form.get('image').updateValueAndValidity(); // Update and validate without html form
+    this.form.get('fileValidator').updateValueAndValidity(); // Update and validate without html form
+
     const reader = new FileReader();
     reader.onload = () => { // When done loading
-      this.imagePreview = reader.result as string;
+      if(this.form.get("fileValidator").valid) {
+        this.selectedFiles.add(file);
+        this.imagesPreview.add(reader.result as string);
+      }
     }
     reader.readAsDataURL(file); // This will kick off onload process
+  }
+
+  deleteImage(index: number, url: string) {
+    let imagesPreviewItem = [...this.imagesPreview][index];
+    let fileItem = [...this.selectedFiles][index];
+    this.imagesPreview.delete(imagesPreviewItem);
+    this.selectedFiles.delete(fileItem);
+    if (this.mode === "edit") {
+      if (this.filePaths.includes(url)) {
+        this.filesToDelete.push(url);
+      }
+    }
   }
 }

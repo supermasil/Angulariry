@@ -13,14 +13,14 @@ const trackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true, index: true},
   status: {type: String, require: true},
   carrier: {type: String, require: true},
-  imagePath: {type: String},
+  filePaths: [{type: String}],
   creatorId: {type: String, required: true}, // Google id, has to be string
   trackerId: {type: String, required: true}, // Tracker Object id, optional
   content: {type: String},
   active: {type: Boolean, required: true},
   timeline: [timelineSchema],
   comments: [{type: mongoose.Types.ObjectId, ref: "Comment"}]
-}, {timestamps: true});
+}, {timestamps: true, autoCreate: true });
 
 trackingSchema.plugin(uniqueValidator); // Throw error if not unique
 trackingSchema.plugin(fuzzySearch, { fields: ['trackingNumber', 'status', 'carrier', 'content'] });

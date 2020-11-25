@@ -28,9 +28,7 @@
 
 <app-code-scanner></app-code-scanner>
 
-<mat-spinner *ngIf='isLoading'></mat-spinner>
-
-<mat-accordion multi='true' *ngIf='trackings.length > 0 && !isLoading'>
+<mat-accordion multi='true' *ngIf='trackings.length > 0'>
   <mat-expansion-panel *ngFor='let tracking of trackings'>
 
     <mat-expansion-panel-header class={{getHeaderColor(tracking.status)}}>
@@ -41,10 +39,26 @@
     </mat-expansion-panel-header>
     <div>
       <ng-template matExpansionPanelContent>
-        <div class='tracking-image mt-3' *ngIf="tracking.imagePath">
-          <img [src]='tracking.imagePath' (click)="openDialog(tracking.imagePath)">
+        <div class="row image-container">
+          <ng-container *ngFor="let item of tracking.filePaths; let indexOfelement=index">
+            <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ indexOfelement">
+              <img [src]="item">
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="modal-{{indexOfelement}}" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <div class="modal-body">
+                    <img [src]="item" class="w-100">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
         </div>
+
         <hr>
+
         <div class="row">
           <div class="col-md-6">
             <div class="mat-title">Note</div>
@@ -56,11 +70,12 @@
 
             <!-- <div class="mat-title mt-3 mt-md-0">Comment</div> -->
             <ng-container *ngIf="userIsAuthenticated">
-              <form [formGroup]='commentForm' (submit)='onCommentSubmit(tracking._id)' (keydown.meta.Enter)="onCommentSubmit(tracking._id)">
+              <form [formGroup]='commentForm' #f='ngForm' (submit)='onCommentSubmit(tracking._id)' (keydown.meta.Enter)="onCommentSubmit(tracking._id)">
                 <div class="d-flex">
                   <mat-form-field appearance="outline" class="mr-2">
                     <mat-label>Comment</mat-label>
                     <textarea
+                      rows="2"
                       matInput
                       formControlName='commentContent'
                       cdkTextareaAutosize>
@@ -112,4 +127,4 @@
 </mat-accordion>
 
 <mat-paginator [length]='totalTrackings' [pageSize]='trackingsPerPage' [pageSizeOptions]='pageSizeOptions' (page)='onChangedPage($event)'></mat-paginator>
-<p class='info-text mat-body-1' *ngIf='trackings.length <= 0 && !isLoading'>No trackings added yet</p>
+<p class='info-text mat-body-1' *ngIf='trackings.length <= 0'>No trackings added yet</p>

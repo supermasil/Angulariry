@@ -55,8 +55,8 @@ app.use((req, res, next) => {
 
 // ORDER MATTERS
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use('/images', express.static(path.join(__dirname, "images"))); // Allow access to images folder
+app.use(bodyParser.urlencoded({extended: true}));
+app.use('/tmp', express.static(path.join(__dirname, "tmp"))); // Allow access to images folder
 app.use('/', express.static(path.join(__dirname, "angular"))); // Allow access to angular folder (integrated approach)
 
 app.use('/api/users', usersRoutes); // this route is reserved for backend

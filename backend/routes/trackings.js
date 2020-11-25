@@ -12,10 +12,10 @@ router.get('/:id', TrackingController.getTracking)
 
 router.get('', TrackingController.getTrackings);
 
-router.post('', checkAuth.isAuthenticated, extractFile, TrackingController.createTracking);
+router.post('', checkAuth.isAuthenticated, extractFile.array("files[]"), TrackingController.createTracking);
 
 router.delete('/:id', checkAuth.isAuthenticated, TrackingController.deleteTracking);
 
-router.put('/:id', checkAuth.isAuthenticated, extractFile, TrackingController.updateTracking);
+router.put('/:id', checkAuth.isAuthenticated, extractFile.array("files[]"), TrackingController.updateTracking);
 
 module.exports = router;

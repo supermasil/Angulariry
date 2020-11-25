@@ -10,15 +10,6 @@ mat-form-field {
   width: 100%;
 }
 
-.tracking-image {
-  width: 100px;
-}
-
-.tracking-image img {
-  width: 100%;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
-}
-
 /* target the element itself */
 :host {
   display: block;
@@ -27,4 +18,7 @@ mat-form-field {
 
 .info-text {
   text-align: center;
+}
+.image-container {
+  padding: 1rem .5rem 0 .5rem;
 }

@@ -7,7 +7,7 @@ const userSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true, index: true }, // unique doesn't not throw error if not unique
   subscribedPosts: [{ type: mongoose.Types.ObjectId, ref: 'Post' }],
   role: {type: String, default: ""}
-}, { timestamps: true });
+}, { timestamps: true, autoCreate: true });
 
 userSchema.plugin(uniqueValidator); // Throw error if not unique
 
