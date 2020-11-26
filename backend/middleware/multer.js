@@ -23,4 +23,4 @@ const storage = multer.diskStorage ({
   }
 });
 // module.exports = multer({storage: storage});
-module.exports = multer(); // No need multer for now
+module.exports = multer({limits: { fieldSize: 30 * 1024 * 1024 }}); // No need multer for now
