@@ -18,6 +18,7 @@ import { AlertModule } from './alert-message';
 import { TrackingModule } from './trackings/tracking.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { SpinnerInterceptor } from './spinner-interceptor';
+import { NgxImageCompressService } from 'ngx-image-compress';
 
 // import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
 
@@ -44,6 +45,7 @@ import { SpinnerInterceptor } from './spinner-interceptor';
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: SpinnerInterceptor, multi: true},
+    NgxImageCompressService
   ], // For services/ Interceptors
   bootstrap: [AppComponent],
   entryComponents: [ErrorComponent] // for components that are dynamically created

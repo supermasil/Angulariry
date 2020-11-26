@@ -41,15 +41,18 @@
       <ng-template matExpansionPanelContent>
         <div class="row image-container">
           <ng-container *ngFor="let item of tracking.filePaths; let indexOfelement=index">
-            <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ indexOfelement">
+            <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ tracking._id + indexOfelement">
               <img [src]="item">
             </div>
             <!-- Modal -->
-            <div class="modal fade" id="modal-{{indexOfelement}}" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal fade" id="modal-{{tracking._id + indexOfelement}}" tabindex="-1" role="dialog" aria-hidden="true">
               <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                   <div class="modal-body">
                     <img [src]="item" class="w-100">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" mat-raised-button color='basic' data-dismiss="modal">Close</button>
                   </div>
                 </div>
               </div>

@@ -2,11 +2,9 @@ const multer = require('multer');
 const path = require('path');
 
 const MIME_TYPE_MAP = {
-  'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/jpg': 'jpg',
-  'image/png': 'png',
-  'image/heic': 'heic'
+  'image/png': 'png'
 };
 const storage = multer.diskStorage ({
   destination: (req, file, cb) => {
@@ -24,4 +22,5 @@ const storage = multer.diskStorage ({
     cb(null, name + '-' + Date.now() + '.' + ext);
   }
 });
-module.exports = multer({storage: storage});
+// module.exports = multer({storage: storage});
+module.exports = multer(); // No need multer for now

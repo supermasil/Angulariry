@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms'
 
 import { TrackingService } from '../tracking.service';
@@ -9,6 +9,9 @@ import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { Router } from '@angular/router';
 import { TrackingGlobals } from '../tracking-globals';
+import { NgxImageCompressService } from 'ngx-image-compress';
+import { on } from 'process';
+
 
 @Component({
   selector: 'app-tracking-create',
@@ -21,13 +24,16 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
   private trackingId: string;
   private carrier: string;
   tracking: Tracking;
-  form: FormGroup;
-  imagesPreview = new Set<string>();
-  private authStatusSub: Subscription;
-  filePaths: string[] = [];
-
   carriers = TrackingGlobals.carriers;
-  selectedFiles = new Set<File>();
+
+  form: FormGroup;
+
+  private authStatusSub: Subscription;
+
+  filePaths: string[] = [];
+  filesPreview: string[] = [];
+  filesToAdd: string[] = [];
+  fileNames: string[] = [];
   filesToDelete = [];
 
   constructor(
@@ -35,7 +41,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
     public route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
-    private changeDetector: ChangeDetectorRef
+    private imageCompress: NgxImageCompressService
   ) {}
 
   ngOnDestroy(): void {
@@ -77,7 +83,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
             this.filePaths = this.tracking.filePaths;
             // Load images preview
             this.filePaths.forEach(file => {
-              this.imagesPreview.add(file);
+              this.filesPreview.push(file);
             });
           },
           err => {
@@ -94,53 +100,73 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
     if (this.form.invalid) {
       return;
     }
+
     if (this.mode === 'create') {
-      await this.trackingService.createTracking(
+      this.trackingService.createTracking(
         this.form.value.trackingNumber,
         this.form.value.carrier,
         this.form.value.content,
-        this.selectedFiles);
+        this.filesToAdd,
+        this.fileNames);
     } else {
-      await this.trackingService.updateTracking(
+      this.trackingService.updateTracking(
         this.trackingId,
         this.form.value.trackingNumber,
         this.form.value.carrier,
         this.form.value.content,
-        this.selectedFiles,
+        this.filesToAdd,
+        this.fileNames,
         this.filesToDelete);
     }
   }
 
   onFilePicked(event: Event) {
     const file = (event.target as HTMLInputElement).files[0];
-
     if (!file) {
       return;
     }
 
     // Trigger mimetype validator
-    this.form.patchValue({image: file}); // Target a single control
+    this.form.patchValue({fileValidator: file}); // Target a single control
     this.form.get('fileValidator').updateValueAndValidity(); // Update and validate without html form
 
-    const reader = new FileReader();
-    reader.onload = () => { // When done loading
-      if(this.form.get("fileValidator").valid) {
-        this.selectedFiles.add(file);
-        this.imagesPreview.add(reader.result as string);
-      }
+    if(this.form.get("fileValidator").valid) {
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = async () => { // When done loading
+        let compressedFile = await this.compressFile(reader.result as string).then();
+        if (this.filesPreview.includes(compressedFile)) {
+          return;
+        }
+        this.filesPreview.push(compressedFile);
+        this.filesToAdd.push(compressedFile);
+        this.fileNames.push(file.name);
+      };
     reader.readAsDataURL(file); // This will kick off onload process
   }
 
-  deleteImage(index: number, url: string) {
-    let imagesPreviewItem = [...this.imagesPreview][index];
-    let fileItem = [...this.selectedFiles][index];
-    this.imagesPreview.delete(imagesPreviewItem);
-    this.selectedFiles.delete(fileItem);
+  deleteFile(index: number, url: string) {
+    this.filesPreview.splice(index, 1);
+
+    let i = this.filesToAdd.indexOf(url);
+    if (i > 0) {
+      this.filesToAdd.splice(i, 1);
+      this.fileNames.splice(i, 1);
+    }
+
     if (this.mode === "edit") {
       if (this.filePaths.includes(url)) {
         this.filesToDelete.push(url);
       }
     }
+  }
+
+  async compressFile(file: string) {
+    return this.imageCompress.compressFile(file, 100, 70).then(
+      result => {
+        return result;
+      });
   }
 }

@@ -73,15 +73,17 @@ export class TrackingService {
     return this.httpClient.get<Tracking>(BACKEND_URL + id); // return an observable
   }
 
-  async createTracking(trackingNumber: string, carrier: string, content: string, files: Set<File>) {
+  createTracking(trackingNumber: string, carrier: string, content: string, files: string[], fileNames: string[]) {
     const trackingData = new FormData();
+    trackingData.append("files", JSON.stringify(files)); // Only works with array
+    trackingData.append("fileNames", JSON.stringify(fileNames)); // Only works with array
     trackingData.append('trackingNumber', trackingNumber);
     trackingData.append('content', content);
     trackingData.append('carrier', carrier);
 
-    files.forEach(file => {
-      trackingData.append("files[]", file, files['name']);
-    });
+    // files.forEach(file => {
+      // trackingData.append("files[]", file, files['name']); // For any file types
+    // });
 
     this.httpClient
       .post<{message: string, tracking: Tracking}>(BACKEND_URL, trackingData)
@@ -94,17 +96,19 @@ export class TrackingService {
     return this.httpClient.delete(BACKEND_URL + id);
   }
 
-  updateTracking(id: string, trackingNumber: string, carrier: string, content: string, files: Set<File>, filesToDelete: string[]) {
+  updateTracking(id: string, trackingNumber: string, carrier: string, content: string, files: string[], fileNames: string[], filesToDelete: string[]) {
     let trackingData = new FormData();
     trackingData.append('_id', id);
     trackingData.append('trackingNumber', trackingNumber);
     trackingData.append('content', content);
     trackingData.append('carrier', carrier);
-    files.forEach(file => {
-      trackingData.append("files[]", file, files['name']);
-    });
-    trackingData.append("filesToDelete", JSON.stringify(filesToDelete));
+    trackingData.append("files", JSON.stringify(files)); // Only works with array
+    trackingData.append("fileNames", JSON.stringify(fileNames)); // Only works with array
+    trackingData.append("filesToDelete", JSON.stringify(filesToDelete)); // Only works with array
 
+    // files.forEach(file => {
+    //   trackingData.append("files[]", file, files['name']);
+    // });
 
     this.httpClient.put<{message: string, updatedTracking: Tracking}>(BACKEND_URL + id, trackingData)
     .subscribe(response => {

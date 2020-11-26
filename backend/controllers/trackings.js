@@ -5,11 +5,10 @@ const Comment = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
 const { assert } = require('console');
-const { assertNotNull } = require('@angular/compiler/src/output/output_ast');
 
 exports.getTrackingTool = async (req, res, next) => {
   try {
-    let tracker = await getTrackerHelper(req);
+    let tracker = await getTrackerHelper(req.body.trackingNumber, req.body.carrier);
     return res.status(200).json(tracker);
   } catch (error) {
     console.log("getTrackingTool: " + error.message)
@@ -21,7 +20,7 @@ exports.createTracking = async (req, res, next) => {
   try {
     tracker = null;
     try {
-      tracker = await getTrackerHelper(req);
+      tracker = await getTrackerHelper(req.body.trackingNumber, req.body.carrier);
     } catch (error) {
       console.log("getTrackerHelper: " + error.message)
       return res.status(404).json({message: "Check your tracking number and carrier"});
@@ -44,8 +43,9 @@ exports.createTracking = async (req, res, next) => {
 
     // Validate before uploading files
     await tracking.validate();
+    let fileNames = JSON.parse(req.body.fileNames);
+    tracking.filePaths = await S3.uploadFiles(JSON.parse(req.body.files), fileNames);
 
-    tracking.filePaths = await S3.uploadFiles(req.files);
 
     return await Tracking.create(tracking)
       .then(createdTracking => {
@@ -62,9 +62,8 @@ exports.createTracking = async (req, res, next) => {
 
 exports.updateTracking = async(req, res , next) => {
   tracker = null;
-
   try {
-    tracker = await getTrackerHelper(req);
+    tracker = await getTrackerHelper(req.body.trackingNumber, req.body.carrier);
   } catch (error) {
     console.log("getTrackerHelper: " + error.message)
     return res.status(404).json({message: "Check your tracking number and carrier"});
@@ -88,9 +87,11 @@ exports.updateTracking = async(req, res , next) => {
 
         let filesToDelete = JSON.parse(req.body.filesToDelete); // Parse the array
         S3.deleteFiles(filesToDelete);
+
         tempFilePaths = tempFilePaths.filter(item => !filesToDelete.includes(item));
 
-        let newFilePaths = await S3.uploadFiles(req.files);
+        let fileNames = JSON.parse(req.body.fileNames);
+        let newFilePaths = await S3.uploadFiles(JSON.parse(req.body.files), fileNames);
         tempFilePaths = [...tempFilePaths, ...newFilePaths];
 
         foundTracking.filePaths = tempFilePaths;
@@ -113,7 +114,6 @@ exports.fuzzySearch = async (req, res, next) => {
       return documents.length;
     })
     .then(count => {
-      console.log(fetchedTrackings);
       return res.status(200).json({
         // No error message needed
         trackings: fetchedTrackings,
@@ -164,7 +164,7 @@ exports.deleteTracking = async (req, res, next) => {
       let foundTracking = await Tracking.findById(req.params.id)
       .then();
 
-      assertNotNull(foundTracking);
+      assert(foundTracking !== null);
 
       await Tracking.deleteOne({ _id: req.params.id, creatorId: req.userData.uid }).session(session)
       .then();
@@ -204,10 +204,10 @@ fetchTrackingsHelper = (req, res, trackingQuery) => {
 //   }
 // }
 
-getTrackerHelper = async (req) => {
+getTrackerHelper = async (trackingNumber, carrier) => {
   const tracker = new api.Tracker({
-    tracking_code: req.query.trackingNumber ? req.query.trackingNumber : req.body.trackingNumber,
-    carrier: req.query.carrier ? req.query.carrier : req.body.carrier
+    tracking_code: trackingNumber,
+    carrier: carrier
   });
   return await tracker.save()
     .then(savedTracker => {

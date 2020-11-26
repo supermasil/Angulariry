@@ -3,12 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js",
-    "ebstart": "npm install && nodemon"
+    "start": "node server.js"
   },
   "dependencies": {
-    "@angular/compiler": "^11.0.2",
-    "@angular/compiler-cli": "^11.0.2",
     "@easypost/api": "^3.9.1",
     "aws-sdk": "^2.797.0",
     "body-parser": "^1.19.0",
