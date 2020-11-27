@@ -1,5 +1,5 @@
 
-<form [formGroup]='trackingForm' (submit)='onFuzzySearch()'>
+<form [formGroup]='trackingForm' (submit)='onFuzzySearch()' (keydown.enter)="onFuzzySearch()">
   <div class="d-flex">
     <a
       mat-mini-fab
@@ -14,6 +14,14 @@
         matInput
         type='text'
         formControlName='searchTerm'>
+      <button
+        *ngIf="trackingForm.controls['searchTerm'].value"
+        matSuffix
+        mat-icon-button
+        aria-label="Clear"
+        (click)="trackingForm.controls['searchTerm'].setValue('')">
+        <mat-icon>close</mat-icon>
+      </button>
     </mat-form-field>
     <button
       mat-mini-fab

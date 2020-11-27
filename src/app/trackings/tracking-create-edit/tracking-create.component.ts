@@ -10,7 +10,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 import { Router } from '@angular/router';
 import { TrackingGlobals } from '../tracking-globals';
 import { NgxImageCompressService } from 'ngx-image-compress';
-import { on } from 'process';
+import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 
 
 @Component({
@@ -26,9 +26,10 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
   tracking: Tracking;
   carriers = TrackingGlobals.carriers;
 
-  form: FormGroup;
+  createForm: FormGroup;
 
   private authStatusSub: Subscription;
+  private codeScannerSub: Subscription;
 
   filePaths: string[] = [];
   filesPreview: string[] = [];
@@ -41,11 +42,13 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
     public route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
-    private imageCompress: NgxImageCompressService
+    private imageCompress: NgxImageCompressService,
+    private codeScannerService: CodeScannerService
   ) {}
 
   ngOnDestroy(): void {
     this.authStatusSub.unsubscribe();
+    this.codeScannerSub.unsubscribe();
   }
 
   ngOnInit() {
@@ -55,7 +58,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
       }
     );
     // Set up form
-    this.form = new FormGroup({
+    this.createForm = new FormGroup({
       trackingNumber: new FormControl(null, {
         validators: [Validators.required, Validators.minLength(3)]
       }),
@@ -74,7 +77,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
           trackingData => {
             this.tracking = trackingData as Tracking;
             // Initialize the form
-            this.form.setValue({
+            this.createForm.setValue({
               trackingNumber: this.tracking.trackingNumber,
               carrier: this.tracking.carrier,
               content: this.tracking.content ? this.tracking.content : "",
@@ -94,26 +97,31 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
         this.trackingId = null;
       }
     });
+
+    this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
+      .subscribe((code: {code: string}) => {
+        this.createForm.controls['trackingNumber'].setValue(code.code);
+      });
   }
 
   async onSaveTracking() {
-    if (this.form.invalid) {
+    if (this.createForm.invalid) {
       return;
     }
 
     if (this.mode === 'create') {
       this.trackingService.createTracking(
-        this.form.value.trackingNumber,
-        this.form.value.carrier,
-        this.form.value.content,
+        this.createForm.value.trackingNumber,
+        this.createForm.value.carrier,
+        this.createForm.value.content,
         this.filesToAdd,
         this.fileNames);
     } else {
       this.trackingService.updateTracking(
         this.trackingId,
-        this.form.value.trackingNumber,
-        this.form.value.carrier,
-        this.form.value.content,
+        this.createForm.value.trackingNumber,
+        this.createForm.value.carrier,
+        this.createForm.value.content,
         this.filesToAdd,
         this.fileNames,
         this.filesToDelete);
@@ -127,10 +135,10 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
     }
 
     // Trigger mimetype validator
-    this.form.patchValue({fileValidator: file}); // Target a single control
-    this.form.get('fileValidator').updateValueAndValidity(); // Update and validate without html form
+    this.createForm.patchValue({fileValidator: file}); // Target a single control
+    this.createForm.get('fileValidator').updateValueAndValidity(); // Update and validate without html form
 
-    if(this.form.get("fileValidator").valid) {
+    if(this.createForm.get("fileValidator").valid) {
       return;
     }
 

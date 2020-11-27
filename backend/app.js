@@ -65,11 +65,7 @@ app.use('/api/users', usersRoutes); // this route is reserved for backend
 app.use('/api/trackings', trackingsRoutes); // this route is reserved for backend
 app.use('/api/comments', commentsRoutes); // this route is reserved for backend
 app.use('/api/easypost', easyPostRoutes); // this route is reserved for backend
-app.use((err, req, res, next) => {
-  if (err) {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong');
-  }
+app.use((req, res, next) => {
   // if (err.status === 404) {
   //   return res.sendFile(path.join(__dirname, "angular", "index.html"));
   // }

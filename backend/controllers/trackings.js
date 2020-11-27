@@ -104,7 +104,7 @@ exports.updateTracking = async(req, res , next) => {
 }
 
 exports.fuzzySearch = async (req, res, next) => {
-  const trackingQuery = Tracking.fuzzySearch({ query: req.query.searchTerm, minSize: 2});
+  const trackingQuery = Tracking.fuzzySearch({ query: req.query.searchTerm, minSize: 2, exact: true});
   return await fetchTrackingsHelper(req, res, trackingQuery).populate('comments').exec()
     .then(documents => {
       fetchedTrackings = documents

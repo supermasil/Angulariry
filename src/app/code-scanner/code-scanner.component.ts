@@ -1,39 +1,69 @@
 import { Component, ViewChild, AfterViewInit } from "@angular/core";
 import { BarecodeScannerLivestreamComponent } from "ngx-barcode-scanner";
 import { CodeScannerService } from './code-scanner.service';
+import Quagga from 'quagga';
 
 @Component({
   selector: "app-code-scanner",
   templateUrl: './code-scanner.component.html',
   styleUrls: ['./code-scanner.component.html']
 })
-export class CodeScannerComponent implements AfterViewInit {
+export class CodeScannerComponent {
   constructor(public codeScannerService: CodeScannerService) {}
-  @ViewChild(BarecodeScannerLivestreamComponent)
-  barecodeScanner: BarecodeScannerLivestreamComponent;
-  barcodeValue;
-  isOpen = false;
+  // @ViewChild(BarecodeScannerLivestreamComponent)
+  // barecodeScanner: BarecodeScannerLivestreamComponent;
+  // barcodeValue;
+  // isOpen = false;
+  // readerTypes=["code_128", "ean"];
 
-  ngAfterViewInit() {}
+  // ngAfterViewInit() {}
 
-  onScannerClick() {
-    if (!this.isOpen) {
-      this.barecodeScanner.start();
-    } else {
-      this.barecodeScanner.stop();
+  // onScannerClick() {
+  //   if (!this.isOpen) {
+  //     this.barecodeScanner.start();
+  //   } else {
+  //     this.barecodeScanner.stop();
+  //   }
+  //   this.isOpen = !this.isOpen;
+  // }
+
+  // onValueChanges(result) {
+  //   if (result.codeResult.code !== this.barcodeValue) {
+  //     this.barcodeValue = result.codeResult.code;
+  //     // console.log(this.barcodeValue)
+  //     this.codeScannerService.updateCodeScannerUpdateListener(this.barcodeValue);
+  //   }
+  // }
+
+  // onStarted(started) {
+  //   // console.log(started);
+  // }
+
+  decode(event: Event) {
+    const file = (event.target as HTMLInputElement).files[0];
+
+    if (!file) {
+      return;
     }
-    this.isOpen = !this.isOpen;
-  }
 
-  onValueChanges(result) {
-    if (result.codeResult.code !== this.barcodeValue) {
-      this.barcodeValue = result.codeResult.code;
-      // console.log(this.barcodeValue)
-      this.codeScannerService.updateCodeScannerUpdateListener(this.barcodeValue);
-    }
-  }
-
-  onStarted(started) {
-    // console.log(started);
+    const reader = new FileReader();
+    reader.onload = async () => { // When done loading
+      Quagga.decodeSingle({
+        decoder: {
+            readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader", "ean_8_reader"] // List of active readers
+        },
+        locate: true, // try to locate the barcode in the image
+        src: reader.result as string // or 'data:image/jpg;base64,' + data
+      }, (result) => {
+          if(result) {
+            if(result.codeResult) {
+              this.codeScannerService.updateCodeScannerUpdateListener(result.codeResult.code);
+              return;
+            }
+          }
+          this.codeScannerService.updateCodeScannerUpdateListener("Code not detected, please try again");
+      });
+    };
+    reader.readAsDataURL(file); // This will kick off onload process
   }
 }

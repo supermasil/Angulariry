@@ -1,14 +1,16 @@
-<a
+<!-- <a
   data-toggle="collapse" href="#cameraArea"
   role="button"
   (click)="onScannerClick()"
   id="cameraButton"
   hidden>
-</a>
+</a> -->
+<input type="file" id="cameraButton" #filePicker (change)='decode($event)' hidden>
+<!--
 <div class="collapse" id="cameraArea">
     <barcode-scanner-livestream
-      type="code_128"
+      [type]="readerTypes"
       (valueChanges)="onValueChanges($event)"
       (started)="onStarted($event)">
     </barcode-scanner-livestream>
-</div>
+</div> -->

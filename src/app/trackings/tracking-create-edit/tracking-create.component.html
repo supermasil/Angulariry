@@ -1,13 +1,26 @@
 <mat-card>
-  <form [formGroup]='form' (submit)='onSaveTracking()' enctype='multipart/form-data'>
-    <mat-form-field appearance="outline">
-      <mat-label>Tracking Number</mat-label>
-      <input
-      matInput
-      type='text'
-      formControlName='trackingNumber'>
-      <mat-error *ngIf="form.get('trackingNumber').invalid">Please enter a Tracking Number</mat-error>
-    </mat-form-field>
+  <form [formGroup]='createForm' (submit)='onSaveTracking()' enctype='multipart/form-data'>
+    <div class="d-flex">
+      <mat-form-field appearance="outline">
+        <mat-label>Tracking Number</mat-label>
+        <input
+        matInput
+        type='text'
+        formControlName='trackingNumber'>
+        <button mat-button *ngIf="createForm.controls['trackingNumber'].value" matSuffix mat-icon-button aria-label="Clear" (click)="createForm.controls['trackingNumber'].setValue('')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-error *ngIf="createForm.get('trackingNumber').invalid">Please enter a Tracking Number</mat-error>
+      </mat-form-field>
+      <a
+        mat-mini-fab
+        color='primary'
+        class="mt-2 d-inline ml-2"
+        onclick="document.getElementById('cameraButton').click()">
+        <mat-icon>photo_camera</mat-icon>
+      </a>
+    </div>
+    <app-code-scanner></app-code-scanner>
 
     <mat-form-field appearance="outline">
       <mat-label>Carrier</mat-label>
@@ -16,7 +29,7 @@
           {{carrier}}
         </mat-option>
       </mat-select>
-      <mat-error *ngIf="form.get('carrier').invalid">Please choose a carrier</mat-error>
+      <mat-error *ngIf="createForm.get('carrier').invalid">Please choose a carrier</mat-error>
       <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
     </mat-form-field>
 
@@ -24,7 +37,7 @@
     <div class="mt-2 mb-4">
       <button mat-stroked-button type='button' (click)='filePicker.click()'>Pick Image</button>
       <input type="file" #filePicker (change)='onFilePicked($event)'>
-      <mat-error *ngIf="form.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>
+      <mat-error *ngIf="createForm.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>
     </div>
     <ng-container *ngFor="let url of filesPreview; let indexOfelement=index;">
       <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ indexOfelement">
@@ -53,7 +66,7 @@
       rows='10'
       formControlName='content'
       ></textarea>
-      <mat-error *ngIf="form.get('content').invalid">Please enter some post content</mat-error>
+      <mat-error *ngIf="createForm.get('content').invalid">Please enter some post content</mat-error>
     </mat-form-field>
 
     <button

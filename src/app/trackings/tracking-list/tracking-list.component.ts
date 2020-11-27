@@ -8,6 +8,7 @@ import { TrackingGlobals } from '../tracking-globals';
 import { Tracking } from '../tracking.model';
 import { TrackingService } from '../tracking.service';
 import * as moment from 'moment';
+import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 
 @Component({
   selector: 'app-tracking-list',
@@ -18,7 +19,7 @@ export class TrackingListComponent {
   trackings: Tracking[] = [];
   // subscribedTrackings: String[] = [];
   private trackingSub: Subscription;
-  private codeSub: Subscription;
+  private codeScannerSub: Subscription;
   // private subscribedPostsSub: Subscription;
   private authListenerSub: Subscription;
   userIsAuthenticated = false;
@@ -39,7 +40,8 @@ export class TrackingListComponent {
   constructor(
     public trackingService: TrackingService,
     private authService: AuthService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private codeScannerService: CodeScannerService
   ) {} // Public simplifies code
 
   async ngOnInit() {
@@ -69,11 +71,10 @@ export class TrackingListComponent {
       });
     await this.trackingService.getTrackings(this.trackingsPerPage, 1); // This will update the getTrackingUpdateListener() observable
 
-    // this.codeSub = this.codeScannerService.getCodeScannerUpdateListener()
-    //   .subscribe((code: {code: string}) => {
-    //     this.trackingForm.controls['searchTerm'].setValue(code.code);
-    //     console.log(code.code);
-    //   });
+    this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
+      .subscribe((code: {code: string}) => {
+        this.trackingForm.controls['searchTerm'].setValue(code.code);
+      });
   }
 
   onDelete(trackingId: string) {
@@ -107,7 +108,7 @@ export class TrackingListComponent {
   ngOnDestroy() {
     this.trackingSub.unsubscribe();
     this.authListenerSub.unsubscribe();
-    // this.codeSub.unsubscribe();
+    this.codeScannerSub.unsubscribe();
   }
 
   getHeaderColor(status: string) {
