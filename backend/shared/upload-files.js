@@ -2,8 +2,8 @@ var url = require("url");
 var path = require("path");
 const AWS = require('aws-sdk');
 const S3 = new AWS.S3({
-  accessKeyId: 'AKIAZTDDKMEE3MACJHXC',
-  secretAccessKey: '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'
+  accessKeyId: process.env.s3AccessKeyId,
+  secretAccessKey: process.env.s3SecretAccessKey
 });
 const fileSystem = require('fs');
 
@@ -61,7 +61,7 @@ exports.uploadFiles = async (files, fileNames) => {
     });
 }
 
-exports.deleteFiles = files => {
+exports.deleteFiles = async files => {
   if (files.length == 0) {
     return [];
   }
@@ -80,7 +80,7 @@ exports.deleteFiles = files => {
     }
   }
 
-  S3.deleteObjects(params, async (err, data) => {
+  await S3.deleteObjects(params, async (err, data) => {
     if (err) {
        console.log("s3DeleteFiles: " + err);
        return;

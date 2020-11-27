@@ -8,7 +8,7 @@ const { assert } = require('console');
 
 exports.getTrackingTool = async (req, res, next) => {
   try {
-    let tracker = await getTrackerHelper(req.body.trackingNumber, req.body.carrier);
+    let tracker = await getTrackerHelper(req.query.trackingNumber, req.query.carrier);
     return res.status(200).json(tracker);
   } catch (error) {
     console.log("getTrackingTool: " + error.message)
@@ -86,7 +86,7 @@ exports.updateTracking = async(req, res , next) => {
         let tempFilePaths = foundTracking.filePaths;
 
         let filesToDelete = JSON.parse(req.body.filesToDelete); // Parse the array
-        S3.deleteFiles(filesToDelete);
+        await S3.deleteFiles(filesToDelete);
 
         tempFilePaths = tempFilePaths.filter(item => !filesToDelete.includes(item));
 
@@ -97,8 +97,6 @@ exports.updateTracking = async(req, res , next) => {
         foundTracking.filePaths = tempFilePaths;
         await foundTracking.save();
         return res.status(201).json({message: "Tracking updated successfully", tracking: foundTracking});
-
-
       })
     .catch (error => {
       console.log("updateTracking: " + error.message);
@@ -172,7 +170,7 @@ exports.deleteTracking = async (req, res, next) => {
       await Comment.deleteMany({trackingId: req.params.id}).session(session)
       .then();
 
-      S3.deleteFiles(foundTracking.filePaths);
+      await S3.deleteFiles(foundTracking.filePaths);
 
       return res.status(200).json({message: "Tracking deleted successfully"});
     })
