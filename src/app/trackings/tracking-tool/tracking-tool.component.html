@@ -33,46 +33,22 @@
 <div *ngIf="tracker">
   <hr>
   <div class="row">
-    <div class="col-md badge badge-info mx-2">
-      <h4 class="m-0">{{codesMapping.get(tracker.status)}}</h4>
+    <div class="col-md mx-2 mb-1 text-center">
+      <h1 class="m-0">{{codesMapping.get(tracker.status)}}</h1>
     </div>
-    <div class="col-md badge badge-secondary mx-2">
-      <h4 class="m-0">{{tracker.tracking_code}}</h4>
+    <div class="col-md mx-2 mb-1 text-center">
+      <h1 class="m-0">{{tracker.tracking_code}}</h1>
     </div>
-    <div class="col-md badge badge-success mx-2">
-      <h4 class="m-0">{{tracker.carrier}}</h4>
+    <div class="col-md mx-2 text-center">
+      <h1 class="m-0">{{tracker.carrier}}</h1>
     </div>
   </div>
   <hr>
   <mat-vertical-stepper linear="false">
-    <ng-container *ngIf="shippingProgress[0]">
-      <mat-step label="Package received" state="initiated" completed="{{stepCompletion[0]}}">
-        <ng-container *ngIf="tracker.created_at">
-          <mat-card>
-            <mat-card-title>{{tracker.carrier_detail?.origin_location}}</mat-card-title>
-            <mat-card-subtitle>Received at (UTC): {{tracker.created_at}}</mat-card-subtitle>
-            <mat-card-content>
-              <div class="row">
-                <div class="col-md">
-                  <div class="mat-body-strong">Origin</div> <div class="mat-body">{{tracker.carrier_detail?.origin_location}}</div>
-                  <div class="mat-body-strong">Destination</div> <div class="mat-body">{{tracker.carrier_detail?.destination_location}}</div>
-                  <div class="mat-body-strong">Estimated delivery date (UTC)</div> <div class="mat-body">{{tracker.est_delivery_date}}</div>
-                </div>
-                <div class="col-md">
-                  <div class="mat-body-strong">Weight</div> <div class="mat-body">{{tracker.weight}} lbs</div>
-                  <div class="mat-body-strong">Service</div> <div class="mat-body">{{tracker.carrier_detail?.service}}</div>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </ng-container>
-      </mat-step>
-    </ng-container>
-
-    <ng-container *ngIf="shippingProgress[1]" >
-      <mat-step label="Shipping in progress" state="in_progress" completed="{{stepCompletion[1]}}">
-        <ng-container *ngFor="let item of inTransitTrackingDetails">
-          <ng-container *ngIf="preTransitCodes.includes(item?.status) || inTransitCodes.includes(item?.status)">
+    <ng-container *ngIf="shippingProgress[3]" >
+      <mat-step label="Something happened :(" state="failure" completed="{{stepCompletion[3]}}">
+        <ng-container *ngFor="let item of failureTrackingDetails">
+          <ng-container *ngIf="failureCodes.includes(item?.status)">
             <mat-card>
               <mat-card-title>
                 {{item?.tracking_location?.city}} {{item?.tracking_location?.state}} {{item?.tracking_location?.zip}} {{item?.tracking_location?.country}}
@@ -132,10 +108,10 @@
       </mat-step>
     </ng-container>
 
-    <ng-container *ngIf="shippingProgress[3]" >
-      <mat-step label="Something happened :(" state="failure" completed="{{stepCompletion[3]}}">
-        <ng-container *ngFor="let item of failureTrackingDetails">
-          <ng-container *ngIf="failureCodes.includes(item?.status)">
+    <ng-container *ngIf="shippingProgress[1]" >
+      <mat-step label="Shipping in progress" state="in_progress" completed="{{stepCompletion[1]}}">
+        <ng-container *ngFor="let item of inTransitTrackingDetails">
+          <ng-container *ngIf="preTransitCodes.includes(item?.status) || inTransitCodes.includes(item?.status)">
             <mat-card>
               <mat-card-title>
                 {{item?.tracking_location?.city}} {{item?.tracking_location?.state}} {{item?.tracking_location?.zip}} {{item?.tracking_location?.country}}
@@ -158,6 +134,30 @@
             </mat-card>
           </ng-container>
           <br>
+        </ng-container>
+      </mat-step>
+    </ng-container>
+
+    <ng-container *ngIf="shippingProgress[0]">
+      <mat-step label="Package received" state="initiated" completed="{{stepCompletion[0]}}">
+        <ng-container *ngIf="tracker.created_at">
+          <mat-card>
+            <mat-card-title>{{tracker.carrier_detail?.origin_location}}</mat-card-title>
+            <mat-card-subtitle>Received at (UTC): {{tracker.created_at}}</mat-card-subtitle>
+            <mat-card-content>
+              <div class="row">
+                <div class="col-md">
+                  <div class="mat-body-strong">Origin</div> <div class="mat-body">{{tracker.carrier_detail?.origin_location}}</div>
+                  <div class="mat-body-strong">Destination</div> <div class="mat-body">{{tracker.carrier_detail?.destination_location}}</div>
+                  <div class="mat-body-strong">Estimated delivery date (UTC)</div> <div class="mat-body">{{tracker.est_delivery_date}}</div>
+                </div>
+                <div class="col-md">
+                  <div class="mat-body-strong">Weight</div> <div class="mat-body">{{tracker.weight}} lbs</div>
+                  <div class="mat-body-strong">Service</div> <div class="mat-body">{{tracker.carrier_detail?.service}}</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
         </ng-container>
       </mat-step>
     </ng-container>

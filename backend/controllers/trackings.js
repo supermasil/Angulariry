@@ -4,7 +4,6 @@ const Tracking = require('../models/tracking');
 const Comment = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
-const { assert } = require('console');
 
 exports.getTrackingTool = async (req, res, next) => {
   try {
@@ -100,7 +99,7 @@ exports.updateTracking = async(req, res , next) => {
       })
     .catch (error => {
       console.log("updateTracking: " + error.message);
-      return res.status(500).json({message: "Tracking update failed, try to search to see if it already exists"});
+      return res.status(500).json({message: "Tracking update failed"});
     });
 }
 

@@ -86,20 +86,20 @@ export class TrackingToolComponent implements OnInit {
     tracker.tracking_details.forEach(element => {
       if (this.preTransitCodes.includes(element.status)) {
         element.tracking_location = tracker.carrier_detail.origin_tracking_location;
-        this.inTransitTrackingDetails.push(element as TrackingDetail);
+        this.inTransitTrackingDetails.unshift(element as TrackingDetail);
         this.shippingProgress[0] = true;
         this.stepCompletion[0] = true;
       } else if(this.inTransitCodes.includes(element.status)) {
-        this.inTransitTrackingDetails.push(element as TrackingDetail);
+        this.inTransitTrackingDetails.unshift(element as TrackingDetail);
         this.shippingProgress[1] = true;
         this.stepCompletion[0] = true;
       } else if (this.deliveryCodes.includes(element.status)) {
-        this.deliveryTrackingDetails.push(element as TrackingDetail);
+        this.deliveryTrackingDetails.unshift(element as TrackingDetail);
         this.shippingProgress[2] = true;
         this.stepCompletion[1] = true;
         this.stepCompletion[2] = true;
       } else if (this.failureCodes.includes(element.status)) {
-        this.failureTrackingDetails.push(element as TrackingDetail);
+        this.failureTrackingDetails.unshift(element as TrackingDetail);
         this.shippingProgress[3] = true;
       }
     });

@@ -49,8 +49,9 @@ exports.uploadFiles = async (files, fileNames) => {
 
   var uploadFilePromises = [];
   files.forEach((item, index) => {
-    // uploadFilePromises.push(uploadFile(item, item.filename)); // For any file types
-    uploadFilePromises.push(uploadFile(item, fileNames[index])); // For any images
+    let ext = fileNames[index].substr(fileNames[index].lastIndexOf('.') + 1);
+    let name = fileNames[index].toLowerCase().split(' ').join('-') + '-' + Date.now() + '.' + ext;
+    uploadFilePromises.push(uploadFile(item, name)); // For any images
 
   })
 

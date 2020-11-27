@@ -3,7 +3,7 @@ const Tracking = require('../models/tracking');
 //{"id":"hook_45098b81d06e412ba3f02306cbfedf9b","object":"Webhook","mode":"production","url":"https://weshippee.com/api/easypost","disabled_at":null}
 
 exports.updateTracker = (req, res, next) => {
-  return await Tracking.updateOne({ trackingNumber: req.body.result.tracking_code}, {status: req.body.result.status })
+  Tracking.updateOne({ trackingNumber: req.body.result.tracking_code}, {status: req.body.result.status })
     .then(
       console.log(`EasyPostWebhook: Updated tracking ${req.body.result.tracking_code} to status ${req.body.result.status}`)
     )
