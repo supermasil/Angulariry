@@ -33,12 +33,16 @@
       <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
     </mat-form-field>
 
-
-    <div class="mt-2 mb-4">
-      <button mat-stroked-button type='button' (click)='filePicker.click()'>Pick Image</button>
+    <div class="row mt-2 mb-2">
+      <div class="col">
+        <button mat-stroked-button type='button' (click)='filePicker.click()'>Pick Image</button>
+      </div>
+      <div class="col d-flex align-items-center mt-4 mt-sm-0">
+        <mat-slide-toggle color="primary" (change)="received = $event.checked" [(checked)]="received">Received at US warehouse {{received}}</mat-slide-toggle>
+      </div>
       <input type="file" #filePicker (change)='onFilePicked($event)'>
-      <mat-error *ngIf="createForm.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>
     </div>
+    <mat-error *ngIf="createForm.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>
     <ng-container *ngFor="let url of filesPreview; let indexOfelement=index;">
       <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ indexOfelement">
         <img [src]="url">

@@ -4,6 +4,7 @@ const Tracking = require('../models/tracking');
 const Comment = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
+assert = require('assert');
 
 exports.getTrackingTool = async (req, res, next) => {
   try {
@@ -27,7 +28,7 @@ exports.createTracking = async (req, res, next) => {
 
     const tracking = new Tracking({
       trackingNumber: req.body.trackingNumber,
-      status: tracker.status,
+      status: JSON.parse(req.body.received) ? "received_at_us_warehouse" : tracker.status,
       carrier: req.body.carrier,
       filePaths: [],
       creatorId: req.userData.uid,
@@ -71,7 +72,7 @@ exports.updateTracking = async(req, res , next) => {
   return await Tracking.findOne({ _id: req.body._id, creatorId: req.userData.uid })
     .then(async (foundTracking) => {
         foundTracking.trackingNumber = req.body.trackingNumber;
-        foundTracking.status = tracker.status,
+        foundTracking.status = JSON.parse(req.body.received) ? "received_at_us_warehouse" : tracker.status,
         foundTracking.carrier = req.body.carrier,
         foundTracking.creatorId = req.userData.uid,
         foundTracking.trackerId = tracker.id,

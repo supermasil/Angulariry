@@ -73,13 +73,14 @@ export class TrackingService {
     return this.httpClient.get<Tracking>(BACKEND_URL + id); // return an observable
   }
 
-  createTracking(trackingNumber: string, carrier: string, content: string, files: string[], fileNames: string[]) {
+  createTracking(trackingNumber: string, carrier: string, content: string, received: boolean, files: string[], fileNames: string[]) {
     const trackingData = new FormData();
     trackingData.append("files", JSON.stringify(files)); // Only works with array
     trackingData.append("fileNames", JSON.stringify(fileNames)); // Only works with array
     trackingData.append('trackingNumber', trackingNumber);
     trackingData.append('content', content);
     trackingData.append('carrier', carrier);
+    trackingData.append('received', JSON.stringify(received));
 
     // files.forEach(file => {
       // trackingData.append("files[]", file, files['name']); // For any file types
@@ -96,7 +97,7 @@ export class TrackingService {
     return this.httpClient.delete(BACKEND_URL + id);
   }
 
-  updateTracking(id: string, trackingNumber: string, carrier: string, content: string, files: string[], fileNames: string[], filesToDelete: string[]) {
+  updateTracking(id: string, trackingNumber: string, carrier: string, content: string, received: boolean, files: string[], fileNames: string[], filesToDelete: string[]) {
     let trackingData = new FormData();
     trackingData.append('_id', id);
     trackingData.append('trackingNumber', trackingNumber);
@@ -105,18 +106,20 @@ export class TrackingService {
     trackingData.append("files", JSON.stringify(files)); // Only works with array
     trackingData.append("fileNames", JSON.stringify(fileNames)); // Only works with array
     trackingData.append("filesToDelete", JSON.stringify(filesToDelete)); // Only works with array
+    trackingData.append('received', JSON.stringify(received));
 
     // files.forEach(file => {
     //   trackingData.append("files[]", file, files['name']);
     // });
 
-    this.httpClient.put<{message: string, updatedTracking: Tracking}>(BACKEND_URL + id, trackingData)
+    this.httpClient.put<{message: string, tracking: Tracking}>(BACKEND_URL + id, trackingData)
     .subscribe(response => {
-      const updatedTrackings = [...this.trackings]; // create a copy
-      const oldTrackingIndex = updatedTrackings.findIndex(p => p._id === id);
-      const tracking: Tracking = response.updatedTracking as Tracking;
-      updatedTrackings[oldTrackingIndex] = tracking;
-      this.trackings = updatedTrackings;
+      const oldTrackingIndex = [...this.trackings].findIndex(p => p._id === response.tracking._id);
+      this.trackings[oldTrackingIndex] = response.tracking as Tracking;
+      this.trackingsUpdated.next({
+        trackings: [...this.trackings],
+        count: this.trackings.length
+      });
       this.router.navigate(['/trackings']); // Will reload, no need to emit
     });
   }

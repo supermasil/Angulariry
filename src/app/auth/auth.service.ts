@@ -105,7 +105,7 @@ export class AuthService {
   }
 
   login(email: string, password: string) {
-    this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+    this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .then(() => {
         this.firebaseAuth.signInWithEmailAndPassword(email, password)
       .then((userCredentials) => {

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms'
 
 import { TrackingService } from '../tracking.service';
@@ -22,7 +22,7 @@ import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 export class TrackingCreateComponent implements OnInit, OnDestroy{
   private mode = 'create';
   private trackingId: string;
-  private carrier: string;
+  received = false;
   tracking: Tracking;
   carriers = TrackingGlobals.carriers;
 
@@ -57,9 +57,13 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
         // this.isLoading = false; // Remove spinner every time auth status changes
       }
     );
+
+    // Passed from tracking-list route
+    let searchTerm = this.route.snapshot.paramMap.get('searchTerm') !== null ? this.route.snapshot.paramMap.get('searchTerm') : "";
+
     // Set up form
     this.createForm = new FormGroup({
-      trackingNumber: new FormControl(null, {
+      trackingNumber: new FormControl(searchTerm, {
         validators: [Validators.required, Validators.minLength(3)]
       }),
       carrier: new FormControl(null, {validators: [Validators.required]}),
@@ -88,6 +92,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
             this.filePaths.forEach(file => {
               this.filesPreview.push(file);
             });
+            this.received = this.tracking.status === "received_at_us_warehouse" ? true : false;
           },
           err => {
             this.router.navigate(['/404']);
@@ -114,6 +119,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
         this.createForm.value.trackingNumber,
         this.createForm.value.carrier,
         this.createForm.value.content,
+        this.received,
         this.filesToAdd,
         this.fileNames);
     } else {
@@ -122,6 +128,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
         this.createForm.value.trackingNumber,
         this.createForm.value.carrier,
         this.createForm.value.content,
+        this.received,
         this.filesToAdd,
         this.fileNames,
         this.filesToDelete);
@@ -138,9 +145,9 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
     this.createForm.patchValue({fileValidator: file}); // Target a single control
     this.createForm.get('fileValidator').updateValueAndValidity(); // Update and validate without html form
 
-    if(this.createForm.get("fileValidator").valid) {
-      return;
-    }
+    // if(!this.createForm.get("fileValidator").valid) {
+    //   return;
+    // }
 
     const reader = new FileReader();
     reader.onload = async () => { // When done loading

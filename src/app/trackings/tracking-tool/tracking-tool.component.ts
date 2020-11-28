@@ -4,10 +4,10 @@ import { TrackingService } from '../tracking.service';
 import {STEPPER_GLOBAL_OPTIONS} from '@angular/cdk/stepper';
 import { Tracker } from '../models/tracker.model';
 import { TrackingDetail } from '../models/tracking-details.model';
-import { AlertService } from '../../alert-message';
-import { GlobalConstants } from '../../global-constants';
 import { GeneralMethods } from '../../shared/general-methods';
 import { TrackingGlobals } from '../tracking-globals';
+import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-tracking',
@@ -37,9 +37,14 @@ export class TrackingToolComponent implements OnInit {
   tracked = false;
   tracker: Tracker;
 
+  private codeScannerSub: Subscription;
+
   capitalizeFirstLetter = GeneralMethods.capitalizeFirstLetter;
 
-  constructor(private trackingService: TrackingService, private alertService: AlertService){}
+  constructor(
+    private trackingService: TrackingService,
+    private codeScannerService: CodeScannerService){}
+
   ngOnInit() {
     // Set up form
     this.form = new FormGroup({
@@ -50,6 +55,11 @@ export class TrackingToolComponent implements OnInit {
         validators: [Validators.required]
       })
     });
+
+    this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
+      .subscribe((code: {code: string}) => {
+        this.form.controls['trackingNumber'].setValue(code.code);
+      });
   }
 
   resetStatus() {
@@ -74,7 +84,6 @@ export class TrackingToolComponent implements OnInit {
         let status = trackerData["status"];
         this.tracked = true;
         this.tracker = trackerData as Tracker;
-        console.log(this.tracker);
         this.setTrackingDetails(this.tracker);
       }, error => {
         this.isLoading = false;

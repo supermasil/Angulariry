@@ -25,9 +25,9 @@ export class TrackingListComponent {
   userIsAuthenticated = false;
   userId: string;
   totalTrackings = 0;
-  trackingsPerPage = 5;
+  trackingsPerPage = 10;
   currentPage = 1;
-  pageSizeOptions = [1, 2, 5, 10];
+  pageSizeOptions = [10, 20, 50, 100];
   trackingForm: FormGroup;
   commentForm: FormGroup;
   @ViewChild('f') myCommentForm;
@@ -48,6 +48,7 @@ export class TrackingListComponent {
     this.trackingForm = new FormGroup({
       searchTerm: new FormControl(null)
     });
+
 
     this.commentForm = new FormGroup({
       commentContent: new FormControl(null, {validators: [Validators.required]})
@@ -117,13 +118,28 @@ export class TrackingListComponent {
     } else if (this.inTransitCodes.includes(status)) {
       return "bg-warning"
     } else if (this.deliveryCodes.includes(status)) {
-      return "bg-success"
+      return "bg-info"
     } else if (this.failureCodes.includes(status)) {
       return "bg-danger"
+    } else if (status === "received_at_us_warehouse") {
+      return "bg-success"
     }
   }
 
   formatDateTime(date: Date) {
     return moment(moment.utc(date).toDate()).fromNow(); //.local().format("MM-DD-YY hh:mm:ss")
+  }
+
+  onReceivedToggled(checked: boolean, tracking: Tracking) {
+    this.trackingService.updateTracking(
+      tracking._id,
+      tracking.trackingNumber,
+      tracking.carrier,
+      tracking.content,
+      checked,
+      [],
+      [],
+      []);
+
   }
 }

@@ -1,27 +1,37 @@
 <mat-card>
   <form [formGroup]="form" (submit)="onSearch()">
-    <div class="inline-block row">
-      <mat-form-field class="col-md-9" appearance="outline">
+    <div class="d-flex">
+      <mat-form-field appearance="outline">
         <mat-label>Tracking Number</mat-label>
         <input
-          matInput
-          type='search'
-          formControlName='trackingNumber'
-        >
-        <mat-error *ngIf="form.get('trackingNumber').invalid">Please enter something to search</mat-error>
+        matInput
+        type='text'
+        formControlName='trackingNumber'>
+        <button mat-button *ngIf="form.controls['trackingNumber'].value" matSuffix mat-icon-button aria-label="Clear" (click)="form.controls['trackingNumber'].setValue('')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-error *ngIf="form.get('trackingNumber').invalid">Please enter a Tracking Number</mat-error>
       </mat-form-field>
-
-      <mat-form-field class="col-md-3" appearance="outline">
-        <mat-label>Carrier</mat-label>
-        <mat-select formControlName="carrier">
-          <mat-option *ngFor="let carrier of carriers" [value]="carrier">
-            {{carrier}}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('carrier').invalid">Please choose a carrier</mat-error>
-        <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
-      </mat-form-field>
+      <a
+        mat-mini-fab
+        color='primary'
+        class="mt-2 d-inline ml-2"
+        onclick="document.getElementById('cameraButton').click()">
+        <mat-icon>photo_camera</mat-icon>
+      </a>
     </div>
+    <app-code-scanner></app-code-scanner>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Carrier</mat-label>
+      <mat-select formControlName="carrier">
+        <mat-option *ngFor="let carrier of carriers" [value]="carrier">
+          {{carrier}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('carrier').invalid">Please choose a carrier</mat-error>
+      <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
+    </mat-form-field>
     <br>
     <button type="submit" class="ml-auto" mat-raised-button color='primary'>Search</button>
 
