@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NgForm } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { Subscription } from 'rxjs';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { phoneNumberValidator } from 'lac-mat-tel-input';
 
 @Component({
   templateUrl: './auth.component.html',
@@ -9,41 +10,74 @@ import { Subscription } from 'rxjs';
 })
 
 export class AuthComponent implements OnInit, OnDestroy {
-  constructor(public authService: AuthService) {}
-  isLoading = false;
+  constructor(
+    public authService: AuthService) {}
+
   private authStatusSub: Subscription;
+  roles = ["SuperAdmin", "Admin", "Manager", "Accounting", "Operation", "Receiving/Shipping", "Customer"];
+  companyCodes = ["JMD"]; // Has to be unique
+
+  loginForm: FormGroup;
+  signupForm: FormGroup;
+  passwordResetForm: FormGroup;
 
   ngOnInit() {
+    this.loginForm = new FormGroup({
+      email: new FormControl(null, {validators: [Validators.required, Validators.email]}),
+      password: new FormControl(null, {validators: [Validators.required, Validators.minLength(6)]})
+    });
+
+    this.signupForm = new FormGroup({
+      name: new FormControl(null, {validators: [Validators.required]}),
+      email: new FormControl(null, {validators: [Validators.required, Validators.email]}),
+      password: new FormControl(null, {validators: [Validators.required, Validators.minLength(6)]}),
+      phoneNumber: new FormControl(null, {validators: [Validators.required, phoneNumberValidator]}),
+      // role: new FormControl(null, {validators: [Validators.required]}),
+      companyCode: new FormControl(null, {validators: [this.companyCodeValidator()]})
+    });
+
+    this.passwordResetForm = new FormGroup({
+      email: new FormControl(null, {validators: [Validators.required, Validators.email]})
+    });
+
     this.authStatusSub = this.authService.getAuthStatusListener().subscribe(
       authStatus => {
-        this.isLoading = false;
+
       }
     );
   }
 
-  onSignup(form: NgForm) {
-    if (form.invalid) {
-      return;
-    }
-    this.isLoading = true;
-    this.authService.createUser(form.value.name, form.value.email, form.value.password);
+  companyCodeValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      if (control && control.value && this.companyCodes.includes(control.value)) {
+        return null;
+      }
+
+      return {wrongCompanyCode: control.value};
+    };
   }
 
-  onLogin(form: NgForm) {
-    if (form.invalid) {
+
+  onSignup() {
+    let role = "Customer"
+    if (this.signupForm.invalid) {
       return;
     }
-    this.isLoading = true;
-    this.authService.login(form.value.email, form.value.password);
+    this.authService.createUser(this.signupForm.get("name").value, this.signupForm.get("email").value, this.signupForm.get("phoneNumber").value, this.signupForm.get("password").value, role, this.signupForm.get("companyCode").value);
   }
 
-  onPasswordReset(form: NgForm) {
-    if (form.invalid) {
+  onLogin() {
+    if (this.loginForm.invalid) {
       return;
     }
-    this.isLoading = true;
-    this.authService.resetPassword(form.value.email);
-    this.isLoading = false;
+    this.authService.login(this.loginForm.get("email").value, this.loginForm.get("password").value);
+  }
+
+  onPasswordReset() {
+    if (this.passwordResetForm.invalid) {
+      return;
+    }
+    this.authService.resetPassword(this.passwordResetForm.get("email").value);
   }
 
   ngOnDestroy() {

@@ -60,6 +60,7 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
 
     // Passed from tracking-list route
     let searchTerm = this.route.snapshot.paramMap.get('searchTerm') !== null ? this.route.snapshot.paramMap.get('searchTerm') : "";
+    this.received = this.route.snapshot.paramMap.get('received') === "true";
 
     // Set up form
     this.createForm = new FormGroup({

@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import bootstrap from "bootstrap";
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
@@ -40,7 +40,6 @@ import { NgxImageCompressService } from 'ngx-image-compress';
     FrontPageModule,
     NgxSpinnerModule
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA], // For Ngx-spinner
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},

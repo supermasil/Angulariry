@@ -1,9 +1,12 @@
 import { NgModule } from '@angular/core';
 import { AngularMaterialModule } from '../angular-material.module';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { AuthRoutingModule } from './auth-routing.module';
 import { AuthComponent } from './auth/auth.component';
+import { LacMatTelInputModule } from 'lac-mat-tel-input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
   declarations: [
@@ -12,8 +15,11 @@ import { AuthComponent } from './auth/auth.component';
   imports: [
     CommonModule,
     AngularMaterialModule,
-    FormsModule,
+    ReactiveFormsModule,
     AuthRoutingModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    LacMatTelInputModule
   ]
 })
 export class AuthModule {}

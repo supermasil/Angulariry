@@ -17,6 +17,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 
 @NgModule({
@@ -48,7 +49,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatGridListModule,
     MatStepperModule,
     MatBadgeModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatFormFieldModule
   ]
 })
 
