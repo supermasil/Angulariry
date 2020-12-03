@@ -48,3 +48,4 @@ Thumbs.db
 # Backend
 /backend/angular/
 /backend/node_modules/
+/backend/nodemon.json
