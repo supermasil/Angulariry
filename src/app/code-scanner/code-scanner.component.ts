@@ -1,16 +1,15 @@
 import { CodeScannerService } from './code-scanner.service';
-import Quagga from 'quagga';
-import { Component, ViewChild, ElementRef } from "@angular/core";
-import * as ScanditSDK from "scandit-sdk";
-import { BarcodePicker, ScanResult } from "scandit-sdk";
+// import Quagga from 'quagga';
+import { Component } from "@angular/core";
+import { Barcode, BarcodePicker, Camera, CameraAccess, CameraSettings, ScanResult, ScanSettings } from 'scandit-sdk-angular';
+
 
 @Component({
   selector: "app-code-scanner",
   templateUrl: './code-scanner.component.html',
-  styleUrls: ['./code-scanner.component.html']
+  styleUrls: ['./code-scanner.component.css']
 })
 export class CodeScannerComponent {
-  constructor(public codeScannerService: CodeScannerService) {}
 
   // decode(event: Event) {
   //   const file = (event.target as HTMLInputElement).files[0];
@@ -40,30 +39,46 @@ export class CodeScannerComponent {
   //   reader.readAsDataURL(file); // This will kick off onload process
   // }
 
-  public scannerReady = false;
-  public showButton = false;
-  public showDescription = true;
-  public result = "";
+  public activeSettings: ScanSettings;
+  public scannerGuiStyle: BarcodePicker.GuiStyle = BarcodePicker.GuiStyle.LASER;
+  public activeCamera: Camera;
+  public cameraSettings: CameraSettings;
+  public scanningPaused: boolean = false;
+  public visible: boolean = false;
+  public fps: number = 30;
+  public videoFit: BarcodePicker.ObjectFit = BarcodePicker.ObjectFit.COVER;;
+  public scannedCodes: Barcode[] = [];
+  public isReady: boolean = false;
+  public enableCameraSwitcher: boolean = false;
+  public enablePinchToZoom: boolean = false;
+  public enableTapToFocus: boolean = false;
+  public enableTorchToggle: boolean = false;
+  public enableVibrateOnScan: boolean = false;
+  public cameraAccess: boolean = false;
+  public enableSoundOnScan: boolean = false;
 
-  @ViewChild("barcodePicker") barcodePickerElement: ElementRef<HTMLDivElement & { barcodePicker: BarcodePicker }>;
+  public possibleCameras: Camera[] = [];
 
-  public onReady(): void {
-    this.scannerReady = true;
-    this.showButton = true;
+  constructor(private codeScannerService: CodeScannerService) {
+    this.activeSettings = new ScanSettings({
+      enabledSymbologies: [Barcode.Symbology.CODE128, Barcode.Symbology.EAN8, Barcode.Symbology.UPCA, Barcode.Symbology.UPCE, Barcode.Symbology.EAN13],
+      maxNumberOfCodesPerFrame: 1,
+      searchArea: {"x":0,"y":0.35,"width":1,"height":0.3},
+      codeDuplicateFilter: 1000,
+    });
+
+    CameraAccess.getCameras().then((cameras) => {
+      this.possibleCameras = cameras;
+    });
+
+    this.cameraSettings = {
+      resolutionPreference: CameraSettings.ResolutionPreference.FULL_HD,
+    };
   }
 
-  public onScan(scanResult: { detail: ScanResult }): void {
-    const calculatedString = scanResult.detail.barcodes.reduce((result, barcode) => {
-      return `${result} ${ScanditSDK.Barcode.Symbology.toHumanizedName(barcode.symbology)} : ${barcode.data}`;
-    }, "");
 
-    this.result = calculatedString;
-  }
-
-  public startBarcodePicker(): void {
-    this.showButton = false;
-    this.showDescription = false;
-
-    this.barcodePickerElement.nativeElement.barcodePicker.setVisible(true).resumeScanning();
+  public onScan(result: ScanResult): void {
+    this.codeScannerService.updateCodeScannerUpdateListener(result.barcodes[0].data);
+    // this.scannedCodes.unshift(result.barcodes[0]);
   }
 }

@@ -1,33 +1,25 @@
 <!-- <input type="file" id="cameraButton" #filePicker (change)='decode($event)' hidden> -->
+<a hidden data-toggle="collapse" id="cameraButton" href="#scannerContainer" role="button" aria-expanded="false" aria-controls="collapseExample" (click)="cameraAccess = !cameraAccess; visible = !visible">
+</a>
 
-<div class="container">
-  <div class="logo"></div>
-  <div class="name">Simple Sample</div>
-  <div id="description" class="description" *ngIf="showDescription">
-    Start the scanner and then aim at a barcode to get the encoded data.
-  </div>
-
-  <div id="lib-loading" *ngIf="!scannerReady">
-    <br />Library is loading, please wait...
-  </div>
-
-  <button id="barcode-picker-starter-button" *ngIf="showButton" (click)="startBarcodePicker()">
-    Start Scanning
-  </button>
-
-  <div id="barcode-result" class="result-text">{{ result }}</div>
-
-  <scandit-barcode-picker
-    #barcodePicker
-    id="barcode-picker"
-    configure.licenseKey="ASqP7BHhDs0nJ4cPGkBhSkQEBHR0AbRajltphKV8nWolH30qCTN6YtN4+h9RTtiYp09k25NJ2Dm9HiIDXGW+6MdVFDTzQgk0ByCozm8xcilwLBBMYgtiMOUUhP9JIAEjeNHMUb0LgLR9a1u1Pv1Alc891wUYKVXtt15SxjYq2djNVhZj32kmQHcnpvtVoNlT+FH0zaLFXiqQlpuerCm3t+mHuUHax5N34bD8R8lZ2ddbb1xFB4qw9YjB8TlJGOPjl1EYLWJmR3S+tZqUdvZ4MyubQWH91fFqas7tXfsN5osNmiAnZ0jzMNXVDjJHWfLY9qZhRUNZK8x2W60UkHH4oSFL+rjdQTRMdlL0Tn/akSXBa9hgN+1RRjsHHxTrZMk71UzJ1XyyLqSq/DO/ZQbHOV3njqsdQVv4pny/8lp0EkmHbvoIWywjTKoZhL9Kua2KdtX/TU1166c3K+7+Yd9kgVpraUhC9hqoZeZTvN6E9H5mMcfSYCFZBxLgAgGM0Vcf1h1xVqjhuIt2pvWjsAsHWUIJlAJiUoKY55wcyRDTnUF5V1lmskFbJUFo1Ttpn9L8wnRddrhEelz8Q+VPu4nr8Qxp/r8nsYP8Mw/w+3N6R1H2zXZEz8x5c7CSpK9hECFK67LxgGpnTYNGBRlaCwrZs4vkE9Zj+jxxUT8WWehC6N4YYGLcc5htrP9oTCy8NgtrLnmiBWW04P1USSysrWGJLwaAejDD/Fn1Jm5WmITW9V1HSDjTfIZ4xfh9IWvAYqlihOi52GOmythFCOMhhjLnMq0YtBPwRdWBN74Ucug="
-    configure.engineLocation="https://cdn.jsdelivr.net/npm/scandit-sdk@5.x/build/"
-    scanningPaused="true"
-    visible="false"
-    playSoundOnScan="true"
-    vibrateOnScan="true"
-    scanSettings.enabledSymbologies='["ean8", "ean13", "upca", "upce", "code128"]'
-    (ready)="onReady()"
-    (scan)="onScan($event)">
-  </scandit-barcode-picker>
+<div class="collapse" id="scannerContainer">
+    <scandit-sdk-barcode-picker #picker [accessCamera]="cameraAccess"
+    [camera]="activeCamera"
+    [cameraSettings]="cameraSettings"
+    [enableCameraSwitcher]="enableCameraSwitcher"
+    [enablePinchToZoom]="enablePinchToZoom"
+    [enableTapToFocus]="enableTapToFocus"
+    [enableTorchToggle]="enableTorchToggle"
+    [guiStyle]="scannerGuiStyle"
+    [paused]="scanningPaused"
+    [playSoundOnScan]="enableSoundOnScan"
+    [scanSettings]="activeSettings"
+    [targetScanningFPS]="fps"
+    [vibrateOnScan]="enableVibrateOnScan"
+    [videoFit]="videoFit"
+    [visible]="visible"
+    [style.height]="'30vw'"
+    [style.width]="'100%'"
+    (scan)="onScan($event)"
+    (init)="isReady = false" (ready)="isReady = true"></scandit-sdk-barcode-picker>
 </div>
