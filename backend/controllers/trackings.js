@@ -4,6 +4,7 @@ const Tracking = require('../models/tracking');
 const Comment = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
+const { CostExplorer } = require('aws-sdk');
 assert = require('assert');
 
 exports.getTrackingTool = async (req, res, next) => {
@@ -12,7 +13,7 @@ exports.getTrackingTool = async (req, res, next) => {
     return res.status(200).json(tracker);
   } catch (error) {
     console.log("getTrackingTool: " + error.message)
-    return res.status(500).json({message: error.message.includes("**") ? error.message : "Something went wrong while looking for this tracking"})
+    return res.status(500).json({message: "Something went wrong while looking for this tracking"})
   }
 };
 
@@ -203,6 +204,8 @@ fetchTrackingsHelper = (req, res, trackingQuery) => {
 // }
 
 getTrackerHelper = async (trackingNumber, carrier) => {
+  console.log(trackingNumber, carrier);
+  console.log(process.env.easyPostApiKey);
   const tracker = new api.Tracker({
     tracking_code: trackingNumber,
     carrier: carrier

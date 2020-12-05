@@ -30,7 +30,7 @@ export class TrackingListComponent {
   pageSizeOptions = [10, 20, 50, 100];
   trackingForm: FormGroup;
   commentForm: FormGroup;
-  @ViewChild('f') myCommentForm;
+  @ViewChild('f') myCommentForm; // To be able to reset form without triggering validators
 
   preTransitCodes = TrackingGlobals.preTransitCodes;
   inTransitCodes = TrackingGlobals.inTransitCodes

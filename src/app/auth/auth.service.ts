@@ -84,7 +84,7 @@ export class AuthService {
     return sessionStorage.getItem("utoken");
   }
 
-  createUser(name: string, email: string, phoneNumber: string, password: string, role: string, companyCode: string) {
+  createUser(name: string, email: string, phoneNumber: string, password: string, role: string, companyCode: string, customerCode: string) {
     this.firebaseAuth.createUserWithEmailAndPassword(email, password)
     .then((userData) => {
       const authData = {
@@ -92,10 +92,12 @@ export class AuthService {
         name: name,
         phoneNumber: phoneNumber,
         role: role,
-        companyCode: companyCode
+        companyCode: companyCode,
+        customerCode: customerCode
       };
       this.http.post<{message: string, user: any}>(BACKEND_URL + "signup", authData)
       .subscribe(response => {
+        console.log(response.user);
         this.authStatusListener.next(true);
         this.router.navigate(["/trackings"]);
       });

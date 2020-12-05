@@ -1,18 +1,20 @@
 const Comment = require('../models/comment');
+const UserController = require("../controllers/users");
 const Tracking = require('../models/tracking');
 const db = require('mongoose');
 
 exports.createComment = async (req, res, next) => {
-  const comment = new Comment ({
-    creatorId: req.userData.uid,
-    trackingId: req.body.trackingId,
-    name: req.userData.uid,
-    imagePaths: req.body.imagePaths,
-    content: req.body.content,
-    attachmentPaths: req.body.attachmentPaths
-  });
-
   try {
+    const comment = new Comment ({
+      creatorId: req.userData.uid,
+      trackingId: req.body.trackingId,
+      name: (await UserController.getUserHelper(req.userData.uid)).name,
+      imagePaths: req.body.imagePaths,
+      content: req.body.content,
+      attachmentPaths: req.body.attachmentPaths
+    });
+
+
     const session = await db.startSession();
     return await session.withTransaction(async () => {
       let createdComment = await Comment.create([comment], {session: session}) // This returns an array

@@ -33,7 +33,8 @@ export class AuthComponent implements OnInit, OnDestroy {
       password: new FormControl(null, {validators: [Validators.required, Validators.minLength(6)]}),
       phoneNumber: new FormControl(null, {validators: [Validators.required, phoneNumberValidator]}),
       // role: new FormControl(null, {validators: [Validators.required]}),
-      companyCode: new FormControl(null, {validators: [this.companyCodeValidator()]})
+      companyCode: new FormControl(null, {validators: [this.companyCodeValidator()]}),
+      customerCode: new FormControl(null, {validators: [Validators.required]})
     });
 
     this.passwordResetForm = new FormGroup({
@@ -63,7 +64,14 @@ export class AuthComponent implements OnInit, OnDestroy {
     if (this.signupForm.invalid) {
       return;
     }
-    this.authService.createUser(this.signupForm.get("name").value, this.signupForm.get("email").value, this.signupForm.get("phoneNumber").value, this.signupForm.get("password").value, role, this.signupForm.get("companyCode").value);
+    this.authService.createUser(
+      this.signupForm.get("name").value,
+      this.signupForm.get("email").value,
+      this.signupForm.get("phoneNumber").value,
+      this.signupForm.get("password").value, role,
+      this.signupForm.get("companyCode").value,
+      this.signupForm.get("customerCode").value
+      );
   }
 
   onLogin() {

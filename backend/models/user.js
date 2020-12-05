@@ -9,7 +9,8 @@ const userSchema = mongoose.Schema({
   phoneNumber: { type: String, required: true},
   role: {type: String, default: ""},
   addresses: {type: [String], default: []},
-  companyCode: {type: String, required: true}
+  companyCode: {type: String, required: true},
+  customerCode: {type: String, required: true}
 }, { timestamps: true, autoCreate: true });
 
 userSchema.plugin(uniqueValidator); // Throw error if not unique

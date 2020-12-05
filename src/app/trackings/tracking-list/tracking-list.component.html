@@ -106,8 +106,8 @@
 
             <div class="scroll-box">
               <ng-container *ngFor="let comment of tracking.comments">
-                <div class="mat-body-strong">{{comment?.name}}</div>
-                <div>{{formatDateTime(comment?.updatedAt)}}</div>
+                <div class="mat-body-strong">{{comment?.name}}   <span class="dimmed-text">{{formatDateTime(comment?.updatedAt)}}</span></div>
+
                 <div>{{comment?.content}}</div>
                 <hr>
               </ng-container>

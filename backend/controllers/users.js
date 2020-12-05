@@ -7,7 +7,8 @@ exports.createUser = (req, res, next) => {
     email: req.body.user.email,
     phoneNumber: req.body.phoneNumber,
     role: req.body.role,
-    companyCode: req.body.companyCode
+    companyCode: req.body.companyCode,
+    customerCode: req.body.customerCode
   });
 
   user.save().then(newUser => {
@@ -24,17 +25,23 @@ exports.createUser = (req, res, next) => {
   });
 }
 
-exports.getUser = (req, res, next) => {
-   User.findById(req.query.uid)
-    .then(foundUser => {
-      return res.status(201).json({
-        user: foundUser
-      });
-   })
-   .catch(error => {
+exports.getUser = async (req, res, next) => {
+  try {
+    foundUser = await this.getUserHelper(req.query.uid);
+    return res.status(201).json({
+      user: foundUser
+    });
+  } catch (error) {
     console.log(error.message);
     return res.status(500).json({
       message: "Couldn't find user"
     });
+  }
+}
+
+exports.getUserHelper = async uid => {
+  return await User.findById(uid)
+    .then(foundUser => {
+      return foundUser;
    })
 }

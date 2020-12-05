@@ -59,16 +59,16 @@ export class TrackingCreateComponent implements OnInit, OnDestroy{
     );
 
     // Passed from tracking-list route
-    let searchTerm = this.route.snapshot.paramMap.get('searchTerm') !== null ? this.route.snapshot.paramMap.get('searchTerm') : "";
+    let searchTerm = this.route.snapshot.paramMap.get('searchTerm');
     this.received = this.route.snapshot.paramMap.get('received') === "true";
 
     // Set up form
     this.createForm = new FormGroup({
-      trackingNumber: new FormControl(searchTerm, {
+      trackingNumber: new FormControl(searchTerm !== "null" ? searchTerm : "", {
         validators: [Validators.required, Validators.minLength(3)]
       }),
       carrier: new FormControl(null, {validators: [Validators.required]}),
-      content: new FormControl(null),
+      content: new FormControl(""),
       fileValidator: new FormControl(null, {asyncValidators: [mimeType]})
     }, {updateOn: 'blur'});
 

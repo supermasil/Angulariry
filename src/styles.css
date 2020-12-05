@@ -63,3 +63,8 @@ mat-spinner {
 .image-preview img:hover {
   box-shadow: 0 0 8px #673AB7;
 }
+
+.dimmed-text {
+  color: rgb(87, 87, 87);
+  font-size: 0.7em;
+}

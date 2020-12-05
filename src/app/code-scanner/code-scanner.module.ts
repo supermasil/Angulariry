@@ -25,6 +25,6 @@ const engineLocation = "https://cdn.jsdelivr.net/npm/scandit-sdk@4.x/build";
   exports: [CodeScannerComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [],
-  bootstrap: [CodeScannerComponent],
+  bootstrap: [],
 })
 export class CodeScannerModule {}

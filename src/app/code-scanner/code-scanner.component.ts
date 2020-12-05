@@ -44,7 +44,7 @@ export class CodeScannerComponent {
   public activeCamera: Camera;
   public cameraSettings: CameraSettings;
   public scanningPaused: boolean = false;
-  public visible: boolean = false;
+  public visible: boolean = true;
   public fps: number = 30;
   public videoFit: BarcodePicker.ObjectFit = BarcodePicker.ObjectFit.COVER;;
   public scannedCodes: Barcode[] = [];
@@ -54,8 +54,9 @@ export class CodeScannerComponent {
   public enableTapToFocus: boolean = false;
   public enableTorchToggle: boolean = false;
   public enableVibrateOnScan: boolean = false;
-  public cameraAccess: boolean = false;
+  public cameraAccess: boolean = true;
   public enableSoundOnScan: boolean = false;
+  isOpen = false;
 
   public possibleCameras: Camera[] = [];
 
@@ -79,6 +80,9 @@ export class CodeScannerComponent {
 
   public onScan(result: ScanResult): void {
     this.codeScannerService.updateCodeScannerUpdateListener(result.barcodes[0].data);
-    // this.scannedCodes.unshift(result.barcodes[0]);
+  }
+
+  scannerClick() {
+    this.isOpen = !this.isOpen;
   }
 }
