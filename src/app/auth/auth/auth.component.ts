@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { Subscription } from 'rxjs';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { phoneNumberValidator } from 'lac-mat-tel-input';
+import { Address } from 'ngx-google-places-autocomplete/objects/address';
 
 @Component({
   templateUrl: './auth.component.html',
@@ -21,6 +22,10 @@ export class AuthComponent implements OnInit, OnDestroy {
   signupForm: FormGroup;
   passwordResetForm: FormGroup;
 
+  isLoading = false; // To prevent fast button clicking
+
+  addressUrl = "#"
+
   ngOnInit() {
     this.loginForm = new FormGroup({
       email: new FormControl(null, {validators: [Validators.required, Validators.email]}),
@@ -28,13 +33,15 @@ export class AuthComponent implements OnInit, OnDestroy {
     });
 
     this.signupForm = new FormGroup({
-      name: new FormControl(null, {validators: [Validators.required]}),
-      email: new FormControl(null, {validators: [Validators.required, Validators.email]}),
-      password: new FormControl(null, {validators: [Validators.required, Validators.minLength(6)]}),
-      phoneNumber: new FormControl(null, {validators: [Validators.required, phoneNumberValidator]}),
-      // role: new FormControl(null, {validators: [Validators.required]}),
-      companyCode: new FormControl(null, {validators: [this.companyCodeValidator()]}),
-      customerCode: new FormControl(null, {validators: [Validators.required]})
+      name: new FormControl("", {validators: [Validators.required]}),
+      email: new FormControl("", {validators: [Validators.required, Validators.email]}),
+      password: new FormControl("", {validators: [Validators.required, Validators.minLength(6)]}),
+      phoneNumber: new FormControl("", {validators: [Validators.required, phoneNumberValidator]}),
+      address: new FormControl("", {validators: [Validators.required, this.addressValidator()]}),
+      addressLineTwo: new FormControl(""),
+      role: new FormControl("", {validators: [Validators.required]}),
+      companyCode: new FormControl("", {validators: [this.companyCodeValidator()]}),
+      customerCode: new FormControl("", {validators: [Validators.required]})
     });
 
     this.passwordResetForm = new FormGroup({
@@ -58,18 +65,33 @@ export class AuthComponent implements OnInit, OnDestroy {
     };
   }
 
+  addressValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      if (control.disabled == true) {
+        return null;
+      }
+
+      return {invalidAddress: control.value};
+    };
+  }
+
+
 
   onSignup() {
-    let role = "Customer"
     if (this.signupForm.invalid) {
       return;
     }
+    this.setButtonTimeOut();
     this.authService.createUser(
       this.signupForm.get("name").value,
       this.signupForm.get("email").value,
       this.signupForm.get("phoneNumber").value,
-      this.signupForm.get("password").value, role,
+      this.signupForm.get("password").value,
+      this.signupForm.get("address").value,
+      this.signupForm.get("addressLineTwo").value,
+      this.addressUrl,
       this.signupForm.get("companyCode").value,
+      this.signupForm.get("role").value,
       this.signupForm.get("customerCode").value
       );
   }
@@ -78,6 +100,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     if (this.loginForm.invalid) {
       return;
     }
+    this.setButtonTimeOut();
     this.authService.login(this.loginForm.get("email").value, this.loginForm.get("password").value);
   }
 
@@ -85,10 +108,22 @@ export class AuthComponent implements OnInit, OnDestroy {
     if (this.passwordResetForm.invalid) {
       return;
     }
+    this.setButtonTimeOut();
     this.authService.resetPassword(this.passwordResetForm.get("email").value);
   }
 
   ngOnDestroy() {
     this.authStatusSub.unsubscribe();
+  }
+
+  setButtonTimeOut() {
+    this.isLoading = true;
+    setTimeout(() => this.isLoading = false, 3000);
+  }
+
+  onAddressChange(address: Address) {
+    this.signupForm.get('address').setValue(address.formatted_address);
+    this.signupForm.get('address').disable();
+    this.addressUrl = address.url;
   }
 }

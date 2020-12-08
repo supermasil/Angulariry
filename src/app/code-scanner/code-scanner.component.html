@@ -1,12 +1,12 @@
 <!-- <input type="file" id="cameraButton" #filePicker (change)='decode($event)' hidden> -->
-<a
+<!-- <a
   hidden data-toggle="collapse"
   id="cameraButton" href="#scannerContainer"
   role="button" aria-expanded="false"
   (click)="scannerClick()">
-</a>
+</a> -->
 
-<div *ngIf="isOpen" class="collapse mb-3" id="scannerContainer">
+<div>
     <scandit-sdk-barcode-picker #picker [accessCamera]="cameraAccess"
       [camera]="activeCamera"
       [cameraSettings]="cameraSettings"

@@ -20,6 +20,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { SpinnerInterceptor } from './spinner-interceptor';
 import { NgxImageCompressService } from 'ngx-image-compress';
 
+
 // import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
 
 @NgModule({

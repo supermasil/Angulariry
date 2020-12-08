@@ -204,8 +204,6 @@ fetchTrackingsHelper = (req, res, trackingQuery) => {
 // }
 
 getTrackerHelper = async (trackingNumber, carrier) => {
-  console.log(trackingNumber, carrier);
-  console.log(process.env.easyPostApiKey);
   const tracker = new api.Tracker({
     tracking_code: trackingNumber,
     carrier: carrier

@@ -37,6 +37,9 @@ export class TrackingListComponent {
   deliveryCodes = TrackingGlobals.deliveryCodes
   failureCodes = TrackingGlobals.failureCodes;
 
+  searchClicked = false;
+  scannerOpened = false;
+
   constructor(
     public trackingService: TrackingService,
     private authService: AuthService,
@@ -93,6 +96,7 @@ export class TrackingListComponent {
 
   onFuzzySearch() {
     this.trackingService.fuzzySearch(this.trackingsPerPage, this.currentPage, this.trackingForm.value.searchTerm);
+    this.searchClicked = true;
   }
 
   onCommentSubmit(trackingId: string) {

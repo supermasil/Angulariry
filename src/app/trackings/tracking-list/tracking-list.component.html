@@ -1,12 +1,11 @@
-
 <form [formGroup]='trackingForm' (submit)='onFuzzySearch()'>
   <div class="d-flex">
     <a
       mat-mini-fab
       color='primary'
       class="mt-2 d-inline mr-2"
-      onclick="document.getElementById('cameraButton').click()">
-      <mat-icon>photo_camera</mat-icon>
+      (click)="scannerOpened = !scannerOpened">
+      <mat-icon>qr_code</mat-icon>
     </a>
     <mat-form-field appearance="outline">
       <mat-label>Search here</mat-label>
@@ -21,7 +20,7 @@
         mat-icon-button
         id="searchButton"
         aria-label="Clear"
-        (click)="trackingForm.controls['searchTerm'].setValue('')">
+        (click)="trackingForm.controls['searchTerm'].setValue(''); searchClicked = false;">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
@@ -35,7 +34,15 @@
   </div>
 </form>
 
-<app-code-scanner></app-code-scanner>
+<app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
+
+<mat-tab-group class="mb-4 greyed-text" [@.disabled]="true">
+  <mat-tab label="Online"><p>These are the orders you ordered online and shipped to us</p></mat-tab>
+  <mat-tab label="Serviced">These are the orders we ordered on behalf of you</mat-tab>
+  <mat-tab label="In-person">These are the orders you delegated to us in person</mat-tab>
+  <mat-tab label="Consolidated">These are the trackings for your consolidated orders</mat-tab>
+  <mat-tab label="Master">These are the trackings of oversea shipments</mat-tab>
+</mat-tab-group>
 
 <mat-accordion multi='true' *ngIf='trackings.length > 0'>
   <mat-expansion-panel *ngFor='let tracking of trackings'>
@@ -141,17 +148,23 @@
   </mat-expansion-panel>
 </mat-accordion>
 
-<p class='info-text mat-body-1' *ngIf="trackings.length == 0 && trackingForm.controls['searchTerm'].value == ''">No trackings added yet</p>
-<p class='info-text mat-body-1' *ngIf="trackings.length == 0 && trackingForm.controls['searchTerm'].value !== ''">Click to add and receive</p>
-<mat-paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [pageSize]='trackingsPerPage' [pageSizeOptions]='pageSizeOptions' (page)='onChangedPage($event)'></mat-paginator>
-<div class="d-flex justify-content-center" *ngIf="trackings.length == 0 && trackingForm.controls['searchTerm'].value !== ''">
-  <a
-    mat-fab
-    color="warn"
-    [routerLink]="['/create', {'searchTerm': trackingForm.controls['searchTerm'].value, 'received': true}]"
-    >
-    <mat-icon>add</mat-icon>
-  </a>
+<p class='info-text mat-body-1' *ngIf="trackings.length == 0 && !trackingForm.controls['searchTerm'].value">No trackings found</p>
+<div *ngIf="trackings.length == 0 && trackingForm.controls['searchTerm'].value && searchClicked">
+  <p class='info-text mat-body-1'>Click to add and receive</p>
+  <div class="d-flex justify-content-center">
+    <a
+      mat-fab
+      color="primary"
+      [routerLink]="['/create', {'searchTerm': trackingForm.controls['searchTerm'].value, 'received': true}]"
+      >
+      <mat-icon>add</mat-icon>
+    </a>
+  </div>
 </div>
+
+
+
+<mat-paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [pageSize]='trackingsPerPage' [pageSizeOptions]='pageSizeOptions' (page)='onChangedPage($event)'></mat-paginator>
+
 
 

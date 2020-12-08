@@ -1,5 +1,4 @@
 import { CodeScannerService } from './code-scanner.service';
-// import Quagga from 'quagga';
 import { Component } from "@angular/core";
 import { Barcode, BarcodePicker, Camera, CameraAccess, CameraSettings, ScanResult, ScanSettings } from 'scandit-sdk-angular';
 
@@ -10,35 +9,6 @@ import { Barcode, BarcodePicker, Camera, CameraAccess, CameraSettings, ScanResul
   styleUrls: ['./code-scanner.component.css']
 })
 export class CodeScannerComponent {
-
-  // decode(event: Event) {
-  //   const file = (event.target as HTMLInputElement).files[0];
-
-  //   if (!file) {
-  //     return;
-  //   }
-
-  //   const reader = new FileReader();
-  //   reader.onload = async () => { // When done loading
-  //     Quagga.decodeSingle({
-  //       decoder: {
-  //           readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader", "ean_8_reader"] // List of active readers
-  //       },
-  //       locate: true, // try to locate the barcode in the image
-  //       src: reader.result as string // or 'data:image/jpg;base64,' + data
-  //     }, (result) => {
-  //         if(result) {
-  //           if(result.codeResult) {
-  //             this.codeScannerService.updateCodeScannerUpdateListener(result.codeResult.code);
-  //             return;
-  //           }
-  //         }
-  //         this.codeScannerService.updateCodeScannerUpdateListener("Code not detected, please try again");
-  //     });
-  //   };
-  //   reader.readAsDataURL(file); // This will kick off onload process
-  // }
-
   public activeSettings: ScanSettings;
   public scannerGuiStyle: BarcodePicker.GuiStyle = BarcodePicker.GuiStyle.LASER;
   public activeCamera: Camera;
@@ -56,7 +26,6 @@ export class CodeScannerComponent {
   public enableVibrateOnScan: boolean = false;
   public cameraAccess: boolean = true;
   public enableSoundOnScan: boolean = false;
-  isOpen = false;
 
   public possibleCameras: Camera[] = [];
 
@@ -80,9 +49,5 @@ export class CodeScannerComponent {
 
   public onScan(result: ScanResult): void {
     this.codeScannerService.updateCodeScannerUpdateListener(result.barcodes[0].data);
-  }
-
-  scannerClick() {
-    this.isOpen = !this.isOpen;
   }
 }

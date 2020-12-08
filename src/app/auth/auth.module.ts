@@ -7,6 +7,7 @@ import { LacMatTelInputModule } from 'lac-mat-tel-input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { GooglePlaceModule } from "ngx-google-places-autocomplete";
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { MatButtonModule } from '@angular/material/button';
     AuthRoutingModule,
     MatFormFieldModule,
     MatButtonModule,
-    LacMatTelInputModule
+    LacMatTelInputModule,
+    GooglePlaceModule
   ]
 })
 export class AuthModule {}

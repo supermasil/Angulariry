@@ -12,7 +12,7 @@ export class SpinnerInterceptor implements HttpInterceptor{
       this.spinner.show("spinner", {
         type: "ball-triangle-path",
         size: "large",
-        bdColor: "rgba(0,0,0,0.5)",
+        bdColor: "rgba(255,250,250,0.8)",
         color: "#673AB7"
       });
 

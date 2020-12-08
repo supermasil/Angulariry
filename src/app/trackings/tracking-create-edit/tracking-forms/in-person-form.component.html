@@ -1,0 +1,167 @@
+<form [formGroup]="inPersonForm" class="m-2">
+  <p>These are the orders you delegated to us in person</p>
+  <mat-form-field>
+    <mat-label>Order Number</mat-label>
+    <input
+    type='text'
+    matInput
+    formControlName='orderNumber'
+    >
+  </mat-form-field>
+  <mat-card>
+    <div class="row">
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label>Sender</mat-label>
+          <input type="text"
+                 matInput
+                 formControlName="customerCode"
+                 placeholder="Customer Code"
+                 (input)="filteredCustomerCodes = filterAutoCompleteItems($event.target.value, customerCodes)"
+                 [matAutocomplete]="autoCustomerCodes">
+          <mat-autocomplete autoActiveFirstOption #autoCustomerCodes="matAutocomplete">
+            <mat-option *ngFor="let option of filteredCustomerCodes | async" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-autocomplete>
+          <mat-error>Please enter a customer code</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label>Recipient</mat-label>
+          <input type="text"
+                 matInput
+                 formControlName="recipient"
+                 (input)="filteredRecipients = filterAutoCompleteItems($event.target.value, recipients)"
+                 [matAutocomplete]="autoRecipients">
+          <mat-autocomplete autoActiveFirstOption #autoRecipients="matAutocomplete">
+            <mat-option *ngFor="let option of filteredRecipients | async" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-autocomplete>
+          <mat-error>Please select a recipient</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-card>
+  <br>
+  <mat-card>
+    <div class="row">
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label>Origin</mat-label>
+          <mat-select matInput formControlName="origin" autoActiveFirstOption>
+            <mat-option *ngFor="let option of origins" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-select>
+          <mat-error>Please select an origin</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label>Destination</mat-label>
+          <mat-select matInput formControlName="destination">
+            <mat-option *ngFor="let option of destinations" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-select>
+          <mat-error>Please select an destination</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+  </mat-card>
+  <br>
+  <mat-card>
+    <div class="row">
+      <div class="col-sm-2">
+        <mat-form-field appearance="outline">
+          <mat-label>Weight</mat-label>
+            <input
+            type='text'
+            matInput
+            formControlName='weight'
+            >
+          <mat-error>Please enter a weight</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-sm-10">
+        <mat-checkbox matInput formControlName='insurance' class="p-2">Insurance</mat-checkbox>
+        <mat-checkbox matInput formControlName='payAtDestination' class="p-2">Pay at destination</mat-checkbox>
+      </div>
+    </div>
+  </mat-card>
+  <br>
+  <mat-card>
+    <div formArrayName="items" *ngFor="let item of inPersonForm.get('items')['controls']; let i = index;">
+      <div [formGroupName]="i">
+        <div class="row px-2">
+          <mat-form-field appearance="outline" class="col px-1">
+            <mat-label>Item Name</mat-label>
+            <input type="text"
+                   matInput
+                   formControlName="name"
+                   (input)="filteredItemNames = filterAutoCompleteItems($event.target.value, itemNames)"
+                   [matAutocomplete]="autoItemNames"
+                   >
+            <mat-autocomplete autoActiveFirstOption #autoItemNames="matAutocomplete">
+              <mat-option *ngFor="let option of filteredItemNames | async" [value]="option">
+                {{option}}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="col px-1">
+            <mat-label>Value</mat-label>
+            <input matInput type="text" formControlName="value">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="col px-1">
+            <mat-label>Quantity</mat-label>
+            <input matInput type="number" formControlName="quantity">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="col px-1">
+            <mat-label>Extra charge</mat-label>
+            <input matInput type="text" formControlName="extraCharge">
+            <a
+              matSuffix
+              mat-mini-fab
+              color="warn"
+              style="position: absolute; top: -60px; right: -20px; "
+              (click)="removeFormItem(i, inPersonForm)">
+              <mat-icon>delete</mat-icon>
+            </a>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+    <a mat-fab color="primary" class="float-right mb-4" (click)="addFormItem(inPersonForm)"><mat-icon>add</mat-icon></a>
+  </mat-card>
+
+  <a
+    mat-fab
+    color='primary'
+    (click)='filePicker.click()'
+    class="mt-4">
+    <mat-icon>add_photo_alternate</mat-icon>
+  </a>
+  <input type="file" #filePicker (change)='onFilePicked($event)'>
+  <mat-error *ngIf="inPersonForm.get('fileValidator').invalid" class="mt-2">Invalid input type, only images are supported</mat-error>
+
+  <mat-form-field appearance="outline" class="mt-4">
+    <mat-label>Notes</mat-label>
+    <textarea
+    matInput
+    rows='10'
+    formControlName='content'
+    ></textarea>
+    <mat-error>Please enter some post content</mat-error>
+  </mat-form-field>
+
+  <button
+    mat-raised-button
+    color='primary'
+    type='submit'
+    class="mt-2">
+    Save
+  </button>
+</form>

@@ -19,7 +19,8 @@ const trackingSchema = mongoose.Schema({
   content: {type: String},
   active: {type: Boolean, required: true},
   timeline: [timelineSchema],
-  comments: [{type: mongoose.Types.ObjectId, ref: "Comment"}]
+  comments: [{type: mongoose.Types.ObjectId, ref: "Comment"}],
+  type: {type: String, required: true}
 }, {timestamps: true, autoCreate: true });
 
 trackingSchema.plugin(uniqueValidator); // Throw error if not unique

@@ -1,132 +1,156 @@
-<mat-card>
-  <mat-tab-group mat-align-tabs="start">
-    <mat-tab label="Login">
-      <mat-card>
-        <form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()'>
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input
-            matInput
-            placeholder='johndoe@abc.com'
-            formControlName='email'
-            >
-            <mat-error>Please enter a valid email</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
-            <input
-            type="password"
-            matInput
-            placeholder='Password'
-            formControlName='password'
-            autocomplete="false"
-            >
-            <mat-error>At least 6 characters are required</mat-error>
-          </mat-form-field>
-          <br>
-          <button class="mt-2" mat-raised-button color='accent' type='submit'>Login</button>
-        </form>
-      </mat-card>
-      <!-- ? check if it's undefined -->
-    </mat-tab>
-    <mat-tab label="Signup">
-      <mat-card>
-        <form *ngIf="signupForm" [formGroup]="signupForm" (submit)='onSignup()'>
-          <mat-form-field appearance="outline">
-            <mat-label>Full name</mat-label>
-            <input
-            matInput
-            placeholder='John Doe'
-            formControlName='name'
-            >
-            <mat-error>Please enter your name</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input
-            matInput
-            placeholder='johndoe@abc.com'
-            formControlName='email'
-            >
-            <mat-error>Please enter a valid email</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>Password</mat-label>
-            <input
-            type="password"
-            matInput
-            placeholder='Password'
-            formControlName='password'
-            autocomplete="false"
-            >
-            <mat-error>At least 6 characters are required</mat-error>
-          </mat-form-field>
+<mat-tab-group [@.disabled]="true">
+  <mat-tab label="Login">
+    <form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()' class="m-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+        matInput
+        placeholder='johndoe@abc.com'
+        formControlName='email'
+        required
+        >
+        <mat-error>Please enter a valid email</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+        type="password"
+        matInput
+        placeholder='Password'
+        formControlName='password'
+        autocomplete="false"
+        required
+        >
+        <mat-error>At least 6 characters are required</mat-error>
+      </mat-form-field>
+      <br>
+      <button *ngIf="!isLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Login</button>
+      <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+    </form>
+    <!-- ? check if it's undefined -->
+  </mat-tab>
+  <mat-tab label="Signup">
+    <form *ngIf="signupForm" [formGroup]="signupForm" (submit)='onSignup()'  class="m-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Full name</mat-label>
+        <input
+        matInput
+        placeholder='John Doe'
+        formControlName='name'
+        required
+        >
+        <mat-error>Please enter your name</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+        matInput
+        placeholder='johndoe@abc.com'
+        formControlName='email'
+        required
+        >
+        <mat-error>Please enter a valid email</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+        type="password"
+        matInput
+        placeholder='Password'
+        formControlName='password'
+        autocomplete="false"
+        required
+        >
+        <mat-error>At least 6 characters are required</mat-error>
+      </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <!-- [preferredCountries]="['us', 'vn']" -->
-            <lac-mat-country-selector matPrefix [selectorFor]="phoneNumber"
-              [onlyCountries]="['us', 'vn']"
-              [showDialCode]="false"
-              [disableSearch]="false"
-              searchPlaceholder="Search..."
-              style="position: relative; bottom: 6px;"
-              >
-            </lac-mat-country-selector>
-            <mat-label>Phone Number</mat-label>
-            <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
-            </lac-mat-tel-input>
-            <mat-error>Invalid phone number</mat-error>
-          </mat-form-field>
+      <mat-form-field appearance="outline">
+        <!-- [preferredCountries]="['us', 'vn']" -->
+        <lac-mat-country-selector matPrefix [selectorFor]="phoneNumber"
+          [onlyCountries]="['us', 'vn']"
+          [showDialCode]="false"
+          [disableSearch]="false"
+          searchPlaceholder="Search..."
+          style="position: relative; bottom: 6px;"
+          >
+        </lac-mat-country-selector>
+        <mat-label>Phone Number</mat-label>
+        <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
+        </lac-mat-tel-input>
+        <mat-error>Invalid phone number</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Address</mat-label>
+        <input
+        type="text"
+        matInput
+        ngx-google-places-autocomplete
+        formControlName="address"
+        placeholder="Please make sure to only select suggested address from Google"
+        (onAddressChange)="onAddressChange($event)"
+        required>
+        <button mat-button *ngIf="signupForm.controls['address'].value" matSuffix mat-icon-button aria-label="Clear" (click)="signupForm.controls['address'].setValue(''); signupForm.controls['address'].enable();">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-error>Please select a suggested address</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Address Line 2</mat-label>
+        <input
+        type="text"
+        matInput
+        formControlName="addressLineTwo"
+        placeholder="Apt/ spc/ #">
+      </mat-form-field>
 
-          <!-- <mat-form-field appearance="outline">
-            <mat-label>Role</mat-label>
-            <mat-select matInput formControlName="role">
-              <mat-option *ngFor="let role of roles" [value]="role">
-                {{role}}
-              </mat-option>
-            </mat-select>
-            <mat-error>Please select a role</mat-error>
-          </mat-form-field> -->
-          <mat-form-field appearance="outline">
-            <mat-label>Company Code</mat-label>
-            <input
-            matInput
-            placeholder='This is provided by your shipping company'
-            formControlName='companyCode'
-            >
-            <mat-error>Please enter a valid company code</mat-error>
-          </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Role</mat-label>
+        <mat-select matInput formControlName="role" required>
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{role}}
+          </mat-option>
+        </mat-select>
+        <mat-error>Please select a role</mat-error>
+      </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Customer Code</mat-label>
-            <input
-            matInput
-            placeholder='Select a code for your customer'
-            formControlName='customerCode'
-            >
-            <mat-error>Customer code is required</mat-error>
-          </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Company Code</mat-label>
+        <input
+        matInput
+        placeholder='This is provided by your shipping company'
+        formControlName='companyCode'
+        required>
+        <mat-error>Please enter a valid company code</mat-error>
+      </mat-form-field>
 
-          <button class="mt-2" mat-raised-button color='accent' type='submit'>Signup</button>
-        </form>
-      </mat-card>
-    </mat-tab>
-    <mat-tab label="Forgot password?">
-      <mat-card>
-        <form *ngIf="passwordResetForm" [formGroup]="passwordResetForm" (submit)='onPasswordReset()'>
-          <mat-form-field appearance="outline">
-            <mat-label>Email</mat-label>
-            <input
-            matInput
-            placeholder='johndoe@abc.com'
-            formControlName='email'
-            >
-            <mat-error>Please enter a valid email</mat-error>
-          </mat-form-field>
-          <br>
-          <button class="mt-2" mat-raised-button color='accent' type='submit'>Signup</button>
-        </form>
-      </mat-card>
-    </mat-tab>
-  </mat-tab-group>
-</mat-card>
+      <mat-form-field appearance="outline">
+        <mat-label>Customer Code</mat-label>
+        <input
+        matInput
+        placeholder='Select a enter a unique code for your customer'
+        formControlName='customerCode'
+        required>
+        <mat-error>Customer code is required</mat-error>
+      </mat-form-field>
+
+      <button *ngIf="!isLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Signup</button>
+      <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+    </form>
+  </mat-tab>
+  <mat-tab label="Forgot password?">
+    <form *ngIf="passwordResetForm" [formGroup]="passwordResetForm" (submit)='onPasswordReset()' class="m-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+        matInput
+        placeholder='johndoe@abc.com'
+        formControlName='email'
+        required>
+        <mat-error>Please enter a valid email</mat-error>
+      </mat-form-field>
+      <br>
+      <button *ngIf="!isLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Send</button>
+      <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+    </form>
+  </mat-tab>
+</mat-tab-group>

@@ -1,84 +1,31 @@
-<mat-card>
-  <form [formGroup]='createForm' (submit)='onSaveTracking()' enctype='multipart/form-data'>
-    <div class="d-flex">
-      <mat-form-field appearance="outline">
-        <mat-label>Tracking Number</mat-label>
-        <input
-        matInput
-        type='text'
-        formControlName='trackingNumber'>
-        <button mat-button *ngIf="createForm.controls['trackingNumber'].value" matSuffix mat-icon-button aria-label="Clear" (click)="createForm.controls['trackingNumber'].setValue('')">
-          <mat-icon>close</mat-icon>
-        </button>
-        <mat-error *ngIf="createForm.get('trackingNumber').invalid">Please enter a Tracking Number</mat-error>
-      </mat-form-field>
-      <a
-        mat-mini-fab
-        color='primary'
-        class="mt-2 d-inline ml-2"
-        onclick="document.getElementById('cameraButton').click()">
-        <mat-icon>photo_camera</mat-icon>
-      </a>
-    </div>
-    <app-code-scanner></app-code-scanner>
+<mat-tab-group class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
+  <mat-tab label="Online">
+    <ng-template matTabContent>
+      <online-form-create></online-form-create>
+    </ng-template>
+  </mat-tab>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Carrier</mat-label>
-      <mat-select formControlName="carrier">
-        <mat-option *ngFor="let carrier of carriers" [value]="carrier">
-          {{carrier}}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="createForm.get('carrier').invalid">Please choose a carrier</mat-error>
-      <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
-    </mat-form-field>
+  <mat-tab label="Serviced">
+    <ng-template matTabContent>
+      <serviced-form-create></serviced-form-create>
+    </ng-template>
+  </mat-tab>
 
-    <div class="row mt-2 mb-2">
-      <div class="col">
-        <button mat-stroked-button type='button' (click)='filePicker.click()'>Pick Image</button>
-      </div>
-      <div class="col d-flex align-items-center mt-4 mt-sm-0">
-        <mat-slide-toggle color="primary" (change)="received = $event.checked" [(checked)]="received">Received at US warehouse {{received}}</mat-slide-toggle>
-      </div>
-      <input type="file" #filePicker (change)='onFilePicked($event)'>
-    </div>
-    <mat-error *ngIf="createForm.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>
-    <ng-container *ngFor="let url of filesPreview; let indexOfelement=index;">
-      <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ indexOfelement">
-        <img [src]="url">
-      </div>
-      <!-- Modal -->
-      <div class="modal fade" id="modal-{{indexOfelement}}" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-          <div class="modal-content">
-            <div class="modal-body">
-              <img [src]="url" class="w-100">
-            </div>
-            <div class="modal-footer">
-              <button type="button" mat-raised-button color='basic' data-dismiss="modal">Close</button>
-              <button type="button" class="ml-2" mat-raised-button color='warn' data-dismiss="modal" (click)="deleteFile(indexOfelement, url)">Delete</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ng-container>
+  <mat-tab label="In-person">
+    <ng-template matTabContent>
+      <in-person-form-create></in-person-form-create>
+    </ng-template>
+  </mat-tab>
 
-    <mat-form-field appearance="outline" class="mt-4">
-      <mat-label>Notes</mat-label>
-      <textarea
-      matInput
-      rows='10'
-      formControlName='content'
-      ></textarea>
-      <mat-error *ngIf="createForm.get('content').invalid">Please enter some post content</mat-error>
-    </mat-form-field>
+  <mat-tab label="Consolidated">
+    <ng-template matTabContent>
+      <consolidated-form-create></consolidated-form-create>
+    </ng-template>
+  </mat-tab>
 
-    <button
-      mat-raised-button
-      color='primary'
-      type='submit'
-      class="mt-2">
-      Save Post
-    </button>
-  </form>
-</mat-card>
+  <mat-tab label="Master">
+    <ng-template matTabContent>
+      <master-form-create></master-form-create>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

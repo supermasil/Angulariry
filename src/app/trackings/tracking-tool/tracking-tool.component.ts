@@ -18,7 +18,7 @@ import { Subscription } from 'rxjs';
   }]
 })
 export class TrackingToolComponent implements OnInit {
-  form: FormGroup;
+  searchForm: FormGroup;
   isLoading = false;
   shippingProgress = [false, false, false, false];
   stepCompletion = [false, false, false, false];
@@ -34,6 +34,8 @@ export class TrackingToolComponent implements OnInit {
   failureCodes = TrackingGlobals.failureCodes;
   codesMapping = TrackingGlobals.codesMapping;
 
+  scannerOpened = false;
+
   tracked = false;
   tracker: Tracker;
 
@@ -47,7 +49,7 @@ export class TrackingToolComponent implements OnInit {
 
   ngOnInit() {
     // Set up form
-    this.form = new FormGroup({
+    this.searchForm = new FormGroup({
       trackingNumber: new FormControl(null, {
         validators: [Validators.required]
       }),
@@ -58,7 +60,7 @@ export class TrackingToolComponent implements OnInit {
 
     this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
       .subscribe((code: {code: string}) => {
-        this.form.controls['trackingNumber'].setValue(code.code);
+        this.searchForm.controls['trackingNumber'].setValue(code.code);
       });
   }
 
@@ -71,17 +73,17 @@ export class TrackingToolComponent implements OnInit {
   }
 
   async onSearch() {
-    if (this.form.invalid) {
+    if (this.searchForm.invalid) {
       return;
     }
     this.resetStatus();
 
     this.isLoading = true;
     this.tracked = false;
-    await this.trackingService.getTrackingInfo(this.form.value.trackingNumber, this.form.value.carrier)
+    await this.trackingService.getTrackingInfo(this.searchForm.value.trackingNumber, this.searchForm.value.carrier)
       .subscribe(trackerData => {
         this.isLoading = false;
-        let status = trackerData["status"];
+        // let status = trackerData["status"];
         this.tracked = true;
         this.tracker = trackerData as Tracker;
         this.setTrackingDetails(this.tracker);

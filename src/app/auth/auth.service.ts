@@ -26,9 +26,9 @@ export class AuthService {
 
         user.getIdTokenResult().then(idTokenResult => {
           const authTime = idTokenResult.claims.auth_time * 1000;
-          const sessionDuration = 8 * 60 * 60 * 1000; // 8 hours
+          const sessionDuration = 8 * 60 * 60 * 1000; // 8 hours in miliseconds
           const millisecondsUntilExpiration = sessionDuration - (Date.now() - authTime);
-          setTimeout(() => this.logout(), millisecondsUntilExpiration);
+          setTimeout(() => {this.logout(); location.reload()}, millisecondsUntilExpiration);
         });
 
         // Get user from MongoDb
@@ -84,7 +84,7 @@ export class AuthService {
     return sessionStorage.getItem("utoken");
   }
 
-  createUser(name: string, email: string, phoneNumber: string, password: string, role: string, companyCode: string, customerCode: string) {
+  createUser(name: string, email: string, phoneNumber: string, password: string, address: string, addressLineTwo: string, addressUrl: string, role: string, companyCode: string, customerCode: string) {
     this.firebaseAuth.createUserWithEmailAndPassword(email, password)
     .then((userData) => {
       const authData = {
@@ -93,17 +93,22 @@ export class AuthService {
         phoneNumber: phoneNumber,
         role: role,
         companyCode: companyCode,
-        customerCode: customerCode
+        customerCode: customerCode,
+        address: address,
+        addressLineTwo: addressLineTwo,
+        addressUrl: addressUrl
       };
+
       this.http.post<{message: string, user: any}>(BACKEND_URL + "signup", authData)
       .subscribe(response => {
-        console.log(response.user);
         this.authStatusListener.next(true);
         this.router.navigate(["/trackings"]);
-      });
+      }, error => {
+        this.deleteCurrentUser();
+        throw error;
+      })
     })
     .catch((error) => {
-      this.deleteCurrentUser();
       this.authStatusListener.next(false);
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });

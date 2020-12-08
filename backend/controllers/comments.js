@@ -5,10 +5,11 @@ const db = require('mongoose');
 
 exports.createComment = async (req, res, next) => {
   try {
+    let user = await UserController.getUserHelper(req.userData.uid);
     const comment = new Comment ({
       creatorId: req.userData.uid,
       trackingId: req.body.trackingId,
-      name: (await UserController.getUserHelper(req.userData.uid)).name,
+      name: user.name,
       imagePaths: req.body.imagePaths,
       content: req.body.content,
       attachmentPaths: req.body.attachmentPaths

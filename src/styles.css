@@ -68,3 +68,29 @@ mat-spinner {
   color: rgb(87, 87, 87);
   font-size: 0.7em;
 }
+
+.greyed-text {
+  color: rgb(87, 87, 87);
+}
+
+
+/* MatTabGroup animation */
+.mat-tab-body.mat-tab-body-active {
+  animation: fade 1s;
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+::ng-deep.mat-tab-label, ::ng-deep.mat-tab-label-active{
+  min-width: 0!important;
+  padding: 0rem!important;
+  margin: 0rem!important;
+ }

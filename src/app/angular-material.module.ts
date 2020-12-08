@@ -18,6 +18,12 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSortModule } from '@angular/material/sort';
 
 
 @NgModule({
@@ -50,7 +56,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatStepperModule,
     MatBadgeModule,
     MatSlideToggleModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatButtonToggleModule,
+    MatAutocompleteModule,
+    MatCheckboxModule,
+    MatTableModule,
+    MatMenuModule,
+    MatSortModule
   ]
 })
 

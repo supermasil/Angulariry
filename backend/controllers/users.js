@@ -8,7 +8,11 @@ exports.createUser = (req, res, next) => {
     phoneNumber: req.body.phoneNumber,
     role: req.body.role,
     companyCode: req.body.companyCode,
-    customerCode: req.body.customerCode
+    customerCode: req.body.customerCode,
+    addresses: [{address: req.body.address,
+              addressLineTwo: req.body.addressLineTwo,
+              addressUrl: req.body.addressUrl}]
+
   });
 
   user.save().then(newUser => {
@@ -20,7 +24,7 @@ exports.createUser = (req, res, next) => {
   .catch(error => {
     console.log(error.message);
     return res.status(500).json({
-      message: "User creation failed"
+      message: error.message
     });
   });
 }

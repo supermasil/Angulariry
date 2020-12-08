@@ -1,0 +1,85 @@
+<form [formGroup]='servicedForm' (submit)='onSave()' class="m-2">
+  <p>These are the orders we ordered on behalf of you</p>
+  <mat-form-field>
+    <mat-label>Order Number</mat-label>
+    <input
+    type='text'
+    matInput
+    formControlName='orderNumber'
+    >
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Link</mat-label>
+    <input
+    type='url'
+    matInput
+    formControlName='productLink'>
+    <button mat-button *ngIf="servicedForm.controls['productLink'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['productLink'].setValue('')">
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-error>Please enter a valid product link</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Price $</mat-label>
+    <input
+    matInput
+    currencyMask
+    formControlName='productPrice'
+    [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: false, max: 100000}">
+    <button mat-button *ngIf="servicedForm.controls['productPrice'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['productPrice'].setValue('')">
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-error>Please enter a price for the product</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Specifications</mat-label>
+    <input
+    placeholder="Size, color, shape..."
+    matInput
+    type='text'
+    formControlName='specifications'>
+    <button mat-button *ngIf="servicedForm.controls['specifications'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['specifications'].setValue('')">
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-error>Please enter specifications for the product</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Quantity</mat-label>
+    <input
+    matInput
+    type='number'
+    formControlName='quantity'>
+    <button mat-button *ngIf="servicedForm.controls['quantity'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['quantity'].setValue('')">
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-error>Please enter quantity for the item</mat-error>
+  </mat-form-field>
+  <a
+    mat-fab
+    color='primary'
+    (click)='filePicker.click()'>
+    <mat-icon>add_photo_alternate</mat-icon>
+  </a>
+  <input type="file" #filePicker (change)='onFilePicked($event)'>
+  <mat-error *ngIf="servicedForm.get('fileValidator').invalid" class="mt-2">Invalid input type, only images are supported</mat-error>
+  <mat-form-field appearance="outline" class="mt-4">
+    <mat-label>Notes</mat-label>
+    <textarea
+    matInput
+    rows='10'
+    formControlName='content'
+    ></textarea>
+    <mat-error>Please enter some post content</mat-error>
+  </mat-form-field>
+
+  <button
+    mat-raised-button
+    color='primary'
+    type='submit'
+    class="mt-2">
+    Save
+  </button>
+</form>
