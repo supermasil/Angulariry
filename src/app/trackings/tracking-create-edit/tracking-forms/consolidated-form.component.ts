@@ -1,9 +1,11 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
+import { SelectionModel } from '@angular/cdk/collections';
 import { AfterViewInit, Component, ViewChild } from "@angular/core";
 import { FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { filter } from 'rxjs/operators';
 
 
 @Component({
@@ -22,19 +24,23 @@ import { MatTableDataSource } from '@angular/material/table';
 export class consolidatedFormCreateComponent implements AfterViewInit {
   consolidatedForm: FormGroup;
 
-  displayedColumns: string[] = ['name', 'weight', 'symbol', 'position'];
+  displayedColumns: string[] = ['select', 'name', 'weight', 'symbol', 'position'];
   expandedElement: PeriodicElement | null;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
   dataSource: MatTableDataSource<PeriodicElement>;
+  filterDataSource = [];
+  selection = new SelectionModel<PeriodicElement>(true, []);
+  filterselection = new SelectionModel<PeriodicElement>(true, []);
 
-
+  isAllSelected = false;
 
   constructor() {
     // Assign the data to the data source for the table to render
-    this.dataSource = new MatTableDataSource(ELEMENT_DATA)
+    this.dataSource = new MatTableDataSource(ELEMENT_DATA);
+    this.filterDataSource = this.dataSource.filteredData;
   }
 
   ngAfterViewInit() {
@@ -45,15 +51,62 @@ export class consolidatedFormCreateComponent implements AfterViewInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.filterDataSource = this.dataSource.filteredData;
+
+    this.refreshFilteredSelection();
 
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
     this.expandedElement = null;
+
   }
 
   sortClicked() {
     this.expandedElement = null;
+  }
+
+  refreshFilteredSelection() {
+    this.filterselection.clear();
+    this.filterDataSource.forEach(row => {
+      if (this.selection.isSelected(row)) {
+        this.filterselection.select(row);
+      }
+    });
+    this.allSelectCheck();
+  }
+
+  /** Whether the number of selected elements matches the total number of rows. */
+  allSelectCheck() {
+    const numRows = this.filterDataSource.length;
+    const numSelected = this.filterselection.selected.length;
+    this.isAllSelected = numSelected === numRows;
+  }
+
+  /** Selects all rows if they are not all selected; otherwise clear selection. */
+  masterToggle() {
+    if (this.isAllSelected) {
+      this.filterDataSource.forEach(row => this.selection.deselect(row));
+      this.filterselection.clear();
+    } else {
+      this.filterDataSource.forEach(row => this.selection.select(row));
+      this.filterDataSource.forEach(row => this.filterselection.select(row));
+    }
+    this.allSelectCheck();
+  }
+
+  /** The label for the checkbox on the passed row */
+  checkboxLabel(row?: PeriodicElement): string {
+    if (!row) {
+      return `${this.isAllSelected ? 'select' : 'deselect'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
+  }
+
+  rowSelectionClicked(row?: PeriodicElement) {
+    this.selection.toggle(row);
+    this.filterselection.toggle(row);
+    this.allSelectCheck();
   }
 }
 
