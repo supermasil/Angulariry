@@ -1,14 +1,13 @@
-import { Component } from "@angular/core";
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, ViewChild } from "@angular/core";
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgxImageCompressService } from 'ngx-image-compress';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 import { TrackingGlobals } from '../../tracking-globals';
 import { Tracking } from '../../tracking.model';
 import { TrackingService } from '../../tracking.service';
-import { mimeType } from '../mime-type.validator';
+import { ItemsListComponent } from '../items-list/items-list.component';
 
 
 @Component({
@@ -16,7 +15,7 @@ import { mimeType } from '../mime-type.validator';
   templateUrl: './online-form.component.html',
   styleUrls: ['./online-form.component.css', '../tracking-create.component.css']
 })
-export class onlineFormCreateComponent {
+export class OnlineFormCreateComponent {
   onlineForm: FormGroup;
 
   private mode = 'create';
@@ -25,11 +24,9 @@ export class onlineFormCreateComponent {
   tracking: Tracking;
   carriers = TrackingGlobals.carriers;
 
-  filePaths: string[] = [];
-  filesPreview: string[] = [];
-  filesToAdd: string[] = [];
-  fileNames: string[] = [];
-  filesToDelete = [];
+  internalStatus = ["Received at US WH", "Consolidated"];
+
+  @ViewChild('itemsList') itemsList: ItemsListComponent;
 
   scannerOpened = false;
 
@@ -41,7 +38,6 @@ export class onlineFormCreateComponent {
     public route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
-    private imageCompress: NgxImageCompressService,
     private codeScannerService: CodeScannerService,
   ) {}
 
@@ -68,7 +64,8 @@ export class onlineFormCreateComponent {
       }),
       carrier: new FormControl(null, {validators: [Validators.required]}),
       content: new FormControl(""),
-      fileValidator: new FormControl(null, {asyncValidators: [mimeType]})
+      status: new FormControl(null, {validators: [Validators.required]}),
+      boxes: new FormArray([])
     });
 
     // Subcribe to see the active route
@@ -87,11 +84,11 @@ export class onlineFormCreateComponent {
               content: this.tracking.content ? this.tracking.content : "",
               fileValidator: null
             });
-            this.filePaths = this.tracking.filePaths;
-            // Load images preview
-            this.filePaths.forEach(file => {
-              this.filesPreview.push(file);
-            });
+            // this.filePaths = this.tracking.filePaths;
+            // // Load images preview
+            // this.filePaths.forEach(file => {
+            //   this.filesPreview.push(file);
+            // });
             this.received = this.tracking.status === "received_at_us_warehouse" ? true : false;
           },
           err => {
@@ -111,78 +108,31 @@ export class onlineFormCreateComponent {
 
 
   async onSave() {
-    if (this.onlineForm.invalid) {
+    this.itemsList.triggerValidation();
+
+    if (this.onlineForm.invalid || !this.itemsList.getFormValidity()) {
       return;
     }
 
-    if (this.mode === 'create') {
-      this.trackingService.createTracking(
-        this.onlineForm.value.trackingNumber,
-        this.onlineForm.value.carrier,
-        this.onlineForm.value.content,
-        this.received,
-        this.filesToAdd,
-        this.fileNames);
-    } else {
-      this.trackingService.updateTracking(
-        this.trackingId,
-        this.onlineForm.value.trackingNumber,
-        this.onlineForm.value.carrier,
-        this.onlineForm.value.content,
-        this.received,
-        this.filesToAdd,
-        this.fileNames,
-        this.filesToDelete);
-    }
-  }
-
-  onFilePicked(event: Event) {
-    const file = (event.target as HTMLInputElement).files[0];
-    if (!file) {
-      return;
-    }
-
-    // Trigger mimetype validator
-    this.onlineForm.patchValue({fileValidator: file}); // Target a single control
-    this.onlineForm.get('fileValidator').updateValueAndValidity(); // Update and validate without html form
-
-    // if(!this.createForm.get("fileValidator").valid) {
-    //   return;
+    // if (this.mode === 'create') {
+    //   this.trackingService.createTracking(
+    //     this.onlineForm.value.trackingNumber,
+    //     this.onlineForm.value.carrier,
+    //     this.onlineForm.value.content,
+    //     this.received,
+    //     this.filesToAdd,
+    //     this.fileNames);
+    // } else {
+    //   this.trackingService.updateTracking(
+    //     this.trackingId,
+    //     this.onlineForm.value.trackingNumber,
+    //     this.onlineForm.value.carrier,
+    //     this.onlineForm.value.content,
+    //     this.received,
+    //     this.filesToAdd,
+    //     this.fileNames,
+    //     this.filesToDelete);
     // }
-
-    const reader = new FileReader();
-    reader.onload = async () => { // When done loading
-        let compressedFile = await this.compressFile(reader.result as string).then();
-        if (this.filesPreview.includes(compressedFile)) {
-          return;
-        }
-        this.filesPreview.push(compressedFile);
-        this.filesToAdd.push(compressedFile);
-        this.fileNames.push(file.name);
-      };
-    reader.readAsDataURL(file); // This will kick off onload process
   }
 
-  deleteFile(index: number, url: string) {
-    this.filesPreview.splice(index, 1);
-
-    let i = this.filesToAdd.indexOf(url);
-    if (i > 0) {
-      this.filesToAdd.splice(i, 1);
-      this.fileNames.splice(i, 1);
-    }
-
-    if (this.mode === "edit") {
-      if (this.filePaths.includes(url)) {
-        this.filesToDelete.push(url);
-      }
-    }
-  }
-
-  async compressFile(file: string) {
-    return this.imageCompress.compressFile(file, 100, 70).then(
-      result => {
-        return result;
-      });
-  }
 }

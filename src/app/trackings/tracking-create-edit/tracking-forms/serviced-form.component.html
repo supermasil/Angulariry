@@ -1,5 +1,4 @@
-<form [formGroup]='servicedForm' (submit)='onSave()' class="mb-2">
-  <p>These are the orders we ordered on behalf of you</p>
+<form [formGroup]='servicedForm' (submit)='onSave()' class="my-4">
   <mat-form-field>
     <mat-label>Order Number</mat-label>
     <input
@@ -8,63 +7,63 @@
     formControlName='orderNumber'
     >
   </mat-form-field>
-  <mat-form-field appearance="outline">
-    <mat-label>Link</mat-label>
-    <input
-    type='url'
-    matInput
-    formControlName='productLink'>
-    <button mat-button *ngIf="servicedForm.controls['productLink'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['productLink'].setValue('')">
-      <mat-icon>close</mat-icon>
-    </button>
-    <mat-error>Please enter a valid product link</mat-error>
-  </mat-form-field>
+  <div formArrayName="items" *ngFor="let item of servicedForm.get('items')['controls']; let i = index;">
+    <div [formGroupName]="i">
+      <div class="row">
 
-  <mat-form-field appearance="outline">
-    <mat-label>Price $</mat-label>
-    <input
-    matInput
-    currencyMask
-    formControlName='productPrice'
-    [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: false, max: 100000}">
-    <button mat-button *ngIf="servicedForm.controls['productPrice'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['productPrice'].setValue('')">
-      <mat-icon>close</mat-icon>
-    </button>
-    <mat-error>Please enter a price for the product</mat-error>
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg pr-lg-1">
+          <mat-label>Link</mat-label>
+          <input
+          type='url'
+          matInput
+          formControlName='productLink'>
+        </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Specifications</mat-label>
-    <input
-    placeholder="Size, color, shape..."
-    matInput
-    type='text'
-    formControlName='specifications'>
-    <button mat-button *ngIf="servicedForm.controls['specifications'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['specifications'].setValue('')">
-      <mat-icon>close</mat-icon>
-    </button>
-    <mat-error>Please enter specifications for the product</mat-error>
-  </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg pr-lg-1">
+          <mat-label>Price $</mat-label>
+          <input
+          matInput
+          currencyMask
+          formControlName='productPrice'
+          [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: false, max: 100000}">
+        </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Quantity</mat-label>
-    <input
-    matInput
-    type='number'
-    formControlName='quantity'>
-    <button mat-button *ngIf="servicedForm.controls['quantity'].value" matSuffix mat-icon-button aria-label="Clear" (click)="servicedForm.controls['quantity'].setValue('')">
-      <mat-icon>close</mat-icon>
-    </button>
-    <mat-error>Please enter quantity for the item</mat-error>
-  </mat-form-field>
-  <a
-    mat-fab
-    color='primary'
-    (click)='filePicker.click()'>
-    <mat-icon>add_photo_alternate</mat-icon>
-  </a>
-  <input type="file" #filePicker (change)='onFilePicked($event)'>
-  <mat-error *ngIf="servicedForm.get('fileValidator').invalid" class="mt-2">Invalid input type, only images are supported</mat-error>
+        <mat-form-field appearance="outline" class="col-lg pr-lg-1">
+          <mat-label>Specifications</mat-label>
+          <input
+          placeholder="Size, color, shape..."
+          matInput
+          type='text'
+          formControlName='specifications'>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-lg">
+          <mat-label>Quantity</mat-label>
+          <input
+          matInput
+          type='number'
+          formControlName='quantity'>
+          <a
+            matSuffix
+            mat-mini-fab
+            color="warn"
+            (click)="removeItem(i)">
+            <mat-icon>delete</mat-icon>
+          </a>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+  <a mat-fab color="primary" class="float-right mb-4" style="margin-right: 13px;" (click)="addItem()"><mat-icon>add</mat-icon></a>
+
+  <div class="mt-2 mb-2">
+    <file-uploader></file-uploader>
+  </div>
+
+  <items-list #itemsList></items-list>
+
+
+
   <mat-form-field appearance="outline" class="mt-4">
     <mat-label>Notes</mat-label>
     <textarea
@@ -75,11 +74,21 @@
     <mat-error>Please enter some post content</mat-error>
   </mat-form-field>
 
-  <button
+  <div class="mt-2">
+    <button
     mat-raised-button
     color='primary'
     type='submit'
-    class="mt-2">
+    class="mr-2">
     Save
-  </button>
+    </button>
+    <button
+      mat-raised-button
+      color='warn'
+      type=''>
+      Cancel
+    </button>
+  </div>
 </form>
+
+

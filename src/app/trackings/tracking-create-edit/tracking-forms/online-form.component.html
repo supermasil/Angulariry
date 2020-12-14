@@ -1,5 +1,4 @@
-<form [formGroup]='onlineForm' (submit)='onSave()' class="mb-2">
-  <p>These are the orders you ordered online and shipped to us</p>
+<form [formGroup]='onlineForm' (submit)='onSave()' class="my-4">
   <div class="d-flex">
     <mat-form-field appearance="outline">
       <mat-label>Tracking Number</mat-label>
@@ -22,51 +21,37 @@
   </div>
   <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Carrier</mat-label>
-    <mat-select formControlName="carrier">
-      <mat-option *ngFor="let carrier of carriers" [value]="carrier">
-        {{carrier}}
-      </mat-option>
-    </mat-select>
-    <mat-error>Please choose a carrier</mat-error>
-    <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
-  </mat-form-field>
+  <div class="row">
+    <mat-form-field appearance="outline" class="col">
+      <mat-label>Carrier</mat-label>
+      <mat-select formControlName="carrier">
+        <mat-option *ngFor="let carrier of carriers" [value]="carrier">
+          {{carrier}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please choose a carrier</mat-error>
+      <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
+    </mat-form-field>
 
-  <div class="row mt-2 mb-2">
-    <div class="col">
-      <a
-        mat-fab
-        color='primary'
-        (click)='filePicker.click()'>
-        <mat-icon>add_photo_alternate</mat-icon>
-      </a>
-    </div>
-    <input type="file" #filePicker (change)='onFilePicked($event)'>
-    <div class="col d-flex align-items-center">
-      <mat-slide-toggle color="primary" (change)="received = $event.checked" [(checked)]="received">Received at US warehouse</mat-slide-toggle>
-    </div>
+    <mat-form-field appearance="outline" class="col">
+      <mat-label>Status</mat-label>
+      <mat-select matInput formControlName="status" autoActiveFirstOption>
+        <mat-option *ngFor="let option of internalStatus" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please select a status</mat-error>
+    </mat-form-field>
   </div>
-  <mat-error *ngIf="onlineForm.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>
-  <ng-container *ngFor="let url of filesPreview; let indexOfelement=index;">
-    <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ indexOfelement">
-      <img [src]="url">
-    </div>
-    <!-- Modal -->
-    <div class="modal fade" id="modal-{{indexOfelement}}" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-          <div class="modal-body">
-            <img [src]="url" class="w-100">
-          </div>
-          <div class="modal-footer">
-            <button type="button" mat-raised-button color='basic' data-dismiss="modal">Close</button>
-            <button type="button" class="ml-2" mat-raised-button color='warn' data-dismiss="modal" (click)="deleteFile(indexOfelement, url)">Delete</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </ng-container>
+
+  <div class="mt-2">
+    <file-uploader></file-uploader>
+  </div>
+
+  <div class="mt-2">
+    <items-list #itemsList></items-list>
+  </div>
+
 
   <mat-form-field appearance="outline" class="mt-4">
     <mat-label>Notes</mat-label>
@@ -78,11 +63,19 @@
     <mat-error>Please enter some post content</mat-error>
   </mat-form-field>
 
-  <button
+  <div class="mt-2">
+    <button
     mat-raised-button
     color='primary'
     type='submit'
-    class="mt-2">
+    class="mr-2">
     Save
-  </button>
+    </button>
+    <button
+      mat-raised-button
+      color='warn'
+      type=''>
+      Cancel
+    </button>
+  </div>
 </form>

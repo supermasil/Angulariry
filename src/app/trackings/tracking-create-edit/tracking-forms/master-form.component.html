@@ -1,1 +1,79 @@
-<p>These are the trackings of oversea shipments</p>
+
+<form [formGroup]="masterForm" class="my-4">
+  <div formArrayName="items" *ngFor="let item of masterForm.get('items')['controls']; let i = index;">
+    <div [formGroupName]="i">
+      <div class="row">
+        <div class="col-lg-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Pallet Number</mat-label>
+            <input matInput type="number" min="0" formControlName="palletNumber">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Box Number</mat-label>
+            <input matInput type="number" min="0" formControlName="boxNumber">
+          </mat-form-field>
+        </div>
+
+        <div class="col-lg-10">
+          <mat-form-field appearance="outline">
+            <mat-label>Favorite Fruits</mat-label>
+            <mat-chip-list #chipList>
+              <mat-chip
+                *ngFor="let item of masterForm.get('items').value[i].items"
+                [selectable]="selectable"
+                [removable]="removable"
+                (removed)="removeItem(item, i)">
+                {{item}}
+                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+              </mat-chip>
+              <input
+                placeholder="New fruit..."
+                #fruitInput
+                (keyup.enter)="fruitInput.value = ''"
+                [formControl]="fruitCtrl"
+                [matAutocomplete]="auto"
+                [matChipInputFor]="chipList"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes">
+            </mat-chip-list>
+            <mat-error>Please only select from the dropdown list</mat-error>
+            <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption (optionSelected)="selectItem($event, i); fruitInput.value = '';">
+              <mat-option *ngFor="let fruit of filteredFruits | async" [value]="fruit">
+                {{fruit}}
+              </mat-option>
+            </mat-autocomplete>
+            <a matSuffix mat-mini-fab color="warn" (click)="removeBox(i, masterForm)">
+              <mat-icon>delete</mat-icon>
+            </a>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a mat-fab color="primary" class="float-right mb-4" (click)="addBox(masterForm)"><mat-icon>add</mat-icon></a>
+  <div class="mb-4">
+    <file-uploader></file-uploader>
+  </div>
+
+  <div class="mt-4">
+    <button
+    mat-raised-button
+    color='primary'
+    type='submit'
+    class="mr-2">
+    Save
+    </button>
+    <button
+      mat-raised-button
+      color='warn'
+      type=''>
+      Cancel
+    </button>
+  </div>
+</form>
+
+
+
+
+
+

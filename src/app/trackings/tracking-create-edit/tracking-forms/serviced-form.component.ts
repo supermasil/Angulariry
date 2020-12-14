@@ -1,6 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { mimeType } from '../mime-type.validator';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
 
 @Component({
@@ -8,18 +7,14 @@ import { mimeType } from '../mime-type.validator';
   templateUrl: './serviced-form.component.html',
   styleUrls: ['./serviced-form.component.css', '../tracking-create.component.css']
 })
-export class servicedFormCreateComponent implements OnInit {
+export class ServicedFormCreateComponent implements OnInit {
   servicedForm: FormGroup;
 
   ngOnInit() {
     this.servicedForm = new FormGroup({
-      orderNumber: new FormControl({value: "sev-" + Date.now(), disabled: true}, {validators: [Validators.required]}),
-      productLink: new FormControl("", {validators: [Validators.required]}),
-      productPrice: new FormControl("", {validators: [Validators.required, Validators.min(0.01)]}),
-      specifications: new FormControl("", {validators: [Validators.required]}),
-      quantity: new FormControl("", {validators: [Validators.required]}),
+      orderNumber: new FormControl({value: "sev-" + Date.now(), disabled: true}),
+      items: new FormArray([this.createItem()]),
       content: new FormControl(""),
-      fileValidator: new FormControl(null, {asyncValidators: [mimeType]})
     });
   }
 
@@ -27,12 +22,26 @@ export class servicedFormCreateComponent implements OnInit {
 
   }
 
-  onFilePicked(event: Event) {
 
+  createItem(): FormGroup {
+    return new FormGroup({
+      orderNumber: new FormControl({value: "sev-" + Date.now(), disabled: true}, {validators: [Validators.required]}),
+      productLink: new FormControl("", {validators: [Validators.required]}),
+      productPrice: new FormControl("", {validators: [Validators.required, Validators.min(0.01)]}),
+      specifications: new FormControl("", {validators: [Validators.required]}),
+      quantity: new FormControl("", {validators: [Validators.required]}),
+      content: new FormControl("")
+    });
   }
 
-  deleteFile(index: number, url: string) {
-
+  addItem() {
+    (this.servicedForm.get('items') as FormArray).push(this.createItem());
   }
 
+  removeItem(i: number) {
+    if((this.servicedForm.get('items') as FormArray).length == 1) {
+      return;
+    }
+    (this.servicedForm.get('items') as FormArray).removeAt(i);
+  }
 }

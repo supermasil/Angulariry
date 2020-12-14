@@ -1,0 +1,58 @@
+<form [formGroup]="itemsForm">
+  <div formArrayName="items" *ngFor="let item of itemsForm.get('items')['controls']; let i = index;">
+    <div [formGroupName]="i">
+      <div class="row">
+        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1 pl-lg-0">
+          <mat-label>Item name</mat-label>
+          <input type="text"
+                  matInput
+                  formControlName="name"
+                  (input)="filterAutoCompleteItems($event.target.value)"
+                  [matAutocomplete]="auto"
+                  >
+          <mat-autocomplete autoActiveFirstOption (optionSelected)="selectItem($event, i)" #auto="matAutocomplete">
+            <mat-option *ngFor="let option of filteredItemNames | async" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+          <mat-label>Declared value</mat-label>
+          <input matInput type="text" formControlName="value">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+          <mat-label>Quantity</mat-label>
+          <input matInput type="number" formControlName="quantity">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+          <mat-label>Insurance</mat-label>
+          <mat-select matInput formControlName="insurance" autoActiveFirstOption>
+            <mat-option *ngFor="let option of insurance" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-select>
+          <mat-error>Please select an origin</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+          <mat-label>Weight (KG)</mat-label>
+          <input matInput type="number" formControlName="weight">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-0">
+          <mat-label>Extra charge</mat-label>
+          <input matInput type="text" formControlName="extraCharge">
+          <a
+            matSuffix
+            mat-mini-fab
+            color="warn"
+            (click)="removeItem(i)">
+            <mat-icon>delete</mat-icon>
+          </a>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+  <a mat-fab color="primary" class="float-right" (click)="addItem()"><mat-icon>add</mat-icon></a>
+
+  <button hidden type="submit" #submitButton></button>
+</form>
+

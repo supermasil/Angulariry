@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { mimeType } from '../mime-type.validator';
 
 
 @Component({
@@ -9,7 +8,7 @@ import { mimeType } from '../mime-type.validator';
   templateUrl: './in-person-form.component.html',
   styleUrls: ['./in-person-form.component.css', '../tracking-create.component.css']
 })
-export class inPersonFormCreateComponent implements OnInit{
+export class InPersonFormCreateComponent implements OnInit{
   inPersonForm: FormGroup;
 
   customerCodes = ["Online", "Serviced", "In-person", "Consolidated", "Master"];
@@ -23,6 +22,7 @@ export class inPersonFormCreateComponent implements OnInit{
 
   origins = ["California", "Oregon"];
   destinations = ["Saigon", "Hanoi"];
+  insurance = ["Regular", "2%"];
 
   ngOnInit() {
     this.inPersonForm = new FormGroup({
@@ -31,48 +31,16 @@ export class inPersonFormCreateComponent implements OnInit{
       recipient: new FormControl(null, {validators: [Validators.required]}),
       origin: new FormControl(null, {validators: [Validators.required]}),
       destination: new FormControl(null, {validators: [Validators.required]}),
-      items: new FormArray([this.createInPersonItem()]),
+      items: new FormArray([]),
       content: new FormControl(""),
       weight: new FormControl(null, {validators: [Validators.required]}),
-      insurance: new FormControl(false, {validators: [Validators.required]}),
       payAtDestination: new FormControl(false, {validators: [Validators.required]}),
-      fileValidator: new FormControl(null, {asyncValidators: [mimeType]})
+      receiveAtDestinationWH: new FormControl(false, {validators: [Validators.required]})
     });
   }
-
-  createInPersonItem(): FormGroup {
-    let form =  new FormGroup({
-      name: new FormControl("", {validators:[Validators.required]}),
-      value: new FormControl("", {validators:[Validators.required]}),
-      quantity: new FormControl("", {validators:[Validators.required]}),
-      extraCharge: new FormControl("", {validators:[Validators.required]}),
-    })
-
-    return form;
-  }
-
-  addFormItem(form: FormGroup) {
-    (form.get('items') as FormArray).push(this.createInPersonItem());
-  }
-
-  removeFormItem(i: number, form: FormGroup) {
-    (form.get('items') as FormArray).removeAt(i);
- }
 
   filterAutoCompleteItems(value: string, values: string[]) {
     const filterValue = value.toLowerCase();
     return of(values.filter(option => option.toLowerCase().includes(filterValue)));
-  }
-
-  onSave() {
-
-  }
-
-  onFilePicked(event: Event) {
-
-  }
-
-  deleteFile(index: number, url: string) {
-
   }
 }

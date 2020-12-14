@@ -24,6 +24,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSortModule } from '@angular/material/sort';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 @NgModule({
@@ -62,7 +63,8 @@ import { MatSortModule } from '@angular/material/sort';
     MatCheckboxModule,
     MatTableModule,
     MatMenuModule,
-    MatSortModule
+    MatSortModule,
+    MatChipsModule
   ]
 })
 
