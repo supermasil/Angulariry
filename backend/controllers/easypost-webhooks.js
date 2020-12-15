@@ -1,4 +1,4 @@
-const Tracking = require('../models/tracking');
+const Tracking = require('../models/online-tracking');
 
 //{"id":"hook_45098b81d06e412ba3f02306cbfedf9b","object":"Webhook","mode":"production","url":"https://weshippee.com/api/easypost","disabled_at":null}
 

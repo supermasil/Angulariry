@@ -1,0 +1,19 @@
+
+<form [formGroup]="autoCompleteForm" class="w-100">
+  <mat-form-field appearance="outline">
+    <mat-label>{{matLabel}}</mat-label>
+    <input type="text"
+            matInput
+            formControlName="item"
+            (input)="filterItems($event.target.value)"
+            [matAutocomplete]="auto">
+    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" (optionSelected)="selectItem($event)">
+      <mat-option *ngFor="let option of filteredData | async" [value]="option">
+        {{option}}
+      </mat-option>
+    </mat-autocomplete>
+    <mat-error>{{matErrorMessage}}</mat-error>
+  </mat-form-field>
+  <button hidden type="submit" #submitButton></button>
+</form>
+

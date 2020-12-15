@@ -4,18 +4,18 @@ const checkAuth = require("../middleware/check-auth");
 const extractFile = require("../middleware/multer");
 const TrackingController = require("../controllers/trackings");
 
-router.get('/tracking-tool', checkAuth.isAuthenticated, TrackingController.getTrackingTool);
+router.get('/trackings/tracking-tool', checkAuth.isAuthenticated, TrackingController.getTrackingTool);
 
-router.get('/search', TrackingController.fuzzySearch); // Has to be before get /:id
+router.get('/trackings/search', TrackingController.fuzzySearch); // Has to be before get /:id
 
-router.get('/:id', TrackingController.getTracking)
+router.get('/trackings/:id', TrackingController.getTracking)
 
-router.get('', TrackingController.getTrackings);
+router.get('/trackings', TrackingController.getTrackings);
 
-router.post('', checkAuth.isAuthenticated, extractFile.array("files[]"), TrackingController.createTracking);
+router.post('/trackings', checkAuth.isAuthenticated, extractFile.array("files[]"), TrackingController.createTracking);
 
-router.delete('/:id', checkAuth.isAuthenticated, TrackingController.deleteTracking);
+router.delete('/trackings/:id', checkAuth.isAuthenticated, TrackingController.deleteTracking);
 
-router.put('/:id', checkAuth.isAuthenticated, extractFile.array("files[]"), TrackingController.updateTracking);
+router.put('/trackings/:id', checkAuth.isAuthenticated, extractFile.array("files[]"), TrackingController.updateTracking);
 
 module.exports = router;

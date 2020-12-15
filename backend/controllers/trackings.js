@@ -1,6 +1,6 @@
 const EasyPost = require('@easypost/api');
 const api = new EasyPost(process.env.easyPostApiKey);
-const Tracking = require('../models/tracking');
+const Tracking = require('../models/online-tracking');
 const Comment = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');

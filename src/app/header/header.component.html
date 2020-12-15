@@ -10,16 +10,16 @@
         <a id="hello" class="nav-link" routerLink="/trackings">Trackings</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/trackings/tracking-tool">Tracking Tool</a>
+        <a class="nav-link" (click)="redirect('/trackings/tracking-tool')">Tracking Tool</a>
       </li>
     </ul>
 
     <ul class="navbar-nav ml-auto">
       <li class="nav-item" *ngIf="userIsAuthenticated">
-        <a class="nav-link" routerLink='/create' routerLinkActive="mat-accent">Create</a>
+        <a class="nav-link" (click)="redirect('/create')" routerLinkActive="mat-accent">Create</a>
       </li>
       <li class="nav-item" *ngIf="!userIsAuthenticated">
-        <a class="nav-link" routerLink='/auth' routerLinkActive="mat-accent">Login/out</a>
+        <a class="nav-link" (click)="redirect('/auth')" routerLinkActive="mat-accent">Login/out</a>
       </li>
       <li class="nav-item" *ngIf="userIsAuthenticated">
         <a class="nav-link" (click)="onLogOut()">Logout</a>

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
@@ -18,7 +18,7 @@ export class AuthService {
   public redirectUrl: string;
   public redirectData = {};
 
-  constructor(private http: HttpClient, private router: Router, private firebaseAuth: AngularFireAuth, private alertService: AlertService) {
+  constructor(private http: HttpClient, private router: Router, private firebaseAuth: AngularFireAuth, private alertService: AlertService, private zone: NgZone) {
     this.firebaseAuth.onAuthStateChanged(async user => {
       if (user) { // Firebase User
         this.firebaseUser = user;
@@ -35,6 +35,7 @@ export class AuthService {
         const queryParams = `getuser/?uid=${this.firebaseUser.uid}`;
         this.mongoDbUser = (await this.http.get<{user: any}>(BACKEND_URL + queryParams).toPromise()).user;
         this.authStatusListener.next(true);
+
         console.log("User authenticated");
       } else {
         this.firebaseUser = null;
@@ -102,7 +103,9 @@ export class AuthService {
       this.http.post<{message: string, user: any}>(BACKEND_URL + "signup", authData)
       .subscribe(response => {
         this.authStatusListener.next(true);
-        this.router.navigate(["/trackings"]);
+        this.zone.run(() => {
+          this.router.navigate(["/trackings"]);
+        });
       }, error => {
         this.deleteCurrentUser();
         throw error;
@@ -132,11 +135,15 @@ export class AuthService {
         .then(async (userCredentials) => {
           this.authStatusListener.next(true);
           if (this.redirectUrl) {
-            this.router.navigate([this.redirectUrl, this.redirectData]);
+            this.zone.run(() => {
+              this.router.navigate([this.redirectUrl, this.redirectData]);
+            });
             this.redirectUrl = null;
             this.redirectData = {};
           } else {
-            this.router.navigate(["/trackings"]);
+            this.zone.run(() => {
+              this.router.navigate(["/trackings"]);
+            });
           }
           this.alertService.success("Logged in successfully", GlobalConstants.flashMessageOptions);
         })
@@ -152,7 +159,9 @@ export class AuthService {
 
   logout() {
     this.firebaseAuth.signOut().then(() => {
-      this.router.navigate(["/"]);
+      this.zone.run(() => {
+        this.router.navigate(["/"]);
+      });
       this.alertService.success("See you later!", GlobalConstants.flashMessageOptions);
     }).catch(error => {
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);

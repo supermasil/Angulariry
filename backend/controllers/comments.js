@@ -1,6 +1,6 @@
 const Comment = require('../models/comment');
 const UserController = require("../controllers/users");
-const Tracking = require('../models/tracking');
+const Tracking = require('../models/online-tracking');
 const db = require('mongoose');
 
 exports.createComment = async (req, res, next) => {

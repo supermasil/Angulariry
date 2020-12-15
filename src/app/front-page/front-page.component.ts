@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-front-page',
@@ -6,4 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['front-page.component.css']
 })
 export class FrontPageComponent {
+
 }

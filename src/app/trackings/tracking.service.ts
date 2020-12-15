@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from "@angular/core";
+import { Injectable, NgZone } from "@angular/core";
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -17,7 +17,8 @@ export class TrackingService {
   constructor(
     private httpClient: HttpClient,
     private router: Router,
-    public commentService: CommentService
+    public commentService: CommentService,
+    private zone: NgZone
     ) {}
 
   getTrackingUpdateListener() {
@@ -25,12 +26,12 @@ export class TrackingService {
   }
 
   getTrackingInfo(trackingNumber: String, carrier: String) {
-    const queryParams = `tracking-tool/?trackingNumber=${trackingNumber}&carrier=${carrier}`;
+    const queryParams = `trackings/tracking-tool/?trackingNumber=${trackingNumber}&carrier=${carrier}`;
     return this.httpClient.get<Object>(BACKEND_URL + queryParams);
   }
 
   fuzzySearch(trackingsPerPage: number, currentPage: number, searchTerm: string) {
-    const queryParams = `search/?pageSize=${trackingsPerPage}&currentPage=${currentPage}&searchTerm=${searchTerm}`;
+    const queryParams = `trackings/search/?pageSize=${trackingsPerPage}&currentPage=${currentPage}&searchTerm=${searchTerm}`;
     this.httpClient
       .get<{message: string, trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((trackingData) => {
@@ -50,7 +51,7 @@ export class TrackingService {
   }
 
   getTrackings(trackingsPerPage: number, currentPage: number) {
-    const queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}`;
+    const queryParams = `trackings/?pageSize=${trackingsPerPage}&currentPage=${currentPage}`;
     this.httpClient
       .get<{message: string, trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((trackingData) => {
@@ -89,7 +90,9 @@ export class TrackingService {
     this.httpClient
       .post<{message: string, tracking: Tracking}>(BACKEND_URL, trackingData)
       .subscribe((responseData) => {
-        this.router.navigate(['/trackings']); // Will reload, no need to emit
+        this.zone.run(() => {
+          this.router.navigate(["/trackings"]);
+        });
     });
   }
 
@@ -120,7 +123,9 @@ export class TrackingService {
         trackings: [...this.trackings],
         count: this.trackings.length
       });
-      this.router.navigate(['/trackings']); // Will reload, no need to emit
+      this.zone.run(() => {
+        this.router.navigate(["/trackings"]);
+      });
     });
   }
 

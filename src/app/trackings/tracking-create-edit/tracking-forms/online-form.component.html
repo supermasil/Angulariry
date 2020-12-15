@@ -22,7 +22,7 @@
   <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
 
   <div class="row">
-    <mat-form-field appearance="outline" class="col">
+    <mat-form-field appearance="outline" class="col-lg-4">
       <mat-label>Carrier</mat-label>
       <mat-select formControlName="carrier">
         <mat-option *ngFor="let carrier of carriers" [value]="carrier">
@@ -33,7 +33,7 @@
       <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="col">
+    <mat-form-field appearance="outline" class="col-lg-4">
       <mat-label>Status</mat-label>
       <mat-select matInput formControlName="status" autoActiveFirstOption>
         <mat-option *ngFor="let option of internalStatus" [value]="option">
@@ -42,6 +42,10 @@
       </mat-select>
       <mat-error>Please select a status</mat-error>
     </mat-form-field>
+
+    <div class="col-lg-4">
+      <auto-complete-input #recipient [data]="customerCodes" [matLabel]="'Customer Code'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+    </div>
   </div>
 
   <div class="mt-2">

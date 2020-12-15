@@ -2,25 +2,21 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const fuzzySearch = require('mongoose-fuzzy-searching');
 
-const timelineSchema = mongoose.Schema({
-  userId: {type: String, required: true},
-  action: {type: String, required: true},
-  timestamp: {type: Date, default: Date.now()}
-}, { _id: false });
+const historySchema = require('./history').schema;
 
 const trackingSchema = mongoose.Schema({
   //USPS tracking numbers can be recycled, let's hope it's not often
-  trackingNumber: {type: String, required: true, unique: true, index: true},
+  trackingNumber: {type: String, required: true, index: true},
   status: {type: String, require: true},
   carrier: {type: String, require: true},
   filePaths: [{type: String}],
   creatorId: {type: String, required: true}, // Google id, has to be string
-  trackerId: {type: String, required: true}, // Tracker Object id, optional
+  trackerId: {type: String}, // Tracker Object id, optional
   content: {type: String},
-  active: {type: Boolean, required: true},
-  timeline: [timelineSchema],
+  active: {type: Boolean, required: true}, // This should be false to prevent edit after certain stage
+  timeline: [historySchema],
   comments: [{type: mongoose.Types.ObjectId, ref: "Comment"}],
-  type: {type: String, required: true}
+  type: {type: String, required: true} // Online Order...
 }, {timestamps: true, autoCreate: true });
 
 trackingSchema.plugin(uniqueValidator); // Throw error if not unique

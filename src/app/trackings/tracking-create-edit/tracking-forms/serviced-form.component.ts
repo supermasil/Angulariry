@@ -9,10 +9,11 @@ import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 })
 export class ServicedFormCreateComponent implements OnInit {
   servicedForm: FormGroup;
+  customerCodes = ["Alex", "John", "Kay"];
 
   ngOnInit() {
     this.servicedForm = new FormGroup({
-      orderNumber: new FormControl({value: "sev-" + Date.now(), disabled: true}),
+      trackingNumber: new FormControl({value: "sev-" + Date.now() + Math.floor(Math.random() * 10000), disabled: true}),
       items: new FormArray([this.createItem()]),
       content: new FormControl(""),
     });
@@ -25,12 +26,10 @@ export class ServicedFormCreateComponent implements OnInit {
 
   createItem(): FormGroup {
     return new FormGroup({
-      orderNumber: new FormControl({value: "sev-" + Date.now(), disabled: true}, {validators: [Validators.required]}),
       productLink: new FormControl("", {validators: [Validators.required]}),
       productPrice: new FormControl("", {validators: [Validators.required, Validators.min(0.01)]}),
       specifications: new FormControl("", {validators: [Validators.required]}),
-      quantity: new FormControl("", {validators: [Validators.required]}),
-      content: new FormControl("")
+      quantity: new FormControl("", {validators: [Validators.required]})
     });
   }
 

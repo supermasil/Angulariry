@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 import { Subscription } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core/';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -10,7 +11,7 @@ import { ChangeDetectorRef } from '@angular/core/';
 })
 
 export class HeaderComponent implements OnInit, OnDestroy{
-  constructor(private authService: AuthService, private changeDetector: ChangeDetectorRef) {}
+  constructor(private authService: AuthService, private changeDetector: ChangeDetectorRef, private zone: NgZone, private router: Router) {}
   userIsAuthenticated = false;
   private authListenerSub: Subscription;
   ngOnInit() {
@@ -29,6 +30,13 @@ export class HeaderComponent implements OnInit, OnDestroy{
 
   ngOnDestroy() {
     this.authListenerSub.unsubscribe();
+  }
+
+  // Always route in a zone to prevent 'https://stackoverflow.com/questions/53645534/navigation-triggered-outside-angular-zone-did-you-forget-to-call-ngzone-run'
+  redirect(route: string) {
+    this.zone.run(() => {
+      this.router.navigate([route]);
+    });
   }
 
 };

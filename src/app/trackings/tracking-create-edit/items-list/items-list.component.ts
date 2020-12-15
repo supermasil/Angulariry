@@ -75,5 +75,6 @@ export class ItemsListComponent implements OnInit {
 
   triggerValidation() {
     this.submitButton.nativeElement.click();
+    return this.itemsForm.valid;
   }
 }

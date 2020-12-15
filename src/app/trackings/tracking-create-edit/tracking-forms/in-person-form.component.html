@@ -1,42 +1,22 @@
-<form [formGroup]="inPersonForm" class="my-4">
-  <mat-form-field>
-    <mat-label>Order Number</mat-label>
-    <input type='text' matInput formControlName='orderNumber'>
+<form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4">
+  <mat-form-field appearance="outline">
+    <mat-label>Tracking Number</mat-label>
+    <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+    <a
+      matSuffix
+      mat-mini-fab
+      color="basic"
+      [cdkCopyToClipboard]="trackingNumber.value">
+      <mat-icon>content_copy</mat-icon>
+    </a>
   </mat-form-field>
 
   <div class="row">
     <div class="col">
-      <mat-form-field appearance="outline">
-        <mat-label>Sender</mat-label>
-        <input type="text"
-                matInput
-                formControlName="customerCode"
-                placeholder="Customer Code"
-                (input)="filteredCustomerCodes = filterAutoCompleteItems($event.target.value, customerCodes)"
-                [matAutocomplete]="autoCustomerCodes">
-        <mat-autocomplete autoActiveFirstOption #autoCustomerCodes="matAutocomplete">
-          <mat-option *ngFor="let option of filteredCustomerCodes | async" [value]="option">
-            {{option}}
-          </mat-option>
-        </mat-autocomplete>
-        <mat-error>Please enter a customer code</mat-error>
-      </mat-form-field>
+        <auto-complete-input #sender [data]="customerCodes" [matLabel]="'Sender'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
     </div>
     <div class="col">
-      <mat-form-field appearance="outline">
-        <mat-label>Recipient</mat-label>
-        <input type="text"
-                matInput
-                formControlName="recipient"
-                (input)="filteredRecipients = filterAutoCompleteItems($event.target.value, recipients)"
-                [matAutocomplete]="autoRecipients">
-        <mat-autocomplete autoActiveFirstOption #autoRecipients="matAutocomplete">
-          <mat-option *ngFor="let option of filteredRecipients | async" [value]="option">
-            {{option}}
-          </mat-option>
-        </mat-autocomplete>
-        <mat-error>Please select a recipient</mat-error>
-      </mat-form-field>
+        <auto-complete-input #recipient [data]="recipients" [matLabel]="'Recipient'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
     </div>
   </div>
   <hr>

@@ -1,4 +1,4 @@
-import { Component, ViewChild } from "@angular/core";
+import { Component, NgZone, ViewChild } from "@angular/core";
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -25,6 +25,7 @@ export class OnlineFormCreateComponent {
   carriers = TrackingGlobals.carriers;
 
   internalStatus = ["Received at US WH", "Consolidated"];
+  customerCodes = ["Alex", "John", "Kay"];
 
   @ViewChild('itemsList') itemsList: ItemsListComponent;
 
@@ -39,6 +40,7 @@ export class OnlineFormCreateComponent {
     private authService: AuthService,
     private router: Router,
     private codeScannerService: CodeScannerService,
+    private zone: NgZone
   ) {}
 
   ngOnDestroy(): void {
@@ -63,6 +65,7 @@ export class OnlineFormCreateComponent {
         validators: [Validators.required]
       }),
       carrier: new FormControl(null, {validators: [Validators.required]}),
+      customerCode: new FormControl(null, {validators: [Validators.required]}),
       content: new FormControl(""),
       status: new FormControl(null, {validators: [Validators.required]}),
       boxes: new FormArray([])
@@ -92,7 +95,9 @@ export class OnlineFormCreateComponent {
             this.received = this.tracking.status === "received_at_us_warehouse" ? true : false;
           },
           err => {
-            this.router.navigate(['/404']);
+            this.zone.run(() => {
+              this.router.navigate(["/404"]);
+            });
           });
       } else {
         this.mode = 'create';

@@ -1,7 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { SelectionModel } from '@angular/cdk/collections';
-import { AfterViewInit, Component, ViewChild } from "@angular/core";
-import { FormGroup } from '@angular/forms';
+import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -20,12 +20,13 @@ import { MatTableDataSource } from '@angular/material/table';
     ])
   ]
 })
-export class ConsolidatedFormCreateComponent implements AfterViewInit {
+export class ConsolidatedFormCreateComponent implements OnInit, AfterViewInit {
   consolidatedForm: FormGroup;
 
   definedColumns: string[] = ['select', 'CustomerCode', 'OrderNumber', 'CreationDate'];
   displayedColumns: string[] = ['select', 'Customer Code', 'Order Number', 'Creation Date'];
 
+  customerCodes = ["Alex", "John", "Kay"];
 
   expandedElement: TrackingRow | null;
 
@@ -49,6 +50,12 @@ export class ConsolidatedFormCreateComponent implements AfterViewInit {
     this.filterDataSource = this.dataSource.filteredData;
 
     this.finalizingDataSource = new MatTableDataSource([]);
+  }
+
+  ngOnInit() {
+    this.consolidatedForm = new FormGroup({
+      trackingNumber: new FormControl({value: "csl-" + Date.now() + Math.floor(Math.random() * 10000), disabled: true}, {validators: [Validators.required]}),
+    });
   }
 
   ngAfterViewInit() {

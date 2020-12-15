@@ -25,6 +25,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSortModule } from '@angular/material/sort';
 import { MatChipsModule } from '@angular/material/chips';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 
 
 @NgModule({
@@ -64,7 +65,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatTableModule,
     MatMenuModule,
     MatSortModule,
-    MatChipsModule
+    MatChipsModule,
+    ClipboardModule
   ]
 })
 

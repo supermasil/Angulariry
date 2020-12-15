@@ -1,7 +1,23 @@
 
 
-<form class="my-4">
-  <h3>#sev-12312313412</h3>
+<form [formGroup]="consolidatedForm" class="my-4">
+  <div class="row">
+    <mat-form-field class="col-lg-6" appearance="outline">
+      <mat-label>Tracking Number</mat-label>
+      <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+      <a
+        matSuffix
+        mat-mini-fab
+        color="basic"
+        [cdkCopyToClipboard]="trackingNumber.value">
+        <mat-icon>content_copy</mat-icon>
+      </a>
+    </mat-form-field>
+
+    <div class="col-lg-6">
+      <auto-complete-input #recipient [data]="customerCodes" [matLabel]="'Customer Code'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+    </div>
+  </div>
   <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex" color="accent">
     <mat-tab label="Online">
       <mat-form-field class="mt-2">

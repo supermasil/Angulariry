@@ -15,6 +15,7 @@ import { ConsolidatedFormCreateComponent } from './tracking-create-edit/tracking
 import { MasterFormCreateComponent } from './tracking-create-edit/tracking-forms/master-form.component';
 import { ItemsListComponent } from './tracking-create-edit/items-list/items-list.component';
 import { FileUploaderModule } from '../file-uploader/file-uploader.module';
+import { AutoCompleteInput } from './tracking-create-edit/auto-complete-input/auto-complete-input.component';
 
 
 @NgModule({
@@ -27,7 +28,8 @@ import { FileUploaderModule } from '../file-uploader/file-uploader.module';
     InPersonFormCreateComponent,
     ConsolidatedFormCreateComponent,
     MasterFormCreateComponent,
-    ItemsListComponent
+    ItemsListComponent,
+    AutoCompleteInput
   ],
   imports: [
     CommonModule,
