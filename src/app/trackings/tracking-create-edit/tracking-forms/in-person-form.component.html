@@ -1,15 +1,27 @@
 <form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4">
-  <mat-form-field appearance="outline">
-    <mat-label>Tracking Number</mat-label>
-    <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
-    <a
-      matSuffix
-      mat-mini-fab
-      color="basic"
-      [cdkCopyToClipboard]="trackingNumber.value">
-      <mat-icon>content_copy</mat-icon>
-    </a>
-  </mat-form-field>
+  <div class="row">
+    <mat-form-field appearance="outline" class="col-lg-6">
+      <mat-label>Tracking Number</mat-label>
+      <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+      <a
+        matSuffix
+        mat-mini-fab
+        color="basic"
+        [cdkCopyToClipboard]="trackingNumber.value">
+        <mat-icon>content_copy</mat-icon>
+      </a>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="col-lg-6">
+      <mat-label>Status</mat-label>
+      <mat-select matInput formControlName="status" autoActiveFirstOption>
+        <mat-option *ngFor="let option of internalStatus" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please select a status</mat-error>
+    </mat-form-field>
+  </div>
 
   <div class="row">
     <div class="col">

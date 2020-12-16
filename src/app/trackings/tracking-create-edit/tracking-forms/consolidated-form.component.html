@@ -2,7 +2,7 @@
 
 <form [formGroup]="consolidatedForm" class="my-4">
   <div class="row">
-    <mat-form-field class="col-lg-6" appearance="outline">
+    <mat-form-field class="col-lg-4" appearance="outline">
       <mat-label>Tracking Number</mat-label>
       <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
       <a
@@ -14,10 +14,21 @@
       </a>
     </mat-form-field>
 
-    <div class="col-lg-6">
+    <div class="col-lg-4">
       <auto-complete-input #recipient [data]="customerCodes" [matLabel]="'Customer Code'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
     </div>
+
+    <mat-form-field appearance="outline" class="col-lg-4">
+      <mat-label>Status</mat-label>
+      <mat-select matInput formControlName="status" autoActiveFirstOption>
+        <mat-option *ngFor="let option of internalStatus" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please select a status</mat-error>
+    </mat-form-field>
   </div>
+
   <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex" color="accent">
     <mat-tab label="Online">
       <mat-form-field class="mt-2">

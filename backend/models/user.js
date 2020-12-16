@@ -5,14 +5,14 @@ const addressSchema = mongoose.Schema({
   address: {type: String, required: true },
   addressLineTwo: {type: String, default: ""},
   addressUrl: {type: String, default: ""},
-}, {autoCreate: true})
+}, {_id: false})
 
 const recipientSchema = mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, unique: true, index: true, default: ""}, // Doesn't have to have email
   phoneNumber: { type: String, required: true},
   addresses: {type: [String], required: true, default: []}
-}, {autoCreate: true });
+}, {_id: false});
 
 const userSchema = mongoose.Schema({
   _id: {type: String, required: true },
@@ -23,7 +23,8 @@ const userSchema = mongoose.Schema({
   addresses: {type: [addressSchema], default: []},
   companyCode: {type: String, required: true},
   customerCode: {type: String, required: true, unique: true, index: true},
-  recipients: {type: [recipientSchema], default: []}
+  recipients: {type: [recipientSchema], default: []},
+  defaultLocation: {type: String, required: true}, // Oregon, California...
 }, { timestamps: true, autoCreate: true });
 
 userSchema.plugin(uniqueValidator); // Throw error if not unique

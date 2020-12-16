@@ -1,11 +1,11 @@
 
 
-<div class="container">
+<div>
   <a
-    mat-fab
+    mat-mini-fab
     color='primary'
     (click)='filePicker.click()'>
-    <mat-icon>add_photo_alternate</mat-icon>
+    <mat-icon style="position: absolute; right: 11px; bottom: 9px; font-size: 20px;" [inline]="true">add_a_photo</mat-icon>
   </a>
   <input type="file" hidden #filePicker (change)='onFilePicked($event)'>
   <mat-error *ngIf="fileUploaderForm.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>

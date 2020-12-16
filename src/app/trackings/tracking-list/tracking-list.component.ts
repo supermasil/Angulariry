@@ -5,7 +5,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TrackingGlobals } from '../tracking-globals';
-import { Tracking } from '../tracking.model';
+import { Tracking } from '../models/tracking.model';
 import { TrackingService } from '../tracking.service';
 import * as moment from 'moment';
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';

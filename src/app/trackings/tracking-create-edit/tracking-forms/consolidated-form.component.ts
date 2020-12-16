@@ -27,6 +27,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['select', 'Customer Code', 'Order Number', 'Creation Date'];
 
   customerCodes = ["Alex", "John", "Kay"];
+  internalStatus = ["Received at US WH", "Consolidated"];
 
   expandedElement: TrackingRow | null;
 
@@ -55,6 +56,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.consolidatedForm = new FormGroup({
       trackingNumber: new FormControl({value: "csl-" + Date.now() + Math.floor(Math.random() * 10000), disabled: true}, {validators: [Validators.required]}),
+      status: new FormControl(null, {validators: [Validators.required]})
     });
   }
 

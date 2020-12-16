@@ -6,7 +6,7 @@ const historySchema = mongoose.Schema({
   userId: {type: String, required: true},
   action: {type: String, required: true},
   timestamp: {type: Date, default: Date.now()}
-}, { _id: false });
+}, { timestamps: true, autoCreate: true });
 
 
 historySchema.plugin(uniqueValidator); // Throw error if not unique

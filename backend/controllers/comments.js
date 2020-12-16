@@ -1,6 +1,6 @@
 const Comment = require('../models/comment');
 const UserController = require("../controllers/users");
-const Tracking = require('../models/online-tracking');
+const onlineTracking = require('../models/tracking-models/online-tracking');
 const db = require('mongoose');
 
 exports.createComment = async (req, res, next) => {
@@ -23,7 +23,7 @@ exports.createComment = async (req, res, next) => {
           return createdComment;
         });
 
-      await Tracking.findById(req.body.trackingId).session(session)
+      await onlineTracking.findById(req.body.trackingId).session(session)
         .then(async(foundTracking) => {
           foundTracking.comments.unshift(createdComment[0]._id);
           await foundTracking.save();

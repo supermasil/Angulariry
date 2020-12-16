@@ -14,6 +14,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewInit {
 
   customerCodes = ["Alex", "John", "Kay"];
   recipients = ["Alex", "John", "Kay"];
+  internalStatus = ["Received at US WH", "Consolidated"];
 
   origins = ["California", "Oregon"];
   destinations = ["Saigon", "Hanoi"];
@@ -37,7 +38,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewInit {
       content: new FormControl(""),
       weight: new FormControl(null, {validators: [Validators.required]}),
       payAtDestination: new FormControl(false, {validators: [Validators.required]}),
-      receiveAtDestinationWH: new FormControl(false, {validators: [Validators.required]})
+      receiveAtDestinationWH: new FormControl(false, {validators: [Validators.required]}),
+      status: new FormControl(null, {validators: [Validators.required]})
     });
   }
 

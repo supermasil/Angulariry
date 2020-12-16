@@ -1,4 +1,4 @@
-import { Comment } from '../comments/comment.model';
+import { Comment } from '../../comments/comment.model';
 
 export interface Tracking { // From backend
   _id: string;

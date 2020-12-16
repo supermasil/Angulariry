@@ -1,23 +1,37 @@
 <form [formGroup]='onlineForm' (submit)='onSave()' class="my-4">
-  <div class="d-flex">
-    <mat-form-field appearance="outline">
+  <div class="row">
+    <mat-form-field appearance="outline" class="col-lg-4">
       <mat-label>Tracking Number</mat-label>
-      <input
-      matInput
-      type='text'
-      formControlName='trackingNumber'>
-      <button *ngIf="onlineForm.controls['trackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['trackingNumber'].setValue('')">
-        <mat-icon>close</mat-icon>
-      </button>
-      <mat-error>Please enter a Tracking Number</mat-error>
+      <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+      <a
+        matSuffix
+        mat-mini-fab
+        color="basic"
+        [cdkCopyToClipboard]="trackingNumber.value">
+        <mat-icon>content_copy</mat-icon>
+      </a>
     </mat-form-field>
-    <a
-      mat-mini-fab
-      color='primary'
-      class="mt-2 d-inline ml-2"
-      (click)="scannerOpened = !scannerOpened">
-      <mat-icon>qr_code</mat-icon>
-    </a>
+
+    <div class="d-flex col-lg-8">
+      <mat-form-field appearance="outline">
+        <mat-label>Carrier Tracking Number</mat-label>
+        <input
+        matInput
+        type='text'
+        formControlName='carrierTrackingNumber'>
+        <button *ngIf="onlineForm.controls['trackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['trackingNumber'].setValue('')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-error>Please enter a Tracking Number</mat-error>
+      </mat-form-field>
+      <a
+        mat-mini-fab
+        color='primary'
+        class="mt-2 d-inline ml-2"
+        (click)="scannerOpened = !scannerOpened">
+        <mat-icon>qr_code</mat-icon>
+      </a>
+    </div>
   </div>
   <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
 
@@ -33,6 +47,10 @@
       <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
     </mat-form-field>
 
+    <div class="col-lg-4">
+      <auto-complete-input #recipient [data]="customerCodes" [matLabel]="'Customer Code'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+    </div>
+
     <mat-form-field appearance="outline" class="col-lg-4">
       <mat-label>Status</mat-label>
       <mat-select matInput formControlName="status" autoActiveFirstOption>
@@ -43,9 +61,6 @@
       <mat-error>Please select a status</mat-error>
     </mat-form-field>
 
-    <div class="col-lg-4">
-      <auto-complete-input #recipient [data]="customerCodes" [matLabel]="'Customer Code'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
-    </div>
   </div>
 
   <div class="mt-2">

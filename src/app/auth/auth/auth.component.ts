@@ -17,6 +17,7 @@ export class AuthComponent implements OnInit, OnDestroy {
   private authStatusSub: Subscription;
   roles = ["SuperAdmin", "Admin", "Manager", "Accounting", "Operation", "Receiving/Shipping", "Customer"];
   companyCodes = ["JMD"]; // Has to be unique
+  defaultLocations = ["Oregon", "California", "Hanoi", "Saigon"];
 
   loginForm: FormGroup;
   signupForm: FormGroup;
@@ -41,7 +42,8 @@ export class AuthComponent implements OnInit, OnDestroy {
       addressLineTwo: new FormControl(""),
       role: new FormControl("", {validators: [Validators.required]}),
       companyCode: new FormControl("", {validators: [this.companyCodeValidator()]}),
-      customerCode: new FormControl("", {validators: [Validators.required]})
+      customerCode: new FormControl("", {validators: [Validators.required]}),
+      defaultLocation: new FormControl("", {validators: [Validators.required]}),
     });
 
     this.passwordResetForm = new FormGroup({

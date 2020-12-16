@@ -3,7 +3,7 @@ import { Injectable, NgZone } from "@angular/core";
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Tracking } from './tracking.model';
+import { Tracking } from './models/tracking.model';
 import { map } from 'rxjs/operators';
 import { CommentService } from '../comments/comment.service';
 

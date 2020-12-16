@@ -79,6 +79,27 @@
         </lac-mat-tel-input>
         <mat-error>Invalid phone number</mat-error>
       </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Role</mat-label>
+        <mat-select matInput formControlName="role" required>
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{role}}
+          </mat-option>
+        </mat-select>
+        <mat-error>Please select a role</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Default Location</mat-label>
+        <mat-select matInput formControlName="defaultLocation" required>
+          <mat-option *ngFor="let location of defaultLocations" [value]="location">
+            {{location}}
+          </mat-option>
+        </mat-select>
+        <mat-error>Please select a role</mat-error>
+      </mat-form-field>
+
       <mat-form-field appearance="outline">
         <mat-label>Address</mat-label>
         <input
@@ -101,16 +122,6 @@
         matInput
         formControlName="addressLineTwo"
         placeholder="Apt/ spc/ #">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Role</mat-label>
-        <mat-select matInput formControlName="role" required>
-          <mat-option *ngFor="let role of roles" [value]="role">
-            {{role}}
-          </mat-option>
-        </mat-select>
-        <mat-error>Please select a role</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">

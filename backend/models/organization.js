@@ -7,7 +7,7 @@ const locationSchema = new Schema({
   address: {type: String, required: true},
   operatingHours: {type: [String], required: true}, //hh:mm:ss - hh:mm:ss
   operatingDays: {type: [String], required: true} // Mon, Tues ....
-}, {autoCreate: true});
+}, {_id: false});
 
 const organizationSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true}, // unique doesn't not throw error if not unique
@@ -16,7 +16,7 @@ const organizationSchema = mongoose.Schema({
   locations: [locationSchema]
 }, { timestamps: true, autoCreate: true });
 
-userSchema.plugin(uniqueValidator); // Throw error if not unique
+organizationSchema.plugin(uniqueValidator); // Throw error if not unique
 locationSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Organization', organizationSchema);

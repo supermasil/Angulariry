@@ -1,6 +1,6 @@
 <form [formGroup]='servicedForm' (submit)='onSave()' class="my-4">
   <div class="row">
-    <mat-form-field class="col-lg-6" appearance="outline">
+    <mat-form-field class="col-lg-4" appearance="outline">
       <mat-label>Tracking Number</mat-label>
       <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
       <a
@@ -12,15 +12,24 @@
       </a>
     </mat-form-field>
 
-    <div class="col-lg-6">
+    <div class="col-lg-4">
       <auto-complete-input #recipient [data]="customerCodes" [matLabel]="'Customer Code'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
     </div>
+
+    <mat-form-field appearance="outline" class="col-lg-4">
+      <mat-label>Status</mat-label>
+      <mat-select matInput formControlName="status" autoActiveFirstOption>
+        <mat-option *ngFor="let option of internalStatus" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please select a status</mat-error>
+    </mat-form-field>
   </div>
 
   <div formArrayName="items" *ngFor="let item of servicedForm.get('items')['controls']; let i = index;">
-    <div [formGroupName]="i">
+    <mat-card class="mb-4 mat-elevation-z4" [formGroupName]="i">
       <div class="row">
-
         <mat-form-field appearance="outline" class="col-lg">
           <mat-label>Link</mat-label>
           <input
@@ -62,11 +71,46 @@
           </a>
         </mat-form-field>
       </div>
-    </div>
-  </div>
-  <a mat-fab color="primary" class="float-right mb-4" style="margin-right: 13px;" (click)="addItem()"><mat-icon>add</mat-icon></a>
 
-  <div class="mt-2 mb-2">
+      <div class="row">
+        <mat-form-field class="col-lg" appearance="outline">
+          <mat-label>Order Numbers</mat-label>
+          <mat-chip-list #orderNumber>
+            <mat-chip *ngFor="let item of orderNumbers" [selectable]="true"
+                      [removable]="true" (removed)="removeChipNumber(item, 0)">
+              {{item}}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            <input
+                    [matChipInputFor]="orderNumber"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    [matChipInputAddOnBlur]="false"
+                    (matChipInputTokenEnd)="addChipNumber($event, 0)">
+          </mat-chip-list>
+        </mat-form-field>
+
+        <mat-form-field class="col-lg" appearance="outline">
+          <mat-label>Tracking Numbers</mat-label>
+          <mat-chip-list #carrierTrackingNumer>
+            <mat-chip *ngFor="let item of carrierTrackings" [selectable]="true" [color]="getChipColor(item.status)" selected
+                      [removable]="true" (removed)="removeChipNumber(item.trackingNumber, 1)">
+                {{item.trackingNumber}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            <input
+                    [matChipInputFor]="carrierTrackingNumer"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    [matChipInputAddOnBlur]="false"
+                    (matChipInputTokenEnd)="addChipNumber($event, 1)">
+          </mat-chip-list>
+        </mat-form-field>
+      </div>
+
+    </mat-card>
+  </div>
+  <a mat-mini-fab color="primary" class="float-right mb-4 mt-2" style="margin-right: 13px;" (click)="addItem()"><mat-icon>add</mat-icon></a>
+
+  <div class="mt-4 mb-2">
     <file-uploader></file-uploader>
   </div>
 

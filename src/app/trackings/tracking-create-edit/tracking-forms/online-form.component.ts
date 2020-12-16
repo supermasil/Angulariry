@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 import { TrackingGlobals } from '../../tracking-globals';
-import { Tracking } from '../../tracking.model';
+import { Tracking } from '../../models/tracking.model';
 import { TrackingService } from '../../tracking.service';
 import { ItemsListComponent } from '../items-list/items-list.component';
 
@@ -61,7 +61,8 @@ export class OnlineFormCreateComponent {
 
     // Set up form
     this.onlineForm = new FormGroup({
-      trackingNumber: new FormControl(searchTerm !== "null" ? searchTerm : "", {
+      trackingNumber: new FormControl({value: "onl-" + Date.now() + Math.floor(Math.random() * 10000), disabled: true}),
+      carrierTrackingNumber: new FormControl(searchTerm !== "null" ? searchTerm : "", {
         validators: [Validators.required]
       }),
       carrier: new FormControl(null, {validators: [Validators.required]}),

@@ -2,7 +2,7 @@ export interface Comment { // From backend
   _id: string;
   creatorId: string;
   trackingId: string;
-  name: string;
+  creatorName: string;
   imagePaths: [string];
   content: string;
   attachmentPaths: [string];

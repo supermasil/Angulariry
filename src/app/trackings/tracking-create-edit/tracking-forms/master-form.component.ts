@@ -15,6 +15,7 @@ export class MasterFormCreateComponent implements OnInit {
   masterForm: FormGroup;
 
   customerCodes = ["Alex", "John", "Kay"];
+  internalStatus = ["Received at US WH", "Consolidated"];
 
   visible = true;
   selectable = true;
@@ -36,6 +37,7 @@ export class MasterFormCreateComponent implements OnInit {
     this.masterForm = new FormGroup({
       trackingNumber: new FormControl({value: "mst-" + Date.now() + Math.floor(Math.random() * 10000), disabled: true}, {validators: [Validators.required]}),
       items: new FormArray([this.createBox()]),
+      status: new FormControl(null, {validators: [Validators.required]})
     });
   }
 

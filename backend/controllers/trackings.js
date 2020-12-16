@@ -1,6 +1,6 @@
 const EasyPost = require('@easypost/api');
 const api = new EasyPost(process.env.easyPostApiKey);
-const Tracking = require('../models/online-tracking');
+const onlineTracking = require('../models/tracking-models/online-tracking');
 const Comment = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
@@ -27,7 +27,7 @@ exports.createTracking = async (req, res, next) => {
       return res.status(404).json({message: "Check your tracking number and carrier"});
     }
 
-    const tracking = new Tracking({
+    const tracking = new onlineTracking({
       trackingNumber: req.body.trackingNumber,
       status: JSON.parse(req.body.received) ? "received_at_us_warehouse" : tracker.status,
       carrier: req.body.carrier,
@@ -48,7 +48,7 @@ exports.createTracking = async (req, res, next) => {
     tracking.filePaths = await S3.uploadFiles(JSON.parse(req.body.files), fileNames);
 
 
-    return await Tracking.create(tracking)
+    return await onlineTracking.create(tracking)
       .then(createdTracking => {
         return res.status(201).json({message: "Tracking created successfully", tracking: createdTracking});
       });
@@ -70,7 +70,7 @@ exports.updateTracking = async(req, res , next) => {
     return res.status(404).json({message: "Check your tracking number and carrier"});
   }
 
-  return await Tracking.findOne({ _id: req.body._id, creatorId: req.userData.uid })
+  return await onlineTracking.findOne({ _id: req.body._id, creatorId: req.userData.uid })
     .then(async (foundTracking) => {
         foundTracking.trackingNumber = req.body.trackingNumber;
         foundTracking.status = JSON.parse(req.body.received) ? "received_at_us_warehouse" : tracker.status,
@@ -106,7 +106,7 @@ exports.updateTracking = async(req, res , next) => {
 }
 
 exports.fuzzySearch = async (req, res, next) => {
-  const trackingQuery = Tracking.fuzzySearch({ query: req.query.searchTerm, minSize: 2, exact: true});
+  const trackingQuery = onlineTracking.fuzzySearch({ query: req.query.searchTerm, minSize: 2, exact: true});
   return await fetchTrackingsHelper(req, res, trackingQuery).populate('comments').exec()
     .then(documents => {
       fetchedTrackings = documents
@@ -126,11 +126,11 @@ exports.fuzzySearch = async (req, res, next) => {
 }
 
 exports.getTrackings = async (req, res, next) => {
-  const trackingQuery = Tracking.find();
+  const trackingQuery = onlineTracking.find();
   return await fetchTrackingsHelper(req, res, trackingQuery).populate('comments').exec()
     .then(documents => {
       fetchedTrackings = documents
-      return Tracking.countDocuments();
+      return onlineTracking.countDocuments();
     })
     .then(count => {
       return res.status(200).json({
@@ -146,7 +146,7 @@ exports.getTrackings = async (req, res, next) => {
 }
 
 exports.getTracking = async (req, res, next) => {
-  return await Tracking.findById(req.params.id).populate('comments').exec()
+  return await onlineTracking.findById(req.params.id).populate('comments').exec()
   .then(tracking => {
     return res.status(200).json(tracking);
   })
@@ -160,12 +160,12 @@ exports.deleteTracking = async (req, res, next) => {
   try {
     const session = await db.startSession();
     return await session.withTransaction(async () => {
-      let foundTracking = await Tracking.findById(req.params.id)
+      let foundTracking = await onlineTracking.findById(req.params.id)
       .then();
 
       assert(foundTracking !== null);
 
-      await Tracking.deleteOne({ _id: req.params.id, creatorId: req.userData.uid }).session(session)
+      await onlineTracking.deleteOne({ _id: req.params.id, creatorId: req.userData.uid }).session(session)
       .then();
 
       await Comment.deleteMany({trackingId: req.params.id}).session(session)
