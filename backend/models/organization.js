@@ -19,4 +19,4 @@ const organizationSchema = mongoose.Schema({
 organizationSchema.plugin(uniqueValidator); // Throw error if not unique
 locationSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model('Organization', organizationSchema);
+module.exports = mongoose.model('organization', organizationSchema);

@@ -7,6 +7,8 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import * as firebase from 'firebase/app';
 import{ GlobalConstants } from '../global-constants';
 import { AlertService } from '../alert-message';
+import { assert } from 'console';
+import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 
 const BACKEND_URL = environment.apiURL + "/users/"
 
@@ -35,6 +37,10 @@ export class AuthService {
         const queryParams = `getuser/?uid=${this.firebaseUser.uid}`;
         this.mongoDbUser = (await this.http.get<{user: any}>(BACKEND_URL + queryParams).toPromise()).user;
         this.authStatusListener.next(true);
+
+        // if (this.mongoDbUser === null) {
+        //   this.logout();
+        // }
 
         console.log("User authenticated");
       } else {

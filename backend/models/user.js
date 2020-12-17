@@ -31,4 +31,4 @@ userSchema.plugin(uniqueValidator); // Throw error if not unique
 recipientSchema.plugin(uniqueValidator);
 addressSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('user', userSchema);

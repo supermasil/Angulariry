@@ -5,9 +5,9 @@ const uniqueValidator = require('mongoose-unique-validator');
 const historySchema = mongoose.Schema({
   userId: {type: String, required: true},
   action: {type: String, required: true},
-  timestamp: {type: Date, default: Date.now()}
+  postId: {type: String, required: true}  // sev-123213 mst123452
 }, { timestamps: true, autoCreate: true });
 
 
 historySchema.plugin(uniqueValidator); // Throw error if not unique
-module.exports = mongoose.model('History', historySchema);
+module.exports = mongoose.model('history', historySchema);

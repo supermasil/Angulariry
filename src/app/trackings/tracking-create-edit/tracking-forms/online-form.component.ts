@@ -1,6 +1,6 @@
-import { Component, NgZone, ViewChild } from "@angular/core";
+import { Component, ViewChild } from "@angular/core";
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
@@ -18,8 +18,6 @@ import { ItemsListComponent } from '../items-list/items-list.component';
 export class OnlineFormCreateComponent {
   onlineForm: FormGroup;
 
-  private mode = 'create';
-  private trackingId: string;
   received = false;
   tracking: Tracking;
   carriers = TrackingGlobals.carriers;
@@ -38,9 +36,7 @@ export class OnlineFormCreateComponent {
     public trackingService: TrackingService,
     public route: ActivatedRoute,
     private authService: AuthService,
-    private router: Router,
-    private codeScannerService: CodeScannerService,
-    private zone: NgZone
+    private codeScannerService: CodeScannerService
   ) {}
 
   ngOnDestroy(): void {
@@ -72,39 +68,7 @@ export class OnlineFormCreateComponent {
       boxes: new FormArray([])
     });
 
-    // Subcribe to see the active route
-    this.route.paramMap.subscribe((paramMap) => {
-      if (paramMap.has('trackingId')) { // Edit case
-        this.mode = 'edit';
-        this.trackingId = paramMap.get('trackingId');
 
-        this.trackingService.getTracking(this.trackingId).subscribe(
-          trackingData => {
-            this.tracking = trackingData as Tracking;
-            // Initialize the form
-            this.onlineForm.setValue({
-              trackingNumber: this.tracking.trackingNumber,
-              carrier: this.tracking.carrier,
-              content: this.tracking.content ? this.tracking.content : "",
-              fileValidator: null
-            });
-            // this.filePaths = this.tracking.filePaths;
-            // // Load images preview
-            // this.filePaths.forEach(file => {
-            //   this.filesPreview.push(file);
-            // });
-            this.received = this.tracking.status === "received_at_us_warehouse" ? true : false;
-          },
-          err => {
-            this.zone.run(() => {
-              this.router.navigate(["/404"]);
-            });
-          });
-      } else {
-        this.mode = 'create';
-        this.trackingId = null;
-      }
-    });
 
     this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
       .subscribe((code: {code: string}) => {

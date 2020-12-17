@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
 const commentSchema = mongoose.Schema({
-  trackingId: { type: mongoose.Types.ObjectId, ref: "Tracking", required: true },
+  trackingId: { type: String, required: true },
   creatorId: { type: String, required: true }, // google Id, has to be string
   creatorname: { type: String, required: true },
   imagePaths: [{ type: String }],
@@ -11,4 +11,4 @@ const commentSchema = mongoose.Schema({
 }, { timestamps: true, autoCreate: true }); // AutoCreate is needed to create with session
 
 commentSchema.plugin(uniqueValidator); // Throw error if not unique
-module.exports = mongoose.model('Comment', commentSchema);
+module.exports = mongoose.model('comment', commentSchema);

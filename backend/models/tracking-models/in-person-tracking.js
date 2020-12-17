@@ -2,10 +2,8 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const fuzzySearch = require('mongoose-fuzzy-searching');
 
-const GeneralInfoSchema = require('./general-info').schema;
-const ListItemSchema = require('./list-item').schema;
-
-
+const GeneralInfoSchema = require('./general-info-schema');
+const ListItemSchema = require('./list-item-schema');
 
 const inPersonTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
@@ -19,4 +17,4 @@ const inPersonTrackingSchema = mongoose.Schema({
 
 inPersonTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
 inPersonTrackingSchema.plugin(fuzzySearch, { fields: [] });
-module.exports = mongoose.model('InPersonTracking', inPersonTrackingSchema);
+module.exports = mongoose.model('in-person-tracking', inPersonTrackingSchema);

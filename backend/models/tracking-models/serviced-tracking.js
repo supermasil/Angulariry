@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const fuzzySearch = require('mongoose-fuzzy-searching');
 
-const GeneralInfoSchema = require('./general-info').schema;
-const ListItemSchema = require('./list-item').schema;
+const GeneralInfoSchema = require('./general-info-schema');
+const ListItemSchema = require('./list-item-schema');
 
 requestedItem = mongoose.Schema({
   link: {type: String, required: true},
@@ -11,12 +11,11 @@ requestedItem = mongoose.Schema({
   specifications: {type: String, required: true},
   quantity: {type: Number, required: true},
   orderNumbers: [{type: String}], // A link can have multiple order numbers
-  carrierTrackings: [{type: mongoose.Types.ObjectId, ref: "CarrierTracking"}]
+  carrierTrackings: [{type: mongoose.Types.ObjectId, ref: "carrier-tracking"}]
 }, {_id: false});
 
 const servicedTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
-  orderNumber: {type: String, index: true}, // Order number from retailer
   requestedItems: [requestedItem],
   generalInfo: GeneralInfoSchema,
   itemsList: [ListItemSchema]
@@ -25,4 +24,4 @@ const servicedTrackingSchema = mongoose.Schema({
 servicedTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
 servicedTrackingSchema.plugin(fuzzySearch, { fields: [] });
 
-module.exports = mongoose.model('ServicedTracking', servicedTrackingSchema);
+module.exports = mongoose.model('serviced-tracking', servicedTrackingSchema);
