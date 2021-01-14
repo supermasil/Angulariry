@@ -17,8 +17,8 @@ requestedItem = mongoose.Schema({
 const servicedTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
   requestedItems: [requestedItem],
-  generalInfo: GeneralInfoSchema,
-  itemsList: [ListItemSchema]
+  generalInfo: {type: GeneralInfoSchema, required: true},
+  itemsList: {type: [ListItemSchema], required: true},
 }, {timestamps: true, autoCreate: true });
 
 servicedTrackingSchema.plugin(uniqueValidator); // Throw error if not unique

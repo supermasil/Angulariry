@@ -1,0 +1,157 @@
+<form *ngIf="organizationOnboardingForm" [formGroup]="organizationOnboardingForm" (submit)='onOrganizationOnboarding()' (keydown.enter)="$event.preventDefault()" class="m-2">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input
+    matInput
+    formControlName='name'
+    required
+    >
+    <mat-error>Please enter a valid organization's name</mat-error>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Email</mat-label>
+    <input
+    matInput
+    formControlName='email'
+    required
+    >
+    <mat-error>Please enter a valid email</mat-error>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Company Code</mat-label>
+    <input
+    matInput
+    formControlName='companyCode'
+    required
+    >
+    <mat-error>Please enter a valid organization's name</mat-error>
+  </mat-form-field>
+
+  <mat-form-field class="col-lg p-0" appearance="outline">
+    <mat-label>Insurance Options</mat-label>
+    <mat-chip-list #insurance formControlName="insuranceOptions">
+      <mat-chip *ngFor="let item of organizationOnboardingForm.get('insuranceOptions').value; let i = index;" [selectable]="true"
+                [removable]="true" (removed)="removeInsuranceChip(i)">
+        {{item}}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+      <input
+              [matChipInputFor]="insurance"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              [matChipInputAddOnBlur]="false"
+              (matChipInputTokenEnd)="addInsuranceChip($event)">
+    </mat-chip-list>
+    <mat-error>Please enter at least 1 insurance option</mat-error>
+  </mat-form-field>
+
+  <div formArrayName="locations" *ngFor="let item of organizationOnboardingForm.get('locations')['controls']; let i = index;">
+    <div [formGroupName]="i">
+      <mat-card class="mb-4 mat-elevation-z4">
+        <mat-form-field appearance="outline">
+          <mat-label>Location Name</mat-label>
+          <input type="text"
+            matInput
+            formControlName="name"
+            required
+          >
+          <mat-error>Please enter a location name</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <!-- [preferredCountries]="['us', 'vn']" -->
+          <lac-mat-country-selector matPrefix [selectorFor]="locationPhoneNumber"
+            [onlyCountries]="['us', 'vn']"
+            [showDialCode]="false"
+            [disableSearch]="false"
+            searchPlaceholder="Search..."
+            style="position: relative; bottom: 6px;"
+            >
+          </lac-mat-country-selector>
+          <mat-label>Phone Number</mat-label>
+          <lac-mat-tel-input #locationPhoneNumber formControlName="phoneNumber" required>
+          </lac-mat-tel-input>
+          <mat-error>Invalid phone number</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <!-- [preferredCountries]="['us', 'vn']" -->
+          <lac-mat-country-selector matPrefix [selectorFor]="locationFaxNumber"
+            [onlyCountries]="['us', 'vn']"
+            [showDialCode]="false"
+            [disableSearch]="false"
+            searchPlaceholder="Search..."
+            style="position: relative; bottom: 6px;"
+            >
+          </lac-mat-country-selector>
+          <mat-label>Fax Number</mat-label>
+          <lac-mat-tel-input #locationFaxNumber formControlName="faxNumber">
+          </lac-mat-tel-input>
+          <mat-error>Invalid fax number</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Address</mat-label>
+          <input
+          type="text"
+          matInput
+          ngx-google-places-autocomplete
+          formControlName="address"
+          placeholder="Please make sure to only select suggested address from Google"
+          (onAddressChange)="onLocationAddressChange($event, i)"
+          required>
+          <button mat-button *ngIf="organizationOnboardingForm.get('locations')['controls'][i].controls['address'].value" matSuffix mat-icon-button aria-label="Clear" (click)="onLocationAddressCancel(i)">
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-error>Please select a suggested address</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Address Line 2</mat-label>
+          <input
+          type="text"
+          matInput
+          formControlName="addressLineTwo"
+          placeholder="Apt/ spc/ #">
+        </mat-form-field>
+
+        <ng-container *ngFor="let day of operatingDays; let dayIndex = index">
+          <mat-checkbox class="mr-2" (change)="operatingDayChecked(i, dayIndex)" [checked]="organizationOnboardingForm.get('locations').value[i].operatingDays[dayIndex]">
+            {{day}}
+          </mat-checkbox>
+        </ng-container>
+
+        <mat-form-field class="col-lg p-0" appearance="outline">
+          <mat-label>Operating Times</mat-label>
+          <mat-chip-list #timeslices formControlName="operatingHours">
+            <mat-chip *ngFor="let item of organizationOnboardingForm.get('locations').value[i].operatingHours" [selectable]="true"
+                      [removable]="true" (removed)="removeOperatingHoursChip(i)">
+              {{item}}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            <input
+              placeholder="9:00-17:00"
+              [matChipInputFor]="timeslices"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              [matChipInputAddOnBlur]="false"
+              (matChipInputTokenEnd)="addOperatingHoursChip($event, i)">
+          </mat-chip-list>
+          <a *ngIf="i > 0"
+            matSuffix
+            mat-mini-fab
+            color="warn"
+            (click)="removeLocation(i)">
+            <mat-icon>delete</mat-icon>
+          </a>
+          <mat-error>Please enter at least 1 time slice</mat-error>
+        </mat-form-field>
+      </mat-card>
+
+    </div>
+  </div>
+  <div class="mb-4 d-flex justify-content-end">
+    <a mat-mini-fab color="primary" (click)="addLocation(organizationOnboardingForm)"><mat-icon>add</mat-icon></a>
+  </div>
+
+  <br>
+  <button *ngIf="!isLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Send</button>
+  <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+</form>

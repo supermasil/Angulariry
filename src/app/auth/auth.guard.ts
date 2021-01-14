@@ -25,7 +25,6 @@ export class AuthGuard implements CanActivate {
   checkLogin(url: string, data: {}) {
     const isAuth = this.authService.getIsAuth();
     if(!isAuth) {
-
       this.authService.redirectUrl = url;
       this.authService.redirectData = data;
       this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);

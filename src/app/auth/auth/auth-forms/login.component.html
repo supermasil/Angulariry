@@ -1,0 +1,27 @@
+<form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()' class="m-2">
+  <mat-form-field appearance="outline">
+    <mat-label>Email</mat-label>
+    <input
+    matInput
+    placeholder='johndoe@abc.com'
+    formControlName='email'
+    required
+    >
+    <mat-error>Please enter a valid email</mat-error>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Password</mat-label>
+    <input
+    type="password"
+    matInput
+    placeholder='Password'
+    formControlName='password'
+    autocomplete="false"
+    required
+    >
+    <mat-error>At least 6 characters are required</mat-error>
+  </mat-form-field>
+  <br>
+  <button *ngIf="!isLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Login</button>
+  <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+</form>

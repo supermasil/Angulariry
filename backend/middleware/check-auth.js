@@ -9,7 +9,7 @@ module.exports = {
       req.userData = {email: decodedToken.email, uid: decodedToken.uid};
       next();
     }).catch(function(error) {
-      console.log(error);
+      console.log("Prevented an unauthorized access");
       res.status(401).json({ message: "You are not authorized!"});
     });
   }

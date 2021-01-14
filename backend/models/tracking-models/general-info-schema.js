@@ -25,7 +25,6 @@ const GeneralInfoSchema = mongoose.Schema({
   creatorName: {type: String, required: true},
 
   filePaths: [{type: String}],
-  history: [{type: mongoose.Types.ObjectId, ref: "history"}],
   comments: [{type: mongoose.Types.ObjectId, ref: "comment"}]
 }, { _id: false });
 

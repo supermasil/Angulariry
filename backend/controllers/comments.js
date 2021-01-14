@@ -1,12 +1,12 @@
-const Comment = require('../models/comment');
+const CommentModel = require('../models/comment');
 const UserController = require("../controllers/users");
-const onlineTracking = require('../models/tracking-models/online-tracking');
+const OnlineTrackingModel = require('../models/tracking-models/online-tracking');
 const db = require('mongoose');
 
 exports.createComment = async (req, res, next) => {
   try {
     let user = await UserController.getUserHelper(req.userData.uid);
-    const comment = new Comment ({
+    const comment = new CommentModel ({
       creatorId: req.userData.uid,
       trackingId: req.body.trackingId,
       name: user.name,
@@ -18,12 +18,12 @@ exports.createComment = async (req, res, next) => {
 
     const session = await db.startSession();
     return await session.withTransaction(async () => {
-      let createdComment = await Comment.create([comment], {session: session}) // This returns an array
+      let createdComment = await CommentModel.create([comment], {session: session}) // This returns an array
         .then(createdComment => {
           return createdComment;
         });
 
-      await onlineTracking.findById(req.body.trackingId).session(session)
+      await OnlineTrackingModel.findById(req.body.trackingId).session(session)
         .then(async(foundTracking) => {
           foundTracking.comments.unshift(createdComment[0]._id);
           await foundTracking.save();
@@ -42,7 +42,7 @@ exports.createComment = async (req, res, next) => {
 }
 
 exports.deleteComment = async (req, res, next) => {
-  return await Comment.deleteOne({ _id: req.body._id, creatorId: req.userData.uid })
+  return await CommentModel.deleteOne({ _id: req.body._id, creatorId: req.userData.uid })
   .then(deletedCommentData => {
     if (deletedCommentData.deletedCount > 0) {
       return res.status(201).json({message: "Comment deleted sucessfully"});
@@ -57,13 +57,13 @@ exports.deleteComment = async (req, res, next) => {
 }
 
 exports.updateComment = async (req, res, next) => {
-  const comment = new Comment ({
+  const comment = new CommentModel ({
     imagePaths: req.body.imagePaths,
     content: req.body.content,
     attachmentPaths: req.body.attachmentPaths
   });
 
-  return await Comment.updateOne({ _id: req.body._id, creatorId: req.userData.uid }, comment)
+  return await CommentModel.updateOne({ _id: req.body._id, creatorId: req.userData.uid }, comment)
     .then(updatedComment => {
       if (updatedComment.nModified > 0) {
         return res.status(201).json({message: "Comment updated sucessfully"});

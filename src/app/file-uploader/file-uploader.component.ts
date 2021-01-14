@@ -57,7 +57,7 @@ export class FileUploaderComponent implements OnInit{
     this.filesPreview.splice(index, 1);
 
     let i = this.filesToAdd.indexOf(url);
-    if (i > 0) {
+    if (i >= 0) {
       this.filesToAdd.splice(i, 1);
       this.fileNames.splice(i, 1);
     }
@@ -80,6 +80,10 @@ export class FileUploaderComponent implements OnInit{
 
   getFilesToAdd() {
     return this.filesToAdd;
+  }
+
+  getFilesToDelete() {
+    return this.filesToDelete;
   }
 
   getFileNames() {

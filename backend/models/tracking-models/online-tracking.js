@@ -8,8 +8,8 @@ const ListItemSchema = require('./list-item-schema');
 const onlineTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
   carrierTracking: {type: mongoose.Types.ObjectId, ref: "carrier-tracking", index: true},
-  generalInfo: GeneralInfoSchema,
-  itemsList: [ListItemSchema]
+  generalInfo: {type: GeneralInfoSchema, required: true},
+  itemsList: {type: [ListItemSchema], required: true},
 }, {timestamps: true, autoCreate: true });
 
 onlineTrackingSchema.plugin(uniqueValidator); // Throw error if not unique

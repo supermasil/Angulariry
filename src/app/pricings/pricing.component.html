@@ -1,0 +1,481 @@
+<mat-tab-group class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
+  <mat-tab label="New Pricing">
+
+    <div *ngIf="newPricingForm">
+      <form [formGroup]="newPricingForm" (submit)="onAddNewItems()" (keydown.enter)="$event.preventDefault()" class="my-4">
+        <div formArrayName="items" *ngFor="let item of newPricingForm.get('items')['controls']; let i = index;">
+          <div [formGroupName]="i">
+            <mat-card class="mb-4 mat-elevation-z4">
+              <div class="row">
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Item Name</mat-label>
+                    <input matInput type="text" formControlName="name">
+                    <a
+                      *ngIf="newPricingForm.get('items')['controls'].length > 1"
+                      matSuffix
+                      mat-mini-fab
+                      color="warn"
+                      (click)="removeItem(newPricingForm, i)">
+                      <mat-icon>delete</mat-icon>
+                    </a>
+                    <mat-error *ngIf="newPricingForm.get('items')['controls'][i].getError('error', 'name') as error">{{error}}</mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Unit</mat-label>
+                    <mat-select matInput formControlName="unit" required>
+                      <mat-option *ngFor="let unit of units" [value]="unit">
+                        {{unit}}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-md-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Note</mat-label>
+                    <input matInput type="text" formControlName="content">
+                  </mat-form-field>
+                </div>
+              </div>
+
+
+              <div formArrayName="routes" *ngFor="let item of newPricingForm.get('items')['controls'][i].get('routes')['controls']; let r = index;">
+                <div [formGroupName]="r">
+                  <hr>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <auto-complete-input
+                        [dataObservable]="defaultLocations.asObservable()"
+                        [defaultValue]="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').value"
+                        (itemSelected)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event)"
+                        (inputInvalid)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue('')"
+                        [enforeSelection]="true"
+                        [matLabel]="'Origin'"
+                        [matErrorMessage]="'Please select one from the drowdown only'">
+                      </auto-complete-input>
+                      <div class="float-right" style="position: relative; bottom: 70px; right: 10px;">
+                        <a
+                          *ngIf="newPricingForm.get('items')['controls'][i].get('routes')['controls'].length > 1"
+                          matSuffix
+                          mat-mini-fab
+                          color="warn"
+                          (click)="removeRoute(newPricingForm, i, r)">
+                          <mat-icon>delete</mat-icon>
+                        </a>
+                      </div>
+                    </div>
+                    <div class="col-md-8">
+                      <div formArrayName="destinations" *ngFor="let item of newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls']; let d = index;">
+                        <div [formGroupName]="d">
+                          <div class="row">
+                            <div class="col">
+                              <auto-complete-input
+                                [dataObservable]="defaultLocations.asObservable()"
+                                [defaultValue]="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').value"
+                                (itemSelected)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event)"
+                                (inputInvalid)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue('')"
+                                [enforeSelection]="true"
+                                [matLabel]="'Destination'"
+                                [matErrorMessage]="'Please select one from the drowdown only'">
+                              </auto-complete-input>
+
+                              <mat-form-field appearance="outline">
+                                <mat-label>Price Per Unit</mat-label>
+                                <input matInput type="number" formControlName="pricePerUnit">
+                              </mat-form-field>
+                              <div class="row">
+                                <div class="col">
+                                  <mat-form-field appearance="outline">
+                                    <mat-label>Extra Change</mat-label>
+                                    <input matInput type="number" formControlName="extraCharge">
+                                  </mat-form-field>
+                                </div>
+                                <div class="col">
+                                  <mat-form-field appearance="outline">
+                                    <mat-label>Unit</mat-label>
+                                    <mat-select matInput formControlName="extraChargeUnit" required>
+                                      <mat-option *ngFor="let unit of extraChargeUnits" [value]="unit">
+                                        {{unit}}
+                                      </mat-option>
+                                    </mat-select>
+                                    <mat-error>Please select a unit</mat-error>
+                                    <a
+                                      *ngIf="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'].length > 1"
+                                      matSuffix
+                                      mat-mini-fab
+                                      color="warn"
+                                      (click)="removeDestination(newPricingForm, i, r, d)">
+                                      <mat-icon>delete</mat-icon>
+                                    </a>
+                                  </mat-form-field>
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-end">
+                    <button type="button" mat-raised-button color="primary" (click)="addDestination(newPricingForm, i, r)">Add destination</button>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-end mt-2">
+                <button type="button" mat-raised-button color="accent"(click)="addRoute(newPricingForm, i)">Add origin</button>
+              </div>
+            </mat-card>
+          </div>
+        </div>
+        <a *ngIf="selectedIndex==0" mat-mini-fab color="primary" class="float-right mb-4" (click)="addItem(newPricingForm)"><mat-icon>add</mat-icon></a>
+        <div class="mt-4" *ngIf="newPricingForm && selectedIndex == 0">
+          <button
+            mat-raised-button
+            color='primary'
+            type="submit"
+            class="mr-2">
+            Save
+          </button>
+          <button
+            mat-raised-button
+            color='warn'
+            type='button'
+            routerLink="/">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Edit Pricing">
+    <div *ngIf="editPricingForm">
+      <form [formGroup]="editPricingForm" (submit)="onEditItem()" (keydown.enter)="$event.preventDefault()" class="my-4">
+        <div>
+          <auto-complete-input
+            [dataObservable]="itemNames.asObservable()"
+            (itemSelected)="itemSelected($event)"
+            (inputInvalid)="''"
+            [enforeSelection]="true"
+            [matLabel]="'Item Name'"
+            [lockOption]="false"
+            [matErrorMessage]="'Please select one from the drowdown only'">
+          </auto-complete-input>
+        </div>
+        <div formArrayName="items" *ngFor="let item of editPricingForm.get('items')['controls']; let i = index;">
+          <div [formGroupName]="i">
+            <div *ngIf="selectedItem && item.value._id === selectedItem._id">
+              <mat-card class="mb-4 mat-elevation-z4">
+                <div class="row">
+                  <div class="col-md-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Item Name</mat-label>
+                      <input matInput type="text" formControlName="name" required>
+                      <a
+                        *ngIf="editPricingForm.get('items')['controls'].length > 1"
+                        matSuffix
+                        mat-mini-fab
+                        color="warn"
+                        (click)="removeItem(editPricingForm, i)">
+                        <mat-icon>delete</mat-icon>
+                      </a>
+                      <mat-error *ngIf="editPricingForm.get('items')['controls'][i].getError('error', 'name') as error">{{error}}</mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Unit</mat-label>
+                      <mat-select matInput formControlName="unit" required>
+                        <mat-option *ngFor="let unit of units" [value]="unit">
+                          {{unit}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Note</mat-label>
+                      <input matInput type="text" formControlName="content">
+                    </mat-form-field>
+                  </div>
+                </div>
+
+
+                <div formArrayName="routes" *ngFor="let item of editPricingForm.get('items')['controls'][i].get('routes')['controls']; let r = index;">
+                  <div [formGroupName]="r">
+                    <hr>
+                    <div class="row">
+                      <div class="col-md-4">
+                        <auto-complete-input
+                          [dataObservable]="defaultLocations.asObservable()"
+                          [defaultValue]="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').value"
+                          (itemSelected)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event)"
+                          (inputInvalid)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue('')"
+                          [enforeSelection]="true"
+                          [matLabel]="'Origin'"
+                          [matErrorMessage]="'Please select one from the drowdown only'">
+                        </auto-complete-input>
+                        <div class="float-right" style="position: relative; bottom: 70px; right: 10px;">
+                          <a
+                            *ngIf="editPricingForm.get('items')['controls'][i].get('routes')['controls'].length > 1"
+                            matSuffix
+                            mat-mini-fab
+                            color="warn"
+                            (click)="removeRoute(editPricingForm, i, r)">
+                            <mat-icon>delete</mat-icon>
+                          </a>
+                        </div>
+                      </div>
+                      <div class="col-md-8">
+                        <div formArrayName="destinations" *ngFor="let item of editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls']; let d = index;">
+                          <div [formGroupName]="d">
+                            <div class="row">
+                              <div class="col">
+                                <auto-complete-input
+                                  [dataObservable]="defaultLocations.asObservable()"
+                                  [defaultValue]="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').value"
+                                  (itemSelected)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event)"
+                                  (inputInvalid)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue('')"
+                                  [enforeSelection]="true"
+                                  [matLabel]="'Destination'"
+                                  [matErrorMessage]="'Please select one from the drowdown only'">
+                                </auto-complete-input>
+
+                                <mat-form-field appearance="outline">
+                                  <mat-label>Price Per Unit</mat-label>
+                                  <input matInput type="number" formControlName="pricePerUnit">
+                                </mat-form-field>
+                                <div class="row">
+                                  <div class="col">
+                                    <mat-form-field appearance="outline">
+                                      <mat-label>Extra Change</mat-label>
+                                      <input matInput type="number" formControlName="extraCharge">
+                                    </mat-form-field>
+                                  </div>
+                                  <div class="col">
+                                    <mat-form-field appearance="outline">
+                                      <mat-label>Unit</mat-label>
+                                      <mat-select matInput formControlName="extraChargeUnit" required>
+                                        <mat-option *ngFor="let unit of extraChargeUnits" [value]="unit">
+                                          {{unit}}
+                                        </mat-option>
+                                      </mat-select>
+                                      <mat-error>Please select a unit</mat-error>
+                                      <a
+                                        *ngIf="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'].length > 1"
+                                        matSuffix
+                                        mat-mini-fab
+                                        color="warn"
+                                        (click)="removeDestination(editPricingForm, i, r, d)">
+                                        <mat-icon>delete</mat-icon>
+                                      </a>
+                                    </mat-form-field>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                      <button type="button" mat-raised-button color="primary" (click)="addDestination(editPricingForm, i, r)">Add destination</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                  <button type="button" mat-raised-button color="accent"(click)="addRoute(editPricingForm, i)">Add origin</button>
+                </div>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4" *ngIf="selectedItem && selectedIndex == 1">
+          <button
+            mat-raised-button
+            color='primary'
+            type="submit"
+            class="mr-2">
+            Save
+          </button>
+          <button
+            mat-raised-button
+            color='warn'
+            type='button'
+            routerLink="/">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Customer Pricing">
+    <div class="mt-4">
+      <auto-complete-input
+        [dataObservable]="customerCodes.asObservable()"
+        (itemSelected)="userSelected($event)"
+        (inputInvalid)="''"
+        [enforeSelection]="true"
+        [matLabel]="'User'"
+        [lockOption]="false"
+        [matErrorMessage]="'Please select one from the drowdown only'">
+      </auto-complete-input>
+    </div>
+
+    <div *ngIf="isLoading">
+      <mat-spinner></mat-spinner>
+    </div>
+
+    <div>
+      <mat-form-field class="mt-2">
+        <mat-label>Filter</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Clothes" #input>
+      </mat-form-field>
+
+      <table mat-table
+            [dataSource]="dataSource" multiTemplateDataRows
+            matSort>
+
+        <!-- Header -->
+        <div *ngFor="let column of displayedColumns, index as i">
+          <ng-container matColumnDef="{{definedColumns[i]}}" >
+            <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="this.expandedElement = null;"> <h3>{{column}}</h3>  </th>
+            <td mat-cell *matCellDef="let item"><b>{{item[definedColumns[i]]}}</b></td>
+          </ng-container>
+        </div>
+
+        <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+        <!-- no <th></th> -->
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let item" [attr.colspan]="definedColumns.length">
+            <div class="item-detail"
+                [@detailExpand]="item == expandedElement ? 'expanded' : 'collapsed'">
+              <div class="mb-4">
+                <ng-container *ngFor="let route of item?.routes">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Origin</mat-label>
+                        <input matInput type="text" value="{{route?.origin}}" readonly="true">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-9">
+                      <ng-container *ngFor="let destination of route?.destinations">
+                        <div class="row">
+                          <div class="col-4">
+                            <mat-form-field appearance="outline">
+                              <mat-label>Destination</mat-label>
+                              <input matInput type="text" value="{{destination?.name}}" readonly="true">
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-4">
+                            <mat-form-field appearance="outline">
+                              <mat-label>Price per unit</mat-label>
+                              <input matInput type="text" value="{{destination?.pricePerUnit}}" readonly="true">
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-4">
+                            <mat-form-field appearance="outline">
+                              <mat-label>Extra charge</mat-label>
+                              <input matInput type="text" value="{{destination?.extraCharge}} {{destination?.extraChargeUnit}}" readonly="true">
+                            </mat-form-field>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="col-4">
+                            <mat-label>Customer Price Adjustment</mat-label>
+                          </div>
+
+                          <div class="col-4">
+                            <mat-form-field appearance="outline">
+                              <mat-label>Discount amount</mat-label>
+                              <input matInput type="number" min="-100" max="100" #perUnitDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).perUnitDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, $event.target.value, null, null)">
+                              <h5 style="color: red;" *ngIf="perUnitDiscountAmount.value > 100 || perUnitDiscountAmount.value < -100">Number must be between -100 and 100</h5>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                              <mat-label>Unit</mat-label>
+                              <mat-select [value]="getDiscountsForDestination(item._id, route._id, destination._id).perUnitDiscountUnit" (selectionChange)="onDiscountChange(item._id, route._id, destination._id, $event.value, null, null, null)">
+                                <mat-option *ngFor="let unit of discountUnits"  [value]="unit">
+                                  {{unit}}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-4">
+                            <mat-form-field appearance="outline">
+                              <mat-label>Discount amount</mat-label>
+                              <input matInput type="number" min="-100" max="100" #extraChargeDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, null, null, $event.target.value)">
+                              <h5 style="color: red;" *ngIf="extraChargeDiscountAmount.value > 100 || extraChargeDiscountAmount.value < -100">Number must be between -100 and 100</h5>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline">
+                              <mat-label>Unit</mat-label>
+                              <mat-select [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountUnit" (selectionChange)="onDiscountChange(item._id, route._id, destination._id, null, null, $event.value, null)">
+                                <mat-option *ngFor="let unit of discountUnits"  [value]="unit">
+                                  {{unit}}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <hr>
+                      </ng-container>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="definedColumns"></tr>
+        <tr mat-row *matRowDef="let element; columns: definedColumns;"
+            class="element-row"
+            [class.expanded-row]="expandedElement === element"
+            (click)="expandedElement = expandedElement === element ? null : element">
+        </tr>
+        <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">No data found</td>
+        </tr>
+
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+    </div>
+    <div class="mt-4" *ngIf="pricingForm && selectedIndex == 2">
+      <button
+        mat-raised-button
+        color='primary'
+        (click)="onUpdateItems()"
+        class="mr-2">
+        Save
+      </button>
+      <button
+        mat-raised-button
+        color='warn'
+        type='button'
+        routerLink="/">
+        Cancel
+      </button>
+    </div>
+
+  </mat-tab>
+</mat-tab-group>
+
+

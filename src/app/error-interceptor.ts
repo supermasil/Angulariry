@@ -1,15 +1,18 @@
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { catchError, tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from './alert-message/alert.service';
 import { GlobalConstants } from './global-constants';
+import { Router } from '@angular/router';
 
 // Any outgoing requests that return an error will be caught in this class
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  constructor(private alertService: AlertService) {}
+  constructor(
+    private alertService: AlertService
+    ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     return next.handle(req).pipe (

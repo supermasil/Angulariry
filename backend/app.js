@@ -9,6 +9,8 @@ const usersRoutes = require('./routes/users');
 const trackingsRoutes = require('./routes/trackings');
 const commentsRoutes = require('./routes/comments');
 const easyPostRoutes = require('./routes/easypost-webhook');
+const organizationstRoutes = require('./routes/organizations');
+const pricingstRoutes = require('./routes/pricings');
 
 // Firebase App (the core Firebase SDK) is always required and
 // must be listed before other Firebase SDKs
@@ -37,6 +39,7 @@ const options = {
   useCreateIndex: true,
 };
 
+
 mongoose.connect("mongodb+srv://supermasil:" + process.env.MONGO_ATLAS_PW + "@cluster0-8khn5.mongodb.net/node-angular?retryWrites=true&w=majority", options)
   .then(() => {
     console.log('Connected to database');
@@ -55,8 +58,8 @@ app.use((req, res, next) => {
 }); // this is used to allow angular to access backend, it's not needed if using integrated approach
 
 // ORDER MATTERS
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use('/tmp', express.static(path.join(__dirname, "tmp"))); // Allow access to images folder
 app.use('/', express.static(path.join(__dirname, "angular"))); // Allow access to angular folder (integrated approach)
 
@@ -65,6 +68,8 @@ app.use('/api/users', usersRoutes); // this route is reserved for backend
 app.use('/api/trackings', trackingsRoutes); // this route is reserved for backend
 app.use('/api/comments', commentsRoutes); // this route is reserved for backend
 app.use('/api/easypost', easyPostRoutes); // this route is reserved for backend
+app.use('/api/organizations', organizationstRoutes); // this route is reserved for backend
+app.use('/api/pricings', pricingstRoutes); // this route is reserved for backend
 app.use((req, res, next) => {
   // if (err.status === 404) {
   //   return res.sendFile(path.join(__dirname, "angular", "index.html"));

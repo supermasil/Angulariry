@@ -1,4 +1,4 @@
-<form [formGroup]='trackingForm' (submit)='onFuzzySearch()'>
+<!-- <form [formGroup]='trackingForm' (submit)='onFuzzySearch()'>
   <div class="d-flex">
     <a
       mat-mini-fab
@@ -60,7 +60,6 @@
             <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ tracking._id + indexOfelement">
               <img [src]="item">
             </div>
-            <!-- Modal -->
             <div class="modal fade" id="modal-{{tracking._id + indexOfelement}}" tabindex="-1" role="dialog" aria-hidden="true">
               <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
@@ -80,14 +79,12 @@
 
         <div class="row">
           <div class="col-md-6">
-            <!-- <div class="mat-title">Note</div> -->
             <div class="scroll-box">
               <p>{{ tracking.content }}</p>
             </div>
           </div>
           <div class="col-md-6 mt-xs-2 mt-md-0">
 
-            <!-- <div class="mat-title mt-3 mt-md-0">Comment</div> -->
             <ng-container *ngIf="userIsAuthenticated">
               <form [formGroup]='commentForm' #f='ngForm' (submit)='onCommentSubmit(tracking._id)' (keydown.meta.Enter)="onCommentSubmit(tracking._id)">
                 <div class="d-flex">
@@ -130,19 +127,9 @@
         <div class="d-inline-flex align-items-center">
           <mat-slide-toggle (change)="onReceivedToggled($event.checked, tracking)" color="primary" checked="{{tracking.status === 'received_at_us_warehouse'}}">Received</mat-slide-toggle>
         </div>
-        <a mat-button color='primary' [routerLink]="['/edit', tracking._id]" >Edit</a>
+        <a mat-button color='primary' [routerLink]="['/trackings/edit', tracking._id]" >Edit</a>
         <button mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</button>
       </div>
-
-      <!-- <div *ngIf="userIsAuthenticated && userId !== tracking.creatorId">
-        <div *ngIf="!subscribedTrackings.includes(tracking._id); else subscribed">
-          <button mat-raised-button color='primary' (click)='onSubscribe(tracking._id)'>Subscribe</button>
-        </div>
-
-        <ng-template #subscribed>
-          <button mat-raised-button color='warn' (click)='onUnSubscribe(tracking._id)'>Unsubscribe</button>
-        </ng-template>
-      </div> -->
 
     </mat-action-row>
   </mat-expansion-panel>
@@ -167,4 +154,4 @@
 <mat-paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [pageSize]='trackingsPerPage' [pageSizeOptions]='pageSizeOptions' (page)='onChangedPage($event)'></mat-paginator>
 
 
-
+ -->

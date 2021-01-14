@@ -1,0 +1,107 @@
+<form [formGroup]='onlineForm' (submit)='onSave()' class="my-4" (keydown.enter)="$event.preventDefault()">
+  <div class="row">
+    <mat-form-field appearance="outline" class="col-lg-4">
+      <mat-label>Tracking Number</mat-label>
+      <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+      <a
+        matSuffix
+        mat-mini-fab
+        color="basic"
+        [cdkCopyToClipboard]="trackingNumber.value">
+        <mat-icon>content_copy</mat-icon>
+      </a>
+    </mat-form-field>
+
+    <div class="d-flex col-lg-8">
+      <mat-form-field appearance="outline">
+        <mat-label>Carrier Tracking Number</mat-label>
+        <input
+        matInput
+        type='text'
+        formControlName='carrierTrackingNumber'>
+        <button *ngIf="onlineForm.controls['trackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['trackingNumber'].setValue('')">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-error>Please enter a Tracking Number</mat-error>
+      </mat-form-field>
+      <a
+        mat-mini-fab
+        color='primary'
+        class="mt-2 d-inline ml-2"
+        (click)="scannerOpened = !scannerOpened">
+        <mat-icon>qr_code</mat-icon>
+      </a>
+    </div>
+  </div>
+  <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
+
+  <div class="row">
+    <mat-form-field appearance="outline" class="col-lg-4">
+      <mat-label>Carrier</mat-label>
+      <mat-select formControlName="carrier">
+        <mat-option *ngFor="let carrier of carriers" [value]="carrier">
+          {{carrier}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please choose a carrier</mat-error>
+      <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
+    </mat-form-field>
+
+    <div class="col-lg-4">
+      <auto-complete-input
+        [dataObservable]="customerCodesSubject.asObservable()"
+        (itemSelected)="this.onlineForm.controls['customerCode'].setValue($event)"
+        (inputInvalid)="this.onlineForm.controls['customerCode'].setValue('')"
+        [enforeSelection]="true"
+        [matLabel]="'Customer Code'"
+        [matErrorMessage]="'Please select one from the drowdown only'">
+      </auto-complete-input>
+    </div>
+
+    <mat-form-field appearance="outline" class="col-lg-4">
+      <mat-label>Status</mat-label>
+      <mat-select matInput formControlName="status" autoActiveFirstOption>
+        <mat-option *ngFor="let option of internalStatus" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please select a status</mat-error>
+    </mat-form-field>
+
+  </div>
+
+  <div class="mt-2">
+    <file-uploader #fileUploader></file-uploader>
+  </div>
+
+  <div class="mt-2">
+    <items-list #itemsList></items-list>
+  </div>
+
+
+  <mat-form-field appearance="outline" class="mt-4">
+    <mat-label>Notes</mat-label>
+    <textarea
+    matInput
+    rows='10'
+    formControlName='content'
+    ></textarea>
+    <mat-error>Please enter some post content</mat-error>
+  </mat-form-field>
+
+  <div class="mt-2">
+    <button
+    mat-raised-button
+    color='primary'
+    type='submit'
+    class="mr-2">
+    Save
+    </button>
+    <button
+      mat-raised-button
+      color='warn'
+      type=''>
+      Cancel
+    </button>
+  </div>
+</form>

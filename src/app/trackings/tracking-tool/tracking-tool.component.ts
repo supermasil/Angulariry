@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TrackingService } from '../tracking.service';
 import {STEPPER_GLOBAL_OPTIONS} from '@angular/cdk/stepper';
-import { Tracker } from '../models/easy-post-models/tracker.model';
-import { TrackingDetail } from '../models/easy-post-models/tracking-details.model';
+import { TrackerModel } from '../../models/easy-post-models/tracker.model';
+import { TrackingDetailModel } from '../../models/easy-post-models/tracking-details.model';
 import { GeneralMethods } from '../../shared/general-methods';
 import { TrackingGlobals } from '../tracking-globals';
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
@@ -37,7 +37,7 @@ export class TrackingToolComponent implements OnInit {
   scannerOpened = false;
 
   tracked = false;
-  tracker: Tracker;
+  tracker: TrackerModel;
 
   private codeScannerSub: Subscription;
 
@@ -85,7 +85,7 @@ export class TrackingToolComponent implements OnInit {
         this.isLoading = false;
         // let status = trackerData["status"];
         this.tracked = true;
-        this.tracker = trackerData as Tracker;
+        this.tracker = trackerData as TrackerModel;
         this.setTrackingDetails(this.tracker);
       }, error => {
         this.isLoading = false;
@@ -93,24 +93,24 @@ export class TrackingToolComponent implements OnInit {
       });
   }
 
-  setTrackingDetails(tracker: Tracker) {
+  setTrackingDetails(tracker: TrackerModel) {
     tracker.tracking_details.forEach(element => {
       if (this.preTransitCodes.includes(element.status)) {
         element.tracking_location = tracker.carrier_detail.origin_tracking_location;
-        this.inTransitTrackingDetails.unshift(element as TrackingDetail);
+        this.inTransitTrackingDetails.unshift(element as TrackingDetailModel);
         this.shippingProgress[0] = true;
         this.stepCompletion[0] = true;
       } else if(this.inTransitCodes.includes(element.status)) {
-        this.inTransitTrackingDetails.unshift(element as TrackingDetail);
+        this.inTransitTrackingDetails.unshift(element as TrackingDetailModel);
         this.shippingProgress[1] = true;
         this.stepCompletion[0] = true;
       } else if (this.deliveryCodes.includes(element.status)) {
-        this.deliveryTrackingDetails.unshift(element as TrackingDetail);
+        this.deliveryTrackingDetails.unshift(element as TrackingDetailModel);
         this.shippingProgress[2] = true;
         this.stepCompletion[1] = true;
         this.stepCompletion[2] = true;
       } else if (this.failureCodes.includes(element.status)) {
-        this.failureTrackingDetails.unshift(element as TrackingDetail);
+        this.failureTrackingDetails.unshift(element as TrackingDetailModel);
         this.shippingProgress[3] = true;
       }
     });

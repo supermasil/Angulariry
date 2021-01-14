@@ -3,8 +3,16 @@ const router = express.Router();
 const UserController = require("../controllers/users");
 const checkAuth = require("../middleware/check-auth");
 
-router.post('/signup', UserController.createUser);
+router.post('/', UserController.createUpdateUser);
 
-router.get('/getuser', checkAuth.isAuthenticated, UserController.getUser);
+router.get('/byOrg/:id', UserController.getUsersByOrgId) // Get one
+
+router.get('/:id', UserController.getUser) // Get one
+
+router.get('/', UserController.getUsers); // Get All
+
+// router.delete('/:id', UserController.deleteUser);
+
+router.put('/:id', UserController.createUpdateUser);
 
 module.exports = router;

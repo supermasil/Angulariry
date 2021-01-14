@@ -8,10 +8,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { GooglePlaceModule } from "ngx-google-places-autocomplete";
+import { LoginFormComponent } from './auth/auth-forms/login.component';
+import { PasswordResetFormComponent } from './auth/auth-forms/password-reset.component';
+import { SignUpFormComponent } from './auth/auth-forms/signup.component';
+import { OnboardingFormComponent } from './auth/auth-forms/onboarding.component';
+import { AutoCompleteInputModule } from '../custom-components/auto-complete-input/auto-complete-input.module';
 
 @NgModule({
   declarations: [
-    AuthComponent
+    AuthComponent,
+    LoginFormComponent,
+    PasswordResetFormComponent,
+    SignUpFormComponent,
+    OnboardingFormComponent
   ],
   imports: [
     CommonModule,
@@ -21,7 +30,8 @@ import { GooglePlaceModule } from "ngx-google-places-autocomplete";
     MatFormFieldModule,
     MatButtonModule,
     LacMatTelInputModule,
-    GooglePlaceModule
+    GooglePlaceModule,
+    AutoCompleteInputModule
   ]
 })
 export class AuthModule {}

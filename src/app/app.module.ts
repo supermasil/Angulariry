@@ -15,10 +15,10 @@ import { FrontPageModule } from './front-page/front-page.module';
 import { AngularFireModule } from '@angular/fire';
 import { environment } from 'src/environments/environment';
 import { AlertModule } from './alert-message';
-import { TrackingModule } from './trackings/tracking.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { SpinnerInterceptor } from './spinner-interceptor';
 import { NgxImageCompressService } from 'ngx-image-compress';
+import { VarDirective } from './directives/ng-var.directive';
 
 
 // import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
@@ -37,7 +37,8 @@ import { NgxImageCompressService } from 'ngx-image-compress';
     AngularMaterialModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AlertModule,
-    TrackingModule,
+    // TrackingModule,
+    // PricingModule,
     FrontPageModule,
     NgxSpinnerModule
   ],

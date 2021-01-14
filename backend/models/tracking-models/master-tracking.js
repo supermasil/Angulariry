@@ -8,7 +8,7 @@ const GeneralInfoSchema = require('./general-info-schema');
 const masterTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
   consolidatedTrackings: [{type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}],
-  generalInfo: GeneralInfoSchema,
+  generalInfo: {type: GeneralInfoSchema, required: true}
 }, {timestamps: true, autoCreate: true });
 
 masterTrackingSchema.plugin(uniqueValidator); // Throw error if not unique

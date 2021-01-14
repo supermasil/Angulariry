@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { stringify } from 'querystring';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Comment } from './comment.model';
+import { CommentModel } from '../models/comment.model';
 
 const BACKEND_URL = environment.apiURL + "/comments/"
 
@@ -19,12 +19,12 @@ export class CommentService {
       "imagePaths": imagePaths,
       "attachementPaths": attachmentPaths
     }
-    return this.httpClient.post<{message: string, comment: Comment}>(BACKEND_URL, commentData);
+    return this.httpClient.post<{message: string, comment: CommentModel}>(BACKEND_URL, commentData);
   }
 
   getComments(trackingId: string) {
     const queryParams = `?trackingId=${trackingId}`;
-    return this.httpClient.get<{message: string, comments: [Comment]}>(BACKEND_URL + queryParams)
+    return this.httpClient.get<{message: string, comments: [CommentModel]}>(BACKEND_URL + queryParams)
       .subscribe(responseData => {
         return responseData.comments
       });

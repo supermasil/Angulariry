@@ -17,6 +17,14 @@ export class SpinnerInterceptor implements HttpInterceptor{
       });
 
       this.count++;
+
+      // This is just in case the spinner got stuck
+      setTimeout(() => {
+        if (this.count > 0) {
+          location.reload();
+        }
+      }, 2500);
+
       return next.handle(req)
         .pipe(tap(
             // event => console.log(event),

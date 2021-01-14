@@ -10,7 +10,7 @@ const consolidatedTrackingSchema = mongoose.Schema({
   onlineTrackings: [{type: mongoose.Types.ObjectId, ref: "online-tracking"}],
   servicedTrackings: [{type: mongoose.Types.ObjectId, ref: "serviced-tracking"}],
   inPersonTrackings: [{type: mongoose.Types.ObjectId, ref: "in-person-tracking"}],
-  generalInfo: GeneralInfoSchema,
+  generalInfo: {type: GeneralInfoSchema, required: true}
 }, {timestamps: true, autoCreate: true });
 
 consolidatedTrackingSchema.plugin(uniqueValidator); // Throw error if not unique

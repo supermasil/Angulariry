@@ -1,0 +1,112 @@
+<form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
+  <div class="row">
+    <mat-form-field appearance="outline" class="col-lg-6">
+      <mat-label>Tracking Number</mat-label>
+      <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+      <a
+        matSuffix
+        mat-mini-fab
+        color="basic"
+        [cdkCopyToClipboard]="trackingNumber.value">
+        <mat-icon>content_copy</mat-icon>
+      </a>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="col-lg-6">
+      <mat-label>Status</mat-label>
+      <mat-select matInput formControlName="status" autoActiveFirstOption>
+        <mat-option *ngFor="let option of internalStatus" [value]="option">
+          {{option}}
+        </mat-option>
+      </mat-select>
+      <mat-error>Please select a status</mat-error>
+    </mat-form-field>
+  </div>
+
+  <div class="row">
+    <div class="col">
+        <auto-complete-input #sender  [matLabel]="'Sender'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+    </div>
+    <div class="col">
+        <auto-complete-input #recipient  [matLabel]="'Recipient'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col">
+      <mat-form-field appearance="outline">
+        <mat-label>Origin</mat-label>
+        <mat-select matInput formControlName="origin" autoActiveFirstOption>
+          <mat-option *ngFor="let option of origins" [value]="option">
+            {{option}}
+          </mat-option>
+        </mat-select>
+        <mat-error>Please select an origin</mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col">
+      <mat-form-field appearance="outline">
+        <mat-label>Destination</mat-label>
+        <mat-select matInput formControlName="destination">
+          <mat-option *ngFor="let option of destinations" [value]="option">
+            {{option}}
+          </mat-option>
+        </mat-select>
+        <mat-error>Please select an destination</mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row">
+    <div class="col-sm-3">
+      <mat-form-field appearance="outline">
+        <mat-label>Total weight (KG)</mat-label>
+          <input
+          type='text'
+          matInput
+          formControlName='weight'
+          >
+        <mat-error>Please enter a weight</mat-error>
+      </mat-form-field>
+    </div>
+    <div class="col-sm-9">
+      <mat-checkbox matInput formControlName='payAtDestination' class="p-2">Pay at destination</mat-checkbox>
+      <mat-checkbox matInput formControlName='receiveAtDestinationWH' class="p-2">Receive at destination WH</mat-checkbox>
+    </div>
+  </div>
+
+  <div class="my-2">
+    <file-uploader></file-uploader>
+  </div>
+
+  <items-list></items-list>
+
+  <mat-form-field appearance="outline" class="mt-4">
+    <mat-label>Notes</mat-label>
+    <textarea
+    matInput
+    rows='10'
+    formControlName='content'
+    ></textarea>
+    <mat-error>Please enter some post content</mat-error>
+  </mat-form-field>
+
+  <div class="mt-2">
+    <button
+    mat-raised-button
+    color='primary'
+    type='submit'
+    class="mr-2">
+    Save
+    </button>
+    <button
+      mat-raised-button
+      color='warn'
+      type=''>
+      Cancel
+    </button>
+  </div>
+
+</form>
