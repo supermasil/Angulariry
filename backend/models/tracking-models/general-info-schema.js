@@ -1,18 +1,19 @@
 const mongoose = require('mongoose');
+const RecipientSchema = require('../recipient');
 
 const shippingOptionsSchema = mongoose.Schema({
-  payAtDestination: {type: Boolean, required: true},
-  receiveAtDestination: {type: Boolean, required: true},
+  payAtDestination: {type: Boolean, default: false},
+  receiveAtDestination: {type: Boolean, default: false},
 }, {_id: false});
 
 // This is only used at sub-document
 const GeneralInfoSchema = mongoose.Schema({
-  customerCode: {type: String, required: true, unique: true}, // Unique index
+  sender: {type: String, required: true, unique: true}, // Unique index
+  recipient: RecipientSchema,
   organizationId: {type: mongoose.Types.ObjectId, ref: "organization"},
   content: {type: String, default: ''}, // Note
   status: {type: String, required: true},
   active: {type: Boolean, required: true}, // This should be false to prevent edit after certain stage
-  type: {type: String, required: true}, // Online Order...
   weight: {type: Number, default: 0}, // Can be updated later on
   finalCost: {type: Number, defaul: 0}, // The money to charge customer
 

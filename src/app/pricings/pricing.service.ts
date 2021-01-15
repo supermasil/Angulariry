@@ -2,8 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
-import { CommentService } from '../comments/comment.service';
-import { AlertService } from '../alert-message';
 import { PricingModel } from '../models/pricing.model';
 
 const BACKEND_URL = environment.apiURL + "/pricings/";

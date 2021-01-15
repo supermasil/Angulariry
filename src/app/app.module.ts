@@ -18,10 +18,7 @@ import { AlertModule } from './alert-message';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { SpinnerInterceptor } from './spinner-interceptor';
 import { NgxImageCompressService } from 'ngx-image-compress';
-import { VarDirective } from './directives/ng-var.directive';
 
-
-// import { AuthModule } from './auth/auth.module'; // Remove to make it lazily loader
 
 @NgModule({
   declarations: [
@@ -37,8 +34,6 @@ import { VarDirective } from './directives/ng-var.directive';
     AngularMaterialModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AlertModule,
-    // TrackingModule,
-    // PricingModule,
     FrontPageModule,
     NgxSpinnerModule
   ],

@@ -11,8 +11,7 @@ import { Observable, of, Subscription } from "rxjs";
 export class AutoCompleteInputComponent implements OnInit, OnDestroy {
 
   data = [];
-  dataSubscription: Subscription;
-  @Input() dataObservable: Observable<string[]>;
+  @Input() dataObservable: Observable<string[]> = new Observable();
   @Input() matLabel = "";
   @Input() matErrorMessage = "";
   @Input() enforeSelection = false;
@@ -36,7 +35,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
       item: new FormControl({value: this.defaultValue, disabled: this.defaultValue != ""} , {validators:[this.autoCompleteValidator()]})
     });
 
-    this.dataSubscription = this.dataObservable?.subscribe(data => {
+    this.dataObservable.subscribe(data => {
       this.data = data;
       this.resetFilteredData();
       this.cdr.detectChanges();
@@ -46,7 +45,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.dataSubscription?.unsubscribe();
+
   }
 
   autoCompleteValidator(): ValidatorFn {

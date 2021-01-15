@@ -17,9 +17,11 @@ const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
 export class AuthService {
   private authStatusListener = new ReplaySubject<boolean>();
   private firebaseUserSubject = new ReplaySubject<firebase.User>();
-  private mongoDbUserSubject = new ReplaySubject<any>();
+  private mongoDbUserSubject = new ReplaySubject<UserModel>();
+  private userOrgSubject = new ReplaySubject<OrganizationModel>();
   private firebaseUser: firebase.User;
   private mongoDbUser: UserModel;
+  private userOrg: OrganizationModel;
   public redirectUrl: string;
   public redirectData = {};
   private signUpMode = false;
@@ -37,21 +39,28 @@ export class AuthService {
     if (firebaseUser) {
       this.getUser(firebaseUser.uid).subscribe(async (user: UserModel) => {
         if (firebaseUser.uid === user._id) {
-          await this.authenticate(firebaseUser, user);
-          this.redirecting();
-          if (this.loginMode) {
-            this.alertService.success("Logged in successfully", GlobalConstants.flashMessageOptions);
-            this.loginMode = false;
-          }
+          this.getOrganization(user.organization).subscribe(async (org: OrganizationModel) => {
+            await this.authenticate(firebaseUser, user, org);
+            this.redirecting();
+            if (this.loginMode) {
+              this.alertService.success("Logged in successfully", GlobalConstants.flashMessageOptions);
+              this.loginMode = false;
+            }
+          }, error => {
+            this.failedRefresh();
+          })
         }
       }, error => {
-        this.unAuthenticate();
-        this.authStatusListener.next(false);
+        this.failedRefresh();
       });
     } else {
-      this.unAuthenticate();
-      this.authStatusListener.next(false);
+      this.failedRefresh();
     }
+  }
+
+  failedRefresh() {
+    this.unAuthenticate();
+    this.authStatusListener.next(false);
   }
 
   redirecting() {
@@ -78,7 +87,7 @@ export class AuthService {
   }
 
 
-  async authenticate(firebaseUser: firebase.User, mongoDbUser: UserModel) {
+  async authenticate(firebaseUser: firebase.User, mongoDbUser: UserModel, userOrg: OrganizationModel) {
     await this.setupSessionStorage(firebaseUser); // Has to await here. SET THIS UP RIGHT AWAY
     await firebaseUser.getIdTokenResult().then(idTokenResult => {
       const authTime = idTokenResult.claims.auth_time * 1000;
@@ -87,6 +96,7 @@ export class AuthService {
       setTimeout(() => {this.alertService.warn("Session times out after 8 hours, please re-login", GlobalConstants.flashMessageOptions); this.logout();}, millisecondsUntilExpiration);
       this.firebaseUser = firebaseUser;
       this.mongoDbUser = mongoDbUser;
+      this.userOrg = userOrg;
       this.refreshUsers();
       this.authStatusListener.next(true);
       console.log("User authenticated");
@@ -104,6 +114,7 @@ export class AuthService {
   refreshUsers() {
     this.firebaseUserSubject.next(this.firebaseUser);
     this.mongoDbUserSubject.next(this.mongoDbUser);
+    this.userOrgSubject.next(this.userOrg);
   }
 
   async login(email: string, password: string) {
@@ -229,6 +240,10 @@ export class AuthService {
 
   getMongoDbUserListener() {
     return this.mongoDbUserSubject.asObservable();
+  }
+
+  getUserOrgListener() {
+    return this.userOrgSubject.asObservable();
   }
 
   getIsAuth() {

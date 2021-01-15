@@ -10,11 +10,12 @@ export interface ServicedTrackingModel { // From backend
     declaredValue: number;
     specifications: string;
     quantity: number;
-    orderNumbers: [string]; // A link can have multiple order numbers
+    orderNumbers: string[]; // A link can have multiple order numbers
     carrierTrackings: [CarrierTrackingModel];
   }];
   generalInfo: GeneralInfoModel;
-  itemsList: [ListItemModel];
+  itemsList: ListItemModel[];
+  linkedTo: string[];
   createdAt: Date;
   updatedAt: Date;
 }

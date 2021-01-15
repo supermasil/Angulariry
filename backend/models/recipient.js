@@ -7,6 +7,6 @@ const RecipientSchema = mongoose.Schema({
   email: { type: String }, // Doesn't have to have email
   phoneNumber: { type: String, required: true},
   address: {type: AddressSchema, required: true}
-}, { _id: false });
+});
 
 module.exports = RecipientSchema;

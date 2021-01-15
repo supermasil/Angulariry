@@ -23,7 +23,7 @@ export class SpinnerInterceptor implements HttpInterceptor{
         if (this.count > 0) {
           location.reload();
         }
-      }, 2500);
+      }, 10000);
 
       return next.handle(req)
         .pipe(tap(

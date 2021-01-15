@@ -1,12 +1,13 @@
 import { CommentModel } from '../comment.model';
+import { RecipientModel } from '../recipient.model';
 
 export interface GeneralInfoModel { // From backend
-  customerCode: string; // Unique index
+  sender: string; // Unique index
+  recipient: RecipientModel;
   organizationId: string;
   content: string; // Note
   status: string;
   active: boolean; // This should be false to prevent edit after certain stage
-  type: string; // Online Order...
   weight: number; // Can be updated later on
   finalCost: number; // The money to charge customer
 

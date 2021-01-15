@@ -5,8 +5,8 @@
         <div class="col-lg px-2 pr-lg-1 pl-lg-0">
           <auto-complete-input
             [dataObservable]="itemNamesSubject.asObservable()"
-            (itemSelected)="itemsForm.get('items')['controls'][i].controls['name'].setValue($event.value)"
-            (inputInvalid)="itemsForm.get('items')['controls'][i].controls['name'].setValue('')"
+            (itemSelected)="itemSelected($event, i)"
+            (inputInvalid)="itemInvalid(i)"
             [enforeSelection]="false"
             [matLabel]="'Item name'">
           </auto-complete-input>
@@ -34,9 +34,18 @@
           <input matInput type="number" formControlName="weight" min="0">
         </mat-form-field>
         <mat-form-field appearance="fill" floatLabel="always" class="col-lg px-2 pr-lg-0">
+          <mat-label>Unit charge</mat-label>
+          <input matInput type="number" formControlName="unitCharge">
+          <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+        <mat-form-field appearance="fill" floatLabel="always" class="col-lg px-2 pr-lg-0">
           <mat-label>Extra charge</mat-label>
           <input matInput type="number" formControlName="extraCharge">
           <span matPrefix>$&nbsp;</span>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+          <mat-label>Status</mat-label>
+          <input matInput type="text" formControlName="status">
           <a
             matSuffix
             mat-mini-fab

@@ -5,6 +5,6 @@ const AddressSchema = mongoose.Schema({
   address: {type: String, required: true },
   addressLineTwo: {type: String},
   addressUrl: {type: String},
-}, { _id: false });
+});
 
 module.exports = AddressSchema;

@@ -6,10 +6,11 @@ import { ServicedTrackingModel } from "./serviced-tracking.model";
 export interface ConsolidatedTrackingModel { // From backend
   _id: string;
   trackingNumber: string;
-  onlineTrackings: [OnlineTrackingModel];
-  servicedTrackings: [ServicedTrackingModel];
-  inPersonTrackings: [InPersonTrackingModel];
+  onlineTrackings: OnlineTrackingModel[];
+  servicedTrackings: ServicedTrackingModel[];
+  inPersonTrackings: InPersonTrackingModel[];
   generalInfo: GeneralInfoModel;
+  linkedTo: string[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -7,7 +7,8 @@ export interface OnlineTrackingModel { // From backend
   trackingNumber: string;
   carrierTracking: CarrierTrackingModel;
   generalInfo: GeneralInfoModel;
-  itemsList: [ListItemModel];
+  itemsList: ListItemModel[];
+  linkedTo: string[];
   createdAt: Date;
   updatedAt: Date;
 }

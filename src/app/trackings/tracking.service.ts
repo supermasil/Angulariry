@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone } from "@angular/core";
+import { Injectable, NgZone, OnInit } from "@angular/core";
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -27,7 +27,7 @@ const TrackingTypes = Object.freeze({
 });
 
 @Injectable({ providedIn: "root"})
-export class TrackingService {
+export class TrackingService{
   private onlineTrackings: OnlineTrackingModel[] = [];
   private onlineTrackingsUpdated = new Subject<{trackings: OnlineTrackingModel[], count: number}>();
 

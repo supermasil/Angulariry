@@ -176,14 +176,14 @@
                     <mat-form-field appearance="outline">
                       <mat-label>Item Name</mat-label>
                       <input matInput type="text" formControlName="name" required>
-                      <a
+                      <!-- <a
                         *ngIf="editPricingForm.get('items')['controls'].length > 1"
                         matSuffix
                         mat-mini-fab
                         color="warn"
                         (click)="removeItem(editPricingForm, i)">
                         <mat-icon>delete</mat-icon>
-                      </a>
+                      </a> -->
                       <mat-error *ngIf="editPricingForm.get('items')['controls'][i].getError('error', 'name') as error">{{error}}</mat-error>
                     </mat-form-field>
                   </div>
@@ -403,7 +403,7 @@
                             <mat-form-field appearance="outline">
                               <mat-label>Discount amount</mat-label>
                               <input matInput type="number" min="-100" max="100" #perUnitDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).perUnitDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, $event.target.value, null, null)">
-                              <h5 style="color: red;" *ngIf="perUnitDiscountAmount.value > 100 || perUnitDiscountAmount.value < -100">Number must be between -100 and 100</h5>
+                              <!-- <h5 style="color: red;" *ngIf="perUnitDiscountAmount.value > 100 || perUnitDiscountAmount.value < -100">Number must be between -100 and 100</h5> -->
                             </mat-form-field>
 
                             <mat-form-field appearance="outline">
@@ -420,7 +420,7 @@
                             <mat-form-field appearance="outline">
                               <mat-label>Discount amount</mat-label>
                               <input matInput type="number" min="-100" max="100" #extraChargeDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, null, null, $event.target.value)">
-                              <h5 style="color: red;" *ngIf="extraChargeDiscountAmount.value > 100 || extraChargeDiscountAmount.value < -100">Number must be between -100 and 100</h5>
+                              <!-- <h5 style="color: red;" *ngIf="extraChargeDiscountAmount.value > 100 || extraChargeDiscountAmount.value < -100">Number must be between -100 and 100</h5> -->
                             </mat-form-field>
 
                             <mat-form-field appearance="outline">

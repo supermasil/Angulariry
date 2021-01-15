@@ -4,5 +4,7 @@ export interface ListItemModel { // From backend
   quantity: number;
   insurance: string;
   weight: number;
+  unitCharge: number;
   extraCharge: number;
+  status: string;
 }

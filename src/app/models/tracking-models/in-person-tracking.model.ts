@@ -8,7 +8,8 @@ export interface InPersonTrackingModel { // From backend
   // sender is customer code
   recipient: RecipientModel;
   generalInfo: GeneralInfoModel;
-  itemsList: [ListItemModel];
+  itemsList: ListItemModel[];
+  linkedTo: string[];
   createdAt: Date;
   updatedAt: Date;
 }

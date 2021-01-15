@@ -16,6 +16,7 @@ import { FileUploaderModule } from '../file-uploader/file-uploader.module';
 import { AutoCompleteInputModule } from '../custom-components/auto-complete-input/auto-complete-input.module';
 import { TrackingRoutingModule } from './tracking-routing.module';
 import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-create-edit.component';
+import { GeneralInfoComponent } from './tracking-create-edit/general-info/general-info.component';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-cre
     InPersonFormCreateComponent,
     ConsolidatedFormCreateComponent,
     MasterFormCreateComponent,
-    ItemsListComponent
+    ItemsListComponent,
+    GeneralInfoComponent
   ],
   imports: [
     CommonModule,

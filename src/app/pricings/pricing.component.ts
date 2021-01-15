@@ -63,7 +63,7 @@ export class PricingComponent implements OnInit {
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
       this.selectedUser = user;
-      this.authService.getOrganization(user.organization).subscribe((org: OrganizationModel) => {
+      this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocations.next(org.locations.map(item => item.name));
         this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
@@ -106,22 +106,21 @@ export class PricingComponent implements OnInit {
   itemNamesValidator(form: FormGroup): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
       let currentItems = [];
-      let currentFormItems = form.get('items')['controls'].map(item => item['controls'].name.value);// Tricky as fuck, can't use .value because the value is not updated
+
       if ((control && control.value)) {
+        let currentFormItems = form.get('items')['controls'].map(item => item['controls'].name.value.toLowerCase());// Tricky as fuck, can't use .value because the value is not updated
         if (this.selectedIndex == 0 && this.orgDefaultPricing) {
-          currentItems = this.orgDefaultPricing.items.map(item => item.name);
+          currentItems = this.orgDefaultPricing.items.map(item => item.name.toLowerCase());
           currentItems = currentItems.concat(currentFormItems);
         } else {
           currentItems = currentFormItems;
         }
 
-
-
         form.get('items')['controls'].forEach(element => {
-          if (currentFormItems.filter(item => item === element['controls'].name.value).length > 1) {
+          if (currentFormItems.filter(item => item === element['controls'].name.value.toLowerCase()).length > 1) {
             element['controls'].name.setErrors({error: "Duplicate item name"});
             return {error: "Duplicate item name"};
-          } else if (currentItems.filter(item => item === element['controls'].name.value).length > 1) {
+          } else if (currentItems.filter(item => item === element['controls'].name.value.toLowerCase()).length > 1) {
             element['controls'].name.setErrors({error: "Item name existed"});
             return {error: "Item name existed"};
           } else {
@@ -130,10 +129,10 @@ export class PricingComponent implements OnInit {
           }
         });
         // This block is needed for the current field
-        if (currentFormItems.filter(item => item ===  control.value).length > 1) {
+        if (currentFormItems.filter(item => item ===  control.value.toLowerCase()).length > 1) {
           control.setErrors({error: "Item name existed"});
           return {error: "Duplicate item name"};
-        } else if (currentItems.filter(item => item === control.value).length > 1) {
+        } else if (currentItems.filter(item => item === control.value.toLowerCase()).length > 1) {
           control.setErrors({error: "Item name existed"});
           return {error: "Item name existed"};
         }
@@ -367,7 +366,7 @@ export class PricingComponent implements OnInit {
         .routes.filter(route => route._id == routeId)[0]
         .destinations.filter(destination => destination._id == destinationId)[0]
         .discounts.filter(discount => discount.userId == this.selectedUser._id)[0]
-      return result;
+      return result? result: {perUnitDiscountAmount: 0, extraChargeDiscountAmount: 0};
     } catch (error) {
       console.log(error);
       this.authService.redirectOnFailedSubscription("Couldn't load pricing");
