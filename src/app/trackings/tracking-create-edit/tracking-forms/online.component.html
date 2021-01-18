@@ -1,7 +1,14 @@
 <div *ngIf="onlineForm">
   <form [formGroup]='onlineForm' (submit)='onSave()' class="my-4" (keydown.enter)="$event.preventDefault()">
 
-    <general-info></general-info>
+    <general-info
+      #generalInfo
+      [usersObservable]="usersSubject.asObservable()"
+      [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
+      [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
+      (formValidityStatus)="generalInfoValidity($event)"
+      (pricingUpdated)="pricingUpdate($event)">
+    </general-info>
 
     <div class="row">
       <mat-form-field appearance="outline" class="col-lg-4">
@@ -22,7 +29,7 @@
           matInput
           type='text'
           formControlName='carrierTrackingNumber'>
-          <button *ngIf="onlineForm.controls['trackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['trackingNumber'].setValue('')">
+          <button *ngIf="onlineForm.controls['carrierTrackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['carrierTrackingNumber'].setValue('')">
             <mat-icon>close</mat-icon>
           </button>
           <mat-error>Please enter a Tracking Number</mat-error>
@@ -42,8 +49,13 @@
       <file-uploader #fileUploader></file-uploader>
     </div>
 
-    <div class="mt-2">
-      <items-list #itemsList [pricingObservable]="defaultPricingSubject.asObservable()" [userIdObservable]="selectedUserIdSubject.asObservable()"></items-list>
+    <div class="mt-2" *ngIf="showItemsList">
+      <items-list
+        #itemsList
+        [pricingObservable]="defaultPricingSubject.asObservable()"
+        [userIdObservable]="selectedUserIdSubject.asObservable()"
+        [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()">
+      </items-list>
     </div>
 
 
@@ -59,11 +71,11 @@
 
     <div class="mt-2">
       <button
-      mat-raised-button
-      color='primary'
-      type='submit'
-      class="mr-2">
-      Save
+        mat-raised-button
+        color='primary'
+        type='submit'
+        class="mr-2">
+        Save
       </button>
       <button
         mat-raised-button

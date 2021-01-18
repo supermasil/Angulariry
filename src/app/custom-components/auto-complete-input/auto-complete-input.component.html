@@ -7,7 +7,7 @@
             formControlName="item"
             (input)="filterItems($event.target.value)"
             [matAutocomplete]="auto">
-    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" (optionSelected)="selectItem($event.option.viewValue)">
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectItem($event.option.viewValue)">
       <mat-option *ngFor="let option of filteredData | async" [value]="option">
         {{option}}
       </mat-option>
@@ -17,6 +17,5 @@
     </button>
     <mat-error>{{matErrorMessage}}</mat-error>
   </mat-form-field>
-  <button hidden type="submit" #submitButton></button>
 </form>
 

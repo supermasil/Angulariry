@@ -14,7 +14,7 @@
 
     <mat-form-field appearance="outline" class="col-lg-6 px-2 pr-lg-0">
       <mat-label>Status</mat-label>
-      <mat-select matInput formControlName="status" autoActiveFirstOption>
+      <mat-select formControlName="status">
         <mat-option *ngFor="let option of statuses" [value]="option">
           {{option}}
         </mat-option>
@@ -25,10 +25,27 @@
 
   <div class="row">
     <div class="col-lg-6 px-2 pl-lg-0">
-        <auto-complete-input #sender  [matLabel]="'Sender'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+        <auto-complete-input
+          #sender
+          [dataObservable]="sendersSubject.asObservable()"
+          [enforeSelection]="true"
+          (itemSelected)="senderSelected($event)"
+          (itemCancelled)="itemCancelled()"
+          (inputInvalid)="generalInfoForm.get('sender').setValue('')"
+          [matLabel]="'Sender'"
+          [matErrorMessage]="'Please select one from the drowdown'">
+        </auto-complete-input>
     </div>
     <div class="col-lg-6 px-2 pr-lg-0">
-        <auto-complete-input #recipient  [matLabel]="'Recipient'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+        <auto-complete-input
+          #recipient
+          [dataObservable]="recipientsSubject.asObservable()"
+          [enforeSelection]="true"
+          (itemSelected)="recipientSelected($event)"
+          (inputInvalid)="generalInfoForm.get('recipient').setValue('')"
+          [matLabel]="'Recipient'"
+          [matErrorMessage]="'Please select one from the drowdown'">
+        </auto-complete-input>
     </div>
   </div>
 
@@ -36,7 +53,7 @@
     <div class="col-lg-6 px-2 pl-lg-0">
       <mat-form-field appearance="outline">
         <mat-label>Origin</mat-label>
-        <mat-select matInput formControlName="origin" autoActiveFirstOption>
+        <mat-select formControlName="origin">
           <mat-option *ngFor="let option of defaultLocationsObservable | async" [value]="option">
             {{option}}
           </mat-option>
@@ -47,7 +64,7 @@
     <div class="col-lg-6 px-2 pr-lg-0">
       <mat-form-field appearance="outline">
         <mat-label>Destination</mat-label>
-        <mat-select matInput formControlName="destination">
+        <mat-select formControlName="destination">
           <mat-option *ngFor="let option of defaultLocationsObservable | async" [value]="option">
             {{option}}
           </mat-option>

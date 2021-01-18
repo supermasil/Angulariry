@@ -142,7 +142,7 @@
           formControlName='name'
           required
           >
-          <mat-error>Please enter your name</mat-error>
+          <mat-error *ngIf="signupForm.get('recipients')['controls'][i].getError('error', 'name') as error">{{error}}</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Email</mat-label>

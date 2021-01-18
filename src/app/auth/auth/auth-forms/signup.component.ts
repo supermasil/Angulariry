@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
-import { FormArray, FormControl, FormGroup, Validators } from "@angular/forms";
+import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
 import * as firebase from "firebase";
 import { phoneNumberValidator } from "lac-mat-tel-input";
@@ -27,6 +27,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   companyCodes = new ReplaySubject<string[]>();
   companyCodesCopy = [];
   mode = "create";
+  currentUser: UserModel;
 
   // mongoDbUserSubscription: Subscription;
   mongoDbUser: UserModel;
@@ -40,6 +41,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.signupForm = this.createSignUpForm(null);
 
     this.authService.getOrganizations().subscribe(orgs => {
       this.organizations = orgs.organizations;
@@ -48,14 +50,12 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
       this.route.paramMap.subscribe((paramMap) => {
         if (paramMap.has("userId")) {
           this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
-            console.log("here");
+            this.currentUser = user;
             this.signupForm = this.createSignUpForm(user);
             this.mode = 'edit';
           }, error => {
             this.authService.redirectOnFailedSubscription("Failed to subscribe to paramMap");
           })
-        } else {
-          this.signupForm = this.createSignUpForm(null);
         }
       });
       this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
@@ -73,6 +73,30 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // this.mongoDbUserSubscription.unsubscribe();
+  }
+
+  recipientNamesValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      if ((control && control.value)) {
+        let currentFormItems = this.signupForm.get('recipients')['controls'].map(item => item['controls'].name.value.toLowerCase());// Tricky as fuck, can't use .value because the value is not updated
+        this.signupForm.get('recipients')['controls'].forEach(element => {
+          if (currentFormItems.filter(item => item === element['controls'].name.value.toLowerCase()).length > 1) {
+            element['controls'].name.setErrors({error: "Duplicate item name"});
+          } else {
+            element['controls'].name.setErrors(null);
+            return null;
+          }
+        });
+        // This block is needed for the current field
+        if (currentFormItems.filter(item => item ===  control.value.toLowerCase()).length > 1) {
+          return {error: "Duplicate name"};
+        }
+        return null;
+      } else {
+        console.log(control);
+        return {error: "Please enter an item name"};
+      }
+    };
   }
 
   createSignUpForm(formData: any) {
@@ -110,14 +134,14 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
     let results: FormGroup[] = [];
     recipients.forEach(recipient => {
       let form = new FormGroup({
-        name: new FormControl(recipient?.name? recipient.name : "", {validators: [Validators.required]}),
+        name: new FormControl(recipient?.name? recipient.name : "", {validators: [Validators.required, this.recipientNamesValidator()]}),
         email: new FormControl(recipient?.email? recipient.email : "", {validators: [Validators.email]}),
         phoneNumber: new FormControl(recipient?.phoneNumber? recipient.phoneNumber : "", {validators: [phoneNumberValidator, Validators.required]}),
         address: new FormControl({value: recipient?.address?.address? recipient.address.address : "", disabled: recipient?.address?.address? true : false}, {validators: [Validators.required, this.validatorsService.addressValidator()]}),
         addressLineTwo: new FormControl(recipient?.address?.addressLineTwo? recipient.address.addressLineTwo : ""),
         addressUrl: new FormControl(recipient?.address?.addressUrl? recipient.address.addressUrl : "", {validators: [Validators.required]})
       });
-
+      console.log(form.get('name').value);
       results.push(form);
     });
 
@@ -157,7 +181,6 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
 
   async onSignup() {
     this.signupForm.markAllAsTouched(); // deal with phone number validator empty issue
-    console.log(this.signupForm);
     if (this.signupForm.invalid) {
       return;
     }

@@ -19,12 +19,12 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   @Input() defaultValue = "";
   @Output() itemSelected = new EventEmitter();
   @Output() inputInvalid = new EventEmitter();
+  @Output() itemCancelled = new EventEmitter();
 
   filteredData: Observable<string[]>;
   inputCtrl = new FormControl();
 
   autoCompleteForm: FormGroup;
-  @ViewChild('submitButton') submitButton: ElementRef;
 
   constructor(private cdr: ChangeDetectorRef) {
 
@@ -41,7 +41,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     })
 
-    this.autoCompleteForm.markAllAsTouched();
+    // this.autoCompleteForm.markAllAsTouched();
   }
 
   ngOnDestroy() {
@@ -51,13 +51,11 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   autoCompleteValidator(): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
       if (control && control.value) {
-        if (this.enforeSelection && this.data.includes(control.value))
-          return null;
-        if (!this.enforeSelection)
+        if ((this.enforeSelection && this.data.includes(control.value)) || !this.enforeSelection)
           return null;
       }
       this.inputInvalid.emit();
-      return {wrongCompanyCode: control.value};
+      return {invalidInput: control.value};
     };
   }
 
@@ -74,7 +72,11 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
     this.filteredData = of(this.data.filter(option => option.toLowerCase().includes(filterValue)));
   }
 
-  selectItem(value: string) {
+  resetForm() {
+    this.autoCompleteForm.reset();
+  }
+
+  public selectItem(value: string) {
     this.autoCompleteForm.get('item').setValue(value);
     this.itemSelected.emit(value);
     this.resetFilteredData(); // Reset the list
@@ -82,8 +84,6 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
       if (this.lockOption) {
         this.autoCompleteForm.get('item').disable();
       }
-
-      this.triggerValidation();
     }
   }
 
@@ -92,6 +92,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
     this.autoCompleteForm.get('item').setValue('');
     this.autoCompleteForm.controls['item'].enable();
     this.resetFilteredData();
+    this.itemCancelled.emit();
   }
 
   resetFilteredData() {
@@ -99,11 +100,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   }
 
   getFormValidity() {
-    return this.autoCompleteForm.valid;
-  }
-
-  triggerValidation() {
-    this.submitButton.nativeElement.click();
+    this.autoCompleteForm.markAllAsTouched();
     return this.autoCompleteForm.valid;
   }
 }

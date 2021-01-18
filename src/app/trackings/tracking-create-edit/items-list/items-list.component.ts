@@ -1,8 +1,10 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { AlertService } from 'src/app/alert-message';
 import { AuthService } from 'src/app/auth/auth.service';
+import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
+import { GlobalConstants } from 'src/app/global-constants';
 import { PricingModel } from 'src/app/models/pricing.model';
 
 @Component({
@@ -17,23 +19,24 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
   @Input() pricingObservable: Observable<PricingModel> = new Observable();
   pricing: PricingModel;
 
+  senderId: string;
+  origin: string;
+  destination: string;
+  @Input() pricingUpdatedObservable: Observable<{sender: string, origin: string, destination: string}> = new Observable();
+
   @Input() userIdObservable: Observable<string> = new Observable();
   userId: string;
-
-  @Input() originObservable: Observable<string> = new Observable();
-  origin: string;
-
-  @Input() destinationObservable: Observable<string> = new Observable();
-  destination: string;
 
   itemNames = [];
   itemNamesSubject = new BehaviorSubject<string[]>([]); // Subject won't work for some reason
 
   insurance = ["Regular", "2%"];
 
-  @ViewChild('submitButton') submitButton: ElementRef<HTMLInputElement>;
+  @ViewChildren('itemName') itemNamesRef: QueryList<AutoCompleteInputComponent>;
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private alertService: AlertService) {
   }
 
   ngOnInit() {
@@ -55,17 +58,78 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
       this.authService.redirectOnFailedSubscription("Couldn't fetch user id");
     });
 
-    this.originObservable.subscribe((o: string) => {
-      this.origin = o;
-    }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch user origin");
-    });
+    this.pricingUpdatedObservable.subscribe(changes => {
+      this.senderId = changes.sender;
+      this.origin = changes.origin;
+      this.destination = changes.destination;
 
-    this.destinationObservable.subscribe((d: string) => {
-      this.destination = d;
-    }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch user destination");
+      this.itemsForm.get('items')['controls'].forEach((item) => {
+        this.pricingChangeCheck(item.get('name').value);
+      });
     });
+  }
+
+  pricingChangeCheck(itemName: string) {
+    if (itemName) {
+      let itemIndex = this.pricing.items.findIndex(i => i.name == itemName);
+      let itemFormIndex = this.itemsForm.get('items')['controls'].findIndex(i => i['controls'].name.value == itemName);
+      if (itemIndex >= 0 && itemFormIndex >= 0) {
+        try {
+          let routeIndex = this.pricing.items[itemIndex].routes.findIndex(r => r.origin == this.origin);
+          let destinationIndex = this.pricing.items[itemIndex].routes[routeIndex].destinations.findIndex(d => d.name == this.destination);
+          let discountIndex = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts.findIndex(discount => discount.userId == this.senderId);
+
+          let destination = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex];
+          let discount = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts[discountIndex];
+
+          let originalUnitCharge = destination.pricePerUnit;
+          let originalExtraCharge = destination.extraCharge; // Can be $ or %
+
+          let finalUnitCharge = 0;
+          let finalExtraCharge = 0;
+
+          // Complicated af
+          if (discount) {
+            if (discount.perUnitDiscountUnit === '$') {
+              finalUnitCharge = originalUnitCharge -  discount.perUnitDiscountAmount;
+            } else if (discount.perUnitDiscountUnit === '%') {
+              finalUnitCharge = originalUnitCharge *  (1 - (discount.perUnitDiscountAmount/ 100))
+            } else if (discount.perUnitDiscountUnit === 'Fixed') {
+              finalUnitCharge = discount.perUnitDiscountAmount;
+            }
+
+            if (destination.extraChargeUnit === '$') {
+              if (discount.extraChargeDiscountUnit === '$') {
+                finalExtraCharge = originalExtraCharge - discount.extraChargeDiscountAmount;
+              } else if (discount.extraChargeDiscountUnit === '%') {
+                finalExtraCharge = originalExtraCharge * (1 - (discount.extraChargeDiscountAmount / 100));
+              } else if (discount.extraChargeDiscountUnit === "Fixed") {
+                finalExtraCharge = discount.extraChargeDiscountAmount;
+              }
+            } else if (destination.extraChargeUnit === '%') {
+              if (discount.extraChargeDiscountUnit === '$') {
+                finalExtraCharge = (originalUnitCharge * originalExtraCharge) - discount.perUnitDiscountAmount;
+              } else if (discount.extraChargeDiscountUnit === '%') {
+
+                finalExtraCharge = (originalUnitCharge * originalExtraCharge) * (1 - (discount.perUnitDiscountAmount / 100));
+              } else if (discount.extraChargeDiscountUnit === "Fixed") {
+                finalExtraCharge = discount.extraChargeDiscountAmount;
+              }
+            }
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(finalUnitCharge);
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(finalExtraCharge);
+          } else {
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(originalUnitCharge);
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(finalExtraCharge);
+          }
+
+        } catch (error) {
+          this.alertService.warn("Probably this route is not set up for this item", GlobalConstants.flashMessageOptions);
+          this.itemsForm?.get('items')['controls'][itemFormIndex]?.get('unitCharge')?.setValue(0);
+          this.itemsForm?.get('items')['controls'][itemFormIndex]?.get('extraCharge')?.setValue(0);
+        }
+      }
+    }
   }
 
   ngAfterViewInit() {
@@ -79,11 +143,15 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
       quantity: new FormControl(0, {validators:[Validators.required]}),
       unitCharge: new FormControl({value: 0, disabled: true}, {validators:[Validators.required]}),
       extraCharge: new FormControl({value: 0, disabled: true}, {validators:[Validators.required]}),
+      extraChargeUnit: new FormControl({value: '%', disabled: true}, {validators:[Validators.required]}),
       weight: new FormControl(0, {validators:[Validators.required]}),
       insurance: new FormControl(this.insurance[0], {validators: [Validators.required]}),
       status: new FormControl({value: "Unknown", disabled: true}, {validators:[Validators.required]})
     });
-    // form.markAllAsTouched();
+
+    form.get('name').valueChanges.subscribe(value => {
+      this.pricingChangeCheck(value);
+    })
     return form;
   }
 
@@ -106,18 +174,19 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
 
   itemInvalid(index: number) {
     this.itemsForm.get('items')['controls'][index].controls['name'].setValue('');
+    this.itemsForm?.get('items')['controls'][index].get('unitCharge')?.setValue(0);
+    this.itemsForm?.get('items')['controls'][index].get('extraCharge')?.setValue(0);
   }
 
   getFormValidity() {
-    return this.itemsForm.valid;
+    this.itemsForm.markAllAsTouched();
+    this.itemNamesRef.forEach(i => {
+      i.getFormValidity();
+    })
+    return this.itemsForm.valid
   }
 
   getRawValues() {
     return this.itemsForm.getRawValue();
-  }
-
-  triggerValidation() {
-    this.submitButton.nativeElement.click();
-    return this.itemsForm.valid;
   }
 }

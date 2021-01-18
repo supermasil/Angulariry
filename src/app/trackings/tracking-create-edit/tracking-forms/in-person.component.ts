@@ -54,9 +54,6 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewInit {
   }
 
   onSave() {
-    console.log(this.sender.triggerValidation());
-    console.log(this.recipient.triggerValidation());
-
     // console.log(this.inPersonForm);
   }
 

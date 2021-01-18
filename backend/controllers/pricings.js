@@ -214,6 +214,23 @@ exports.deletePricing = async (req, res, next) => {
   }
 }
 
+exports.cleanUpPricing = async (req, res, next) => {
+  try {
+    const pricing = await this.getPricingByIdHelper(req.params.id);
+    pricing.items = [];
+
+    await pricing.save().then(response => {});
+    return res.status(201).json({
+      message: "Pricing cleaned up successfully"
+    });
+  } catch (error) {
+    console.log(`cleanUpPricing: ${req.body._id}: ${error.message}`);
+    return res.status(500).json({
+      message: "Couldn't clean up pricing"
+    });
+  }
+}
+
 exports.getPricingByIdHelper = async (pricingId) => {
   return await PricingModel.findById(pricingId).then(foundPricing => {
     return foundPricing;

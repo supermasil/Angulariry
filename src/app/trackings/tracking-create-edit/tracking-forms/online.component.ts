@@ -13,6 +13,7 @@ import { UserModel } from "src/app/models/user.model";
 import { PricingService } from "src/app/pricings/pricing.service";
 import { TrackingGlobals } from '../../tracking-globals';
 import { TrackingService } from '../../tracking.service';
+import { GeneralInfoComponent } from "../general-info/general-info.component";
 import { ItemsListComponent } from '../items-list/items-list.component';
 
 
@@ -32,6 +33,7 @@ export class OnlineFormCreateComponent {
 
   @ViewChild('itemsList') itemsList: ItemsListComponent;
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
+  @ViewChild('generalInfo') generalInfo: GeneralInfoComponent;
 
   private codeScannerSub: Subscription;
   currentUser: UserModel;
@@ -46,7 +48,12 @@ export class OnlineFormCreateComponent {
   defaultPricingSubject = new ReplaySubject<PricingModel>();
   selectedUserIdSubject = new ReplaySubject<string>();
 
+  usersSubject = new ReplaySubject<UserModel[]>();
+  trackingNumeberSubject = new ReplaySubject<string>();
+  pricingUpdatedSubject = new ReplaySubject<{sender: string, origin: string, destination: string}>();
+
   scannerOpened = false;
+  showItemsList = false;
 
   constructor(
     private trackingService: TrackingService,
@@ -64,6 +71,8 @@ export class OnlineFormCreateComponent {
   }
 
   ngOnInit() {
+    this.trackingNumeberSubject.next("onl-" + Date.now() + Math.floor(Math.random() * 10000));
+
     this.onlineForm = this.createOnlineForm(null);
     // Passed from tracking-list route
     let searchTerm = this.route.snapshot.paramMap.get('searchTerm');
@@ -77,6 +86,7 @@ export class OnlineFormCreateComponent {
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
         this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
           this.users = users;
+          this.usersSubject.next(users);
           this.customerCodesSubject.next(users.map(user => user.customerCode));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
@@ -105,12 +115,9 @@ export class OnlineFormCreateComponent {
 
   createOnlineForm(formData: any) {
     let form = new FormGroup({
-      trackingNumber: new FormControl({value: "onl-" + Date.now() + Math.floor(Math.random() * 10000), disabled: true}),
       carrierTrackingNumber: new FormControl("", {validators: [Validators.required]}),
       carrier: new FormControl("", {validators: [Validators.required]}),
-      customerCode: new FormControl("", {validators: [Validators.required]}),
       content: new FormControl(""),
-      status: new FormControl("", {validators: [Validators.required]})
     });
 
     return form
@@ -123,24 +130,32 @@ export class OnlineFormCreateComponent {
     });
   }
 
+  generalInfoValidity(valid: boolean) {
+    if (valid) {
+      this.showItemsList = true;
+    }
+    // Don't change it back to false
+  }
+
+  pricingUpdate(changes) {
+    let customerCode = changes.sender.split(' ')[0];
+    let user = this.users?.filter(u => u.customerCode == customerCode)[0];
+    changes.sender = user?._id;
+    this.pricingUpdatedSubject.next(changes);
+    // Error is handled in itemsListComponent
+  }
+
   async onSave() {
-    this.itemsList.triggerValidation();
-    if (this.onlineForm.invalid || !this.itemsList.getFormValidity()) {
+    this.itemsList?.getFormValidity();
+    this.generalInfo.getFormValidity();
+    if (!this.onlineForm.valid || !this.generalInfo.getFormValidity() || (this.itemsList && !this.itemsList.getFormValidity())) {
       return;
     }
 
-    console.log(this.onlineForm.getRawValue());
+    let formData = this.onlineForm.getRawValue();
+    formData['generalInfo'] = this.generalInfo.getRawValues();
+    formData['itemsList'] = this.itemsList?.getRawValues() ? this.itemsList?.getRawValues() : [];
 
-    // let postData = this.onlineForm.getRawValue();
-    // postData['itemsList'] = this.itemsList.getRawValues();
-    // postData['filesToUpload'] = this.fileUploader.getFilesToAdd();
-    // postData['fileNames'] = this.fileUploader.getFileNames();
-    // postData['filesToDelete'] = this.fileUploader.getFilesToDelete();
-
-    // this.trackingService.createUpdateTracking(postData);
-  }
-
-  setUpGeneralInfo() {
-
+    console.log(formData);
   }
 }

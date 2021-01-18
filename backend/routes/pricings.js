@@ -13,4 +13,5 @@ router.delete('/:pricingId/item/:itemId', checkAuth.isAuthenticated, PricingCont
 
 router.delete('/:id', checkAuth.isAuthenticated, PricingController.deletePricing);
 
+router.delete('/cleanup/:id', PricingController.cleanUpPricing)
 module.exports = router;

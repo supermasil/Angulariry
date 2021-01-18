@@ -62,7 +62,6 @@ export class PricingComponent implements OnInit {
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
-      this.selectedUser = user;
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocations.next(org.locations.map(item => item.name));
@@ -243,7 +242,7 @@ export class PricingComponent implements OnInit {
       })
     }
 
-    if (destination?.discounts?.filter(discount => discount.userId == this.currentUser._id).length == 0) {
+    if (this.selectedUser && destination?.discounts?.filter(discount => discount.userId == this.selectedUser._id).length == 0) {
       createdDiscounts.push(
         this.createDiscount({
           userId: this.selectedUser._id,
