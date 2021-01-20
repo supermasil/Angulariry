@@ -14,8 +14,11 @@ const GeneralInfoSchema = mongoose.Schema({
   content: {type: String, default: ''}, // Note
   status: {type: String, required: true},
   active: {type: Boolean, required: true}, // This should be false to prevent edit after certain stage
-  weight: {type: Number, default: 0}, // Can be updated later on
-  finalCost: {type: Number, defaul: 0}, // The money to charge customer
+
+  totalWeight: {type: Number, default: 0}, // Can be updated later on
+  finalCost: {type: Number, default: 0}, // The money to charge customer
+  costAdjustment: {type: Number, default: 0},
+
 
   currentLocation: {type: String, required: true}, //Unknown, Oregon, HN, SG....
   origin: {type: String, required: true},

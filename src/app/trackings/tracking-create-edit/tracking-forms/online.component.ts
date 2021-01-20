@@ -51,9 +51,11 @@ export class OnlineFormCreateComponent {
   usersSubject = new ReplaySubject<UserModel[]>();
   trackingNumeberSubject = new ReplaySubject<string>();
   pricingUpdatedSubject = new ReplaySubject<{sender: string, origin: string, destination: string}>();
+  itemsListSubject = new ReplaySubject<any>();
 
   scannerOpened = false;
   showItemsList = false;
+
 
   constructor(
     private trackingService: TrackingService,
@@ -135,6 +137,15 @@ export class OnlineFormCreateComponent {
       this.showItemsList = true;
     }
     // Don't change it back to false
+  }
+
+  itemsListValidity(valid: boolean) {
+    console.log(valid);
+    if (valid) {
+      this.itemsListSubject.next(this.itemsList.getRawValues().items);
+    } else {
+      this.itemsListSubject.next(null);
+    }
   }
 
   pricingUpdate(changes) {

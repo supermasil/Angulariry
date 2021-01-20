@@ -17,6 +17,7 @@ import { AutoCompleteInputModule } from '../custom-components/auto-complete-inpu
 import { TrackingRoutingModule } from './tracking-routing.module';
 import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-create-edit.component';
 import { GeneralInfoComponent } from './tracking-create-edit/general-info/general-info.component';
+import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/finalized-info.component';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { GeneralInfoComponent } from './tracking-create-edit/general-info/genera
     ConsolidatedFormCreateComponent,
     MasterFormCreateComponent,
     ItemsListComponent,
-    GeneralInfoComponent
+    GeneralInfoComponent,
+    FinalizedInfoComponent
   ],
   imports: [
     CommonModule,

@@ -54,9 +54,15 @@
         #itemsList
         [pricingObservable]="defaultPricingSubject.asObservable()"
         [userIdObservable]="selectedUserIdSubject.asObservable()"
-        [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()">
+        [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
+        (formValidityStatus)="itemsListValidity($event)"
+        >
       </items-list>
     </div>
+
+    <finalized-info
+      [itemsListObservable]="itemsListSubject.asObservable()">
+    </finalized-info>
 
 
     <mat-form-field appearance="outline" class="mt-4">

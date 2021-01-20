@@ -1,8 +1,6 @@
-import { SHIFT } from '@angular/cdk/keycodes';
-import { stringify } from '@angular/compiler/src/util';
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, TRANSLATIONS, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
 import { UserModel } from 'src/app/models/user.model';
 
@@ -26,7 +24,7 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   statuses = ["Unknown", "Pending", "Created", "Received", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
 
-  @Output() formValidityStatus = new EventEmitter();
+  @Output() formValidityStatus = new EventEmitter<boolean>();
   @Output() pricingUpdated = new EventEmitter<{sender: string, origin: string, destination: string}>();
 
   @ViewChild('recipient') recipient: AutoCompleteInputComponent;

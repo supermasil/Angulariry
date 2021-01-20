@@ -90,13 +90,13 @@
                               <div class="row">
                                 <div class="col">
                                   <mat-form-field appearance="outline">
-                                    <mat-label>Extra Change</mat-label>
+                                    <mat-label>Extra Charge</mat-label>
                                     <input matInput type="number" formControlName="extraCharge">
                                   </mat-form-field>
                                 </div>
                                 <div class="col">
                                   <mat-form-field appearance="outline">
-                                    <mat-label>Unit</mat-label>
+                                    <mat-label>Extra Charge Unit</mat-label>
                                     <mat-select matInput formControlName="extraChargeUnit" required>
                                       <mat-option *ngFor="let unit of extraChargeUnits" [value]="unit">
                                         {{unit}}
@@ -260,14 +260,30 @@
                                     </mat-form-field>
                                   </div>
                                   <div class="col">
-                                    <mat-form-field appearance="outline">
+                                    <!-- <mat-form-field appearance="outline">
                                       <mat-label>Unit</mat-label>
+                                      <mat-select matInput formControlName="extraChargeUnit">
+                                        <mat-option *ngFor="let unit of extraChargeUnits" [value]="unit" readonly>
+                                          {{unit}}
+                                        </mat-option>
+                                      </mat-select>
+                                      <mat-error>Please select a unit</mat-error>
+                                      <a
+                                        *ngIf="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'].length > 1"
+                                        matSuffix
+                                        mat-mini-fab
+                                        color="warn"
+                                        (click)="removeDestination(editPricingForm, i, r, d)">
+                                        <mat-icon>delete</mat-icon>
+                                      </a>
+                                    </mat-form-field> -->
+                                    <mat-form-field appearance="outline">
+                                      <mat-label>Extra Charge Unit</mat-label>
                                       <mat-select matInput formControlName="extraChargeUnit" required>
                                         <mat-option *ngFor="let unit of extraChargeUnits" [value]="unit">
                                           {{unit}}
                                         </mat-option>
                                       </mat-select>
-                                      <mat-error>Please select a unit</mat-error>
                                       <a
                                         *ngIf="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'].length > 1"
                                         matSuffix
@@ -426,7 +442,7 @@
                             <mat-form-field appearance="outline">
                               <mat-label>Unit</mat-label>
                               <mat-select [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountUnit" (selectionChange)="onDiscountChange(item._id, route._id, destination._id, null, null, $event.value, null)">
-                                <mat-option *ngFor="let unit of discountUnits"  [value]="unit">
+                                <mat-option *ngFor="let unit of getDiscountUnits(getDestination(item._id, route._id, destination._id).extraChargeUnit)"  [value]="unit">
                                   {{unit}}
                                 </mat-option>
                               </mat-select>

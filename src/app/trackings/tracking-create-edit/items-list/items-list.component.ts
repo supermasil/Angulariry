@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AlertService } from 'src/app/alert-message';
@@ -30,9 +30,11 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
   itemNames = [];
   itemNamesSubject = new BehaviorSubject<string[]>([]); // Subject won't work for some reason
 
-  insurance = ["Regular", "2%"];
+  insurance = ["5 %", "2 %"];
 
   @ViewChildren('itemName') itemNamesRef: QueryList<AutoCompleteInputComponent>;
+
+  @Output() formValidityStatus = new EventEmitter<boolean>();
 
   constructor(
     private authService: AuthService,
@@ -67,6 +69,10 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
         this.pricingChangeCheck(item.get('name').value);
       });
     });
+
+    this.itemsForm.valueChanges.subscribe(valid => {
+      this.formValidityStatus.emit(this.itemsForm.valid);
+    })
   }
 
   pricingChangeCheck(itemName: string) {
@@ -81,6 +87,8 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
 
           let destination = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex];
           let discount = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts[discountIndex];
+
+          this.itemsForm.get('items')['controls'][itemFormIndex].controls['extraChargeUnit'].setValue(destination.extraChargeUnit);
 
           let originalUnitCharge = destination.pricePerUnit;
           let originalExtraCharge = destination.extraCharge; // Can be $ or %
@@ -107,20 +115,19 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
                 finalExtraCharge = discount.extraChargeDiscountAmount;
               }
             } else if (destination.extraChargeUnit === '%') {
-              if (discount.extraChargeDiscountUnit === '$') {
-                finalExtraCharge = (originalUnitCharge * originalExtraCharge) - discount.perUnitDiscountAmount;
-              } else if (discount.extraChargeDiscountUnit === '%') {
-
-                finalExtraCharge = (originalUnitCharge * originalExtraCharge) * (1 - (discount.perUnitDiscountAmount / 100));
-              } else if (discount.extraChargeDiscountUnit === "Fixed") {
-                finalExtraCharge = discount.extraChargeDiscountAmount;
+              if (discount.extraChargeDiscountUnit === '%') { // Can only be this case
+                finalExtraCharge = originalExtraCharge - discount.extraChargeDiscountAmount;
               }
             }
             this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(finalUnitCharge);
             this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(finalExtraCharge);
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('unitChargeSaving').setValue(originalUnitCharge - finalUnitCharge);
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('extraChargeSaving').setValue(originalExtraCharge - finalExtraCharge); // Can be $ or %
           } else {
             this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(originalUnitCharge);
-            this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(finalExtraCharge);
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(originalExtraCharge);
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('unitChargeSaving').setValue(0);
+            this.itemsForm.get('items')['controls'][itemFormIndex].get('extraChargeSaving').setValue(0);
           }
 
         } catch (error) {
@@ -141,12 +148,14 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
       name: new FormControl("", {validators:[Validators.required]}),
       value: new FormControl(0, {validators:[Validators.required]}),
       quantity: new FormControl(0, {validators:[Validators.required]}),
-      unitCharge: new FormControl({value: 0, disabled: true}, {validators:[Validators.required]}),
-      extraCharge: new FormControl({value: 0, disabled: true}, {validators:[Validators.required]}),
-      extraChargeUnit: new FormControl({value: '%', disabled: true}, {validators:[Validators.required]}),
+      unitCharge: new FormControl(0, {validators:[Validators.required]}),
+      extraCharge: new FormControl(0, {validators:[Validators.required]}),
+      extraChargeUnit: new FormControl(null, {validators:[Validators.required]}),
+      unitChargeSaving: new FormControl(0, {validators:[Validators.required]}),
+      extraChargeSaving: new FormControl(0, {validators:[Validators.required]}),
       weight: new FormControl(0, {validators:[Validators.required]}),
-      insurance: new FormControl(this.insurance[0], {validators: [Validators.required]}),
-      status: new FormControl({value: "Unknown", disabled: true}, {validators:[Validators.required]})
+      insurance: new FormControl(0, {validators: [Validators.required]}),
+      status: new FormControl("Unknown", {validators:[Validators.required]})
     });
 
     form.get('name').valueChanges.subscribe(value => {
@@ -174,8 +183,12 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
 
   itemInvalid(index: number) {
     this.itemsForm.get('items')['controls'][index].controls['name'].setValue('');
-    this.itemsForm?.get('items')['controls'][index].get('unitCharge')?.setValue(0);
-    this.itemsForm?.get('items')['controls'][index].get('extraCharge')?.setValue(0);
+    this.itemsForm.get('items')['controls'][index].get('unitCharge')?.setValue(0);
+    this.itemsForm.get('items')['controls'][index].get('extraCharge')?.setValue(0);
+  }
+
+  getExtraChargeUnit(index: number) {
+    return this.itemsForm.get('items')['controls'][index].controls['extraChargeUnit'].value;
   }
 
   getFormValidity() {

@@ -46,7 +46,7 @@ export class PricingComponent implements OnInit {
   itemNames = new ReplaySubject<string[]>();
   customerCodes = new ReplaySubject<string[]>();
 
-  units = ["kg", "lb"];
+  units = ["kg"];
   extraChargeUnits = ["$", "%"];
   discountUnits = ["%", "$", "Fixed"];
 
@@ -174,10 +174,10 @@ export class PricingComponent implements OnInit {
     let createdRoutes = [];
     if (item?.routes?.length > 0) {
       item.routes.forEach(route => {
-        createdRoutes.push(this.createRoute(route));
+        createdRoutes.push(this.createRoute(route, true));
       })
     } else {
-      createdRoutes.push(this.createRoute(null));
+      createdRoutes.push(this.createRoute(null, false));
     }
 
     let form = new FormGroup({
@@ -204,14 +204,14 @@ export class PricingComponent implements OnInit {
     (form.get('items') as FormArray).removeAt(i);
   }
 
-  createRoute(route: PricingRouteModel) {
+  createRoute(route: PricingRouteModel, disableExtraChargeUnit: boolean) {
     let createdDestinations = [];
     if (route?.destinations?.length > 0) {
       route.destinations.forEach(destination => {
-        createdDestinations.push(this.createDestination(destination));
+        createdDestinations.push(this.createDestination(destination, disableExtraChargeUnit));
       })
     } else {
-      createdDestinations.push(this.createDestination(null));
+      createdDestinations.push(this.createDestination(null, disableExtraChargeUnit));
     }
 
     let form = new FormGroup({
@@ -223,7 +223,7 @@ export class PricingComponent implements OnInit {
   }
 
   addRoute(form: FormGroup, i: number) {
-    (form.get('items')['controls'][i].get('routes') as FormArray).push(this.createRoute(null));
+    (form.get('items')['controls'][i].get('routes') as FormArray).push(this.createRoute(null, false));
   }
 
   removeRoute(form: FormGroup, i: number, r: number) {
@@ -234,7 +234,7 @@ export class PricingComponent implements OnInit {
     (form.get('items')['controls'][i].get('routes') as FormArray).removeAt(r);
   }
 
-  createDestination(destination: PricingDestinationModel) {
+  createDestination(destination: PricingDestinationModel, disableExtraChargeUnit: boolean) {
     let createdDiscounts = [];
     if (destination?.discounts?.length > 0) {
       destination.discounts.forEach(discount => {
@@ -258,7 +258,7 @@ export class PricingComponent implements OnInit {
       name: new FormControl(destination?.name? destination.name: "", {validators: [Validators.required]}),
       pricePerUnit: new FormControl(destination?.pricePerUnit? destination.pricePerUnit: 0, {validators: [Validators.required]}),
       extraCharge: new FormControl(destination?.extraCharge? destination.extraCharge: 0, {validators: [Validators.required]}),
-      extraChargeUnit: new FormControl(destination?.extraChargeUnit? destination.extraChargeUnit: "$", {validators: [Validators.required]}),
+      extraChargeUnit: new FormControl({value: destination?.extraChargeUnit? destination.extraChargeUnit: "$", disabled: disableExtraChargeUnit}, {validators: [Validators.required]}),
       discounts: new FormArray(createdDiscounts)
     })
 
@@ -266,7 +266,7 @@ export class PricingComponent implements OnInit {
   }
 
   addDestination(form: FormGroup, i: number, r: number) {
-    (form.get('items')['controls'][i].get('routes')['controls'][r].get('destinations') as FormArray).push(this.createDestination(null));
+    (form.get('items')['controls'][i].get('routes')['controls'][r].get('destinations') as FormArray).push(this.createDestination(null, false));
   }
 
   removeDestination(form: FormGroup, i: number, r: number, d: number) {
@@ -359,6 +359,18 @@ export class PricingComponent implements OnInit {
     this.expandedElement = null;
   }
 
+  getDestination(itemId: string, routeId: string, destinationId: string) : PricingDestinationModel {
+    try {
+      let result =  this.pricingForm.getRawValue().items.filter(item => item._id == itemId)[0]
+        .routes.filter(route => route._id == routeId)[0]
+        .destinations.filter(destination => destination._id == destinationId)[0]
+      return result;
+    } catch (error) {
+      console.log(error);
+      this.authService.redirectOnFailedSubscription("Couldn't load pricing");
+    }
+  }
+
   getDiscountsForDestination(itemId: string, routeId: string, destinationId: string) : PricingDiscountModel{
     try {
       let result =  this.pricingForm.getRawValue().items.filter(item => item._id == itemId)[0]
@@ -390,6 +402,14 @@ export class PricingComponent implements OnInit {
     } catch (error) {
       console.log(error);
       this.authService.redirectOnFailedSubscription("Couldn't load pricing");
+    }
+  }
+
+  getDiscountUnits(unit: string) { // limit to % if extra charge unit is %
+    if (unit === "%") {
+      return ["%"];
+    } else if (unit === "$") {
+      return this.discountUnits;
     }
   }
 }
