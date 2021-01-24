@@ -13,6 +13,7 @@ export class FinalizedInfoComponent implements OnInit{
 
   itemsList: any;
   @Input() itemsListObservable = new Observable<any>();
+  @Input() costAdjustmentObservable = new Observable<any>();
 
   totalWeight = 0;
   totalWeightCharge = 0;
@@ -39,6 +40,11 @@ export class FinalizedInfoComponent implements OnInit{
       } else { // null
         this.resetInfo()
       }
+    });
+
+    this.costAdjustmentObservable.subscribe(c => {
+      this.finalizedInfoForm.get('costAdjustment').setValue(c);
+      this.getFinalizedInfo();
     })
   }
 
@@ -56,19 +62,17 @@ export class FinalizedInfoComponent implements OnInit{
   getFinalizedInfo() {
     this.resetInfo();
     this.itemsList?.forEach(item => {
-      console.log(item);
       this.totalWeight += item.weight;
       this.totalWeightCharge += item.weight * item.unitCharge;
       this.totalSaving += item.weight * item.unitChargeSaving;
-      this.totalInsurance += item.quantity * item.value * (item.insurance / 100);
-
+      this.totalInsurance += item.quantity * item.declaredValue * (item.insurance / 100);
 
       if (item.extraChargeUnit === "$") {
         this.totalExtraCharge += item.extraCharge * item.quantity;
         this.totalSaving += item.quantity * item.extraChargeSaving;
       } else if (item.extraChargeUnit === "%") {
-        this.totalExtraCharge += item.quantity * item.value * (item.extraCharge / 100);
-        this.totalSaving += item.quantity * item.value * (item.extraChargeSaving / 100);
+        this.totalExtraCharge += item.quantity * item.declaredValue * (item.extraCharge / 100);
+        this.totalSaving += item.quantity * item.declaredValue * (item.extraChargeSaving / 100);
       }
 
       this.finalCharge = this.totalWeightCharge + this.totalExtraCharge + this.totalInsurance + this.finalizedInfoForm.get('costAdjustment').value;
@@ -82,14 +86,12 @@ export class FinalizedInfoComponent implements OnInit{
   }
 
   roundEverythingAndSetFields() {
-    console.log("here");
     this.totalWeight = this.round(this.totalWeight, 2);
     this.totalWeightCharge = this.round(this.totalWeightCharge, 2);
     this.totalExtraCharge = this.round(this.totalExtraCharge, 2);
     this.totalSaving = this.round(this.totalSaving, 2);
     this.totalInsurance = this.round(this.totalInsurance, 2);
     this.finalCharge = this.round(this.finalCharge, 2);
-    console.log(this.finalCharge);
     this.finalizedInfoForm.get('totalWeight').setValue(this.totalWeight);
     this.finalizedInfoForm.get('finalCost').setValue(this.finalCharge);
   }

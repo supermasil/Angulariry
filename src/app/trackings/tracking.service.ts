@@ -13,10 +13,8 @@ import { MasterTrackingModel } from '../models/tracking-models/master-tracking.m
 import { AlertService } from '../alert-message';
 import { GlobalConstants } from '../global-constants';
 import { CommentModel } from '../models/comment.model';
-import { PricingModel } from '../models/pricing.model';
 
 const BACKEND_URL = environment.apiURL + "/trackings/";
-const PRICING_BACKEND_URL = environment.apiURL + "/pricings/";
 
 const TrackingTypes = Object.freeze({
   ONLINE: "onl",
@@ -103,13 +101,14 @@ export class TrackingService{
       .post<{message: string, tracking: any}>(BACKEND_URL, formData)
       .subscribe((responseData) => {
         this.zone.run(() => {
-          this.router.navigate(["/trackings"]);
+          console.log(responseData);
+          // this.router.navigate(["/trackings"]);
         });
       });
   }
 
   getTracking(trackingNumber: string) {
-    return this.httpClient.get<OnlineTrackingModel>(BACKEND_URL + trackingNumber); // return an observable
+    return this.httpClient.get<any>(BACKEND_URL + trackingNumber); // return an observable
   }
 
   getTrackings(trackingsPerPage: number, currentPage: number) {
@@ -212,20 +211,5 @@ export class TrackingService{
         this.alertService.error("Couldn't find transformed trackings type", GlobalConstants.flashMessageOptions);
         return;
     }
-  }
-
-  addUpdatePricing(formData: any) {
-    this.httpClient
-      .post<{message: string, tracking: any}>(PRICING_BACKEND_URL, formData)
-      .subscribe((responseData) => {
-        console.log(responseData);
-        this.zone.run(() => {
-          this.router.navigate(["/"]);
-        });
-      });
-  }
-
-  getPricing(pricingId: string) {
-    return this.httpClient.get<PricingModel>(PRICING_BACKEND_URL + pricingId); // return an observable
   }
 }

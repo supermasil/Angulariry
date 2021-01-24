@@ -1,12 +1,12 @@
 <div *ngIf="onlineForm">
   <form [formGroup]='onlineForm' (submit)='onSave()' class="my-4" (keydown.enter)="$event.preventDefault()">
-
     <general-info
       #generalInfo
       [usersObservable]="usersSubject.asObservable()"
       [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
       [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
       (formValidityStatus)="generalInfoValidity($event)"
+      [generalInfoObservable]="generalInfoSubject.asObservable()"
       (pricingUpdated)="pricingUpdate($event)">
     </general-info>
 
@@ -46,7 +46,10 @@
     <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
 
     <div class="mt-2">
-      <file-uploader #fileUploader></file-uploader>
+      <file-uploader
+      #fileUploader
+      [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()">
+      </file-uploader>
     </div>
 
     <div class="mt-2" *ngIf="showItemsList">
@@ -54,16 +57,19 @@
         #itemsList
         [pricingObservable]="defaultPricingSubject.asObservable()"
         [userIdObservable]="selectedUserIdSubject.asObservable()"
+        [updateExistingItemsObservable]="updateExistingItemsSubject.asObservable()"
         [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
         (formValidityStatus)="itemsListValidity($event)"
         >
       </items-list>
     </div>
-
-    <finalized-info
-      [itemsListObservable]="itemsListSubject.asObservable()">
-    </finalized-info>
-
+    <div *ngIf="showFinalizedInfo">
+      <finalized-info
+        #finalizedInfo
+        [itemsListObservable]="itemsListSubject.asObservable()"
+        [costAdjustmentObservable]="costAdjustmentSubject.asObservable()">
+      </finalized-info>
+    </div>
 
     <mat-form-field appearance="outline" class="mt-4">
       <mat-label>Notes</mat-label>
@@ -86,9 +92,17 @@
       <button
         mat-raised-button
         color='warn'
-        type=''>
+        type='button'
+        (click)="printPage()">
         Cancel
       </button>
+      <button mat-mini-fab color="primary" class="float-right" type="button" ngxPrint printSectionId="print-section" ><mat-icon>print</mat-icon></button>
     </div>
   </form>
+</div>
+
+<!-- Printing section -->
+
+<div hidden id="print-section">
+  <h1>HEllo</h1>
 </div>

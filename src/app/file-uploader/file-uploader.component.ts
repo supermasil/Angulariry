@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgxImageCompressService } from 'ngx-image-compress';
+import { Observable } from 'rxjs';
 import { mimeType } from './mime-type.validator';
 
 
@@ -16,8 +17,10 @@ export class FileUploaderComponent implements OnInit{
   existingFilePaths: string[] = []; // Edit case
   filesPreview: string[] = [];
   filesToAdd: string[] = [];
-  fileNames: string[] = [];
+  fileNamesToAdd: string[] = [];
   filesToDelete = [];
+
+  @Input() currentFilePathsObservable: Observable<string[]> = new Observable();
 
   constructor(
     private imageCompress: NgxImageCompressService,
@@ -27,6 +30,11 @@ export class FileUploaderComponent implements OnInit{
     this.fileUploaderForm = new FormGroup({
       fileValidator: new FormControl(null, {asyncValidators: [mimeType]})
     });
+
+    this.currentFilePathsObservable.subscribe((files: string[]) => {
+      this.existingFilePaths = [...files];
+      this.filesPreview = [...files];
+    })
   }
 
   onFilePicked(event: Event) {
@@ -48,7 +56,7 @@ export class FileUploaderComponent implements OnInit{
         }
         this.filesPreview.push(compressedFile);
         this.filesToAdd.push(compressedFile);
-        this.fileNames.push(file.name);
+        this.fileNamesToAdd.push(file.name);
       };
     reader.readAsDataURL(file); // This will kick off onload process
   }
@@ -59,7 +67,7 @@ export class FileUploaderComponent implements OnInit{
     let i = this.filesToAdd.indexOf(url);
     if (i >= 0) {
       this.filesToAdd.splice(i, 1);
-      this.fileNames.splice(i, 1);
+      this.fileNamesToAdd.splice(i, 1);
     }
 
     if (this.existingFilePaths.includes(url)) { //edit case
@@ -74,10 +82,6 @@ export class FileUploaderComponent implements OnInit{
       });
   }
 
-  setExistingFilePath(filePaths: string[]) {
-    this.existingFilePaths = filePaths;
-  }
-
   getFilesToAdd() {
     return this.filesToAdd;
   }
@@ -86,8 +90,8 @@ export class FileUploaderComponent implements OnInit{
     return this.filesToDelete;
   }
 
-  getFileNames() {
-    return this.fileNames;
+  getFileNamesToAdd() {
+    return this.fileNamesToAdd;
   }
 
 }

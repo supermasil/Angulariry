@@ -1,6 +1,6 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
+import { Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
 import { AbstractControl, FormControl, FormGroup, ValidatorFn } from "@angular/forms";
-import { Observable, of, Subscription } from "rxjs";
+import { Observable, of } from "rxjs";
 
 
 @Component({
@@ -19,26 +19,27 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   @Input() defaultValue = "";
   @Output() itemSelected = new EventEmitter();
   @Output() inputInvalid = new EventEmitter();
-  @Output() itemCancelled = new EventEmitter();
+
 
   filteredData: Observable<string[]>;
-  inputCtrl = new FormControl();
-
   autoCompleteForm: FormGroup;
+  selectedItem : string;
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(
+    private zone: NgZone
+  ) {
 
   }
 
   ngOnInit(): void {
     this.autoCompleteForm = new FormGroup({
-      item: new FormControl({value: this.defaultValue, disabled: this.defaultValue != ""} , {validators:[this.autoCompleteValidator()]})
+      item: new FormControl({value: this.defaultValue, disabled: this.defaultValue && this.lockOption}, {validators:[this.autoCompleteValidator()]}) // Default value has to be defined for set value to work
     });
-
     this.dataObservable.subscribe(data => {
-      this.data = data;
-      this.resetFilteredData();
-      this.cdr.detectChanges();
+      this.zone.run(() => {
+        this.data = data;
+        this.resetFilteredData();
+      })
     })
 
     // this.autoCompleteForm.markAllAsTouched();
@@ -54,16 +55,17 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
         if ((this.enforeSelection && this.data.includes(control.value)) || !this.enforeSelection)
           return null;
       }
-      this.inputInvalid.emit();
+      this.inputInvalid.emit(control.value);
       return {invalidInput: control.value};
     };
   }
 
   setData(data: string[]) {
     if (!data) return;
-    this.data = data;
-    this.resetFilteredData();
-    this.cdr.detectChanges();
+    this.zone.run(() => {
+      this.data = data;
+      this.resetFilteredData();
+    });
     // To prevent "Expression has changed after it was checked"
   }
 
@@ -77,22 +79,25 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   }
 
   public selectItem(value: string) {
-    this.autoCompleteForm.get('item').setValue(value);
-    this.itemSelected.emit(value);
-    this.resetFilteredData(); // Reset the list
-    if (this.enforeSelection) {
-      if (this.lockOption) {
-        this.autoCompleteForm.get('item').disable();
+    this.autoCompleteForm.patchValue({
+      item: value
+    });
+
+    this.selectedItem = value;
+      this.itemSelected.emit(value);
+      this.resetFilteredData(); // Reset the list
+      if (this.enforeSelection) {
+        if (this.lockOption) {
+          this.autoCompleteForm.get('item').disable();
+        }
       }
-    }
   }
 
   cancelItem() {
-    this.inputInvalid.emit();
+    this.selectedItem = null;
     this.autoCompleteForm.get('item').setValue('');
     this.autoCompleteForm.controls['item'].enable();
     this.resetFilteredData();
-    this.itemCancelled.emit();
   }
 
   resetFilteredData() {

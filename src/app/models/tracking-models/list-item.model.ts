@@ -1,10 +1,13 @@
 export interface ListItemModel { // From backend
-  itemName: string;
+  name: string;
   declaredValue: number;
   quantity: number;
-  insurance: string;
+  insurance: number;
   weight: number;
   unitCharge: number;
   extraCharge: number;
+  extraChargeUnit: string;
+  unitChargeSaving: number;
+  extraChargeSaving: number;
   status: string;
 }

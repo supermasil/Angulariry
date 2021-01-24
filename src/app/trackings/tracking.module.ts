@@ -18,6 +18,7 @@ import { TrackingRoutingModule } from './tracking-routing.module';
 import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-create-edit.component';
 import { GeneralInfoComponent } from './tracking-create-edit/general-info/general-info.component';
 import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/finalized-info.component';
+import { NgxPrintModule } from 'ngx-print';
 
 
 @NgModule({
@@ -43,7 +44,8 @@ import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/fi
     NgxCurrencyModule,
     FileUploaderModule,
     AutoCompleteInputModule,
-    TrackingRoutingModule
+    TrackingRoutingModule,
+    NgxPrintModule
   ]
 })
 export class TrackingModule {

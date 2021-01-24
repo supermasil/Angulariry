@@ -1,34 +1,33 @@
 <form [formGroup]="finalizedInfoForm" class="my-4" (keydown.enter)="$event.preventDefault()">
   <div class="row mt-4">
     <div class="col-lg-4">
-      <span class="d-block mat-headline"><b>Total weight charge</b></span>
-      <span class="d-block mat-title">$&nbsp;{{totalWeightCharge}}</span>
-      <span class="d-block mat-headline"><b>Total extra charge</b></span>
-      <span class="d-block mat-title">$&nbsp;{{totalExtraCharge}}</span>
-      <span class="d-block mat-headline"><b>Total insurance</b></span>
-      <span class="d-block mat-title">$&nbsp;{{totalInsurance}}</span>
+      <span class="d-block mat-h3"><b>Total weight charge</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalWeightCharge}}</span>
+      <span class="d-block mat-h3"><b>Total extra charge</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalExtraCharge}}</span>
+      <span class="d-block mat-h3"><b>Total insurance</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalInsurance}}</span>
     </div>
 
     <div class="col-lg-4">
-      <span class="d-block mat-headline"><b>Total weight</b></span>
-      <span class="d-block mat-title">{{totalWeight}}&nbsp;Kg</span>
-      <span class="d-block mat-headline"><b>Total saving</b></span>
-      <span class="d-block mat-title">$&nbsp;{{totalSaving}}</span>
+      <span class="d-block mat-h3"><b>Total weight</b></span>
+      <span class="d-block mat-h4">{{totalWeight}}&nbsp;Kg</span>
+      <span class="d-block mat-h3"><b>Total saving</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalSaving}}</span>
 
     </div>
     <div class="col-lg-4">
-      <span class="d-block mat-headline"><b>Adjustment</b></span>
+      <span class="d-block mat-h3 mb-0"><b>Adjustment</b></span>
       <mat-form-field>
         <input
         matInput
         type='number'
         formControlName='costAdjustment'
-        (change)="getFinalizedInfo()"
-        style="font-size: 1.3rem;">
-        <span class="mat-title" style="position: relative; bottom: 3px;" matPrefix>$&nbsp;</span>
+        (change)="getFinalizedInfo()">
+        <span class="mat-h4"  style="position: relative; bottom: 1px;" matPrefix>$&nbsp;</span>
       </mat-form-field>
 
-      <span class="d-block mat-headline"><b>Final Charge</b></span>
+      <span class="d-block mat-h3 mb-0"><b style="color: red;">Final Charge</b></span>
       <mat-form-field>
         <input
         matInput
@@ -36,7 +35,7 @@
         formControlName='finalCost'
         readonly
         style="font-size: 2rem;">
-        <span class="mat-headline" style="position: relative; bottom: 8px;" matPrefix>$&nbsp;</span>
+        <span class="mat-h4" style="position: relative; bottom: 8px;" matPrefix>$&nbsp;</span>
       </mat-form-field>
     </div>
   </div>

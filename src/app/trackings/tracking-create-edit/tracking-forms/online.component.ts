@@ -1,4 +1,4 @@
-import { Component, NgZone, ViewChild } from "@angular/core";
+import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReplaySubject, Subscription } from 'rxjs';
@@ -9,10 +9,14 @@ import { FileUploaderComponent } from "src/app/file-uploader/file-uploader.compo
 import { GlobalConstants } from "src/app/global-constants";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { PricingModel } from "src/app/models/pricing.model";
+import { GeneralInfoModel } from "src/app/models/tracking-models/general-info.model";
+import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
+import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { UserModel } from "src/app/models/user.model";
 import { PricingService } from "src/app/pricings/pricing.service";
 import { TrackingGlobals } from '../../tracking-globals';
 import { TrackingService } from '../../tracking.service';
+import { FinalizedInfoComponent } from "../finalized-info/finalized-info.component";
 import { GeneralInfoComponent } from "../general-info/general-info.component";
 import { ItemsListComponent } from '../items-list/items-list.component';
 
@@ -22,7 +26,7 @@ import { ItemsListComponent } from '../items-list/items-list.component';
   templateUrl: './online.component.html',
   styleUrls: ['./online.component.css', '../tracking-create-edit.component.css']
 })
-export class OnlineFormCreateComponent {
+export class OnlineFormCreateComponent implements AfterViewChecked{
   onlineForm: FormGroup;
 
   received = false;
@@ -33,7 +37,8 @@ export class OnlineFormCreateComponent {
 
   @ViewChild('itemsList') itemsList: ItemsListComponent;
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
-  @ViewChild('generalInfo') generalInfo: GeneralInfoComponent;
+  @ViewChild('generalInfo', {static: false}) generalInfo: GeneralInfoComponent;
+  @ViewChild('finalizedInfo') finalizedInfo: FinalizedInfoComponent;
 
   private codeScannerSub: Subscription;
   currentUser: UserModel;
@@ -52,10 +57,18 @@ export class OnlineFormCreateComponent {
   trackingNumeberSubject = new ReplaySubject<string>();
   pricingUpdatedSubject = new ReplaySubject<{sender: string, origin: string, destination: string}>();
   itemsListSubject = new ReplaySubject<any>();
+  generalInfoSubject = new ReplaySubject<GeneralInfoModel>();
+
+  updateExistingItemsSubject = new ReplaySubject<ListItemModel[]>();
+  costAdjustmentSubject = new ReplaySubject<number>();
+  updateExistingImagesSubject = new ReplaySubject<string[]>();
 
   scannerOpened = false;
   showItemsList = false;
+  showFinalizedInfo = false;
 
+  currentTracking: OnlineTrackingModel; // edit case
+  mode = "create";
 
   constructor(
     private trackingService: TrackingService,
@@ -65,7 +78,8 @@ export class OnlineFormCreateComponent {
     private alertService: AlertService,
     private zone: NgZone,
     private router: Router,
-    private pricingService: PricingService
+    private pricingService: PricingService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnDestroy(): void {
@@ -73,12 +87,12 @@ export class OnlineFormCreateComponent {
   }
 
   ngOnInit() {
+    this.onlineForm = this.createOnlineForm();
     this.trackingNumeberSubject.next("onl-" + Date.now() + Math.floor(Math.random() * 10000));
 
-    this.onlineForm = this.createOnlineForm(null);
     // Passed from tracking-list route
-    let searchTerm = this.route.snapshot.paramMap.get('searchTerm');
-    this.received = this.route.snapshot.paramMap.get('received') === "true";
+    // let searchTerm = this.route.snapshot.paramMap.get('searchTerm');
+    // this.received = this.route.snapshot.paramMap.get('received') === "true";
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
@@ -94,6 +108,20 @@ export class OnlineFormCreateComponent {
             this.defaultPricing = pricing;
             this.itemNamesSubject.next(pricing.items.map(i => i.name));
             this.defaultPricingSubject.next(pricing);
+
+            this.route.paramMap.subscribe((paramMap) => {
+              if (paramMap.has('trackingId')) {
+                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: OnlineTrackingModel) => {
+                  this.currentTracking = this.trackingService.setTrackingModel(response);
+                  this.mode = "edit"
+                  this.emitChanges();
+                }, error => {
+                  this.authService.redirect404();
+                });
+              }
+            }, error => {
+              this.authService.redirect404();
+            });
           }, error => {
             this.authService.redirectOnFailedSubscription("Couldn't fetch pricing");
           });
@@ -115,14 +143,33 @@ export class OnlineFormCreateComponent {
       });
   }
 
-  createOnlineForm(formData: any) {
+  emitChanges() {
+    this.patchFormValues(this.currentTracking);
+    this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
+    this.generalInfoSubject.next(this.currentTracking.generalInfo);
+    this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
+    this.costAdjustmentSubject.next(this.currentTracking.generalInfo.costAdjustment);
+    this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
+  }
+
+  createOnlineForm() {
     let form = new FormGroup({
+      _id: new FormControl(null),
       carrierTrackingNumber: new FormControl("", {validators: [Validators.required]}),
       carrier: new FormControl("", {validators: [Validators.required]}),
       content: new FormControl(""),
     });
 
     return form
+  }
+
+  patchFormValues(formData: OnlineTrackingModel) {
+    this.onlineForm.patchValue({
+      _id: formData._id,
+      carrierTrackingNumber: formData.carrierTracking?.carrierTrackingNumber,
+      carrier: formData.carrierTracking?.carrier,
+      content: formData.generalInfo.content
+    });
   }
 
   redirectOnError(errorMessage: string) {
@@ -134,18 +181,22 @@ export class OnlineFormCreateComponent {
 
   generalInfoValidity(valid: boolean) {
     if (valid) {
-      this.showItemsList = true;
+      this.zone.run(() => {this.showItemsList = true;});
     }
     // Don't change it back to false
   }
 
   itemsListValidity(valid: boolean) {
-    console.log(valid);
-    if (valid) {
-      this.itemsListSubject.next(this.itemsList.getRawValues().items);
+    if (valid && this.itemsList?.getRawValues()?.items?.length > 0) {
+      this.showFinalizedInfo = true;
     } else {
-      this.itemsListSubject.next(null);
+      this.showFinalizedInfo = false;
     }
+    this.itemsListSubject.next(this.itemsList?.getRawValues()?.items);
+  }
+
+  ngAfterViewChecked() {
+    this.cd.detectChanges();
   }
 
   pricingUpdate(changes) {
@@ -157,16 +208,37 @@ export class OnlineFormCreateComponent {
   }
 
   async onSave() {
-    this.itemsList?.getFormValidity();
     this.generalInfo.getFormValidity();
-    if (!this.onlineForm.valid || !this.generalInfo.getFormValidity() || (this.itemsList && !this.itemsList.getFormValidity())) {
+    this.itemsList?.getFormValidity();
+    this.finalizedInfo?.getFormValidity();
+
+    if (!this.onlineForm.valid || !this.generalInfo.getFormValidity() || (this.itemsList && !this.itemsList.getFormValidity()) || (this.finalizedInfo && !this.finalizedInfo.getFormValidity())) {
       return;
     }
 
-    let formData = this.onlineForm.getRawValue();
-    formData['generalInfo'] = this.generalInfo.getRawValues();
-    formData['itemsList'] = this.itemsList?.getRawValues() ? this.itemsList?.getRawValues() : [];
+    let sender = this.users.filter(u => u.customerCode == this.generalInfo.getRawValues().sender)[0];
+    let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
 
-    console.log(formData);
+    let formData = this.onlineForm.getRawValue();
+    formData['organizationId'] = this.organization._id
+    formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
+    formData['generalInfo']['recipient'] = recipient;
+    formData['itemsList'] = this.itemsList?.getRawValues()?.items ? this.itemsList.getRawValues().items : [];
+    formData['finalizedInfo'] = this.finalizedInfo?.getRawValues() ? this.finalizedInfo.getRawValues() : [];
+    if (this.mode === "edit") {
+      formData['_id'] = this.currentTracking._id;
+      formData['filesToAdd'] = JSON.stringify(this.fileUploader.getFilesToAdd());
+      formData['fileNamesToAdd'] = JSON.stringify(this.fileUploader.getFileNamesToAdd());
+      formData['filesToDelete'] = JSON.stringify(this.fileUploader.getFilesToDelete());
+      console.log(this.fileUploader.getFilesToDelete())
+    } else {
+      formData['filesToAdd'] = JSON.stringify(this.fileUploader.getFilesToAdd());
+      formData['fileNamesToAdd'] = JSON.stringify(this.fileUploader.getFileNamesToAdd());
+    }
+    this.trackingService.createUpdateTracking(formData);
+  }
+
+  printPage() {
+    window.print();
   }
 }

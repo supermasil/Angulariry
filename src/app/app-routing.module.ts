@@ -9,11 +9,11 @@ import { TrackingListComponent } from './trackings/tracking-list/tracking-list.c
 
 const routes: Routes = [
   { path: '', component: FrontPageComponent},
+  { path: 'trackings/create', loadChildren: () => import("./trackings/tracking.module").then(module => module.TrackingModule), canActivate: [AuthGuard]},
   { path: 'trackings', component: TrackingListComponent},
-  { path: 'trackings/create', loadChildren: () => import("./trackings/tracking.module").then(module => module.TrackingModule)},
-  { path: 'pricings', loadChildren: () => import("./pricings/pricing.module").then(module => module.PricingModule)},
-  { path: 'trackings/edit/:trackingId', component: TrackingCreateEditComponent, canActivate: [AuthGuard]},
+  { path: 'trackings/edit/:type/:trackingId', component: TrackingCreateEditComponent, canActivate: [AuthGuard]},
   { path: 'trackings/tracking-tool', component: TrackingToolComponent, canActivate: [AuthGuard]},
+  { path: 'pricings', loadChildren: () => import("./pricings/pricing.module").then(module => module.PricingModule)},
   { path: "auth", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule)}, // Lazy loading
   { path: "auth/users/edit/:userId", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard]}, // Lazy loading
   { path: "auth/organizations/edit/:orgId", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard]}, // Lazy loading

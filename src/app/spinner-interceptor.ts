@@ -1,5 +1,5 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { Observable } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
@@ -7,13 +7,15 @@ import { finalize, tap } from 'rxjs/operators';
 @Injectable()
 export class SpinnerInterceptor implements HttpInterceptor{
     count = 0;
-    constructor(private spinner: NgxSpinnerService) { }
+    constructor(private spinner: NgxSpinnerService, private zone: NgZone) { }
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-      this.spinner.show("spinner", {
-        type: "ball-triangle-path",
-        size: "large",
-        bdColor: "rgba(255,250,250,0.8)",
-        color: "#673AB7"
+      this.zone.run(() => {
+        this.spinner.show("spinner", {
+          type: "ball-triangle-path",
+          size: "large",
+          bdColor: "rgba(255,250,250,0.8)",
+          color: "#673AB7"
+        });
       });
 
       this.count++;
@@ -31,7 +33,9 @@ export class SpinnerInterceptor implements HttpInterceptor{
             // error => console.log(error)
           ), finalize(() => {
             this.count--;
-            if ( this.count == 0 ) this.spinner.hide ("spinner");
+            if ( this.count == 0 ) {
+              this.zone.run(() => {this.spinner.hide("spinner")});
+            };
           })
         );
     }

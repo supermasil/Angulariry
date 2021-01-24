@@ -1,17 +1,16 @@
-const EasyPost = require('@easypost/api');
-const api = new EasyPost(process.env.easyPostApiKey);
 const OnlineTrackingModel = require('../models/tracking-models/online-tracking');
 const ServicedTrackingModel = require('../models/tracking-models/serviced-tracking');
 const InPersonTrackingModel = require('../models/tracking-models/in-person-tracking');
 const ConsolidatedTrackingModel = require('../models/tracking-models/consolidated-tracking');
 const MasterTrackingModel = require('../models/tracking-models/master-tracking');
-const CarrierTrackingModel = require('../models/tracking-models/carrier-tracking');
 const HistoryModel = require('../models/history');
 const UserController = require("../controllers/users");
+const CarrierTrackingController = require("../controllers/carrier-trackings");
 const CommentModel = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
-assert = require('assert');
+const { assert } = require('console');
+require('assert');
 
 const TrackingTypes = Object.freeze({
   ONLINE: "onl",
@@ -38,36 +37,18 @@ exports.createTracking = async (req, res, next) => {
   // console.log(JSON.stringify(req.body, null, 2));
   try {
     const session = await db.startSession();
-    result =  await session.withTransaction(async () => {
-      prefix = req.body.trackingNumber.substring(0, 3);
+    await session.withTransaction(async () => {
+      prefix = req.body.generalInfo.trackingNumber.substring(0, 3);
       createdTracking = null;
-      req.historyId = (await createHistoryHelper(req.userData.uid, "Create", req.body.trackingNumber, session))._id;
-
+      if (req.body._id) {
+        req.historyId = (await createHistoryHelper(req.userData.uid, "Update", req.body.generalInfo.trackingNumber, session))._id;
+      } else {
+        req.historyId = (await createHistoryHelper(req.userData.uid, "Create", req.body.generalInfo.trackingNumber, session))._id;
+      }
       switch (prefix) {
         case TrackingTypes.ONLINE:
-          const tracker = await getTrackerHelper(req.body.carrierTrackingNumber, req.body.carrier);
-          assert(tracker !== null);
-
-          tracking = new OnlineTrackingModel({
-            trackingNumber: req.body.trackingNumber,
-
-            carrierTracking: (await CarrierTrackingModel.create([{
-              carrierTrackingNumber: req.body.carrierTrackingNumber,
-              status: tracker.status,
-              trackerId: tracker.id,
-              carrier: req.body.carrier,
-              postId: req.body.trackingNumber
-            }], {session: session}).then(response => response[0]._id)),
-
-            generalInfo: await generalInfoSetupHelper(req),
-            itemList: itemsListSetupHelper(req)
-          });
-          await tracking.validate();
-          // tracking.generalInfo.filePaths = await S3.uploadFiles(JSON.parse(req.body.files), JSON.parse(req.body.fileNames));
-          console.log(tracking);
-          // createdTracking =  await OnlineTrackingModel.create([tracking], {session: session}).then(createdTracking => { return createdTracking });
+          createdTracking = await createUpdateOnlineTracking(req, session);
           break;
-
         case TrackingTypes.SERVICED:
           tracking = new ServicedTrackingModel({
             trackingNumber: req.body.trackingNumber,
@@ -128,17 +109,53 @@ exports.createTracking = async (req, res, next) => {
         default:
           return res.status(500).json({message: "Tracking type doesn't match any"});
       }
+      console.log(`createTracking: Tracking created successfully: ${createdTracking.trackingNumber}`);
+      return res.status(201).json({message: "Tracking created successfully", tracking: createdTracking});
     });
-
     session.endSession();
-    console.info(`createTracking: Tracking created successfully: ${req.body.trackingNumber}`);
-    return res.status(201).json({message: "Tracking created successfully", tracking: result});
-
   } catch (error) {
-    console.error(`createTracking: ${req.body.trackingNumber}: ${error}`);
-    return res.status(500).json({message: `Tracking creation failed, please check your info or contact Admin with this number ${req.body.trackingNumber}`});
+    console.error(`createTracking: ${req.body.generalInfo.trackingNumber}: ${error}`);
+    return res.status(500).json({message: `Tracking creation failed, please check your info or contact Admin with tracking number ${req.body.generalInfo.trackingNumber}. If this is an online order, check if your carrier/ carrier tracking number is correct`});
   }
 };
+
+createUpdateOnlineTracking = async (req, session) => {
+  const tracker = await CarrierTrackingController.getTrackerHelper(req.body.carrierTrackingNumber, req.body.carrier);
+  assert(tracker !== null);
+
+  if (req.body._id) { //edit case
+    let currentTracking = await OnlineTrackingModel.findById(req.body._id).then(result => result);
+    let currentCarrierTracking = await CarrierTrackingController.getCarrierTracking(currentTracking.carrierTracking);
+    assert(currentCarrierTracking != null, "Carrier tracking number is null");
+
+    if (currentCarrierTracking.carrier != req.body.carrier || currentCarrierTracking.carrierTrackingNumber != req.body.carrierTrackingNumber) {
+      await CarrierTrackingController.updateCarrierTracking(currentTracking.carrierTracking, req.body.carrierTrackingNumber, tracker.status, tracker.id, req.body.carrier, session);
+    }
+
+    let generalInfo = await generalInfoSetupHelper(req);
+    generalInfo['filePaths'] = await updateImages(req, currentTracking.generalInfo.filePaths);
+
+    return await OnlineTrackingModel.findByIdAndUpdate(req.body._id, {
+      generalInfo: generalInfo,
+      itemsList: itemsListSetupHelper(req),
+    }, {new: true}).session(session).then(result => {return result});
+
+  } else { // create case
+    let newcarrierTracking = await CarrierTrackingController.createCarrierTracking(req.body.carrierTrackingNumber, tracker.status, tracker.id, req.body.carrier, req.body.generalInfo.trackingNumber, session);
+    let generalInfo = await generalInfoSetupHelper(req);
+    generalInfo['filePaths'] = await addImages(req);
+
+    tracking = new OnlineTrackingModel({
+      trackingNumber: req.body.generalInfo.trackingNumber,
+      carrierTracking: newcarrierTracking._id,
+      generalInfo: generalInfo,
+      itemsList: itemsListSetupHelper(req)
+      // linkedTo: req.body.linkedTo? req.body.linkedTo: []
+    });
+    await tracking.validate();
+    return await OnlineTrackingModel.create([tracking], {session: session}).then(createdTracking => {return createdTracking[0]});
+  }
+}
 
 createHistoryHelper = async (userId, action, postId, session) => {
   return await HistoryModel.create([{
@@ -150,45 +167,50 @@ createHistoryHelper = async (userId, action, postId, session) => {
 
 generalInfoSetupHelper = async req => {
   return {
-    customerCode: req.body.customerCode,
+    sender: req.body.generalInfo.sender,
+    recipient: req.body.generalInfo.recipient,
     organizationId: req.body.organizationId,
     content: req.body.content,
-    status: req.body.status,
-    active: req.body.active,
-    type: req.body.type,
-    weight: req.body.weight,
-    finalCost: req.body.finalCost,
+    // status: req.body.status? req.body.status : "Unknown",
+    active: req.body.active? req.body.active : true,
 
-    currentLocation: req.body.currentLocation,
-    origin: req.body.origin,
-    destination: req.body.destination,
+    totalWeight: req.body.finalizedInfo.totalWeight,
+    finalCost: req.body.finalizedInfo.finalCost,
+    costAdjustment: req.body.finalizedInfo.costAdjustment,
+
+    currentLocation: req.body.currentLocation? req.body.currentLocation : req.body.generalInfo.origin,
+    origin: req.body.generalInfo.origin,
+    destination: req.body.generalInfo.destination,
     shippingOptions: {
-      payAtDestination: req.body.payAtDestination,
-      receiveAtDestination: req.body.receiveAtDestination
+      payAtDestination: req.body.payAtDestination? req.body.payAtDestination : false,
+      receiveAtDestination: req.body.receiveAtDestination? req.body.receiveAtDestination : false
     },
 
     creatorId: req.userData.uid,
-    creatorName: (await UserController.getUserByIdHelper(req.userData.uid)).name,
-
-    comments: []
+    creatorName: (await UserController.getUserByIdHelper(req.userData.uid)).name
+    // comments: req.body.comments? req.body.comments : []
   };
 }
 
 itemsListSetupHelper = req => {
-  itemsList = []
-
-  JSON.parse(req.body.itemsList).forEach(item =>{
-    itemList.push({
-      itemName: item.itemName,
+  itemsList = [];
+  req.body.itemsList.forEach(item =>{
+    itemsList.push({
+      name: item.name,
       declaredValue: item.declaredValue,
       quantity: item.quantity,
       insurance: item.insurance,
       weight: item.weight,
-      extraCharge: item.extraCharge
+      unitCharge: item.unitCharge,
+      extraCharge: item.extraCharge,
+      extraChargeUnit: item.extraChargeUnit,
+      unitChargeSaving: item.unitChargeSaving,
+      extraChargeSaving: item.extraChargeSaving
+      // status: item.status
     });
   });
 
-  return itemList;
+  return itemsList;
 }
 
 requestItemsSetupHelper = async req => {
@@ -249,7 +271,7 @@ exports.updateTracking = async(req, res , next) => {
 
         tempFilePaths = tempFilePaths.filter(item => !filesToDelete.includes(item));
 
-        let fileNames = JSON.parse(req.body.fileNames);
+        let fileNames = JSON.parse(req.body.fileNamesToAdd);
         let newFilePaths = await S3.uploadFiles(JSON.parse(req.body.files), fileNames);
         tempFilePaths = [...tempFilePaths, ...newFilePaths];
 
@@ -261,6 +283,22 @@ exports.updateTracking = async(req, res , next) => {
       console.log("updateTracking: " + error.message);
       return res.status(500).json({message: "Tracking update failed"});
     });
+}
+
+addImages = async (req) => {
+  filePaths = await S3.uploadFiles(JSON.parse(req.body.filesToAdd), JSON.parse(req.body.fileNamesToAdd));
+  return filePaths
+}
+
+updateImages = async (req, currentFilesPath) => {
+  let tempFilePaths = currentFilesPath;
+  let filesToDelete = JSON.parse(req.body.filesToDelete); // Parse the array
+  await S3.deleteFiles(filesToDelete);
+  tempFilePaths = tempFilePaths.filter(item => !filesToDelete.includes(item));
+  let fileNames = JSON.parse(req.body.fileNamesToAdd);
+  let newFilePaths = await S3.uploadFiles(JSON.parse(req.body.filesToAdd), fileNames);
+  tempFilePaths = [...tempFilePaths, ...newFilePaths];
+  return tempFilePaths;
 }
 
 exports.fuzzySearch = async (req, res, next) => {
@@ -304,14 +342,29 @@ exports.getTrackings = async (req, res, next) => {
 }
 
 exports.getTracking = async (req, res, next) => {
-  return await onlineTracking.findById(req.params.id).populate('comments').exec()
-  .then(tracking => {
-    return res.status(200).json(tracking);
-  })
-  .catch(error => {
-    console.log("getTracking: " + error.message);
+  try {
+    switch(req.params.id.substring(0, 3)) {
+      case TrackingTypes.ONLINE:
+        return await OnlineTrackingModel.findOne({trackingNumber: req.params.id}).populate('carrierTracking').exec()
+          .then(tracking => {
+            assert(tracking != null);
+            return res.status(200).json(tracking);
+          })
+      case TrackingTypes.SERVICED:
+        break;
+      case TrackingTypes.INPERSON:
+        break;
+      case TrackingTypes.CONSOLIDATED:
+        break;
+      case TrackingTypes.MASTER:
+        break;
+      default:
+        return res.status(500).json({message: "Couldn't fetch tracking"});
+    }
+  } catch(error) {
+    console.log(`getTracking: ${req.params.id} ${error.message}`);
     return res.status(500).json({message: "Couldn't fetch tracking"});
-  });
+  };
 }
 
 exports.deleteTracking = async (req, res, next) => {
@@ -360,13 +413,4 @@ fetchTrackingsHelper = (req, res, trackingQuery) => {
 //   }
 // }
 
-getTrackerHelper = async (trackingNumber, carrier) => {
-  const tracker = new api.Tracker({
-    tracking_code: trackingNumber,
-    carrier: carrier
-  });
-  return await tracker.save()
-    .then(savedTracker => {
-      return savedTracker;
-    });
-};
+

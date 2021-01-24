@@ -268,4 +268,10 @@ export class AuthService {
         this.router.navigate(["/"]);
       });
   }
+
+  redirect404() {
+    this.zone.run(() => {
+      this.router.navigate(["/404"]);
+    });
+  }
 }

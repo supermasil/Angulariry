@@ -11,7 +11,7 @@ export interface GeneralInfoModel { // From backend
 
   totalWeight: number; // Can be updated later on
   finalCost: number; // The money to charge customer
-  costAdjustment: {type: Number, default: 0}
+  costAdjustment: number;
 
   currentLocation: string; //Unknown, Oregon, HN, SG....
   origin: string;
@@ -24,6 +24,6 @@ export interface GeneralInfoModel { // From backend
   creatorId: string; // Google id, has to be string
   creatorName: string;
 
-  filePaths: [{type: String}];
-  comments: [CommentModel];
+  filePaths: string[];
+  comments: CommentModel[];
 }

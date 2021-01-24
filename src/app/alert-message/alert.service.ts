@@ -31,10 +31,18 @@ export class AlertService {
         this.alert(new Alert({ ...options, type: AlertType.Warning, message }));
     }
 
-    // main alert method    
+    scroll() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }
+
+    // main alert method
     alert(alert: Alert) {
         alert.id = alert.id || this.defaultId;
         this.subject.next(alert);
+        this.scroll();
     }
 
     // clear alerts

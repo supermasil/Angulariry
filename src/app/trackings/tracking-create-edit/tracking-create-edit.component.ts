@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TrackingService } from '../tracking.service';
 
@@ -21,7 +21,8 @@ export class TrackingCreateEditComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private zone: NgZone
   ) {}
 
 
@@ -29,36 +30,18 @@ export class TrackingCreateEditComponent implements OnInit {
   ngOnInit() {
     // Subcribe to see the active route
     this.route.paramMap.subscribe((paramMap) => {
-      if (paramMap.has('trackingId')) { // Edit case
-        // this.mode = 'edit';
-        // this.trackingId = paramMap.get('trackingId');
-
-        // this.trackingService.getTracking(this.trackingId).subscribe(
-        //   trackingData => {
-        //     this.tracking = trackingData as Tracking;
-
-        //     Initialize the form
-        //     this.onlineForm.setValue({
-        //       trackingNumber: this.tracking.trackingNumber,
-        //       carrier: this.tracking.carrier,
-        //       content: this.tracking.content ? this.tracking.content : "",
-        //       fileValidator: null
-        //     });
-
-        //     this.filePaths = this.tracking.filePaths;
-        //     // Load images preview
-        //     this.filePaths.forEach(file => {
-        //       this.filesPreview.push(file);
-        //     });
-        //     this.received = this.tracking.status === "received_at_us_warehouse" ? true : false;
-        //   },
-        //   err => {
-        //     this.zone.run(() => {
-        //       this.router.navigate(["/404"]);
-        //     });
-        //   });
-      } else if (paramMap.has('pricingId') || this.router.url == "/pricings/new") {
-        this.selectedIndex = 5;
+      if (this.router.url.includes('edit')) {
+        if (paramMap.get('type') === 'online') {
+          this.selectedIndex = 0;
+        } else if (paramMap.get('type') === 'serviced') {
+          this.selectedIndex = 1;
+        } else if (paramMap.get('type') === 'inperson') {
+          this.selectedIndex = 2;
+        } else if (paramMap.get('type') === 'consolidated') {
+          this.selectedIndex = 3;
+        } else if (paramMap.get('type') === 'master') {
+          this.selectedIndex = 4;
+        }
       }
     });
   }

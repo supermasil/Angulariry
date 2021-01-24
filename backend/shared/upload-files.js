@@ -52,7 +52,6 @@ exports.uploadFiles = async (files, fileNames) => {
     let ext = fileNames[index].substr(fileNames[index].lastIndexOf('.') + 1);
     let name = fileNames[index].toLowerCase().split(' ').join('-') + '-' + Date.now() + '.' + ext;
     uploadFilePromises.push(uploadFile(item, name)); // For any images
-
   })
 
   return await Promise.all(uploadFilePromises).then(values => {

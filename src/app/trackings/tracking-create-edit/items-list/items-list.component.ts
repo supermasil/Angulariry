@@ -1,18 +1,21 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
+import { ThrowStmt } from '@angular/compiler';
+import { AfterContentInit, AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { element } from 'protractor';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AlertService } from 'src/app/alert-message';
 import { AuthService } from 'src/app/auth/auth.service';
 import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
 import { GlobalConstants } from 'src/app/global-constants';
 import { PricingModel } from 'src/app/models/pricing.model';
+import { ListItemModel } from 'src/app/models/tracking-models/list-item.model';
 
 @Component({
   selector: 'items-list',
   templateUrl: './items-list.component.html',
   styleUrls: ['./items-list.component.css', '../tracking-create-edit.component.css']
 })
-export class ItemsListComponent implements OnInit, AfterViewInit{
+export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewChecked{
 
   itemsForm: FormGroup;
 
@@ -27,10 +30,16 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
   @Input() userIdObservable: Observable<string> = new Observable();
   userId: string;
 
+  @Input() updateExistingItemsObservable: Observable<ListItemModel[]> = new Observable(); // Edit case
+  totalOldItems = -1;
+
+  currentValidItemNames = [] // For when edit item is not avaiable anymore
   itemNames = [];
   itemNamesSubject = new BehaviorSubject<string[]>([]); // Subject won't work for some reason
 
   insurance = ["5 %", "2 %"];
+
+  increment = 0; // for items order
 
   @ViewChildren('itemName') itemNamesRef: QueryList<AutoCompleteInputComponent>;
 
@@ -38,20 +47,22 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
 
   constructor(
     private authService: AuthService,
-    private alertService: AlertService) {
+    private alertService: AlertService,
+    private cd: ChangeDetectorRef) {
   }
 
   ngOnInit() {
     this.pricingObservable.subscribe((p: PricingModel) => {
       this.pricing = p;
       this.itemNames = p.items.map(i => i.name);
+      this.currentValidItemNames = p.items.map(i => i.name);
       this.itemNamesSubject.next(this.itemNames);
     }, error => {
       this.authService.redirectOnFailedSubscription("Couldn't fetch pricing");
     });
 
     this.itemsForm = new FormGroup({
-      items: new FormArray([this.createItem()])
+      items: new FormArray([])
     });
 
     this.userIdObservable.subscribe((u: string) => {
@@ -64,31 +75,42 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
       this.senderId = changes.sender;
       this.origin = changes.origin;
       this.destination = changes.destination;
-
-      this.itemsForm.get('items')['controls'].forEach((item) => {
-        this.pricingChangeCheck(item.get('name').value);
+      this.itemsForm.get('items')['controls'].forEach((item, index) => {
+        if (index > this.totalOldItems - 1) {
+          this.pricingChangeCheck(item.get('name').value, this.itemsForm.get('items')['controls'][index].get('order').value); // Only new items
+        }
       });
     });
 
     this.itemsForm.valueChanges.subscribe(valid => {
       this.formValidityStatus.emit(this.itemsForm.valid);
-    })
+    });
+
+    this.updateExistingItemsObservable.subscribe((items: ListItemModel[]) => {
+      this.totalOldItems = items.length;
+      items.forEach(item => {
+        this.addItem(item);
+      });
+    });
   }
 
-  pricingChangeCheck(itemName: string) {
+  ngAfterViewChecked() {
+    this.cd.detectChanges(); // To prevent problems when selectItem()
+  }
+
+  pricingChangeCheck(itemName: string, order: number) {
     if (itemName) {
-      let itemIndex = this.pricing.items.findIndex(i => i.name == itemName);
-      let itemFormIndex = this.itemsForm.get('items')['controls'].findIndex(i => i['controls'].name.value == itemName);
-      if (itemIndex >= 0 && itemFormIndex >= 0) {
+      let itemPricingIndex = this.pricing.items.findIndex(i => i.name == itemName);
+      let itemFormIndex = this.itemsForm.get('items')['controls'].findIndex(i => i.get('order').value === order);
+      if (itemPricingIndex >= 0 && itemFormIndex >= 0) {
         try {
-          let routeIndex = this.pricing.items[itemIndex].routes.findIndex(r => r.origin == this.origin);
-          let destinationIndex = this.pricing.items[itemIndex].routes[routeIndex].destinations.findIndex(d => d.name == this.destination);
-          let discountIndex = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts.findIndex(discount => discount.userId == this.senderId);
+          let routeIndex = this.pricing.items[itemPricingIndex].routes.findIndex(r => r.origin == this.origin);
+          let destinationIndex = this.pricing.items[itemPricingIndex].routes[routeIndex].destinations.findIndex(d => d.name == this.destination);
+          let discountIndex = this.pricing.items[itemPricingIndex].routes[routeIndex].destinations[destinationIndex].discounts.findIndex(discount => discount.userId == this.senderId);
+          let destination = this.pricing.items[itemPricingIndex].routes[routeIndex].destinations[destinationIndex];
+          let discount = this.pricing.items[itemPricingIndex].routes[routeIndex].destinations[destinationIndex].discounts[discountIndex];
 
-          let destination = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex];
-          let discount = this.pricing.items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts[discountIndex];
-
-          this.itemsForm.get('items')['controls'][itemFormIndex].controls['extraChargeUnit'].setValue(destination.extraChargeUnit);
+          this.itemsForm.get('items')['controls'][itemFormIndex].get('extraChargeUnit').setValue(destination.extraChargeUnit);
 
           let originalUnitCharge = destination.pricePerUnit;
           let originalExtraCharge = destination.extraCharge; // Can be $ or %
@@ -126,14 +148,12 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
           } else {
             this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(originalUnitCharge);
             this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(originalExtraCharge);
-            this.itemsForm.get('items')['controls'][itemFormIndex].get('unitChargeSaving').setValue(0);
-            this.itemsForm.get('items')['controls'][itemFormIndex].get('extraChargeSaving').setValue(0);
           }
 
         } catch (error) {
-          this.alertService.warn("Probably this route is not set up for this item", GlobalConstants.flashMessageOptions);
-          this.itemsForm?.get('items')['controls'][itemFormIndex]?.get('unitCharge')?.setValue(0);
-          this.itemsForm?.get('items')['controls'][itemFormIndex]?.get('extraCharge')?.setValue(0);
+          this.alertService.warn(`Probably this route is not set up for item ${itemName}`, GlobalConstants.flashMessageOptions);
+          this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(null);
+          this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(null);
         }
       }
     }
@@ -143,29 +163,34 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
     this.itemNamesSubject.next(this.itemNames);
   }
 
-  createItem(): FormGroup {
+  createItem(formData: ListItemModel): FormGroup {
     let form = new FormGroup({
-      name: new FormControl("", {validators:[Validators.required]}),
-      value: new FormControl(0, {validators:[Validators.required]}),
-      quantity: new FormControl(0, {validators:[Validators.required]}),
-      unitCharge: new FormControl(0, {validators:[Validators.required]}),
-      extraCharge: new FormControl(0, {validators:[Validators.required]}),
-      extraChargeUnit: new FormControl(null, {validators:[Validators.required]}),
-      unitChargeSaving: new FormControl(0, {validators:[Validators.required]}),
-      extraChargeSaving: new FormControl(0, {validators:[Validators.required]}),
-      weight: new FormControl(0, {validators:[Validators.required]}),
-      insurance: new FormControl(0, {validators: [Validators.required]}),
-      status: new FormControl("Unknown", {validators:[Validators.required]})
+      name: new FormControl(formData?.name? formData.name : "", {validators:[Validators.required]}),
+      declaredValue: new FormControl(formData?.declaredValue? formData.declaredValue : 0, {validators:[Validators.required]}),
+      quantity: new FormControl(formData?.quantity? formData.quantity : 0, {validators:[Validators.required]}),
+      unitCharge: new FormControl(formData?.unitCharge? formData.unitCharge : 0, {validators:[Validators.required]}),
+      extraCharge: new FormControl(formData?.extraCharge? formData.extraCharge : 0, {validators:[Validators.required]}),
+      extraChargeUnit: new FormControl(formData?.extraChargeUnit? formData.extraChargeUnit : '$', {validators:[Validators.required]}),
+      unitChargeSaving: new FormControl(formData?.unitChargeSaving? formData.unitChargeSaving : 0, {validators:[Validators.required]}),
+      extraChargeSaving: new FormControl(formData?.extraChargeSaving? formData.extraChargeSaving : 0, {validators:[Validators.required]}),
+      weight: new FormControl(formData?.weight? formData.weight : 0, {validators:[Validators.required]}),
+      insurance: new FormControl(formData?.insurance? formData.insurance : 0, {validators: [Validators.required]}),
+      status: new FormControl(formData?.status? formData.status : "Unknown", {validators:[Validators.required]}),
+      order: new FormControl(this.increment)
     });
 
-    form.get('name').valueChanges.subscribe(value => {
-      this.pricingChangeCheck(value);
-    })
+    if (!formData) { // edit case
+      form.get('name').valueChanges.subscribe(value => {
+        this.pricingChangeCheck(value, form.get('order').value);
+      })
+    }
+
+    this.increment ++;
     return form;
   }
 
-  addItem() {
-    (this.itemsForm.get('items') as FormArray).push(this.createItem());
+  addItem(formData: ListItemModel) {
+    (this.itemsForm.get('items') as FormArray).push(this.createItem(formData));
     this.itemNamesSubject.next(this.itemNames);
   }
 
@@ -173,22 +198,66 @@ export class ItemsListComponent implements OnInit, AfterViewInit{
     // if((this.itemsForm.get('items') as FormArray).length == 1) {
     //   return;
     // }
+    if (i > this.totalOldItems - 1) { // Only for new items
+      this.addItemName(this.itemsForm.get('items')['controls'][i].get('name').value);
+    } else {
+      this.totalOldItems -= 1;
+    }
+
     (this.itemsForm.get('items') as FormArray).removeAt(i);
   }
 
   itemSelected(value: string, index: number) {
-    this.itemsForm.get('items')['controls'][index].controls['name'].setValue(value);
-    // let unitCharge = this.pricing.items.filter(i => i.name == value).
+    let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
+    if (previousValue) {
+      this.addItemName(previousValue);
+    }
+    this.itemsForm.get('items')['controls'][index].get('name').setValue(value);
+    this.subtractItemName(value);
   }
 
-  itemInvalid(index: number) {
-    this.itemsForm.get('items')['controls'][index].controls['name'].setValue('');
-    this.itemsForm.get('items')['controls'][index].get('unitCharge')?.setValue(0);
-    this.itemsForm.get('items')['controls'][index].get('extraCharge')?.setValue(0);
+  subtractItemName(value: string) {
+    this.itemNames = this.itemNames.filter(i => i !== value);
+    this.itemNamesSubject.next(this.itemNames);
+  }
+
+  addItemName(value: string) {
+    if (value && this.currentValidItemNames.includes(value)) { // Can be empty string
+      this.itemNames.unshift(value);
+      this.itemNamesSubject.next(this.itemNames);
+    }
+  }
+
+  itemInvalid(value: string, index: number) {
+    let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
+    if (previousValue && !this.itemNames.includes(previousValue)) {
+      this.addItemName(previousValue);
+    }
+    if (index > this.totalOldItems - 1) { // Only new items
+      this.itemsForm.get('items')['controls'][index].get('name').setValue('');
+      this.itemsForm.get('items')['controls'][index].get('unitCharge').setValue(null);
+      this.itemsForm.get('items')['controls'][index].get('extraCharge').setValue(null);
+    }
   }
 
   getExtraChargeUnit(index: number) {
-    return this.itemsForm.get('items')['controls'][index].controls['extraChargeUnit'].value;
+    return this.itemsForm.get('items')['controls'][index].get('extraChargeUnit').value;
+  }
+
+  getDefaultValue(index: number) {
+    if (index > this.totalOldItems - 1) {
+      return "";
+    } else {
+      return this.itemsForm.get('items')['controls'][index].get('name').value;;
+    }
+  }
+
+  getLockOption(index: number) {
+    if (index > this.totalOldItems - 1) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   getFormValidity() {
