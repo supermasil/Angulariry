@@ -42,6 +42,10 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
       })
     })
 
+    if (this.defaultValue) {
+      this.itemSelected.emit(this.defaultValue);
+    }
+
     // this.autoCompleteForm.markAllAsTouched();
   }
 
@@ -84,13 +88,13 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
     });
 
     this.selectedItem = value;
-      this.itemSelected.emit(value);
-      this.resetFilteredData(); // Reset the list
-      if (this.enforeSelection) {
-        if (this.lockOption) {
-          this.autoCompleteForm.get('item').disable();
-        }
+    this.itemSelected.emit(value);
+    this.resetFilteredData(); // Reset the list
+    if (this.enforeSelection) {
+      if (this.lockOption) {
+        this.autoCompleteForm.get('item').disable();
       }
+    }
   }
 
   cancelItem() {

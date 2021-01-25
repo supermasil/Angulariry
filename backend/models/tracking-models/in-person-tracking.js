@@ -8,8 +8,6 @@ const RecipientSchema = require('../recipient');
 
 const inPersonTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
-  // sender: {type: String, required: true}, // It's customer code
-  recipient: {type: RecipientSchema, required: true},
   generalInfo: {type: GeneralInfoSchema, required: true},
   itemsList: {type: [ListItemSchema], required: true},
   linkedTo: [{type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}]

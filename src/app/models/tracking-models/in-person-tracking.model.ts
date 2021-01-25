@@ -5,8 +5,6 @@ import { ListItemModel } from "./list-item.model";
 export interface InPersonTrackingModel { // From backend
   _id: string;
   trackingNumber: string;
-  // sender is customer code
-  recipient: RecipientModel;
   generalInfo: GeneralInfoModel;
   itemsList: ListItemModel[];
   linkedTo: string[];

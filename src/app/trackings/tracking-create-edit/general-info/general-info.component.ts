@@ -26,6 +26,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   @Input() defaultLocationsObservable = new Observable<string[]>();
   @Input() trackingNumberObservable = new Observable<string>();
   @Input() generalInfoObservable = new Observable<GeneralInfoModel>();
+  @Input() statusChangeObservable = new Observable<string>();
+
   generalInfo : GeneralInfoModel;
 
   statuses = ["Unknown", "Pending", "Created", "Received", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
@@ -72,6 +74,12 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
     this.trackingNumberObservable.subscribe((trackingNumber: string) => {
       this.generalInfoForm.get('trackingNumber').patchValue(trackingNumber);
+    });
+
+    this.statusChangeObservable.subscribe((status: string) => {
+      if (this.statuses.includes(status)) {
+        this.generalInfoForm.get('status').setValue(status);
+      }
     });
 
     this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {

@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, ViewChild } from "@angular/core";
+import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReplaySubject, Subscription } from 'rxjs';
@@ -6,7 +6,6 @@ import { AlertService } from "src/app/alert-message";
 import { AuthService } from "src/app/auth/auth.service";
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 import { FileUploaderComponent } from "src/app/file-uploader/file-uploader.component";
-import { GlobalConstants } from "src/app/global-constants";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { PricingModel } from "src/app/models/pricing.model";
 import { GeneralInfoModel } from "src/app/models/tracking-models/general-info.model";
@@ -14,7 +13,7 @@ import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { UserModel } from "src/app/models/user.model";
 import { PricingService } from "src/app/pricings/pricing.service";
-import { TrackingGlobals } from '../../tracking-globals';
+import { TrackingGlobals } from "../../tracking-globals";
 import { TrackingService } from '../../tracking.service';
 import { FinalizedInfoComponent } from "../finalized-info/finalized-info.component";
 import { GeneralInfoComponent } from "../general-info/general-info.component";
@@ -26,21 +25,15 @@ import { ItemsListComponent } from '../items-list/items-list.component';
   templateUrl: './online.component.html',
   styleUrls: ['./online.component.css', '../tracking-create-edit.component.css']
 })
-export class OnlineFormCreateComponent implements AfterViewChecked{
+export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   onlineForm: FormGroup;
-
-  received = false;
-  // tracking: Tracking;
   carriers = TrackingGlobals.carriers;
-
-  internalStatus = ["Received at US WH", "Consolidated"];
 
   @ViewChild('itemsList') itemsList: ItemsListComponent;
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
   @ViewChild('generalInfo', {static: false}) generalInfo: GeneralInfoComponent;
   @ViewChild('finalizedInfo') finalizedInfo: FinalizedInfoComponent;
 
-  private codeScannerSub: Subscription;
   currentUser: UserModel;
   selectedUser: UserModel;
   organization: OrganizationModel;
@@ -63,22 +56,24 @@ export class OnlineFormCreateComponent implements AfterViewChecked{
   costAdjustmentSubject = new ReplaySubject<number>();
   updateExistingImagesSubject = new ReplaySubject<string[]>();
 
+  statusChangeSubject = new ReplaySubject<string>();
+
+  currentTracking: OnlineTrackingModel; // edit case
+  mode = "create";
+
+  private codeScannerSub: Subscription;
   scannerOpened = false;
   showItemsList = false;
   showFinalizedInfo = false;
 
-  currentTracking: OnlineTrackingModel; // edit case
-  mode = "create";
 
   constructor(
     private trackingService: TrackingService,
     private route: ActivatedRoute,
     private codeScannerService: CodeScannerService,
     private authService: AuthService,
-    private alertService: AlertService,
-    private zone: NgZone,
-    private router: Router,
     private pricingService: PricingService,
+    private zone: NgZone,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -89,10 +84,6 @@ export class OnlineFormCreateComponent implements AfterViewChecked{
   ngOnInit() {
     this.onlineForm = this.createOnlineForm();
     this.trackingNumeberSubject.next("onl-" + Date.now() + Math.floor(Math.random() * 10000));
-
-    // Passed from tracking-list route
-    // let searchTerm = this.route.snapshot.paramMap.get('searchTerm');
-    // this.received = this.route.snapshot.paramMap.get('received') === "true";
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
@@ -108,11 +99,10 @@ export class OnlineFormCreateComponent implements AfterViewChecked{
             this.defaultPricing = pricing;
             this.itemNamesSubject.next(pricing.items.map(i => i.name));
             this.defaultPricingSubject.next(pricing);
-
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: OnlineTrackingModel) => {
-                  this.currentTracking = this.trackingService.setTrackingModel(response);
+                this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: OnlineTrackingModel) => {
+                  this.currentTracking = response;
                   this.mode = "edit"
                   this.emitChanges();
                 }, error => {
@@ -139,7 +129,7 @@ export class OnlineFormCreateComponent implements AfterViewChecked{
       .subscribe((code: {code: string}) => {
         this.onlineForm.controls['trackingNumber'].setValue(code.code);
       }, error => {
-        this.redirectOnError("Couldn't load code scanner");
+        this.authService.redirectOnFailedSubscription("Couldn't load code scanner");
       });
   }
 
@@ -152,31 +142,26 @@ export class OnlineFormCreateComponent implements AfterViewChecked{
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
   }
 
-  createOnlineForm() {
-    let form = new FormGroup({
-      _id: new FormControl(null),
-      carrierTrackingNumber: new FormControl("", {validators: [Validators.required]}),
-      carrier: new FormControl("", {validators: [Validators.required]}),
-      content: new FormControl(""),
-    });
-
-    return form
-  }
-
   patchFormValues(formData: OnlineTrackingModel) {
     this.onlineForm.patchValue({
       _id: formData._id,
       carrierTrackingNumber: formData.carrierTracking?.carrierTrackingNumber,
       carrier: formData.carrierTracking?.carrier,
+      received: formData.received,
       content: formData.generalInfo.content
     });
   }
 
-  redirectOnError(errorMessage: string) {
-    this.alertService.error(errorMessage, GlobalConstants.flashMessageOptions);
-    this.zone.run(() => {
-      this.router.navigate(["/"]);
+  createOnlineForm() {
+    let form = new FormGroup({
+      _id: new FormControl(null),
+      carrierTrackingNumber: new FormControl("", {validators: [Validators.required]}),
+      carrier: new FormControl("", {validators: [Validators.required]}),
+      received: new FormControl(false, {validators: [Validators.required]}),
+      content: new FormControl(""),
     });
+
+    return form
   }
 
   generalInfoValidity(valid: boolean) {
@@ -207,7 +192,7 @@ export class OnlineFormCreateComponent implements AfterViewChecked{
     // Error is handled in itemsListComponent
   }
 
-  async onSave() {
+  onSave() {
     this.generalInfo.getFormValidity();
     this.itemsList?.getFormValidity();
     this.finalizedInfo?.getFormValidity();
@@ -230,11 +215,11 @@ export class OnlineFormCreateComponent implements AfterViewChecked{
       formData['filesToAdd'] = JSON.stringify(this.fileUploader.getFilesToAdd());
       formData['fileNamesToAdd'] = JSON.stringify(this.fileUploader.getFileNamesToAdd());
       formData['filesToDelete'] = JSON.stringify(this.fileUploader.getFilesToDelete());
-      console.log(this.fileUploader.getFilesToDelete())
     } else {
       formData['filesToAdd'] = JSON.stringify(this.fileUploader.getFilesToAdd());
       formData['fileNamesToAdd'] = JSON.stringify(this.fileUploader.getFileNamesToAdd());
     }
+
     this.trackingService.createUpdateTracking(formData);
   }
 

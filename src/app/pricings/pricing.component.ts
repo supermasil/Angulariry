@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { AfterViewChecked, ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { AbstractControl, Form, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { AuthService } from "src/app/auth/auth.service";
 import { UserModel } from "src/app/models/user.model";
@@ -27,7 +27,7 @@ import { GlobalConstants } from "../global-constants";
     ])
   ]
 })
-export class PricingComponent implements OnInit {
+export class PricingComponent implements OnInit, AfterViewChecked {
   pricingForm: FormGroup;
   newPricingForm: FormGroup;
   editPricingForm: FormGroup
@@ -53,8 +53,8 @@ export class PricingComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private pricingService: PricingService,
-    private router: Router,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -84,6 +84,10 @@ export class PricingComponent implements OnInit {
     }, error => {
       this.authService.redirectOnFailedSubscription("Couldn't fetch user");
     });
+  }
+
+  ngAfterViewChecked() {
+    this.cd.detectChanges();
   }
 
   userSelected(user: string) {
@@ -316,6 +320,7 @@ export class PricingComponent implements OnInit {
     // this.editPricingForm.get('items')['controls'].forEach(control => control.get('name').updateValueAndValidity()); // Item names validator
     this.editPricingForm.get('organization').setValue(this.organization._id);
     this.editPricingForm.get('_id').setValue(this.orgDefaultPricing._id);
+    console.log(this.editPricingForm.getRawValue())
     if (!this.editPricingForm.valid) {
       this.alertService.warn("Items have invalid fields", GlobalConstants.flashMessageOptions)
       return

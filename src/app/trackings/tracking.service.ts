@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, NgZone, OnInit } from "@angular/core";
+import { Injectable, NgZone } from "@angular/core";
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -13,6 +13,7 @@ import { MasterTrackingModel } from '../models/tracking-models/master-tracking.m
 import { AlertService } from '../alert-message';
 import { GlobalConstants } from '../global-constants';
 import { CommentModel } from '../models/comment.model';
+import { query } from '@angular/animations';
 
 const BACKEND_URL = environment.apiURL + "/trackings/";
 
@@ -107,23 +108,27 @@ export class TrackingService{
       });
   }
 
-  getTracking(trackingNumber: string) {
-    return this.httpClient.get<any>(BACKEND_URL + trackingNumber); // return an observable
+  getTracking(trackingNumber: string, orgId: string) {
+    return this.httpClient.get<any>(BACKEND_URL + orgId + "/" +trackingNumber ); // return an observable
   }
 
-  getTrackings(trackingsPerPage: number, currentPage: number) {
-    const queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}`;
-    this.httpClient
+  getTrackings(trackingsPerPage: number, currentPage: number, type: string, orgId: string, origin: string, destination: string) {
+    let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&orgId=${orgId}&type=${type}`;
+    if (origin) {
+      queryParams = queryParams.concat(`&origin=${origin}`);
+    }
+    if (destination) {
+      queryParams = queryParams.concat(`&destination=${destination}`);
+    }
+
+    return this.httpClient
       .get<{trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((response) => {
         return {
           trackings: response.trackings.map(tracking => {return this.setTrackingModel(tracking)}),
           count: response.count};
         })
-      )
-      .subscribe((transformedTrackings) => {
-        this.setTransformedTrackings(transformedTrackings.trackings, null, null);
-    });
+      );
   }
 
   deleteTracking(trackingNumber: string) {

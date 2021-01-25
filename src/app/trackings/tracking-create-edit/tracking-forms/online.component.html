@@ -7,6 +7,7 @@
       [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
       (formValidityStatus)="generalInfoValidity($event)"
       [generalInfoObservable]="generalInfoSubject.asObservable()"
+      [statusChangeObservable]="statusChangeSubject.asObservable()"
       (pricingUpdated)="pricingUpdate($event)">
     </general-info>
 
@@ -52,6 +53,10 @@
       </file-uploader>
     </div>
 
+    <div class="mt-2">
+      <mat-checkbox matInput formControlName="received">Received</mat-checkbox>
+    </div>
+
     <div class="mt-2" *ngIf="showItemsList">
       <items-list
         #itemsList
@@ -63,6 +68,7 @@
         >
       </items-list>
     </div>
+
     <div *ngIf="showFinalizedInfo">
       <finalized-info
         #finalizedInfo

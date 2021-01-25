@@ -1,21 +1,21 @@
 <mat-tab-group class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
-  <mat-tab label="Online">
+  <mat-tab label="Online" *ngIf="enabled[0]">
     <online-form-create></online-form-create>
   </mat-tab>
 
-  <mat-tab label="Serviced">
+  <mat-tab label="Serviced" *ngIf="enabled[1]">
     <serviced-form-create></serviced-form-create>
   </mat-tab>
 
-  <mat-tab label="In-person">
+  <mat-tab label="In-person" *ngIf="enabled[2]">
     <in-person-form-create></in-person-form-create>
   </mat-tab>
 
-  <mat-tab label="Consolidated">
+  <mat-tab label="Consolidated" *ngIf="enabled[3]">
     <consolidated-form-create></consolidated-form-create>
   </mat-tab>
 
-  <mat-tab label="Master">
+  <mat-tab label="Master" *ngIf="enabled[4]">
     <master-form-create></master-form-create>
   </mat-tab>
 </mat-tab-group>

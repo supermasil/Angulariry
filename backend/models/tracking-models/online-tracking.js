@@ -10,6 +10,7 @@ const onlineTrackingSchema = mongoose.Schema({
   carrierTracking: {type: mongoose.Types.ObjectId, ref: "carrier-tracking", index: true},
   generalInfo: {type: GeneralInfoSchema, required: true},
   itemsList: {type: [ListItemSchema], required: true},
+  received: {type: Boolean, required: true},
   linkedTo: [{type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}]
 }, {timestamps: true, autoCreate: true });
 

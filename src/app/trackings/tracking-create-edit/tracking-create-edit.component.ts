@@ -1,6 +1,7 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TrackingService } from '../tracking.service';
+import { AuthService } from 'src/app/auth/auth.service';
+
 
 
 @Component({
@@ -14,18 +15,13 @@ export class TrackingCreateEditComponent implements OnInit {
   // formModes = ["Online", "Serviced", "In-person", "Consolidated", "Master", "Pricing"];
   selectedIndex = 0;
 
-  private mode = 'create';
-  private trackingId: string;
-  // tracking: Tracking;
-
+  enabled = [false, false, false, false, false];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private zone: NgZone
+    private authService: AuthService
   ) {}
-
-
 
   ngOnInit() {
     // Subcribe to see the active route
@@ -41,8 +37,26 @@ export class TrackingCreateEditComponent implements OnInit {
           this.selectedIndex = 3;
         } else if (paramMap.get('type') === 'master') {
           this.selectedIndex = 4;
+        } else {
+          return this.authService.redirect404();
         }
+        this.disableTheRest(this.selectedIndex);
+
+      } else {
+        this.enabled = [true, false, true, true, true];
       }
     });
+  }
+
+  disableTheRest(index: number) {
+    let temp = [...this.enabled];
+    this.enabled.forEach((tab, i) => {
+      if (i != index) {
+        temp[i] = false;
+      } else {
+        temp[i] = true;
+      }
+    });
+    this.enabled = [...temp];
   }
 }
