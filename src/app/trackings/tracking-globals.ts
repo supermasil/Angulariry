@@ -35,5 +35,8 @@ export class TrackingGlobals {
     ["return_to_sender", "Return to Sender"],
     ["failure", "Failures"],
     ["unknown", "Unknown"]
-  ])
+  ]);
+
+  public static statuses = ["Unknown", "Created", "Pending", , "Received", "Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
+  public static postConsolidationStatuses = ["Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
 }

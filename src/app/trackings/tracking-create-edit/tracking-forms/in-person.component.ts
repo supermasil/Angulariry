@@ -147,15 +147,14 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     // Don't change it back to false
   }
 
-  itemsListValidity(valid: boolean) {
-    console.log(valid);
-    console.log(this.itemsList.getRawValues())
-    if (valid && this.itemsList?.getRawValues()?.items?.length > 0) {
+  itemsListValidity(input: any) {
+    if (input.valid) {
       this.showFinalizedInfo = true;
+      this.itemsListSubject.next(input.data.items);
     } else {
-      this.showFinalizedInfo = false;
+      this.showFinalizedInfo = true;
+      this.itemsListSubject.next(null);
     }
-    this.itemsListSubject.next(this.itemsList?.getRawValues()?.items);
   }
 
   pricingUpdate(changes) {
@@ -201,6 +200,4 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
     this.trackingService.createUpdateTracking(formData);
   }
-
-
 }

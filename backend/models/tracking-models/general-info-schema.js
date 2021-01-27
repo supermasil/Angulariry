@@ -8,7 +8,7 @@ const shippingOptionsSchema = mongoose.Schema({
 
 // This is only used at sub-document
 const GeneralInfoSchema = mongoose.Schema({
-  sender: {type: String, required: true},
+  sender: {type: String, required: true}, // Customer Code
   recipient: RecipientSchema,
   organizationId: {type: mongoose.Types.ObjectId, ref: "organization"},
   content: {type: String, default: ''}, // Note

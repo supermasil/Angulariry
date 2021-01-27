@@ -2,7 +2,6 @@ import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChi
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReplaySubject, Subscription } from 'rxjs';
-import { AlertService } from "src/app/alert-message";
 import { AuthService } from "src/app/auth/auth.service";
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 import { FileUploaderComponent } from "src/app/file-uploader/file-uploader.component";
@@ -140,6 +139,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
     this.costAdjustmentSubject.next(this.currentTracking.generalInfo.costAdjustment);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
+    this.itemsListSubject.next(this.itemsList?.getRawValues()?.items);
   }
 
   patchFormValues(formData: OnlineTrackingModel) {
@@ -150,6 +150,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       received: formData.received,
       content: formData.generalInfo.content
     });
+    this.receivedCheckboxChecked();
   }
 
   createOnlineForm() {
@@ -171,13 +172,15 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     // Don't change it back to false
   }
 
-  itemsListValidity(valid: boolean) {
-    if (valid && this.itemsList?.getRawValues()?.items?.length > 0) {
+  itemsListValidity(input: any) {
+    if (input.valid) {
       this.showFinalizedInfo = true;
+      this.itemsListSubject.next(input.data.items);
     } else {
-      this.showFinalizedInfo = false;
+      this.showFinalizedInfo = true;
+      this.itemsListSubject.next(null);
     }
-    this.itemsListSubject.next(this.itemsList?.getRawValues()?.items);
+
   }
 
   ngAfterViewChecked() {
@@ -190,6 +193,11 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     changes.sender = user?._id;
     this.pricingUpdatedSubject.next(changes);
     // Error is handled in itemsListComponent
+  }
+
+  receivedCheckboxChecked() {
+    this.statusChangeSubject.next('Received');
+    this.onlineForm.get('received').disable();
   }
 
   onSave() {

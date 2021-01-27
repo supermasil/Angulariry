@@ -112,8 +112,8 @@ export class TrackingService{
     return this.httpClient.get<any>(BACKEND_URL + orgId + "/" +trackingNumber ); // return an observable
   }
 
-  getTrackings(trackingsPerPage: number, currentPage: number, type: string, orgId: string, origin: string, destination: string) {
-    let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&orgId=${orgId}&type=${type}`;
+  getTrackings(trackingsPerPage: number, currentPage: number, type: string, orgId: string, origin: string, destination: string, sender: string) {
+    let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&orgId=${orgId}&type=${type}&sender=${sender}`;
     if (origin) {
       queryParams = queryParams.concat(`&origin=${origin}`);
     }

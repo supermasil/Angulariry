@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
 import { GeneralInfoModel } from 'src/app/models/tracking-models/general-info.model';
 import { UserModel } from 'src/app/models/user.model';
+import { TrackingGlobals } from '../../tracking-globals';
 
 @Component({
   selector: 'general-info',
@@ -30,10 +31,10 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   generalInfo : GeneralInfoModel;
 
-  statuses = ["Unknown", "Pending", "Created", "Received", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
+  statuses = TrackingGlobals.statuses;
 
   @Output() formValidityStatus = new EventEmitter<boolean>();
-  @Output() pricingUpdated = new EventEmitter<{sender: string, origin: string, destination: string}>();
+  @Output() generalInfoUpdated = new EventEmitter<{sender: string, origin: string, destination: string}>();
 
   // @ViewChildren('recipient') recipientQuery: QueryList<AutoCompleteInputComponent>;
   // @ViewChildren('sender') senderQuery: QueryList<AutoCompleteInputComponent>;
@@ -58,18 +59,9 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
     this.generalInfoForm.valueChanges.subscribe(result => {
       this.formValidityStatus.emit(this.generalInfoForm.valid);
-    });
-
-    this.generalInfoForm.get('sender').valueChanges.subscribe((value) => {
-      this.emitPricingRelatedChanges();
-    });
-
-    this.generalInfoForm.get('origin').valueChanges.subscribe((value) => {
-      this.emitPricingRelatedChanges();
-    });
-
-    this.generalInfoForm.get('destination').valueChanges.subscribe((value) => {
-      this.emitPricingRelatedChanges();
+      if (this.generalInfoForm.valid) {
+        this.emitGeneralInfoChanges();
+      }
     });
 
     this.trackingNumberObservable.subscribe((trackingNumber: string) => {
@@ -114,8 +106,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
     });
   }
 
-  emitPricingRelatedChanges() {
-    this.pricingUpdated.emit({
+  emitGeneralInfoChanges() {
+    this.generalInfoUpdated.emit({
       sender: this.generalInfoForm.get('sender').value,
       origin: this.generalInfoForm.get('origin').value,
       destination: this.generalInfoForm.get('destination').value

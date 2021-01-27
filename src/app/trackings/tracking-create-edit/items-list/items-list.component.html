@@ -2,7 +2,7 @@
   <div formArrayName="items" *ngFor="let item of itemsForm.get('items')['controls']; let i = index;">
     <div [formGroupName]="i">
       <div class="row">
-        <div class="col-lg px-2 pr-lg-1 pl-lg-0">
+        <div class="col">
           <auto-complete-input
             #itemName
             [dataObservable]="itemNamesSubject.asObservable()"
@@ -16,34 +16,34 @@
           </auto-complete-input>
         </div>
 
-        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+        <mat-form-field appearance="outline" class="col">
           <mat-label>Declared value</mat-label>
           <input matInput type="number" formControlName="declaredValue" min="0">
         </mat-form-field>
-        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+        <mat-form-field appearance="outline" class="col">
           <mat-label>Quantity</mat-label>
           <input matInput type="number" formControlName="quantity" min="0">
         </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" class="col-lg px-2 pr-lg-0">
+        <mat-form-field appearance="outline" floatLabel="always" class="col">
           <mat-label>Insurance</mat-label>
           <input matInput type="number" formControlName="insurance">
           <span style="position: relative; bottom: 4px;" matPrefix>%&nbsp;</span>
         </mat-form-field>
-        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+        <mat-form-field appearance="outline" class="col">
           <mat-label>Weight (KG)</mat-label>
           <input matInput type="number" formControlName="weight" min="0">
         </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" class="col-lg px-2 pr-lg-0">
+        <mat-form-field appearance="outline" floatLabel="always" class="col">
           <mat-label>Weight unit charge</mat-label>
           <input matInput type="number" formControlName="unitCharge" readonly="true">
           <span style="position: relative; bottom: 4px;" matPrefix>$&nbsp;</span>
         </mat-form-field>
-        <mat-form-field appearance="outline" floatLabel="always" class="col-lg px-2 pr-lg-0">
+        <mat-form-field appearance="outline" floatLabel="always" class="col">
           <mat-label>Extra charge</mat-label>
           <input matInput type="number" formControlName="extraCharge" readonly="true">
           <span style="position: relative; bottom: 4px;" matPrefix>{{getExtraChargeUnit(i)}}&nbsp;</span>
         </mat-form-field>
-        <mat-form-field appearance="outline" class="col-lg px-2 pr-lg-1">
+        <mat-form-field appearance="outline" class="col">
           <mat-label>Status</mat-label>
           <input matInput type="text" formControlName="status" readonly="true">
           <a

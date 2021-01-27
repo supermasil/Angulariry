@@ -11,7 +11,7 @@ const routes: Routes = [
   { path: '', component: FrontPageComponent},
   { path: 'trackings/create', loadChildren: () => import("./trackings/tracking.module").then(module => module.TrackingModule), canActivate: [AuthGuard]},
   { path: 'trackings', component: TrackingListComponent},
-  { path: 'trackings/edit/:type/:trackingId', component: TrackingCreateEditComponent, canActivate: [AuthGuard]},
+  { path: 'trackings/edit/:trackingId', component: TrackingCreateEditComponent, canActivate: [AuthGuard]},
   { path: 'trackings/tracking-tool', component: TrackingToolComponent, canActivate: [AuthGuard]},
   { path: 'pricings', loadChildren: () => import("./pricings/pricing.module").then(module => module.PricingModule)},
   { path: "auth", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule)}, // Lazy loading

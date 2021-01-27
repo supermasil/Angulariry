@@ -19,6 +19,7 @@ import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-cre
 import { GeneralInfoComponent } from './tracking-create-edit/general-info/general-info.component';
 import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/finalized-info.component';
 import { NgxPrintModule } from 'ngx-print';
+import { ConsolidationTableComponent } from './tracking-create-edit/consolidation-table/consolidation-table.component';
 
 
 @NgModule({
@@ -33,7 +34,8 @@ import { NgxPrintModule } from 'ngx-print';
     MasterFormCreateComponent,
     ItemsListComponent,
     GeneralInfoComponent,
-    FinalizedInfoComponent
+    FinalizedInfoComponent,
+    ConsolidationTableComponent
   ],
   imports: [
     CommonModule,

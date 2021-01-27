@@ -27,15 +27,15 @@ export class TrackingCreateEditComponent implements OnInit {
     // Subcribe to see the active route
     this.route.paramMap.subscribe((paramMap) => {
       if (this.router.url.includes('edit')) {
-        if (paramMap.get('type') === 'online') {
+        if (paramMap.get('trackingId').includes('onl')) {
           this.selectedIndex = 0;
-        } else if (paramMap.get('type') === 'serviced') {
+        } else if (paramMap.get('trackingId').includes('sev')) {
           this.selectedIndex = 1;
-        } else if (paramMap.get('type') === 'inperson') {
+        } else if (paramMap.get('trackingId').includes('inp')) {
           this.selectedIndex = 2;
-        } else if (paramMap.get('type') === 'consolidated') {
+        } else if (paramMap.get('trackingId').includes('csl')) {
           this.selectedIndex = 3;
-        } else if (paramMap.get('type') === 'master') {
+        } else if (paramMap.get('trackingId').includes('mst')) {
           this.selectedIndex = 4;
         } else {
           return this.authService.redirect404();

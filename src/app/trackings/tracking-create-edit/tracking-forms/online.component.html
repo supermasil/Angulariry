@@ -8,7 +8,7 @@
       (formValidityStatus)="generalInfoValidity($event)"
       [generalInfoObservable]="generalInfoSubject.asObservable()"
       [statusChangeObservable]="statusChangeSubject.asObservable()"
-      (pricingUpdated)="pricingUpdate($event)">
+      (generalInfoUpdated)="pricingUpdate($event)">
     </general-info>
 
     <div class="row">
@@ -54,7 +54,7 @@
     </div>
 
     <div class="mt-2">
-      <mat-checkbox matInput formControlName="received">Received</mat-checkbox>
+      <mat-checkbox matInput formControlName="received" (change)="receivedCheckboxChecked()">Received</mat-checkbox>
     </div>
 
     <div class="mt-2" *ngIf="showItemsList">
@@ -64,7 +64,7 @@
         [userIdObservable]="selectedUserIdSubject.asObservable()"
         [updateExistingItemsObservable]="updateExistingItemsSubject.asObservable()"
         [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
-        (formValidityStatus)="itemsListValidity($event)"
+        (formValidity)="itemsListValidity($event)"
         >
       </items-list>
     </div>
@@ -84,7 +84,6 @@
       rows='10'
       formControlName='content'
       ></textarea>
-      <mat-error>Please enter some post content</mat-error>
     </mat-form-field>
 
     <div class="mt-2">

@@ -43,7 +43,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
 
   @ViewChildren('itemName') itemNamesRef: QueryList<AutoCompleteInputComponent>;
 
-  @Output() formValidityStatus = new EventEmitter<boolean>();
+  @Output() formValidity = new EventEmitter<any>();
 
   constructor(
     private authService: AuthService,
@@ -83,7 +83,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
     });
 
     this.itemsForm.valueChanges.subscribe(valid => {
-      this.formValidityStatus.emit(this.itemsForm.valid);
+      this.formValidity.emit({valid: this.itemsForm.valid, data: this.itemsForm.getRawValue()});
     });
 
     this.updateExistingItemsObservable.subscribe((items: ListItemModel[]) => {
