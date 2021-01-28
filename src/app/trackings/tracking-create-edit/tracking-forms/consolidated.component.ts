@@ -35,7 +35,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   consolidatedForm: FormGroup;
 
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
-  @ViewChild('generalInfo', {static: false}) generalInfo: GeneralInfoComponent;
+  @ViewChild('generalInfo') generalInfo: GeneralInfoComponent;
 
   currentUser: UserModel;
   selectedUser: UserModel;
@@ -82,8 +82,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   currentTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel)[] = []; // edit case
   currentTrackingsReference: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel)[] = []; // edit case
-
-  postConsolidationStatuses = TrackingGlobals.postConsolidationStatuses;
 
   constructor(
     private zone: NgZone,
@@ -148,17 +146,17 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   fetchTrackings(origin: string, destination: string, sender: string) {
     this.trackingService.getTrackings(0, 1, "onl", this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.onlineTrackings = transformedTrackings.trackings//.filter(i => !this.postConsolidationStatuses.includes(i.generalInfo.status));
+      this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
     });;
 
     this.trackingService.getTrackings(0, 1, "sev", this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.serviceTrackings = transformedTrackings.trackings//.filter(i => !this.postConsolidationStatuses.includes(i.generalInfo.status));
+      this.serviceTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
       this.servicedTrackingDataSubject.next(this.serviceTrackings);
     });;
 
     this.trackingService.getTrackings(0, 1, "inp", this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.inPersonTrackings = transformedTrackings.trackings//.filter(i => !this.postConsolidationStatuses.includes(i.generalInfo.status));
+      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
       this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
     });;
   }
@@ -207,7 +205,8 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   patchFormValues(formData: ConsolidatedTrackingModel) {
     this.consolidatedForm.patchValue({
-
+      _id: formData._id,
+      content: formData.generalInfo.content
     });
   }
 
@@ -297,7 +296,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     formData['generalInfo']['recipient'] = recipient;
 
     if (this.mode === "edit") {
-      formData['_id'] = this.currentTracking._id;
       formData['filesToAdd'] = JSON.stringify(this.fileUploader.getFilesToAdd());
       formData['fileNamesToAdd'] = JSON.stringify(this.fileUploader.getFileNamesToAdd());
       formData['filesToDelete'] = JSON.stringify(this.fileUploader.getFilesToDelete());

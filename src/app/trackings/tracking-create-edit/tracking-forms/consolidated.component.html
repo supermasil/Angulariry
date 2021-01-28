@@ -2,25 +2,25 @@
 
 <form [formGroup]="consolidatedForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
   <general-info
-      #generalInfo
-      [usersObservable]="usersSubject.asObservable()"
-      [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
-      [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
-      (formValidityStatus)="generalInfoValidity($event)"
-      (generalInfoUpdated)="generalInfoUpdated($event)"
-      [generalInfoObservable]="generalInfoSubject.asObservable()"
-      [statusChangeObservable]="statusChangeSubject.asObservable()">
-    </general-info>
+    #generalInfo
+    [usersObservable]="usersSubject.asObservable()"
+    [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
+    [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
+    (formValidityStatus)="generalInfoValidity($event)"
+    (generalInfoUpdated)="generalInfoUpdated($event)"
+    [generalInfoObservable]="generalInfoSubject.asObservable()"
+    [statusChangeObservable]="statusChangeSubject.asObservable()">
+  </general-info>
 
-    <div *ngIf="showTable">
-      <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex" color="accent">
-        <mat-tab label="Online">
-          <consolidation-table
-            [tableDataObservable]="onlineTrackingDataSubject.asObservable()"
-            (selectionEmitted)="onlineSelectionReceived($event)"
-            [deselectItemObservable]="deselectOnlineTrackingSubject.asObservable()">
-          </consolidation-table>
-        </mat-tab>
+  <div *ngIf="showTable">
+    <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex" color="accent">
+      <mat-tab label="Online">
+        <consolidation-table
+          [tableDataObservable]="onlineTrackingDataSubject.asObservable()"
+          (selectionEmitted)="onlineSelectionReceived($event)"
+          [deselectItemObservable]="deselectOnlineTrackingSubject.asObservable()">
+        </consolidation-table>
+      </mat-tab>
 
       <mat-tab label="Serviced">
         <consolidation-table

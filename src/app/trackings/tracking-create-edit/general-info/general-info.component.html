@@ -25,29 +25,29 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-6 px-2 pl-lg-0">
-          <auto-complete-input
-            #sender
-            [dataObservable]="sendersSubject.asObservable()"
-            [enforeSelection]="true"
-            (itemSelected)="senderSelected($event)"
-            (itemCancelled)="itemCancelled()"
-            (inputInvalid)="generalInfoForm.get('sender').setValue('')"
-            [matLabel]="'Sender'"
-            [lockOption]="true"
-            [matErrorMessage]="'Please select one from the drowdown'">
-          </auto-complete-input>
+      <div class="col-lg-6 px-2 pl-lg-0" *ngIf="!this.disableSender">
+        <auto-complete-input
+          #sender
+          [dataObservable]="sendersSubject.asObservable()"
+          [enforeSelection]="true"
+          (itemSelected)="senderSelected($event)"
+          (itemCancelled)="itemCancelled()"
+          (inputInvalid)="generalInfoForm.get('sender').setValue('')"
+          [matLabel]="'Sender'"
+          [lockOption]="true"
+          [matErrorMessage]="'Please select one from the drowdown'">
+        </auto-complete-input>
       </div>
-      <div class="col-lg-6 px-2 pr-lg-0">
-          <auto-complete-input
-            #recipient
-            [dataObservable]="recipientsSubject.asObservable()"
-            [enforeSelection]="true"
-            (itemSelected)="recipientSelected($event)"
-            (inputInvalid)="generalInfoForm.get('recipient').setValue('')"
-            [matLabel]="'Recipient'"
-            [matErrorMessage]="'Please select one from the drowdown or create a recipient'">
-          </auto-complete-input>
+      <div class="col-lg-6 px-2 pr-lg-0" *ngIf="!this.disableRecipient">
+        <auto-complete-input
+          #recipient
+          [dataObservable]="recipientsSubject.asObservable()"
+          [enforeSelection]="true"
+          (itemSelected)="recipientSelected($event)"
+          (inputInvalid)="generalInfoForm.get('recipient').setValue('')"
+          [matLabel]="'Recipient'"
+          [matErrorMessage]="'Please select one from the drowdown or create a recipient'">
+        </auto-complete-input>
       </div>
     </div>
 

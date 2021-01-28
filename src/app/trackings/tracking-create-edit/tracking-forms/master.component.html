@@ -1,102 +1,109 @@
+<form [formGroup]="masterForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
 
-<form [formGroup]="masterForm" class="my-4">
-  <div class="row">
-    <mat-form-field class="col-lg-4" appearance="outline">
-      <mat-label>Tracking Number</mat-label>
-      <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
-      <a
-        matSuffix
-        mat-mini-fab
-        color="basic"
-        [cdkCopyToClipboard]="trackingNumber.value">
-        <mat-icon>content_copy</mat-icon>
-      </a>
-    </mat-form-field>
+  <general-info
+    #generalInfo
+    [usersObservable]="usersSubject.asObservable()"
+    [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
+    [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
+    (formValidityStatus)="generalInfoValidity($event)"
+    (generalInfoUpdated)="generalInfoUpdated($event)"
+    [generalInfoObservable]="generalInfoSubject.asObservable()"
+    [statusChangeObservable]="statusChangeSubject.asObservable()"
+    [disableSender]="true"
+    [disableRecipient]="true">
+  </general-info>
+  <div *ngIf="showTable">
+    <div formArrayName="boxes" *ngFor="let item of masterForm.get('boxes')['controls']; let i = index;">
+      <mat-card class="mb-4 mat-elevation-z4" [formGroupName]="i">
+        <div class="row">
+          <div class="col-lg-2">
+            <mat-form-field appearance="outline">
+              <mat-label>Pallet Number</mat-label>
+              <input matInput type="number" min="0" formControlName="palletNumber">
+            </mat-form-field>
 
-    <div class="col-lg-4">
-      <auto-complete-input #recipient  [matLabel]="'Customer Code'" [matErrorMessage]="'Please select one from the drowdown'"></auto-complete-input>
+            <mat-form-field appearance="outline">
+              <mat-label>Box Number</mat-label>
+              <input matInput type="number" min="0" formControlName="boxNumber">
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-10">
+            <mat-form-field appearance="outline">
+              <mat-label>Consolidated Trackings</mat-label>
+              <mat-chip-list #chipList>
+                <mat-chip
+                  *ngFor="let item of masterForm.get('boxes').value[i].items; let index = index"
+                  [selectable]="selectable"
+                  [removable]="removable"
+                  (removed)="removeItem(index ,i, item)">
+                  {{item}}
+                  <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+                </mat-chip>
+                <input
+                  #chipInput
+                  (keyup.enter)="chipInput.value = ''"
+                  [formControl]="trackingCtrl"
+                  [matAutocomplete]="auto"
+                  [matChipInputFor]="chipList"
+                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (keydown.enter)="$event.preventDefault()">
+              </mat-chip-list>
+              <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption (optionSelected)="selectItem($event.option.value, i); chipInput.value = '';">
+                <mat-option *ngFor="let t of filteredTrackings | async" [value]="t.trackingNumber">
+                  {{t.trackingNumber}} {{t.generalInfo.sender}} {{t.generalInfo.status}}
+                </mat-option>
+              </mat-autocomplete>
+              <a matSuffix mat-mini-fab color="warn" (click)="removeBox(i, masterForm)">
+                <mat-icon>delete</mat-icon>
+              </a>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <mat-form-field appearance="outline">
+              <mat-label>Notes</mat-label>
+              <textarea
+              matInput
+              rows='1'
+              formControlName='content'
+              ></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+    <a mat-mini-fab color="primary" class="float-right mb-4" (click)="addbox(null)"><mat-icon>add</mat-icon></a>
+
+    <div class="my-4">
+      <file-uploader #fileUploader
+      [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
     </div>
 
-    <mat-form-field appearance="outline" class="col-lg-4">
-      <mat-label>Status</mat-label>
-      <mat-select matInput formControlName="status" autoActiveFirstOption>
-        <mat-option *ngFor="let option of internalStatus" [value]="option">
-          {{option}}
-        </mat-option>
-      </mat-select>
-      <mat-error>Please select a status</mat-error>
+    <mat-form-field appearance="outline" class="mt-4">
+      <mat-label>Notes</mat-label>
+      <textarea
+      matInput
+      rows='10'
+      formControlName='content'
+      ></textarea>
     </mat-form-field>
-  </div>
 
-  <div formArrayName="items" *ngFor="let item of masterForm.get('items')['controls']; let i = index;">
-    <mat-card class="mb-4 mat-elevation-z4" [formGroupName]="i">
-      <div class="row">
-        <div class="col-lg-2">
-          <mat-form-field appearance="outline">
-            <mat-label>Pallet Number</mat-label>
-            <input matInput type="number" min="0" formControlName="palletNumber">
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Box Number</mat-label>
-            <input matInput type="number" min="0" formControlName="boxNumber">
-          </mat-form-field>
-        </div>
-
-        <div class="col-lg-10">
-          <mat-form-field appearance="outline">
-            <mat-label>Favorite Fruits</mat-label>
-            <mat-chip-list #chipList>
-              <mat-chip
-                *ngFor="let item of masterForm.get('items').value[i].items; let index = index"
-                [selectable]="selectable"
-                [removable]="removable"
-                (removed)="removeItem(index ,i, item)">
-                {{item}}
-                <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
-              </mat-chip>
-              <input
-                placeholder="New fruit..."
-                #fruitInput
-                (keyup.enter)="fruitInput.value = ''"
-                [formControl]="fruitCtrl"
-                [matAutocomplete]="auto"
-                [matChipInputFor]="chipList"
-                [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (keydown.enter)="$event.preventDefault()">
-            </mat-chip-list>
-            <mat-error>Please only select from the dropdown list</mat-error>
-            <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption (optionSelected)="selectItem($event, i); fruitInput.value = '';">
-              <mat-option *ngFor="let fruit of filteredFruits | async" [value]="fruit">
-                {{fruit}}
-              </mat-option>
-            </mat-autocomplete>
-            <a matSuffix mat-mini-fab color="warn" *ngIf="i > 0" (click)="removeBox(i, masterForm)">
-              <mat-icon>delete</mat-icon>
-            </a>
-          </mat-form-field>
-        </div>
-      </div>
-    </mat-card>
-  </div>
-  <a mat-mini-fab color="primary" class="float-right mb-4" (click)="addbox()"><mat-icon>add</mat-icon></a>
-  <div class="mb-4">
-    <file-uploader></file-uploader>
-  </div>
-
-  <div class="mt-4">
-    <button
-    mat-raised-button
-    color='primary'
-    type='submit'
-    class="mr-2">
-    Save
-    </button>
-    <button
+    <div class="mt-4">
+      <button
       mat-raised-button
-      color='warn'
-      type=''>
-      Cancel
-    </button>
+      color='primary'
+      type='submit'
+      class="mr-2">
+      Save
+      </button>
+      <button
+        mat-raised-button
+        color='warn'
+        type=''>
+        Cancel
+      </button>
+    </div>
   </div>
 </form>
 

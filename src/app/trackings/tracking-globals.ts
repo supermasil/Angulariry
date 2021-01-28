@@ -38,5 +38,6 @@ export class TrackingGlobals {
   ]);
 
   public static statuses = ["Unknown", "Created", "Pending", , "Received", "Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
-  public static postConsolidationStatuses = ["Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
+  public static postCreatedStatuses = ["Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
+  public static postConsolidatedStatuses = ["Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
 }

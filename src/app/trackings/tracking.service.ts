@@ -113,12 +113,15 @@ export class TrackingService{
   }
 
   getTrackings(trackingsPerPage: number, currentPage: number, type: string, orgId: string, origin: string, destination: string, sender: string) {
-    let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&orgId=${orgId}&type=${type}&sender=${sender}`;
+    let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&orgId=${orgId}&type=${type}`;
     if (origin) {
       queryParams = queryParams.concat(`&origin=${origin}`);
     }
     if (destination) {
       queryParams = queryParams.concat(`&destination=${destination}`);
+    }
+    if(sender) {
+      queryParams = queryParams.concat(`&sender=${sender}`);
     }
 
     return this.httpClient

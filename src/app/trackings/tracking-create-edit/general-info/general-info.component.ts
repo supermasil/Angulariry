@@ -28,16 +28,14 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   @Input() trackingNumberObservable = new Observable<string>();
   @Input() generalInfoObservable = new Observable<GeneralInfoModel>();
   @Input() statusChangeObservable = new Observable<string>();
-
+  @Input() disableSender = false;
+  @Input() disableRecipient = false;
   generalInfo : GeneralInfoModel;
 
   statuses = TrackingGlobals.statuses;
 
   @Output() formValidityStatus = new EventEmitter<boolean>();
-  @Output() generalInfoUpdated = new EventEmitter<{sender: string, origin: string, destination: string}>();
-
-  // @ViewChildren('recipient') recipientQuery: QueryList<AutoCompleteInputComponent>;
-  // @ViewChildren('sender') senderQuery: QueryList<AutoCompleteInputComponent>;
+  @Output() generalInfoUpdated = new EventEmitter<any>();
 
   @ViewChild('sender') sender: AutoCompleteInputComponent;
   @ViewChild('recipient') recipient: AutoCompleteInputComponent;
@@ -54,7 +52,7 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
     this.usersObservable.subscribe((users: UserModel[]) => {
       this.senders = users;
-      this.sendersSubject.next(users.map(u => u.customerCode? u.customerCode + ' ' + u.name : "Employee"));
+      this.sendersSubject.next(users.map(u => u.customerCode + ' ' + u.name));
     });
 
     this.generalInfoForm.valueChanges.subscribe(result => {
@@ -76,8 +74,13 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
     this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
       this.patchFormValue(generalInfo);
-      this.sender.selectItem(generalInfo.sender);
-      this.recipient.selectItem(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
+      if (!this.disableSender) {
+        this.sender.selectItem(generalInfo.sender);
+      }
+
+      if (!this.disableRecipient) {
+        this.recipient.selectItem(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
+      }
 
       this.formValidityStatus.emit(this.generalInfoForm.valid);
     });
@@ -87,11 +90,17 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
     let form = new FormGroup({
       trackingNumber: new FormControl({value: "", disabled: true}, {validators: [Validators.required]}), // Set through subscription
       status: new FormControl({value: this.statuses[0], disabled: true}, {validators: [Validators.required]}),
-      sender: new FormControl("", {validators: [Validators.required]}),
-      recipient: new FormControl("", {validators: [Validators.required]}),
       origin: new FormControl("", {validators: [Validators.required]}),
       destination: new FormControl("", {validators: [Validators.required]}),
     });
+
+    if (!this.disableSender) {
+      form.addControl('sender', new FormControl("", {validators: [Validators.required]}));
+    }
+
+    if (!this.disableRecipient) {
+      form.addControl('recipient', new FormControl("", {validators: [Validators.required]}));
+    }
 
     return form;
   }
@@ -107,11 +116,16 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   }
 
   emitGeneralInfoChanges() {
-    this.generalInfoUpdated.emit({
-      sender: this.generalInfoForm.get('sender').value,
+    let emitData = {
       origin: this.generalInfoForm.get('origin').value,
       destination: this.generalInfoForm.get('destination').value
-    })
+    }
+
+    if (!this.disableSender) {
+      emitData['sender'] = this.generalInfoForm.get('sender').value;
+    }
+
+    this.generalInfoUpdated.emit(emitData)
   }
 
   ngAfterViewInit() {
@@ -132,8 +146,13 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   getFormValidity() {
     this.generalInfoForm.markAllAsTouched();
-    this.recipient.getFormValidity();
-    this.sender.getFormValidity();
+    if (!this.disableRecipient) {
+      this.recipient.getFormValidity();
+    }
+    if (!this.disableSender) {
+      this.sender.getFormValidity();
+    }
+
     return this.generalInfoForm.valid;
   }
 

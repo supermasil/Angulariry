@@ -10,6 +10,7 @@ const CommentModel = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
 let assert = require('assert');
+const { update } = require('../models/tracking-models/master-tracking');
 
 const TrackingTypes = Object.freeze({
   ONLINE: "onl",
@@ -129,6 +130,14 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       changeTrackingsStatusHelper(TrackingTypes.INPERSON, Statuses.Pending, req.body.removedInPersonTrackings);
     }
 
+    if (type === TrackingTypes.MASTER) {
+      updateBody['boxes'] = req.body.boxes;
+      req.body.boxes.forEach(box => {
+        changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, Statuses.ReadyToShip, box.items);
+      });
+      changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, Statuses.Pending, req.body.removedConsolidatedTrackingNumbers);
+    }
+
     generalInfo['filePaths'] = await updateImages(req, currentTracking.generalInfo.filePaths);
     updateBody['generalInfo'] = generalInfo;
 
@@ -158,6 +167,13 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       changeTrackingsStatusHelper(TrackingTypes.ONLINE, Statuses.Consolidated, req.body.onlineTrackings);
       changeTrackingsStatusHelper(TrackingTypes.SERVICED, Statuses.Consolidated, req.body.servicedTrackings);
       changeTrackingsStatusHelper(TrackingTypes.INPERSON, Statuses.Consolidated, req.body.inPersonTrackings);
+    }
+
+    if (type === TrackingTypes.MASTER) {
+      newBody['boxes'] = req.body.boxes;
+      req.body.boxes.forEach(box => {
+        changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, Statuses.ReadyToShip, box.items);
+      });
     }
 
     generalInfo['filePaths'] = await addImages(req);
@@ -395,7 +411,12 @@ exports.getTracking = async (req, res, next) => {
             return res.status(200).json(tracking);
           });
       case TrackingTypes.MASTER:
-        break;
+        return await MasterTrackingModel.findOne({trackingNumber: req.params.id, 'generalInfo.organizationId': req.params.orgId})
+        .populate('boxes.items')
+          .then(tracking => {
+            assert(tracking != null);
+            return res.status(200).json(tracking);
+          });
       default:
         return res.status(500).json({message: "Couldn't fetch tracking"});
     }

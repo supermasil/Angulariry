@@ -7,7 +7,12 @@ const GeneralInfoSchema = require('./general-info-schema');
 
 const masterTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
-  consolidatedTrackings: [{type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}],
+  boxes: [{
+    boxNumber: {type: String, required: true},
+    palletNumber: {type: String, required: true},
+    items: [{type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}],
+    content: {type: String, default: ''}
+  }],
   generalInfo: {type: GeneralInfoSchema, required: true}
 }, {timestamps: true, autoCreate: true });
 
