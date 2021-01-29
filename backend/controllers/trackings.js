@@ -86,6 +86,7 @@ exports.createTracking = async (req, res, next) => {
     session.endSession();
   } catch (error) {
     console.error(`createTracking: ${req.body.generalInfo.trackingNumber}: ${error}`);
+    console.error(`createTracking: ${req.body.generalInfo.trackingNumber}: ${JSON.stringify(error, null, 2)}`);
     return res.status(500).json({message: `Tracking creation failed, please check your info or contact Admin with tracking number ${req.body.generalInfo.trackingNumber}. If this is an online order, check if your carrier/ carrier tracking number is correct`});
   }
 };
@@ -331,32 +332,38 @@ exports.getTrackings = async (req, res, next) => {
 
     let trackingQuery = null;
 
+    let totalCount = 0;
+
     switch (req.query.type) {
       case TrackingTypes.ONLINE:
-        trackingQuery = OnlineTrackingModel.find(queryBody);;
+        trackingQuery = OnlineTrackingModel.find(queryBody);
+        totalCount = await OnlineTrackingModel.countDocuments().then(count => {return count});
         extraPopulation1 = 'carrierTracking'
         break;
       case TrackingTypes.SERVICED:
-        trackingQuery = ServicedTrackingModel.find(queryBody);;
+        trackingQuery = ServicedTrackingModel.find(queryBody);
+        totalCount = await ServicedTrackingModel.countDocuments().then(count => {return count});
         break;
       case TrackingTypes.INPERSON:
-        trackingQuery = InPersonTrackingModel.find(queryBody);;
+        trackingQuery = InPersonTrackingModel.find(queryBody);
+        totalCount = await InPersonTrackingModel.countDocuments().then(count => {return count});
         break;
       case TrackingTypes.CONSOLIDATED:
-        trackingQuery = ConsolidatedTrackingModel.find(queryBody);;
+        trackingQuery = ConsolidatedTrackingModel.find(queryBody);
+        totalCount = await ConsolidatedTrackingModel.countDocuments().then(count => {return count});
         break;
       case TrackingTypes.MASTER:
-        trackingQuery = MasterTrackingModel.find(queryBody);;
+        trackingQuery = MasterTrackingModel.find(queryBody);
+        totalCount = await MasterTrackingModel.countDocuments().then(count => {return count});
         break;
     }
 
     assert(trackingQuery != null, "trackingQuery is null");
 
-
     return await fetchTrackingsHelper(req, res, trackingQuery).populate('generalInfo.comments').populate(extraPopulation1).exec()
       .then(documents => {
         fetchedTrackings = documents
-        return 1;
+        return totalCount;
       })
       .then(count => {
         return res.status(200).json({

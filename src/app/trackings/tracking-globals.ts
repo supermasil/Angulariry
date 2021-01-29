@@ -37,6 +37,14 @@ export class TrackingGlobals {
     ["unknown", "Unknown"]
   ]);
 
+  public static trackingTypes = {
+    ONLINE: "onl",
+    SERVICED: "sev",
+    INPERSON: "inp",
+    CONSOLIDATED: "csl",
+    MASTER: "mst"
+  }
+
   public static statuses = ["Unknown", "Created", "Pending", , "Received", "Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
   public static postCreatedStatuses = ["Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
   public static postConsolidatedStatuses = ["Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];

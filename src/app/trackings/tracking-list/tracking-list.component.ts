@@ -2,12 +2,19 @@ import { Component, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
-import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TrackingGlobals } from '../tracking-globals';
 import { TrackingService } from '../tracking.service';
 import * as moment from 'moment';
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
+import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
+import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
+import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
+import { ConsolidatedTrackingModel } from "src/app/models/tracking-models/consolidated-tracking.model";
+import { MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
+import { OrganizationModel } from "src/app/models/organization.model";
+import { UserModel } from "src/app/models/user.model";
+import { ReplaySubject } from "rxjs";
 
 @Component({
   selector: 'app-tracking-list',
@@ -15,134 +22,86 @@ import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
   styleUrls: ['./tracking-list.component.css']
 })
 export class TrackingListComponent {
-  // trackings: Tracking[] = [];
-  // // subscribedTrackings: String[] = [];
-  // private trackingSub: Subscription;
-  // private codeScannerSub: Subscription;
-  // // private subscribedPostsSub: Subscription;
-  // private authListenerSub: Subscription;
-  // userIsAuthenticated = false;
-  // userId: string;
-  // totalTrackings = 0;
-  // trackingsPerPage = 10;
-  // currentPage = 1;
-  // pageSizeOptions = [10, 20, 50, 100];
-  // trackingForm: FormGroup;
-  // commentForm: FormGroup;
-  // @ViewChild('f') myCommentForm; // To be able to reset form without triggering validators
 
-  // preTransitCodes = TrackingGlobals.preTransitCodes;
-  // inTransitCodes = TrackingGlobals.inTransitCodes
-  // deliveryCodes = TrackingGlobals.deliveryCodes
-  // failureCodes = TrackingGlobals.failureCodes;
+  enabled = [true, false, true, true, true];
+  selectedIndex = 0;
+  currentTrackingType = TrackingGlobals.trackingTypes.ONLINE;
 
-  // searchClicked = false;
-  // scannerOpened = false;
+  searchClicked = false;
+  scannerOpened = false;
 
-  // constructor(
-  //   public trackingService: TrackingService,
-  //   private authService: AuthService,
-  //   public dialog: MatDialog,
-  //   private codeScannerService: CodeScannerService
-  // ) {} // Public simplifies code
+  currentUser: UserModel;
+  selectedUser: UserModel;
+  organization: OrganizationModel;
 
-  // async ngOnInit() {
-  //   this.trackingForm = new FormGroup({
-  //     searchTerm: new FormControl(null)
-  //   });
+  trackingsSubject: ReplaySubject<{trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}> = new ReplaySubject();
 
+  constructor(
+    public trackingService: TrackingService,
+    private authService: AuthService,
+    private codeScannerService: CodeScannerService
+  ) {} // Public simplifies code
 
-  //   this.commentForm = new FormGroup({
-  //     commentContent: new FormControl(null, {validators: [Validators.required]})
-  //   }, {updateOn: 'blur'});
+  async ngOnInit() {
+    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+      this.currentUser = user;
+      this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
+        this.organization = org;
+        this.fetchTrackings(10, 1, this.currentTrackingType);
+      }, error => {
+        this.authService.redirectOnFailedSubscription("Couldn't fetch organization");
+      });
+    }, error => {
+      this.authService.redirectOnFailedSubscription("Couldn't fetch user");
+    });
 
-  //   this.userIsAuthenticated = this.authService.getIsAuth(); // Get current login status
-  //   this.userId = this.authService.getUserId();
-  //   // Since the post list component is loaded after logging in
-  //   // so this block won't be entered again (no new broadcast)
-  //   this.authListenerSub = this.authService.getAuthStatusListener().subscribe(
-  //     isAuthenticated => {
-  //       this.userIsAuthenticated = isAuthenticated;
-  //       this.userId = this.authService.getUserId();
-  //     }
-  //   );
+    this.codeScannerService.getCodeScannerUpdateListener()
+      .subscribe((code: {code: string}) => {
 
-  //   this.trackingSub = this.trackingService.getTrackingUpdateListener()
-  //     .subscribe((trackingData: {trackings: Tracking[], count: number}) => {
-  //       this.trackings = trackingData.trackings;
-  //       this.totalTrackings = trackingData.count;
-  //     });
-  //   await this.trackingService.getTrackings(this.trackingsPerPage, 1); // This will update the getTrackingUpdateListener() observable
+      });
+  }
 
-  //   this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
-  //     .subscribe((code: {code: string}) => {
-  //       this.trackingForm.controls['searchTerm'].setValue(code.code);
-  //     });
-  // }
+  fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {
+    this.trackingService.getTrackings(trackingsPerPage, currenPage, type, this.organization._id, null, null, null).subscribe((transformedTrackings) => {
+      this.trackingsSubject.next(transformedTrackings);
+    });
+  }
 
-  // onDelete(trackingId: string) {
-  //   this.trackingService.deleteTracking(trackingId).subscribe(() => {
-  //     this.trackingService.getTrackings(this.trackingsPerPage, this.currentPage); // refetch after deletion
-  //   });
-  // }
+  pageDataChanged (pageData: PageEvent) {
+    this.fetchTrackings(pageData.pageSize, pageData.pageIndex + 1, this.currentTrackingType);
+  }
 
-  // // Change # of trackings per page
-  // onChangedPage(pageData: PageEvent) {
-  //   this.currentPage = pageData.pageIndex;
-  //   this.trackingsPerPage = pageData.pageSize;
-  //   this.trackingService.getTrackings(this.trackingsPerPage, this.currentPage);
-  // }
+  tabChanged(index: Number) {
+    switch (index) {
+      case 0:
+        this.currentTrackingType = TrackingGlobals.trackingTypes.ONLINE;
+        this.fetchTrackings(10, 1, this.currentTrackingType);
+        break;
+      case 1:
+        this.currentTrackingType = TrackingGlobals.trackingTypes.SERVICED;
+        this.fetchTrackings(10, 1, this.currentTrackingType);
+        break;
+      case 2:
+        this.currentTrackingType = TrackingGlobals.trackingTypes.INPERSON;
+        this.fetchTrackings(10, 1, this.currentTrackingType);
+        break;
+      case 3:
+        this.currentTrackingType = TrackingGlobals.trackingTypes.CONSOLIDATED;
+        this.fetchTrackings(10, 1, this.currentTrackingType);
+        break;
+      case 4:
+        this.currentTrackingType = TrackingGlobals.trackingTypes.MASTER;
+        this.fetchTrackings(10, 1, this.currentTrackingType);
+        break;
+    }
+  }
 
-  // onFuzzySearch() {
-  //   this.trackingService.fuzzySearch(this.trackingsPerPage, this.currentPage, this.trackingForm.value.searchTerm);
-  //   this.searchClicked = true;
-  // }
+  onFuzzySearch() {
+    // this.trackingService.fuzzySearch(this.trackingsPerPage, this.currentPage, this.trackingForm.value.searchTerm);
+    this.searchClicked = true;
+  }
 
-  // onCommentSubmit(trackingId: string) {
-  //   if (this.commentForm.invalid) {
-  //     return;
-  //   }
-  //   let imagePaths: string[] = [];
-  //   let attachmentPaths: string[] = [];
-  //   this.trackingService.createComment(trackingId, this.commentForm.value.commentContent, imagePaths, attachmentPaths);
-  //   this.myCommentForm.resetForm();
-  // }
+  ngOnDestroy() {
 
-  // // Always remember to unsub
-  // ngOnDestroy() {
-  //   this.trackingSub.unsubscribe();
-  //   this.authListenerSub.unsubscribe();
-  //   this.codeScannerSub.unsubscribe();
-  // }
-
-  // getHeaderColor(status: string) {
-  //   if (this.preTransitCodes.includes(status)) {
-  //     return "bg-dark"
-  //   } else if (this.inTransitCodes.includes(status)) {
-  //     return "bg-warning"
-  //   } else if (this.deliveryCodes.includes(status)) {
-  //     return "bg-info"
-  //   } else if (this.failureCodes.includes(status)) {
-  //     return "bg-danger"
-  //   } else if (status === "received_at_us_warehouse") {
-  //     return "bg-success"
-  //   }
-  // }
-
-  // formatDateTime(date: Date) {
-  //   return moment(moment.utc(date).toDate()).fromNow(); //.local().format("MM-DD-YY hh:mm:ss")
-  // }
-
-  // onReceivedToggled(checked: boolean, tracking: Tracking) {
-  //   this.trackingService.updateTracking(
-  //     tracking._id,
-  //     tracking.trackingNumber,
-  //     tracking.carrier,
-  //     tracking.content,
-  //     checked,
-  //     [],
-  //     [],
-  //     []);
-
-  // }
+  }
 }

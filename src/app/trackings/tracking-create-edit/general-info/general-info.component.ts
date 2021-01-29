@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, NgZone, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -19,8 +19,6 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   senders: UserModel[] = [];
   sendersSubject = new BehaviorSubject<string[]>([]);
   @Input() usersObservable = new Observable<UserModel[]>();
-
-
 
   recipientsSubject = new BehaviorSubject<string[]>([]);
 

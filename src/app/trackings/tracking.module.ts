@@ -20,6 +20,7 @@ import { GeneralInfoComponent } from './tracking-create-edit/general-info/genera
 import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/finalized-info.component';
 import { NgxPrintModule } from 'ngx-print';
 import { ConsolidationTableComponent } from './tracking-create-edit/consolidation-table/consolidation-table.component';
+import { TrackingListCommonTemplateComponent } from './tracking-list/common-template/tracking-list-common-template.component';
 
 
 @NgModule({
@@ -35,7 +36,8 @@ import { ConsolidationTableComponent } from './tracking-create-edit/consolidatio
     ItemsListComponent,
     GeneralInfoComponent,
     FinalizedInfoComponent,
-    ConsolidationTableComponent
+    ConsolidationTableComponent,
+    TrackingListCommonTemplateComponent
   ],
   imports: [
     CommonModule,

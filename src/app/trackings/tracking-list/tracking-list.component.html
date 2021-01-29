@@ -1,141 +1,89 @@
-<!-- <form [formGroup]='trackingForm' (submit)='onFuzzySearch()'>
-  <div class="d-flex">
-    <a
-      mat-mini-fab
-      color='primary'
-      class="mt-2 d-inline mr-2"
-      (click)="scannerOpened = !scannerOpened">
-      <mat-icon>qr_code</mat-icon>
-    </a>
-    <mat-form-field appearance="outline">
-      <mat-label>Search here</mat-label>
-      <input
-        (keydown.meta.enter)="onFuzzySearch()"
-        matInput
-        type='text'
-        formControlName='searchTerm'>
-      <button
-        *ngIf="trackingForm.controls['searchTerm'].value"
-        matSuffix
-        mat-icon-button
-        id="searchButton"
-        aria-label="Clear"
-        (click)="trackingForm.controls['searchTerm'].setValue(''); searchClicked = false;">
-        <mat-icon>close</mat-icon>
-      </button>
-    </mat-form-field>
-    <a
-      mat-mini-fab
-      color='primary'
-      (click)='onFuzzySearch()'
-      class="mt-2 d-inline ml-2">
-      <mat-icon>search</mat-icon>
-    </a>
-  </div>
-</form>
+<div class="d-flex">
+  <a
+    mat-mini-fab
+    color='primary'
+    class="mt-2 d-inline mr-2"
+    (click)="scannerOpened = !scannerOpened">
+    <mat-icon>qr_code</mat-icon>
+  </a>
+  <mat-form-field appearance="outline">
+    <mat-label>Search here</mat-label>
+    <input
+      (keydown.meta.enter)="onFuzzySearch()"
+      matInput
+      type='text'>
+    <button
+      matSuffix
+      mat-icon-button
+      id="searchButton"
+      aria-label="Clear">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <a
+    mat-mini-fab
+    color='primary'
+    (click)='onFuzzySearch()'
+    class="mt-2 d-inline ml-2">
+    <mat-icon>search</mat-icon>
+  </a>
+</div>
+
 
 <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
 
-<mat-tab-group class="mb-4 greyed-text" [@.disabled]="true">
-  <mat-tab label="Online"><p>These are the orders you ordered online and shipped to us</p></mat-tab>
-  <mat-tab label="Serviced">These are the orders we ordered on behalf of you</mat-tab>
-  <mat-tab label="In-person">These are the orders you delegated to us in person</mat-tab>
-  <mat-tab label="Consolidated">These are the trackings for your consolidated orders</mat-tab>
-  <mat-tab label="Master">These are the trackings of oversea shipments</mat-tab>
+<mat-tab-group (selectedIndexChange)="tabChanged($event)"class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
+  <mat-tab label="Online" *ngIf="enabled[0]">
+    <ng-template matTabContent>
+      <tracking-list-common-template
+        (pageDataChangeEvent)="pageDataChanged($event)"
+        [trackingsObservable]="trackingsSubject.asObservable()">
+      </tracking-list-common-template>
+    </ng-template>
+  </mat-tab>
+
+  <mat-tab label="Serviced" *ngIf="enabled[1]">
+    <ng-template matTabContent>
+      <tracking-list-common-template
+        (pageDataChangeEvent)="pageDataChanged($event)"
+        [trackingsObservable]="trackingsSubject.asObservable()">
+      </tracking-list-common-template>
+    </ng-template>
+  </mat-tab>
+
+  <mat-tab label="In-person" *ngIf="enabled[2]">
+    <ng-template matTabContent>
+      <tracking-list-common-template
+        (pageDataChangeEvent)="pageDataChanged($event)"
+        [trackingsObservable]="trackingsSubject.asObservable()">
+      </tracking-list-common-template>
+    </ng-template>
+  </mat-tab>
+
+  <mat-tab label="Consolidated" *ngIf="enabled[3]">
+    <ng-template matTabContent>
+      <tracking-list-common-template
+        (pageDataChangeEvent)="pageDataChanged($event)"
+        [trackingsObservable]="trackingsSubject.asObservable()">
+      </tracking-list-common-template>
+    </ng-template>
+  </mat-tab>
+
+  <mat-tab label="Master" *ngIf="enabled[4]">
+    <ng-template matTabContent>
+      <tracking-list-common-template
+        (pageDataChangeEvent)="pageDataChanged($event)"
+        [trackingsObservable]="trackingsSubject.asObservable()">
+      </tracking-list-common-template>
+    </ng-template>
+  </mat-tab>
 </mat-tab-group>
 
-<mat-accordion multi='true' *ngIf='trackings.length > 0'>
-  <mat-expansion-panel *ngFor='let tracking of trackings'>
-
-    <mat-expansion-panel-header class={{getHeaderColor(tracking.status)}}>
-      <mat-panel-title class="text-white">
-        <div>{{ tracking.trackingNumber }} {{tracking.carrier}} {{tracking.status}}</div>
-        <div class="ml-auto">{{formatDateTime(tracking.updatedAt)}}</div>
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-    <div>
-      <ng-template matExpansionPanelContent>
-        <div class="row image-container">
-          <ng-container *ngFor="let item of tracking.filePaths; let indexOfelement=index">
-            <div class='rounded float-left image-preview' data-toggle="modal" [attr.data-target]="'#modal-'+ tracking._id + indexOfelement">
-              <img [src]="item">
-            </div>
-            <div class="modal fade" id="modal-{{tracking._id + indexOfelement}}" tabindex="-1" role="dialog" aria-hidden="true">
-              <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                  <div class="modal-body">
-                    <img [src]="item" class="w-100">
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" mat-raised-button color='basic' data-dismiss="modal">Close</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ng-container>
-        </div>
-
-        <hr>
-
-        <div class="row">
-          <div class="col-md-6">
-            <div class="scroll-box">
-              <p>{{ tracking.content }}</p>
-            </div>
-          </div>
-          <div class="col-md-6 mt-xs-2 mt-md-0">
-
-            <ng-container *ngIf="userIsAuthenticated">
-              <form [formGroup]='commentForm' #f='ngForm' (submit)='onCommentSubmit(tracking._id)' (keydown.meta.Enter)="onCommentSubmit(tracking._id)">
-                <div class="d-flex">
-                  <mat-form-field appearance="outline" class="mr-2">
-                    <mat-label>Comment</mat-label>
-                    <textarea
-                      rows="2"
-                      matInput
-                      formControlName='commentContent'
-                      cdkTextareaAutosize>
-                    </textarea>
-                  </mat-form-field>
-                  <button
-                    mat-icon-button
-                    color='primary'
-                    type='submit'
-                    class="mt-2 d-inline">
-                    <mat-icon>send</mat-icon>
-                  </button>
-                </div>
-              </form>
-            </ng-container>
-
-            <div class="scroll-box">
-              <ng-container *ngFor="let comment of tracking.comments">
-                <div class="mat-body-strong">{{comment?.creatorName}}   <span class="dimmed-text">{{formatDateTime(comment?.updatedAt)}}</span></div>
-
-                <div>{{comment?.content}}</div>
-                <hr>
-              </ng-container>
-            </div>
-          </div>
-        </div>
-      </ng-template>
-    </div>
 
 
-    <mat-action-row *ngIf="userIsAuthenticated && userId === tracking.creatorId">
-      <div>
-        <div class="d-inline-flex align-items-center">
-          <mat-slide-toggle (change)="onReceivedToggled($event.checked, tracking)" color="primary" checked="{{tracking.status === 'received_at_us_warehouse'}}">Received</mat-slide-toggle>
-        </div>
-        <a mat-button color='primary' [routerLink]="['/trackings/edit', tracking._id]" >Edit</a>
-        <button mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</button>
-      </div>
 
-    </mat-action-row>
-  </mat-expansion-panel>
-</mat-accordion>
 
-<p class='info-text mat-body-1' *ngIf="trackings.length == 0 && !trackingForm.controls['searchTerm'].value">No trackings found</p>
+<!-- <p class='info-text mat-body-1' *ngIf="trackings.length == 0 && !trackingForm.controls['searchTerm'].value">No trackings found</p>
 <div *ngIf="trackings.length == 0 && trackingForm.controls['searchTerm'].value && searchClicked">
   <p class='info-text mat-body-1'>Click to add and receive</p>
   <div class="d-flex justify-content-center">
@@ -147,11 +95,11 @@
       <mat-icon>add</mat-icon>
     </a>
   </div>
-</div>
+</div> -->
 
 
 
-<mat-paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [pageSize]='trackingsPerPage' [pageSizeOptions]='pageSizeOptions' (page)='onChangedPage($event)'></mat-paginator>
 
 
- -->
+
+

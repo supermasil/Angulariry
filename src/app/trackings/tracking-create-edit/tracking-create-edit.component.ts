@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
+import { TrackingGlobals } from '../tracking-globals';
 
 
 
@@ -11,10 +12,7 @@ import { AuthService } from 'src/app/auth/auth.service';
 })
 
 export class TrackingCreateEditComponent implements OnInit {
-
-  // formModes = ["Online", "Serviced", "In-person", "Consolidated", "Master", "Pricing"];
   selectedIndex = 0;
-
   enabled = [false, false, false, false, false];
 
   constructor(
@@ -27,15 +25,15 @@ export class TrackingCreateEditComponent implements OnInit {
     // Subcribe to see the active route
     this.route.paramMap.subscribe((paramMap) => {
       if (this.router.url.includes('edit')) {
-        if (paramMap.get('trackingId').includes('onl')) {
+        if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.ONLINE)) {
           this.selectedIndex = 0;
-        } else if (paramMap.get('trackingId').includes('sev')) {
+        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.SERVICED)) {
           this.selectedIndex = 1;
-        } else if (paramMap.get('trackingId').includes('inp')) {
+        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.INPERSON)) {
           this.selectedIndex = 2;
-        } else if (paramMap.get('trackingId').includes('csl')) {
+        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.CONSOLIDATED)) {
           this.selectedIndex = 3;
-        } else if (paramMap.get('trackingId').includes('mst')) {
+        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.MASTER)) {
           this.selectedIndex = 4;
         } else {
           return this.authService.redirect404();

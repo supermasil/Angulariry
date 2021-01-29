@@ -99,7 +99,7 @@ export class AuthService {
       this.userOrg = userOrg;
       this.refreshUsers();
       this.authStatusListener.next(true);
-      console.log("User authenticated");
+      // console.log("User authenticated");
     });
   }
 
@@ -108,7 +108,7 @@ export class AuthService {
     this.mongoDbUser = null;
     this.clearSessionStorage();
     this.authStatusListener.next(false);
-    console.log("User unauthenticated");
+    // console.log("User unauthenticated");
   }
 
   refreshUsers() {

@@ -12,21 +12,22 @@ const BACKEND_URL = environment.apiURL + "/comments/"
 export class CommentService {
   constructor(private httpClient: HttpClient, private router: Router) {}
 
-  createComment(trackingId: string, content: string, imagePaths: string[], attachmentPaths: string[]) {
+  createComment(trackingId: string, trackingNumber, content: string, filePaths: string[]) {
     const commentData = {
       "trackingId": trackingId,
+      "trackingNumber": trackingNumber,
       "content": content,
-      "imagePaths": imagePaths,
-      "attachementPaths": attachmentPaths
+      "filePaths": filePaths
     }
-    return this.httpClient.post<{message: string, comment: CommentModel}>(BACKEND_URL, commentData);
+    return this.httpClient.post<CommentModel>(BACKEND_URL, commentData);
   }
 
-  getComments(trackingId: string) {
-    const queryParams = `?trackingId=${trackingId}`;
-    return this.httpClient.get<{message: string, comments: [CommentModel]}>(BACKEND_URL + queryParams)
-      .subscribe(responseData => {
-        return responseData.comments
-      });
-  }
+  // Comments are populated with tracking
+  // getComments(trackingId: string) {
+  //   const queryParams = `?trackingId=${trackingId}`;
+  //   return this.httpClient.get<{message: string, comments: [CommentModel]}>(BACKEND_URL + queryParams)
+  //     .subscribe(responseData => {
+  //       return responseData.comments
+  //     });
+  // }
 }

@@ -37,8 +37,6 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   defaultPricing: PricingModel;
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
-  itemNamesSubject = new ReplaySubject<string[]>();
-  customerCodesSubject = new ReplaySubject<string[]>();
   defaultPricingSubject = new ReplaySubject<PricingModel>();
   selectedUserIdSubject = new ReplaySubject<string>();
 
@@ -80,10 +78,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
         this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
           this.users = users;
           this.usersSubject.next(users);
-          this.customerCodesSubject.next(users.map(user => user.customerCode));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
-            this.itemNamesSubject.next(pricing.items.map(i => i.name));
             this.defaultPricingSubject.next(pricing);
 
             this.route.paramMap.subscribe((paramMap) => {

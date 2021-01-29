@@ -14,16 +14,10 @@ import { AlertService } from '../alert-message';
 import { GlobalConstants } from '../global-constants';
 import { CommentModel } from '../models/comment.model';
 import { query } from '@angular/animations';
+import { TrackingGlobals } from './tracking-globals';
 
 const BACKEND_URL = environment.apiURL + "/trackings/";
 
-const TrackingTypes = Object.freeze({
-  ONLINE: "onl",
-  SERVICED: "sev",
-  INPERSON: "inp",
-  CONSOLIDATED: "csl",
-  MASTER: "mst"
-});
 
 @Injectable({ providedIn: "root"})
 export class TrackingService{
@@ -90,13 +84,6 @@ export class TrackingService{
     });
   }
 
-  createComment(trackingNumber: string, content: string, imagePaths: string[], attachmentPaths: string[]) {
-    this.commentService.createComment(trackingNumber, content, imagePaths, attachmentPaths)
-      .subscribe(response => {
-        this.setTransformedTrackings(null, response.comment, trackingNumber)
-      });
-  }
-
   createUpdateTracking(formData: any) {
     this.httpClient
       .post<{message: string, tracking: any}>(BACKEND_URL, formData)
@@ -141,15 +128,15 @@ export class TrackingService{
   setTrackingModel(tracking: any) {
     let prefix = tracking.trackingNumber.substring(0, 3);
     switch (prefix) {
-      case TrackingTypes.ONLINE:
+      case TrackingGlobals.trackingTypes.ONLINE:
         return tracking as OnlineTrackingModel;
-      case TrackingTypes.SERVICED:
+      case TrackingGlobals.trackingTypes.SERVICED:
         return tracking as ServicedTrackingModel;
-      case TrackingTypes.INPERSON:
+      case TrackingGlobals.trackingTypes.INPERSON:
         return tracking as InPersonTrackingModel;
-      case TrackingTypes.CONSOLIDATED:
+      case TrackingGlobals.trackingTypes.CONSOLIDATED:
         return tracking as ConsolidatedTrackingModel;
-      case TrackingTypes.MASTER:
+      case TrackingGlobals.trackingTypes.MASTER:
         return tracking as MasterTrackingModel;
       default:
         this.alertService.error("Couldn't find tracking type", GlobalConstants.flashMessageOptions);
@@ -160,7 +147,7 @@ export class TrackingService{
   setTransformedTrackings(trackings: any, comment: CommentModel, trackingNumber: string) {
     let prefix = trackings[0]?.trackingNumber.substring(0, 3);
     switch (prefix) {
-      case TrackingTypes.ONLINE:
+      case TrackingGlobals.trackingTypes.ONLINE:
         if (trackingNumber) {
           this.onlineTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
         else {
@@ -171,7 +158,7 @@ export class TrackingService{
           count: this.onlineTrackings.length
         });
         break;
-      case TrackingTypes.SERVICED:
+      case TrackingGlobals.trackingTypes.SERVICED:
         if (trackingNumber) {
           this.servicedTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
         else {
@@ -182,7 +169,7 @@ export class TrackingService{
           count: this.servicedTrackings.length
         });
         break;
-      case TrackingTypes.INPERSON:
+      case TrackingGlobals.trackingTypes.INPERSON:
         if (trackingNumber) {
           this.inPersonTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
         else {
@@ -193,7 +180,7 @@ export class TrackingService{
           count: this.inPersonTrackings.length
         });
         break;
-      case TrackingTypes.CONSOLIDATED:
+      case TrackingGlobals.trackingTypes.CONSOLIDATED:
         if (trackingNumber) {
           this.consolidatedTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
         else {
@@ -204,7 +191,7 @@ export class TrackingService{
           count: this.consolidatedTrackings.length
         });
         break;
-      case TrackingTypes.MASTER:
+      case TrackingGlobals.trackingTypes.MASTER:
         if (trackingNumber) {
           this.masterTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
         else {

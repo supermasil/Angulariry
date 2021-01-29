@@ -1,5 +1,6 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { AuthService } from "src/app/auth/auth.service";
@@ -40,8 +41,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   defaultPricing: PricingModel;
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
-  itemNamesSubject = new ReplaySubject<string[]>();
-  customerCodesSubject = new ReplaySubject<string[]>();
   defaultPricingSubject = new ReplaySubject<PricingModel>();
   selectedUserIdSubject = new ReplaySubject<string>();
 
@@ -93,10 +92,8 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
         this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
           this.users = users;
           this.usersSubject.next(users);
-          this.customerCodesSubject.next(users.map(user => user.customerCode));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
-            this.itemNamesSubject.next(pricing.items.map(i => i.name));
             this.defaultPricingSubject.next(pricing);
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
@@ -150,7 +147,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       received: formData.received,
       content: formData.generalInfo.content
     });
-    this.receivedCheckboxChecked();
   }
 
   createOnlineForm() {
@@ -195,9 +191,13 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     // Error is handled in itemsListComponent
   }
 
-  receivedCheckboxChecked() {
-    this.statusChangeSubject.next('Received');
-    this.onlineForm.get('received').disable();
+  receivedCheckboxChecked(event: MatCheckboxChange) {
+    if (event.checked) {
+      this.statusChangeSubject.next('Received');
+    } else {
+      this.statusChangeSubject.next('Pending');
+    }
+    // this.onlineForm.get('received').disable();
   }
 
   onSave() {

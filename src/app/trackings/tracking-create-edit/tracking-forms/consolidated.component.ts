@@ -43,8 +43,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   users: UserModel[];
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
-  customerCodesSubject = new ReplaySubject<string[]>();
-  selectedUserIdSubject = new ReplaySubject<string>();
 
   usersSubject = new ReplaySubject<UserModel[]>();
   trackingNumeberSubject = new ReplaySubject<string>();
@@ -103,14 +101,12 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
-      this.selectedUserIdSubject.next(user._id);
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
         this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
           this.users = users;
           this.usersSubject.next(users);
-          this.customerCodesSubject.next(users.map(user => user.customerCode));
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
                 this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: ConsolidatedTrackingModel) => {
@@ -145,17 +141,17 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   fetchTrackings(origin: string, destination: string, sender: string) {
-    this.trackingService.getTrackings(0, 1, "onl", this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
       this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
     });;
 
-    this.trackingService.getTrackings(0, 1, "sev", this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
       this.serviceTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
       this.servicedTrackingDataSubject.next(this.serviceTrackings);
     });;
 
-    this.trackingService.getTrackings(0, 1, "inp", this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
       this.inPersonTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
       this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
     });;
@@ -253,11 +249,11 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   deselectRow(row: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel) {
-    if (row.trackingNumber.includes('onl')) {
+    if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
       this.deselectOnlineTrackingSubject.next(row);
-    } else if (row.trackingNumber.includes('sev')) {
+    } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
       this.deselectServicedTrackingSubject.next(row);
-    } else if (row.trackingNumber.includes('inp')) {
+    } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
       this.deselectInPersonTrackingSubject.next(row);
     }
   }
@@ -313,21 +309,21 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     let removedInPersonTrackings = [];
 
     this.finalizingDataSource.data.forEach(row => {
-      if (row.trackingNumber.includes('onl')) {
+      if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
         onlineTrackings.push(row._id);
-      } else if (row.trackingNumber.includes('sev')) {
+      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
         servicedTrackings.push(row._id);
-      } else if (row.trackingNumber.includes('inp')) {
+      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
         inPersonTrackings.push(row._id);
       }
     });
 
     this.tempDataSource.data.forEach(row => {
-      if (row.trackingNumber.includes('onl')) {
+      if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
         removedOnlineTrackings.push(row._id);
-      } else if (row.trackingNumber.includes('sev')) {
+      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
         removedServicedTrackings.push(row._id);
-      } else if (row.trackingNumber.includes('inp')) {
+      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
         removedInPersonTrackings.push(row._id);
       }
     });
