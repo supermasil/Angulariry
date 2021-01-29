@@ -154,7 +154,7 @@ export class MasterFormCreateComponent implements OnInit {
 
   fetchTrackings(origin: string, destination: string) {
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.CONSOLIDATED, this.organization._id, origin, destination, null).subscribe((transformedTrackings) => {
-      this.allTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidatedStatuses.includes(i.generalInfo.status));
+      this.allTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidationStatuses.includes(i.generalInfo.status));
       this.trackingsReference = [...this.allTrackings];
       this.filteredTrackings = of(this.allTrackings);
     });

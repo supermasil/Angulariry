@@ -9,6 +9,7 @@ import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-compl
 import { GlobalConstants } from 'src/app/global-constants';
 import { PricingModel } from 'src/app/models/pricing.model';
 import { ListItemModel } from 'src/app/models/tracking-models/list-item.model';
+import { TrackingGlobals } from '../../tracking-globals';
 
 @Component({
   selector: 'items-list',
@@ -175,7 +176,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
       extraChargeSaving: new FormControl(formData?.extraChargeSaving? formData.extraChargeSaving : 0, {validators:[Validators.required]}),
       weight: new FormControl(formData?.weight? formData.weight : 0, {validators:[Validators.required]}),
       insurance: new FormControl(formData?.insurance? formData.insurance : 0, {validators: [Validators.required]}),
-      status: new FormControl(formData?.status? formData.status : "Unknown", {validators:[Validators.required]}),
+      status: new FormControl(formData?.status? formData.status : TrackingGlobals.allStatusTypes.Created, {validators:[Validators.required]}),
       order: new FormControl(this.increment)
     });
 

@@ -1,11 +1,8 @@
-import { Component, ViewChild } from "@angular/core";
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
+import { Component } from "@angular/core";
 import { PageEvent } from '@angular/material/paginator';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TrackingGlobals } from '../tracking-globals';
 import { TrackingService } from '../tracking.service';
-import * as moment from 'moment';
 import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
@@ -23,7 +20,7 @@ import { ReplaySubject } from "rxjs";
 })
 export class TrackingListComponent {
 
-  enabled = [true, false, true, true, true];
+  enabled = [true, true, true, true, true];
   selectedIndex = 0;
   currentTrackingType = TrackingGlobals.trackingTypes.ONLINE;
 

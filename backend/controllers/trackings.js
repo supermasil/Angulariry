@@ -20,22 +20,24 @@ const TrackingTypes = Object.freeze({
   MASTER: "mst"
 });
 
-const Statuses = Object.freeze({
+const allStatusTypes= {
   Unknown: "Unknown",
   Created: "Created",
   Pending: "Pending",
-  Received: "Received",
+  BeingShippedToOrigin: "Being shipped to origin",
+  ReceivedAtOrigin: "Received at origin",
   Consolidated: "Consolidated",
-  ReadyToShip: "Ready to ship",
-  Shipped: "Shipped",
-  ArrivedAtDestination: "Arrived at Destination",
-  Delivering: "Delivering",
-  Delivered: "Delivered"});
+  ReadyToFly: "Ready to fly",
+  BeingShippedToDestination: "Being shipped to destination",
+  ReceivedAtDestination: "Received at destination",
+  BeingDeliveredToRecipient: "Being delivered to recipient",
+  DeliveredToRecipient: "Delivered to recipient"
+}
 
 // TRACKING TOOL
 exports.getTrackingTool = async (req, res, next) => {
   try {
-    let tracker = await getTrackerHelper(req.query.trackingNumber, req.query.carrier);
+    let tracker = await CarrierTrackingController.getTrackerHelper(req.query.trackingNumber, req.query.carrier);
     return res.status(200).json(tracker);
   } catch (error) {
     console.log("getTrackingTool: " + error.message)
@@ -123,20 +125,20 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       updateBody['onlineTrackings'] = req.body.onlineTrackings;
       updateBody['servicedTrackings'] = req.body.servicedTrackings;
       updateBody['inPersonTrackings'] = req.body.inPersonTrackings;
-      changeTrackingsStatusHelper(TrackingTypes.ONLINE, Statuses.Consolidated, req.body.onlineTrackings);
-      changeTrackingsStatusHelper(TrackingTypes.SERVICED, Statuses.Consolidated, req.body.servicedTrackings);
-      changeTrackingsStatusHelper(TrackingTypes.INPERSON, Statuses.Consolidated, req.body.inPersonTrackings);
-      changeTrackingsStatusHelper(TrackingTypes.ONLINE, Statuses.Pending, req.body.removedOnlineTrackings);
-      changeTrackingsStatusHelper(TrackingTypes.SERVICED, Statuses.Pending, req.body.removedServicedTrackings);
-      changeTrackingsStatusHelper(TrackingTypes.INPERSON, Statuses.Pending, req.body.removedInPersonTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.ONLINE, allStatusTypes.Consolidated, req.body.onlineTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.SERVICED, allStatusTypes.Consolidated, req.body.servicedTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.INPERSON, allStatusTypes.Consolidated, req.body.inPersonTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.ONLINE, allStatusTypes.Pending, req.body.removedOnlineTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.SERVICED, allStatusTypes.Pending, req.body.removedServicedTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.INPERSON, allStatusTypes.Pending, req.body.removedInPersonTrackings);
     }
 
     if (type === TrackingTypes.MASTER) {
       updateBody['boxes'] = req.body.boxes;
       req.body.boxes.forEach(box => {
-        changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, Statuses.ReadyToShip, box.items);
+        changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, allStatusTypes.ReadyToFly, box.items);
       });
-      changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, Statuses.Pending, req.body.removedConsolidatedTrackingNumbers);
+      changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, allStatusTypes.Pending, req.body.removedConsolidatedTrackingNumbers);
     }
 
     generalInfo['filePaths'] = await updateImages(req, currentTracking.generalInfo.filePaths);
@@ -165,15 +167,15 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       newBody['onlineTrackings'] = req.body.onlineTrackings;
       newBody['servicedTrackings'] = req.body.servicedTrackings;
       newBody['inPersonTrackings'] = req.body.inPersonTrackings;
-      changeTrackingsStatusHelper(TrackingTypes.ONLINE, Statuses.Consolidated, req.body.onlineTrackings);
-      changeTrackingsStatusHelper(TrackingTypes.SERVICED, Statuses.Consolidated, req.body.servicedTrackings);
-      changeTrackingsStatusHelper(TrackingTypes.INPERSON, Statuses.Consolidated, req.body.inPersonTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.ONLINE, allStatusTypes.Consolidated, req.body.onlineTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.SERVICED, allStatusTypes.Consolidated, req.body.servicedTrackings);
+      changeTrackingsStatusHelper(TrackingTypes.INPERSON, allStatusTypes.Consolidated, req.body.inPersonTrackings);
     }
 
     if (type === TrackingTypes.MASTER) {
       newBody['boxes'] = req.body.boxes;
       req.body.boxes.forEach(box => {
-        changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, Statuses.ReadyToShip, box.items);
+        changeTrackingsStatusHelper(TrackingTypes.CONSOLIDATED, allStatusTypes.ReadyToFly, box.items);
       });
     }
 
@@ -252,7 +254,7 @@ requestItemsSetupHelper = async req => {
     carrierTrackingIds = [];
     item.carrierTrackings.forEach(async item => {
       try {
-        carrierTrackingIds.push((await getTrackerHelper(item.trackingNumber, item.carrier)).id);
+        carrierTrackingIds.push((await CarrierTrackingController.getTrackerHelper(item.trackingNumber, item.carrier)).id);
       } catch (error) {
         console.error(`requestItemsSetupHelper: ${item.trackingNumber}: ${error.message}`); // then ignore the wrong tracking
       }
@@ -470,6 +472,7 @@ changeTrackingsStatusHelper = (type, status, idsList) => {
       InPersonTrackingModel.updateMany({"_id": {$in: idsList}}, {$set:{"generalInfo.status": status}}).then();
       break;
     case TrackingTypes.CONSOLIDATED:
+      console.log(idsList)
       ConsolidatedTrackingModel.updateMany({"_id": {$in: idsList}}, {$set:{"generalInfo.status": status}}).then();
       break;
     case TrackingTypes.MASTER:

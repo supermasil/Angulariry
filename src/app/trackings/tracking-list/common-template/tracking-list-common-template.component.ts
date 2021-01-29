@@ -26,6 +26,8 @@ export class TrackingListCommonTemplateComponent implements OnInit {
   trackingsPerPage = this.pageSizeOptions[0];
   currentPage = 1;
 
+  getBadgeColor = TrackingGlobals.getBadgeColor;
+
   commentForm: FormGroup;
 
   @ViewChild('f') myCommentForm; // To be able to reset form without triggering validators

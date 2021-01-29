@@ -45,7 +45,48 @@ export class TrackingGlobals {
     MASTER: "mst"
   }
 
-  public static statuses = ["Unknown", "Created", "Pending", , "Received", "Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
-  public static postCreatedStatuses = ["Consolidated", "Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
-  public static postConsolidatedStatuses = ["Ready to ship", "Shipped", "Arrived at Destination", "Delivering", "Delivered"];
+  public static allStatusTypes = {
+    Unknown: "Unknown",
+    Created: "Created",
+    Pending: "Pending",
+    BeingShippedToOrigin: "Being shipped to origin",
+    ReceivedAtOrigin: "Received at origin",
+    Consolidated: "Consolidated",
+    ReadyToFly: "Ready to fly",
+    BeingShippedToDestination: "Being shipped to destination",
+    ReceivedAtDestination: "Received at destination",
+    BeingDeliveredToRecipient: "Being delivered to recipient",
+    DeliveredToRecipient: "Delivered to recipient"
+  }
+
+  public static getBadgeColor = (status: string) => {
+    switch (status) {
+      case TrackingGlobals.allStatusTypes.Unknown:
+        return "#f44336"
+      case TrackingGlobals.allStatusTypes.Created:
+        return "#ff5722"
+      case TrackingGlobals.allStatusTypes.Pending:
+        return "#607d8b"
+      case TrackingGlobals.allStatusTypes.BeingShippedToOrigin:
+        return "#e91e63"
+      case TrackingGlobals.allStatusTypes.ReceivedAtOrigin:
+        return "#9c27b0"
+      case TrackingGlobals.allStatusTypes.Consolidated:
+        return "#e040fb"
+      case TrackingGlobals.allStatusTypes.ReadyToFly:
+        return "#03a9f4"
+      case TrackingGlobals.allStatusTypes.BeingShippedToDestination:
+        return "#ffeb3b"
+      case TrackingGlobals.allStatusTypes.ReceivedAtDestination:
+        return "#8bc34a"
+      case TrackingGlobals.allStatusTypes.BeingDeliveredToRecipient:
+        return "#ccff90"
+      case TrackingGlobals.allStatusTypes.DeliveredToRecipient:
+        return "#76ff03"
+    }
+  }
+
+  public static statuses = Object.values(TrackingGlobals.allStatusTypes);
+  public static postCreationStatuses = [...TrackingGlobals.statuses].splice(4);
+  public static postConsolidationStatuses = [...TrackingGlobals.statuses].splice(5);
 }

@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const checkAuth = require("../middleware/check-auth");
-const extractFile = require("../middleware/multer");
 const TrackingController = require("../controllers/trackings");
 
 router.get('/tracking-tool', checkAuth.isAuthenticated, TrackingController.getTrackingTool);

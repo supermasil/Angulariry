@@ -193,9 +193,9 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
 
   receivedCheckboxChecked(event: MatCheckboxChange) {
     if (event.checked) {
-      this.statusChangeSubject.next('Received');
+      this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.ReceivedAtOrigin);
     } else {
-      this.statusChangeSubject.next('Pending');
+      this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.Pending);
     }
     // this.onlineForm.get('received').disable();
   }

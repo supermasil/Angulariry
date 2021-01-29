@@ -142,17 +142,17 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   fetchTrackings(origin: string, destination: string, sender: string) {
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
+      this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreationStatuses.includes(i.generalInfo.status));
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
     });;
 
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.serviceTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
+      this.serviceTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreationStatuses.includes(i.generalInfo.status));
       this.servicedTrackingDataSubject.next(this.serviceTrackings);
     });;
 
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreatedStatuses.includes(i.generalInfo.status));
+      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreationStatuses.includes(i.generalInfo.status));
       this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
     });;
   }

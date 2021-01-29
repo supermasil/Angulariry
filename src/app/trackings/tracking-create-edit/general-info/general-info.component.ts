@@ -41,7 +41,6 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   selectedSender: UserModel;
 
   constructor(
-    private route: ActivatedRoute,
     private zone: NgZone) {
   }
 
@@ -87,7 +86,7 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   createGeneralInfoForm() {
     let form = new FormGroup({
       trackingNumber: new FormControl({value: "", disabled: true}, {validators: [Validators.required]}), // Set through subscription
-      status: new FormControl({value: this.statuses[0], disabled: true}, {validators: [Validators.required]}),
+      status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: false}, {validators: [Validators.required]}),
       origin: new FormControl("", {validators: [Validators.required]}),
       destination: new FormControl("", {validators: [Validators.required]}),
     });
