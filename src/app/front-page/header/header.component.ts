@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { Subscription } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core/';
 import { Router } from '@angular/router';
+import { AuthGlobals } from 'src/app/auth/auth-globals';
 
 @Component({
   selector: 'app-header',
@@ -12,16 +13,9 @@ import { Router } from '@angular/router';
 
 export class HeaderComponent implements OnInit, OnDestroy{
   constructor(private authService: AuthService, private changeDetector: ChangeDetectorRef, private zone: NgZone, private router: Router) {}
-  userIsAuthenticated = false;
   private authListenerSub: Subscription;
-  ngOnInit() {
-    this.authListenerSub = this.authService.getAuthStatusListener().subscribe(
-      isAuthenticated => {
-        this.userIsAuthenticated = isAuthenticated;
-      }
-    );
-    this.userIsAuthenticated = this.authService.getIsAuth();
-  }
+  authGlobals = AuthGlobals;
+  ngOnInit() {}
 
   onLogOut() {
     this.authService.logout();
@@ -36,6 +30,14 @@ export class HeaderComponent implements OnInit, OnDestroy{
     this.zone.run(() => {
       this.router.navigate([route]);
     });
+  }
+
+  canView(roles: string[]) {
+    return roles.includes(this.authService.getMongoDbUser().role);
+  }
+
+  isAuth() {
+    return this.authService.getIsAuth();
   }
 
 };

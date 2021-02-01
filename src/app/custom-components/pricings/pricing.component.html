@@ -337,7 +337,7 @@
   <mat-tab label="Customer Pricing">
     <div class="mt-4">
       <auto-complete-input
-        [dataObservable]="customerCodes.asObservable()"
+        [dataObservable]="userCodes.asObservable()"
         (itemSelected)="userSelected($event)"
         (inputInvalid)="''"
         [enforeSelection]="true"

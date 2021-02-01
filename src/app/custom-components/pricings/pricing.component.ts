@@ -12,7 +12,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { animate, state, style, transition, trigger } from "@angular/animations";
 import { PricingService } from "./pricing.service";
 import { AlertService } from "../alert-message";
-import { GlobalConstants } from "../global-constants";
+import { GlobalConstants } from "../../global-constants";
 
 @Component({
   selector: 'pricing-form',
@@ -44,7 +44,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
 
   defaultLocations = new ReplaySubject<string[]>();
   itemNames = new ReplaySubject<string[]>();
-  customerCodes = new ReplaySubject<string[]>();
+  userCodes = new ReplaySubject<string[]>();
 
   units = ["kg"];
   extraChargeUnits = ["$", "%"];
@@ -67,22 +67,22 @@ export class PricingComponent implements OnInit, AfterViewChecked {
         this.defaultLocations.next(org.locations.map(item => item.name));
         this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
           this.users = users;
-          this.customerCodes.next(users.map(user => user.customerCode));
+          this.userCodes.next(users.map(user => user.userCode));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.orgDefaultPricing = pricing;
             this.itemNames.next(pricing.items.map(i => i.name));
             this.editPricingForm = this.createPricingForm(this.orgDefaultPricing);
           }, error => {
-            this.authService.redirectOnFailedSubscription("Couldn't fetch pricing");
+            this.authService.redirectToMainPageWithMessage("Couldn't fetch pricing");
           });
         }, error => {
-          this.authService.redirectOnFailedSubscription("Couldn't fetch users");
+          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
         })
       }, error => {
-        this.authService.redirectOnFailedSubscription("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
       });
     }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch user");
+      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
     });
   }
 
@@ -93,7 +93,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
   userSelected(user: string) {
     this.isLoading = true;
     this.pricingForm = null;
-    this.selectedUser = this.users.filter(u => u.customerCode == user)[0];
+    this.selectedUser = this.users.filter(u => u.userCode == user)[0];
     this.pricingForm = this.createPricingForm(this.orgDefaultPricing);
     this.updateData(this.orgDefaultPricing.items);
     this.isLoading = false;
@@ -372,7 +372,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
       return result;
     } catch (error) {
       console.log(error);
-      this.authService.redirectOnFailedSubscription("Couldn't load pricing");
+      this.authService.redirectToMainPageWithMessage("Couldn't load pricing");
     }
   }
 
@@ -385,7 +385,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
       return result? result: {perUnitDiscountAmount: 0, extraChargeDiscountAmount: 0};
     } catch (error) {
       console.log(error);
-      this.authService.redirectOnFailedSubscription("Couldn't load pricing");
+      this.authService.redirectToMainPageWithMessage("Couldn't load pricing");
     }
   }
 
@@ -406,7 +406,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
       }
     } catch (error) {
       console.log(error);
-      this.authService.redirectOnFailedSubscription("Couldn't load pricing");
+      this.authService.redirectToMainPageWithMessage("Couldn't load pricing");
     }
   }
 

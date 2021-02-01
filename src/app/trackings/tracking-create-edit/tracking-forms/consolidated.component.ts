@@ -4,8 +4,9 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReplaySubject } from 'rxjs';
+import { AuthGlobals } from 'src/app/auth/auth-globals';
 import { AuthService } from 'src/app/auth/auth.service';
-import { FileUploaderComponent } from 'src/app/file-uploader/file-uploader.component';
+import { FileUploaderComponent } from 'src/app/custom-components/file-uploader/file-uploader.component';
 import { OrganizationModel } from 'src/app/models/organization.model';
 import { ConsolidatedTrackingModel } from 'src/app/models/tracking-models/consolidated-tracking.model';
 import { GeneralInfoModel } from 'src/app/models/tracking-models/general-info.model';
@@ -96,7 +97,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   ngOnInit() {
     this.finalizingDataSource = new MatTableDataSource([]);
     this.tempDataSource = new MatTableDataSource([]);
-    this.consolidatedForm = this.createConcolidatedForm();
     this.trackingNumeberSubject.next("csl-" + Date.now() + Math.floor(Math.random() * 10000));
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
@@ -106,38 +106,47 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
         this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
           this.users = users;
-          this.usersSubject.next(users);
+          this.usersSubject.next(users.filter(u => u.role === AuthGlobals.roles.Customer));
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
                 this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: ConsolidatedTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
+                  this.consolidatedForm = this.createConcolidatedForm(response);
                   this.emitChanges();
                   this.setUpDataSource();
                 }, error => {
                   this.authService.redirect404();
                 });
+              } else {
+                this.consolidatedForm = this.createConcolidatedForm(null);
               }
             }, error => {
               this.authService.redirect404();
             });
         }, error => {
-          this.authService.redirectOnFailedSubscription("Couldn't fetch users");
+          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
         })
       }, error => {
-        this.authService.redirectOnFailedSubscription("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
       });
     }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch user");
+      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
     });
   }
 
-  createConcolidatedForm() {
+  createConcolidatedForm(formData: ConsolidatedTrackingModel) {
     let form = new FormGroup({
-      _id: new FormControl(null),
-      content: new FormControl("")
+      _id: new FormControl(formData?._id? formData._id : null),
+      content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content : "")
     })
     return form;
+  }
+
+  emitChanges() {
+    this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
+    this.generalInfoSubject.next(this.currentTracking.generalInfo);
+    this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
   }
 
   fetchTrackings(origin: string, destination: string, sender: string) {
@@ -186,24 +195,10 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     });
   }
 
-  emitChanges() {
-    this.patchFormValues(this.currentTracking);
-    this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
-    this.generalInfoSubject.next(this.currentTracking.generalInfo);
-    this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
-  }
-
   setUpDataSource() {
     this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...this.currentTracking.inPersonTrackings];
     this.currentTrackingsReference = [...this.currentTrackings];
     this.combineData();
-  }
-
-  patchFormValues(formData: ConsolidatedTrackingModel) {
-    this.consolidatedForm.patchValue({
-      _id: formData._id,
-      content: formData.generalInfo.content
-    });
   }
 
   generalInfoValidity(valid: boolean) {
@@ -283,7 +278,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
       return;
     }
 
-    let sender = this.users.filter(u => u.customerCode == this.generalInfo.getRawValues().sender)[0];
+    let sender = this.users.filter(u => u._id == this.generalInfo.getRawValues().sender)[0];
     let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
 
     let formData = this.consolidatedForm.getRawValue();

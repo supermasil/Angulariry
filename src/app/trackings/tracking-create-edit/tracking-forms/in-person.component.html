@@ -1,71 +1,73 @@
-<form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
-  <general-info
-      #generalInfo
-      [usersObservable]="usersSubject.asObservable()"
-      [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
-      [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
-      (formValidityStatus)="generalInfoValidity($event)"
-      [generalInfoObservable]="generalInfoSubject.asObservable()"
-      (generalInfoUpdated)="pricingUpdate($event)">
-    </general-info>
+<div *ngIf="inPersonForm">
+  <form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
+    <general-info
+        #generalInfo
+        [usersObservable]="usersSubject.asObservable()"
+        [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
+        [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
+        (formValidityStatus)="generalInfoValidity($event)"
+        [generalInfoObservable]="generalInfoSubject.asObservable()"
+        (generalInfoUpdated)="pricingUpdate($event)">
+      </general-info>
 
-<!--
-  <div class="row">
-    <div class="col">
-      <mat-checkbox matInput formControlName='payAtDestination' class="p-2">Pay at destination</mat-checkbox>
-      <mat-checkbox matInput formControlName='receiveAtDestinationWH' class="p-2">Receive at destination WH</mat-checkbox>
+  <!--
+    <div class="row">
+      <div class="col">
+        <mat-checkbox matInput formControlName='payAtDestination' class="p-2">Pay at destination</mat-checkbox>
+        <mat-checkbox matInput formControlName='receiveAtDestinationWH' class="p-2">Receive at destination WH</mat-checkbox>
+      </div>
+    </div> -->
+
+    <div class="my-2">
+      <file-uploader #fileUploader
+      [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
     </div>
-  </div> -->
 
-  <div class="my-2">
-    <file-uploader #fileUploader
-    [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
-  </div>
+    <div class="mt-2" *ngIf="showItemsList">
+      <items-list
+        #itemsList
+        [pricingObservable]="defaultPricingSubject.asObservable()"
+        [userIdObservable]="selectedUserIdSubject.asObservable()"
+        [updateExistingItemsObservable]="updateExistingItemsSubject.asObservable()"
+        [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
+        (formValidity)="itemsListValidity($event)"
+        >
+      </items-list>
+    </div>
 
-  <div class="mt-2" *ngIf="showItemsList">
-    <items-list
-      #itemsList
-      [pricingObservable]="defaultPricingSubject.asObservable()"
-      [userIdObservable]="selectedUserIdSubject.asObservable()"
-      [updateExistingItemsObservable]="updateExistingItemsSubject.asObservable()"
-      [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
-      (formValidity)="itemsListValidity($event)"
-      >
-    </items-list>
-  </div>
+    <div *ngIf="showFinalizedInfo">
+      <finalized-info
+        #finalizedInfo
+        [itemsListObservable]="itemsListSubject.asObservable()"
+        [costAdjustmentObservable]="costAdjustmentSubject.asObservable()">
+      </finalized-info>
+    </div>
 
-  <div *ngIf="showFinalizedInfo">
-    <finalized-info
-      #finalizedInfo
-      [itemsListObservable]="itemsListSubject.asObservable()"
-      [costAdjustmentObservable]="costAdjustmentSubject.asObservable()">
-    </finalized-info>
-  </div>
+    <mat-form-field appearance="outline" class="mt-4">
+      <mat-label>Notes</mat-label>
+      <textarea
+      matInput
+      rows='10'
+      formControlName='content'
+      ></textarea>
+      <mat-error>Please enter some post content</mat-error>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline" class="mt-4">
-    <mat-label>Notes</mat-label>
-    <textarea
-    matInput
-    rows='10'
-    formControlName='content'
-    ></textarea>
-    <mat-error>Please enter some post content</mat-error>
-  </mat-form-field>
-
-  <div class="mt-2">
-    <button
-    mat-raised-button
-    color='primary'
-    type='submit'
-    class="mr-2">
-    Save
-    </button>
-    <button
+    <div class="mt-2">
+      <button
       mat-raised-button
-      color='warn'
-      type=''>
-      Cancel
-    </button>
-  </div>
+      color='primary'
+      type='submit'
+      class="mr-2">
+      Save
+      </button>
+      <button
+        mat-raised-button
+        color='warn'
+        type=''>
+        Cancel
+      </button>
+    </div>
 
-</form>
+  </form>
+</div>

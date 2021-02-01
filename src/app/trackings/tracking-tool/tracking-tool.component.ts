@@ -6,7 +6,7 @@ import { TrackerModel } from '../../models/easy-post-models/tracker.model';
 import { TrackingDetailModel } from '../../models/easy-post-models/tracking-details.model';
 import { GeneralMethods } from '../../shared/general-methods';
 import { TrackingGlobals } from '../tracking-globals';
-import { CodeScannerService } from 'src/app/code-scanner/code-scanner.service';
+import { CodeScannerService } from 'src/app/custom-components/code-scanner/code-scanner.service';
 import { Subscription } from 'rxjs';
 
 @Component({

@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { AuthGlobals } from 'src/app/auth/auth-globals';
+import { AuthService } from 'src/app/auth/auth.service';
 import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
 import { GeneralInfoModel } from 'src/app/models/tracking-models/general-info.model';
 import { UserModel } from 'src/app/models/user.model';
@@ -34,23 +35,23 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   @Output() formValidityStatus = new EventEmitter<boolean>();
   @Output() generalInfoUpdated = new EventEmitter<any>();
+  selectSenderSubject = new ReplaySubject<string>();
+  selectRecipientSubject = new ReplaySubject<string>();
 
   @ViewChild('sender') sender: AutoCompleteInputComponent;
   @ViewChild('recipient') recipient: AutoCompleteInputComponent;
 
   selectedSender: UserModel;
+  currentUser: UserModel;
 
   constructor(
-    private zone: NgZone) {
+    private zone: NgZone,
+    private authService: AuthService) {
   }
 
   ngOnInit() {
+    this.currentUser = this.authService.getMongoDbUser();
     this.generalInfoForm = this.createGeneralInfoForm();
-
-    this.usersObservable.subscribe((users: UserModel[]) => {
-      this.senders = users;
-      this.sendersSubject.next(users.map(u => u.customerCode + ' ' + u.name));
-    });
 
     this.generalInfoForm.valueChanges.subscribe(result => {
       this.formValidityStatus.emit(this.generalInfoForm.valid);
@@ -69,24 +70,33 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
       }
     });
 
-    this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
-      this.patchFormValue(generalInfo);
-      if (!this.disableSender) {
-        this.sender.selectItem(generalInfo.sender);
+    this.usersObservable.subscribe((users: UserModel[]) => {
+      this.senders = users;
+      this.sendersSubject.next(users.map(u => u.userCode + ' ' + u.name));
+      if (this.currentUser.role === AuthGlobals.roles.Customer) {
+        this.selectSenderSubject.next(this.currentUser.userCode + " " + this.currentUser.name);
       }
 
-      if (!this.disableRecipient) {
-        this.recipient.selectItem(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
-      }
-
-      this.formValidityStatus.emit(this.generalInfoForm.valid);
+      this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
+        this.patchFormValue(generalInfo);
+        if (!this.disableSender) {
+          this.authService.getUser(generalInfo.sender).subscribe((user: UserModel) => {
+            this.selectSenderSubject.next(user.userCode + " " + user.name)
+            if (!this.disableRecipient) {
+              this.selectRecipientSubject.next(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
+            }
+          })
+        }
+        this.formValidityStatus.emit(this.generalInfoForm.valid);
+      });
     });
+
   }
 
   createGeneralInfoForm() {
     let form = new FormGroup({
       trackingNumber: new FormControl({value: "", disabled: true}, {validators: [Validators.required]}), // Set through subscription
-      status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: false}, {validators: [Validators.required]}),
+      status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: !AuthGlobals.managerAdmins.includes(this.currentUser.role)}, {validators: [Validators.required]}),
       origin: new FormControl("", {validators: [Validators.required]}),
       destination: new FormControl("", {validators: [Validators.required]}),
     });
@@ -130,10 +140,10 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   senderSelected(value: string) {
     let splitValue = value.split(' ')[0];
-    this.recipient.resetForm();
-    this.selectedSender = this.senders.filter(s => s.customerCode == splitValue)[0];
+    this.recipient?.resetForm();
+    this.selectedSender = this.senders.filter(s => s.userCode == splitValue)[0];
     this.recipientsSubject.next(this.selectedSender.recipients.map(r => r.name + ' ' + r.address.address));
-    this.generalInfoForm.get('sender').setValue(splitValue);
+    this.generalInfoForm.get('sender').setValue(this.selectedSender._id);
   }
 
   recipientSelected(value: string) {

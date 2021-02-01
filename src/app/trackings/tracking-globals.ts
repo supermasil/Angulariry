@@ -89,4 +89,7 @@ export class TrackingGlobals {
   public static statuses = Object.values(TrackingGlobals.allStatusTypes);
   public static postCreationStatuses = [...TrackingGlobals.statuses].splice(4);
   public static postConsolidationStatuses = [...TrackingGlobals.statuses].splice(5);
+
+
+  public static defaultPageSizes = [10, 20, 50, 100];
 }

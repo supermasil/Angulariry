@@ -4,7 +4,7 @@ import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { MatAutocomplete, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { map, startWith } from 'rxjs/operators';
-import { FileUploaderComponent } from "src/app/file-uploader/file-uploader.component";
+import { FileUploaderComponent } from "src/app/custom-components/file-uploader/file-uploader.component";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { ConsolidatedTrackingModel } from "src/app/models/tracking-models/consolidated-tracking.model";
 import { GeneralInfoModel } from "src/app/models/tracking-models/general-info.model";
@@ -69,7 +69,6 @@ export class MasterFormCreateComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.masterForm = this.createMasterForm();
     this.trackingNumeberSubject.next("mst-" + Date.now() + Math.floor(Math.random() * 10000));
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
@@ -84,47 +83,42 @@ export class MasterFormCreateComponent implements OnInit {
                 this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: MasterTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
+                  this.masterForm = this.createMasterForm(response);
                   this.emitChanges();
                   this.setUpData();
                 }, error => {
                   this.authService.redirect404();
                 });
+              } else {
+                this.masterForm = this.createMasterForm(null);
               }
             }, error => {
               this.authService.redirect404();
             });
         }, error => {
-          this.authService.redirectOnFailedSubscription("Couldn't fetch users");
+          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
         })
       }, error => {
-        this.authService.redirectOnFailedSubscription("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
       });
     }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch user");
+      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
     });
   }
 
-  createMasterForm() {
+  createMasterForm(formData: MasterTrackingModel) {
     let form = new FormGroup({
-      _id: new FormControl(null),
+      _id: new FormControl(formData?._id? formData._id : null),
       boxes: new FormArray([]),
-      content: new FormControl("")
+      content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content : "")
     });
     return form
   }
 
   emitChanges() {
-    this.patchFormValues(this.currentTracking);
     this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
-  }
-
-  patchFormValues(formData: MasterTrackingModel) {
-    this.masterForm.patchValue({
-      _id: formData._id,
-      content: formData.generalInfo.content
-    })
   }
 
   setUpData() {

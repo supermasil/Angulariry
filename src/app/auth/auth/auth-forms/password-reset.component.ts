@@ -1,7 +1,7 @@
 import { Component, NgZone, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { AlertService } from "src/app/alert-message";
+import { AlertService } from "src/app/custom-components/alert-message";
 import { AuthService } from "../../auth.service";
 
 

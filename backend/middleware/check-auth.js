@@ -3,10 +3,11 @@ const admin = require('firebase-admin');
 module.exports = {
   isAuthenticated: (req, res, next) => {
     var authorization = req.headers.authorization.split(" ");
-    var idToken = authorization[1]
+    var idToken = authorization[1];
+    var orgId = authorization[2];
     admin.auth().verifyIdToken(idToken)
     .then(function(decodedToken) {
-      req.userData = {email: decodedToken.email, uid: decodedToken.uid};
+      req.userData = {email: decodedToken.email, uid: decodedToken.uid, orgId: orgId};
       next();
     }).catch(function(error) {
       console.log("Prevented an unauthorized access");

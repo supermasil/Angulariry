@@ -12,9 +12,10 @@ export interface UserModel { // From backend
   recipients: [RecipientModel];
   addresses: [AddressModel];
   companyCode: string;
-  customerCode: string;
+  userCode: string;
   organization: string;
   pricings: string;
+  creatorId: string;
   active: boolean;
   credit: number;
   createdAt: Date;

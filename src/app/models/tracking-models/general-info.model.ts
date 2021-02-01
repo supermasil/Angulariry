@@ -1,5 +1,6 @@
 import { CommentModel } from '../comment.model';
 import { RecipientModel } from '../recipient.model';
+import { UserModel } from '../user.model';
 
 export interface GeneralInfoModel { // From backend
   sender: string; // Unique index

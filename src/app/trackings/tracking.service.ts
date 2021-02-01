@@ -4,13 +4,13 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { map } from 'rxjs/operators';
-import { CommentService } from '../comments/comment.service';
+import { CommentService } from '../custom-components/comments/comment.service';
 import { OnlineTrackingModel } from '../models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from '../models/tracking-models/serviced-tracking.model';
 import { InPersonTrackingModel } from '../models/tracking-models/in-person-tracking.model';
 import { ConsolidatedTrackingModel } from '../models/tracking-models/consolidated-tracking.model';
 import { MasterTrackingModel } from '../models/tracking-models/master-tracking.model';
-import { AlertService } from '../alert-message';
+import { AlertService } from '../custom-components/alert-message';
 import { GlobalConstants } from '../global-constants';
 import { CommentModel } from '../models/comment.model';
 import { query } from '@angular/animations';
@@ -69,19 +69,18 @@ export class TrackingService{
     return this.httpClient.get<Object>(BACKEND_URL + queryParams);
   }
 
-  fuzzySearch(trackingsPerPage: number, currentPage: number, searchTerm: string) {
-    const queryParams = `search/?pageSize=${trackingsPerPage}&currentPage=${currentPage}&searchTerm=${searchTerm}`;
-    this.httpClient
-      .get<{message: string, trackings: any, count: number}>(BACKEND_URL + queryParams)
+  fuzzySearch(searchTerm: string, orgId: string, type: string) {
+    const queryParams = `search?searchTerm=${searchTerm}&orgId=${orgId}&type=${type}`;
+    return this.httpClient
+      .get<{trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((trackingData) => {
+        console.log(trackingData.trackings)
         return {
-          trackings: trackingData.trackings.map(tracking => {return tracking as OnlineTrackingModel}),
-          count: trackingData.count};
-        })
-      )
-      .subscribe((transformedTrackings) => {
-        this.setTransformedTrackings(transformedTrackings.trackings, null, null);
-    });
+          trackings: trackingData.trackings.map(tracking => {return tracking as OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel}),
+          count: trackingData.count
+        };
+      })
+    );
   }
 
   createUpdateTracking(formData: any) {
@@ -89,14 +88,13 @@ export class TrackingService{
       .post<{message: string, tracking: any}>(BACKEND_URL, formData)
       .subscribe((responseData) => {
         this.zone.run(() => {
-          console.log(responseData);
-          // this.router.navigate(["/trackings"]);
+          this.router.navigate(["/trackings"]);
         });
       });
   }
 
   getTracking(trackingNumber: string, orgId: string) {
-    return this.httpClient.get<any>(BACKEND_URL + orgId + "/" +trackingNumber ); // return an observable
+    return this.httpClient.get<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel |ConsolidatedTrackingModel | MasterTrackingModel>(BACKEND_URL + orgId + "/" +trackingNumber ); // return an observable
   }
 
   getTrackings(trackingsPerPage: number, currentPage: number, type: string, orgId: string, origin: string, destination: string, sender: string) {

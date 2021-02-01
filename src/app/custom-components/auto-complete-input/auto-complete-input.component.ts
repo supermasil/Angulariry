@@ -12,6 +12,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
 
   data = [];
   @Input() dataObservable: Observable<string[]> = new Observable();
+  @Input() selectItemObservable: Observable<string> = new Observable();
   @Input() matLabel = "";
   @Input() matErrorMessage = "";
   @Input() enforeSelection = false;
@@ -35,11 +36,15 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
     this.autoCompleteForm = new FormGroup({
       item: new FormControl({value: this.defaultValue, disabled: this.defaultValue && this.lockOption}, {validators:[this.autoCompleteValidator()]}) // Default value has to be defined for set value to work
     });
-    this.dataObservable.subscribe(data => {
+    this.dataObservable.subscribe((data: string[]) => {
       this.zone.run(() => {
         this.data = data;
         this.resetFilteredData();
       })
+    });
+
+    this.selectItemObservable.subscribe((item: string) => {
+      this.selectItem(item);
     })
 
     if (this.defaultValue) {

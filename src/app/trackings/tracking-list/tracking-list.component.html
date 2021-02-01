@@ -1,43 +1,16 @@
-<div class="d-flex">
-  <a
-    mat-mini-fab
-    color='primary'
-    class="mt-2 d-inline mr-2"
-    (click)="scannerOpened = !scannerOpened">
-    <mat-icon>qr_code</mat-icon>
-  </a>
-  <mat-form-field appearance="outline">
-    <mat-label>Search here</mat-label>
-    <input
-      (keydown.meta.enter)="onFuzzySearch()"
-      matInput
-      type='text'>
-    <button
-      matSuffix
-      mat-icon-button
-      id="searchButton"
-      aria-label="Clear">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
-  <a
-    mat-mini-fab
-    color='primary'
-    (click)='onFuzzySearch()'
-    class="mt-2 d-inline ml-2">
-    <mat-icon>search</mat-icon>
-  </a>
-</div>
-
-
-<app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
+<mat-spinner *ngIf="isLoading"></mat-spinner>
+<div *ngIf="!isLoading">
+  <search-bar
+  (onSearchEvent)="onFuzzySearch($event)"
+></search-bar>
 
 <mat-tab-group (selectedIndexChange)="tabChanged($event)"class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
   <mat-tab label="Online" *ngIf="enabled[0]">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()">
+        [trackingsObservable]="trackingsSubject.asObservable()"
+        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
       </tracking-list-common-template>
     </ng-template>
   </mat-tab>
@@ -46,7 +19,8 @@
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()">
+        [trackingsObservable]="trackingsSubject.asObservable()"
+        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
       </tracking-list-common-template>
     </ng-template>
   </mat-tab>
@@ -55,7 +29,8 @@
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()">
+        [trackingsObservable]="trackingsSubject.asObservable()"
+        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
       </tracking-list-common-template>
     </ng-template>
   </mat-tab>
@@ -64,24 +39,23 @@
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()">
+        [trackingsObservable]="trackingsSubject.asObservable()"
+        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
       </tracking-list-common-template>
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="Master" *ngIf="enabled[4]">
+  <mat-tab label="Master" *ngIf="enabled[4] && canView(authGlobals.internal)">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()">
+        [trackingsObservable]="trackingsSubject.asObservable()"
+        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
       </tracking-list-common-template>
     </ng-template>
   </mat-tab>
 </mat-tab-group>
-
-
-
-
+</div>
 
 <!-- <p class='info-text mat-body-1' *ngIf="trackings.length == 0 && !trackingForm.controls['searchTerm'].value">No trackings found</p>
 <div *ngIf="trackings.length == 0 && trackingForm.controls['searchTerm'].value && searchClicked">

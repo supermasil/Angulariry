@@ -1,0 +1,35 @@
+<form [formGroup]="searchForm">
+  <div class="d-flex" (submit)="onSearch()">
+    <a
+      mat-mini-fab
+      color='primary'
+      class="mt-2 d-inline mr-2"
+      (click)="scannerOpened = !scannerOpened">
+      <mat-icon>qr_code</mat-icon>
+    </a>
+    <mat-form-field appearance="outline">
+      <mat-label>Search here</mat-label>
+      <input
+        matInput
+        (keydown.enter)="onSearch()"
+        formControlName='searchTerm'
+        type='text'>
+      <button
+        matSuffix
+        mat-icon-button
+        type="button"
+        (click)="clearContent()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <a
+      mat-mini-fab
+      color='primary'
+      (click)="onSearch()"
+      class="mt-2 d-inline ml-2">
+      <mat-icon>search</mat-icon>
+    </a>
+  </div>
+</form>
+
+<app-code-scanner *ngIf="scannerOpened"></app-code-scanner>

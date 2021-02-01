@@ -1,51 +1,110 @@
 const UserModel = require('../models/user');
 const OrganizationController = require('./organizations');
 const db = require('mongoose');
+const admin = require('firebase-admin');
 
+
+// Messy af, can't use await on admin
 exports.createUpdateUser = async (req, res, next) => {
-  try {
-    const session = await db.startSession();
-    await session.withTransaction(async () => {
-      const user = new UserModel();;
-
-      user.name = req.body.name;
-      user.email = req.body.email;
-      user.phoneNumber = req.body.phoneNumber;
-      user.role = req.body.role;
-      user.addresses = addressesSetupHelper(req.body.addresses);
-      user.companyCode = req.body.companyCode;
-      user.organization = req.body.organization;
-      user.customerCode = req.body.customerCode;
-      user.recipients = recipientsSetupHelper(req.body.recipients);
-      user.defaultLocation = req.body.defaultLocation;
-      user._id = req.body._id;
-      let updatedUser = null;
-
-      let org = await OrganizationController.getOrganizationByIdHelper(req.body.organization);
-
-      user.pricings = org.pricings;
-
-      if (!req.body.newUser) { // edit
+  let firebaseUser = null;
+  const session = await db.startSession();
+  await session.withTransaction(async () => {
+    try {
+    const user = new UserModel();;
+    user.name = req.body.name;
+    user.email = req.body.email;
+    user.phoneNumber = req.body.phoneNumber;
+    user.role = req.body.role;
+    user.addresses = addressesSetupHelper(req.body.addresses);
+    user.companyCode = req.body.companyCode;
+    user.organization = req.body.organization;
+    user.userCode = req.body.userCode;
+    user.recipients = recipientsSetupHelper(req.body.recipients);
+    user.defaultLocation = req.body.defaultLocation;
+    user.creatorId = req.userData.uid
+    let org = await OrganizationController.getOrganizationByIdHelper(req.body.organization);
+    user.pricings = org.pricings;
+    let updatedUser = null;
+    if (!req.body._id) {
+      await admin
+        .auth()
+        .createUser({
+          email: req.body.email,
+          password: req.body.password,
+        })
+        .then(async userRecord => {
+          console.log('Successfully created new firebase user:', userRecord.uid);
+          firebaseUser = userRecord;
+          user._id = userRecord.uid;
+          await UserModel.create([user], {session: session}).then(users => {
+            updatedUser = users[0];
+            return res.status(201).json({
+              message: "User created successfully",
+              user: updatedUser
+            });
+          }).catch(async error => {
+            console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
+            if (firebaseUser) {
+              await deleteFireBaseUser(firebaseUser.uid).then(() => {
+                console.log('Successfully deleted firebase user');
+                return res.status(500).json({
+                  message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
+                });
+              })
+              .catch((error) => {
+                console.log('Error deleting firebase user:', error);
+                return res.status(500).json({
+                  message: "User creation/update failed"
+                });
+              });
+            } else {
+              return res.status(500).json({
+                message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
+              });
+            }
+          });
+        })
+        .catch((error) => {
+          console.log('Error creating new firebase user:', error.message);
+          return res.status(500).json({
+            message: error.message
+          });
+        });
+      } else {
+        user._id = req.body._id
         await UserModel.findByIdAndUpdate(req.body._id, user, {new: true}).session(session).then(user => {
           updatedUser = user;
         });
-      } else { // create
-        await UserModel.create([user], {session: session}).then(user => {
-          updatedUser = user[0];
-        })
+        return res.status(201).json({
+          message: "User updated successfully",
+          user: updatedUser
+        });
       }
-
-      return res.status(201).json({
-        message: "User created/updated successfully",
-        user: updatedUser
+    } catch(error) {
+      console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
+      return res.status(500).json({
+        message: "User creation/update failed"
       });
-    });
-  } catch(error) {
-    console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
-    return res.status(500).json({
-      message: "User creation/update failed"
-    });
-  };
+    };
+  });
+}
+
+getFireBaseUser = async (uid) => {
+  return admin
+  .auth()
+  .getUser(uid)
+  .then((userRecord) => {
+    console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
+  })
+  .catch((error) => {
+    console.log('Error fetching user data:', error);
+  });
+}
+
+deleteFireBaseUser = async (uid) => {
+  await admin
+  .auth()
+  .deleteUser(uid);
 }
 
 addressesSetupHelper = (addresses) => {
@@ -94,7 +153,7 @@ exports.getUser = async (req, res, next) => {
 
 exports.getUsers = async (req, res, next) => {
   try {
-    const userQuery = UserModel.find();
+    const userQuery = UserModel.find({organization: req.userData.orgId});
     const pageSize = req.query.pageSize? +req.query.pageSize : 5; // Convert to int
     const currentPage = req.query.currentPage? +req.query.currentPage : 0;
 

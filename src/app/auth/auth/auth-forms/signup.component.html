@@ -60,11 +60,12 @@
 
   <auto-complete-input
     #companyCode
-    [dataObservable]="companyCodes.asObservable()"
+    [dataObservable]="companyCodesSubject.asObservable()"
+    [selectItemObservable]="companyCodeSubject.asObservable()"
     (itemSelected)="companyCodeSelected($event)"
     (inputInvalid)="this.signupForm.controls['companyCode'].setValue('')"
     [enforeSelection]="true"
-    [lockOption]="false"
+    [lockOption]="lockCustomerCode()"
     [matLabel]="'Company Code'"
     [matErrorMessage]="'Please select one from the drowdown only'">
   </auto-complete-input>
@@ -81,13 +82,13 @@
 
 
   <mat-form-field appearance="outline">
-    <mat-label>Customer Code</mat-label>
+    <mat-label>User Code</mat-label>
     <input
     matInput
     placeholder='Select a enter a unique code for your customer'
-    formControlName='customerCode'
+    formControlName='userCode'
     required>
-    <mat-error>Customer code is required</mat-error>
+    <mat-error *ngIf="signupForm.getError('invalidUserCode', 'userCode') as error">{{error}}</mat-error>
   </mat-form-field>
 
   <h2>Sender's addresses</h2>
@@ -206,6 +207,7 @@
     <a mat-mini-fab color="primary" (click)="addAddressOrRecipient('recipients')"><mat-icon>add</mat-icon></a>
   </div>
 
-  <button *ngIf="!isLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Signup</button>
+  <button *ngIf="!isLoading && mode === 'create'" class="mt-2" mat-raised-button color='accent' type='submit'>Sign up</button>
+  <button *ngIf="!isLoading && mode === 'edit'" class="mt-2" mat-raised-button color='accent' type='submit'>Update</button>
   <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
 </form>

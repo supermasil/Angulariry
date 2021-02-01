@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { stringify } from 'querystring';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { CommentModel } from '../models/comment.model';
+import { CommentModel } from '../../models/comment.model';
 
 const BACKEND_URL = environment.apiURL + "/comments/"
 

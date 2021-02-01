@@ -1,7 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Component, NgZone, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
-import * as firebase from "firebase";
 import { phoneNumberValidator } from "lac-mat-tel-input";
 import { Address } from "ngx-google-places-autocomplete/objects/address";
 import { ReplaySubject } from "rxjs";
@@ -9,6 +8,7 @@ import { UserModel } from "src/app/models/user.model";
 import { AutoCompleteInputComponent } from "src/app/custom-components/auto-complete-input/auto-complete-input.component";
 import { ValidatorsService } from "src/app/validators.service";
 import { AuthService } from "../../auth.service";
+import { AuthGlobals } from "../../auth-globals";
 
 
 @Component({
@@ -20,17 +20,19 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   signupForm: FormGroup;
   isLoading = false;
 
-  roles = ["SuperAdmin", "Admin", "Manager", "Sales", "Accounting", "Operation", "Receiving/Shipping", "Customer"];
+  roles = [AuthGlobals.roles.Customer];
 
   defaultLocations = [];
+  userCodes = [];
   organizations = [];
-  companyCodes = new ReplaySubject<string[]>();
-  companyCodesCopy = [];
+  organization = null;
+  companyCodesSubject = new ReplaySubject<string[]>();
+  companyCodeSubject = new ReplaySubject<string>();
   mode = "create";
-  currentUser: UserModel;
 
   // mongoDbUserSubscription: Subscription;
-  mongoDbUser: UserModel;
+  currentUser: UserModel;
+  editUser: UserModel;
 
   @ViewChild("companyCode") companyCode: AutoCompleteInputComponent;
 
@@ -38,37 +40,49 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private route: ActivatedRoute,
     private validatorsService: ValidatorsService,
+    private zone: NgZone
   ) {}
 
   ngOnInit() {
-    this.signupForm = this.createSignUpForm(null);
-
-    this.authService.getOrganizations().subscribe(orgs => {
-      this.organizations = orgs.organizations;
-      this.companyCodes.next(orgs.organizations.map(item => item.companyCode));
-      this.companyCodesCopy = orgs.organizations.map(item => item.companyCode);
-      this.route.paramMap.subscribe((paramMap) => {
-        if (paramMap.has("userId")) {
-          this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
-            this.currentUser = user;
-            this.signupForm = this.createSignUpForm(user);
-            this.mode = 'edit';
-          }, error => {
-            this.authService.redirectOnFailedSubscription("Failed to subscribe to paramMap");
-          })
-        }
-      });
-      this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-        this.mongoDbUser = user;
-        if (user && this.mode == "edit") {
-          this.companyCode.selectItem(user.companyCode);
-        }
+    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+      this.currentUser = user;
+      this.authService.getOrganizations().subscribe(orgsData => {
+        this.organizations = orgsData.organizations;
+        this.companyCodesSubject.next(orgsData.organizations.map(item => item.companyCode));
+        this.authService.getUsersByOrg(this.authService.getUserOrg()._id).subscribe((users: UserModel[]) => {
+          this.userCodes = users.map(u => u.userCode.toLowerCase());
+          this.route.paramMap.subscribe((paramMap) => {
+            if (paramMap.has("userId")) { // Edit case
+              this.mode = 'edit';
+              this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
+                this.editUser = user;
+                if (this.checkAuthorization()) {
+                  this.roles = AuthGlobals.everyone;
+                  this.zone.run(() => {
+                    this.createSignUpForm(user);
+                    this.setRoles();
+                  })
+                }
+              }, error => {
+                this.authService.redirectToMainPageWithMessage("Failed to subscribe to paramMap");
+              })
+            } else { // Create case
+              this.zone.run(() => {
+                this.createSignUpForm(null);
+                this.setRoles();
+              })
+            }
+          });
+        }, error => {
+          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
+        });
       }, error => {
-        this.authService.redirectOnFailedSubscription("Couldn't fetch user");
+        this.authService.redirectToMainPageWithMessage("Couldn't fetch organizations");
       });
     }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch organization");
+      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
     });
+
   }
 
   ngOnDestroy() {
@@ -77,6 +91,9 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
 
   recipientNamesValidator(): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
+      if (!this.signupForm) {
+        return null;
+      }
       if ((control && control.value)) {
         let currentFormItems = this.signupForm.get('recipients')['controls'].map(item => item['controls'].name.value.toLowerCase());// Tricky as fuck, can't use .value because the value is not updated
         this.signupForm.get('recipients')['controls'].forEach(element => {
@@ -93,27 +110,81 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
         }
         return null;
       } else {
-        console.log(control);
         return {error: "Please enter an item name"};
       }
     };
   }
 
   createSignUpForm(formData: any) {
-    return new FormGroup({
+    this.signupForm =  new FormGroup({
       _id: new FormControl(formData?._id? formData._id : null),
       name: new FormControl(formData?.name? formData.name : "", {validators: [Validators.required]}),
       email: new FormControl({value: formData?.email? formData.email : "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.email]}),
       password: new FormControl({value: "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.minLength(6)]}),
       phoneNumber: new FormControl(formData?.phoneNumber? formData.phoneNumber : "", {validators: [phoneNumberValidator, Validators.required]}),
-      role: new FormControl(formData?.role? formData.role: "", {validators: [Validators.required]}),
-      defaultLocation: new FormControl({value: formData?.defaultLocation? formData.defaultLocation : ""}, {validators: [Validators.required]}),
+      role: new FormControl({value: formData?.role? formData.role: "", disabled: this.mode === 'edit' && !AuthGlobals.admins.includes(this.currentUser?.role)}, {validators: [Validators.required]}),
+      defaultLocation: new FormControl(formData?.defaultLocation? formData.defaultLocation : "", {validators: [Validators.required]}),
       addresses: new FormArray(formData?.addresses && formData.addresses.length > 0 ? this.createAddresses(formData.addresses) : this.createAddresses([null])),
       recipients: new FormArray(formData?.recipients && formData.recipients.length > 0 ? this.createRecipients(formData.recipients): this.createRecipients([])),
-      companyCode: new FormControl(formData?.companyCode? formData.companyCode : "", {validators: [this.validatorsService.companyCodeValidator(this.companyCodesCopy)]}),
-      customerCode: new FormControl(formData?.customerCode? formData.customerCode : "", {validators: [Validators.required]}),
+      companyCode: new FormControl({value: ""} , {validators: [Validators.required]}),
+      userCode: new FormControl(formData?.userCode? formData.userCode : "", {validators: [Validators.required, this.userCodeValidator()]}),
       organization: new FormControl(formData?.organization? formData.organization : "", {validators: [Validators.required]}),
     });
+  }
+
+  setRoles() {
+    if (this.mode === 'edit') { // edit case
+      if (AuthGlobals.admins.includes(this.currentUser.role)) {
+        this.roles = AuthGlobals.internal;
+      }
+      this.companyCodeSubject.next(this.editUser.companyCode);
+      if (this.currentUser.role === AuthGlobals.roles.Customer) {
+        this.signupForm.get('userCode').disable();
+      }
+      this.companyCodeSubject.next(this.editUser.companyCode);
+    } else { // create case
+      if (this.currentUser.role === AuthGlobals.roles.Admin) {
+        this.roles = AuthGlobals.nonAdmin;
+      } else if (this.currentUser.role === AuthGlobals.roles.SuperAdmin) {
+        this.roles = AuthGlobals.nonSuperAdmin;
+      } else {
+        this.roles = [AuthGlobals.roles.Customer];
+      }
+
+      if (this.currentUser.role !== AuthGlobals.roles.SuperAdmin) {
+        this.companyCodeSubject.next(this.currentUser.companyCode);
+      }
+    }
+
+    if (this.currentUser.role !== AuthGlobals.roles.SuperAdmin) {
+      this.signupForm.get('companyCode').disable();
+    }
+  }
+
+  checkAuthorization() {
+    console.log(this.currentUser._id)
+    if (this.currentUser._id !== this.editUser._id) {
+      if (this.currentUser.role === AuthGlobals.roles.Admin && AuthGlobals.admins.includes(this.editUser.role) ||
+        AuthGlobals.internalNonAdmin.includes(this.currentUser.role) && this.editUser.role != AuthGlobals.roles.Customer ||
+        this.currentUser.role === AuthGlobals.roles.Customer) {
+          this.authService.redirectToMainPageWithMessage("You're not authorized");
+          return false;
+      }
+    }
+    return true;
+  }
+
+  userCodeValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      if (this.mode === 'edit' && control.value === this.editUser?.userCode) {
+        return null;
+      } else if (control && control.value && this.userCodes.includes(control.value.toLowerCase())) {
+        return {invalidUserCode: "Customer code already exists"};
+      } else if (control && !control.value) {
+        return {invalidUserCode: "Customer code is required"};
+      }
+      return null;
+    };
   }
 
   createAddresses(addresses: any) {
@@ -141,7 +212,6 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
         addressLineTwo: new FormControl(recipient?.address?.addressLineTwo? recipient.address.addressLineTwo : ""),
         addressUrl: new FormControl(recipient?.address?.addressUrl? recipient.address.addressUrl : "", {validators: [Validators.required]})
       });
-      console.log(form.get('name').value);
       results.push(form);
     });
 
@@ -179,15 +249,6 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
     (this.signupForm.get(field) as FormArray).removeAt(i);
   }
 
-  async onSignup() {
-    this.signupForm.markAllAsTouched(); // deal with phone number validator empty issue
-    if (this.signupForm.invalid) {
-      return;
-    }
-    this.setButtonTimeOut();
-    await this.authService.createUpdateUser(this.signupForm.getRawValue());
-  }
-
   setButtonTimeOut() {
     this.isLoading = true;
     setTimeout(() => this.isLoading = false, 3000);
@@ -196,10 +257,30 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   companyCodeSelected(code: string) {
     let selectedOrg = this.organizations.filter(item => item.companyCode == code)[0];
     if (selectedOrg) {
-      this.signupForm.controls['companyCode'].setValue(selectedOrg.companyCode);
-      this.signupForm.controls['organization'].setValue(selectedOrg._id);
-      this.defaultLocations = selectedOrg.locations.map(item => item.name);
-      this.signupForm.get('defaultLocation').enable();
+      this.zone.run(() => {
+        this.signupForm.controls['companyCode'].setValue(selectedOrg.companyCode);
+        this.signupForm.controls['organization'].setValue(selectedOrg._id);
+        this.defaultLocations = selectedOrg.locations.map(item => item.name);
+        this.signupForm.get('defaultLocation').enable();
+      });
     }
+  }
+
+  lockCustomerCode() {
+    if (this.mode === 'create' && this.currentUser && this.currentUser.role === AuthGlobals.roles.SuperAdmin
+    || (this.mode === 'edit' && this.currentUser && this.currentUser.role === AuthGlobals.roles.SuperAdmin && this.editUser && this.editUser.role === AuthGlobals.roles.SuperAdmin)) {
+      return false;
+    }
+    return true
+  }
+
+  async onSignup() {
+    this.companyCode.getFormValidity();
+    this.signupForm.markAllAsTouched(); // deal with phone number validator empty issue
+    if (this.signupForm.invalid) {
+      return;
+    }
+    this.setButtonTimeOut();
+    await this.authService.createUpdateUser(this.signupForm.getRawValue());
   }
 }

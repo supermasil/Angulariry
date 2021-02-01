@@ -2,8 +2,9 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from
 import { Observable } from 'rxjs';
 import { Injectable, NgZone } from '@angular/core';
 import { AuthService } from './auth.service';
-import { AlertService } from '../alert-message';
+import { AlertService } from '../custom-components/alert-message';
 import { GlobalConstants } from '../global-constants';
+import { UserModel } from '../models/user.model';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,10 +20,15 @@ export class AuthGuard implements CanActivate {
         data[split[0]] = split[1];
       });
     }
-    return this.checkLogin(url, data);
+    if (route.url.length === 0) { // path /
+      return this.checkAuthentication(url, data);
+    } else {
+      return this.checkAuthentication(url, data) &&  this.checkAuthorization(route.data.roles);
+    }
+
   }
 
-  checkLogin(url: string, data: {}) {
+  checkAuthentication(url: string, data: {}) {
     const isAuth = this.authService.getIsAuth();
     if(!isAuth) {
       this.authService.redirectUrl = url;
@@ -35,5 +41,14 @@ export class AuthGuard implements CanActivate {
     } else {
       return true;
     }
+  }
+
+  checkAuthorization(roles: string[]) {
+    let result = roles.includes(this.authService.getMongoDbUser().role);
+    if (!result) {
+      this.authService.redirectToMainPageWithMessage("You're not authorized");
+      return false;
+    }
+    return true
   }
 }

@@ -13,9 +13,10 @@ const userSchema = mongoose.Schema({
   addresses: [AddressSchema],
   recipients: [RecipientSchema],
   companyCode: {type: String, required: true},
-  customerCode: {type: String, required: true, unique: true, index: true},
+  userCode: {type: String, required: true, index: true}, // Can have duplicates across org
   organization: {type: mongoose.Types.ObjectId, ref: "organization", index: true},
   pricings: {type: mongoose.Types.ObjectId, ref: "pricing"},
+  creatorId: {type: String, required: true},
   active: {type: Boolean, required: true, default: true},
   credit: {type: Number, required: true, default: 0}
 }, { timestamps: true, autoCreate: true });

@@ -1,146 +1,148 @@
 
+<div *ngIf="consolidatedForm">
+  <form [formGroup]="consolidatedForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
+    <general-info
+      #generalInfo
+      [usersObservable]="usersSubject.asObservable()"
+      [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
+      [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
+      (formValidityStatus)="generalInfoValidity($event)"
+      (generalInfoUpdated)="generalInfoUpdated($event)"
+      [generalInfoObservable]="generalInfoSubject.asObservable()"
+      [statusChangeObservable]="statusChangeSubject.asObservable()">
+    </general-info>
 
-<form [formGroup]="consolidatedForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
-  <general-info
-    #generalInfo
-    [usersObservable]="usersSubject.asObservable()"
-    [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
-    [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
-    (formValidityStatus)="generalInfoValidity($event)"
-    (generalInfoUpdated)="generalInfoUpdated($event)"
-    [generalInfoObservable]="generalInfoSubject.asObservable()"
-    [statusChangeObservable]="statusChangeSubject.asObservable()">
-  </general-info>
-
-  <div *ngIf="showTable">
-    <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex" color="accent">
-      <mat-tab label="Online">
-        <consolidation-table
-          [tableDataObservable]="onlineTrackingDataSubject.asObservable()"
-          (selectionEmitted)="onlineSelectionReceived($event)"
-          [deselectItemObservable]="deselectOnlineTrackingSubject.asObservable()">
-        </consolidation-table>
-      </mat-tab>
-
-      <mat-tab label="Serviced">
-        <consolidation-table
-            [tableDataObservable]="servicedTrackingDataSubject.asObservable()"
-            (selectionEmitted)="servicedSelectionReceived($event)"
-            [deselectItemObservable]="deselectServicedTrackingSubject.asObservable()">
+    <div *ngIf="showTable">
+      <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex" color="accent">
+        <mat-tab label="Online">
+          <consolidation-table
+            [tableDataObservable]="onlineTrackingDataSubject.asObservable()"
+            (selectionEmitted)="onlineSelectionReceived($event)"
+            [deselectItemObservable]="deselectOnlineTrackingSubject.asObservable()">
           </consolidation-table>
-      </mat-tab>
+        </mat-tab>
 
-      <mat-tab label="In-person">
-        <consolidation-table
-            [tableDataObservable]="inPersonTrackingDataSubject.asObservable()"
-            (selectionEmitted)="inPersonSelectionReceived($event)"
-            [deselectItemObservable]="deselectInPersonTrackingSubject.asObservable()">
-        </consolidation-table>
-      </mat-tab>
-    </mat-tab-group>
+        <mat-tab label="Serviced">
+          <consolidation-table
+              [tableDataObservable]="servicedTrackingDataSubject.asObservable()"
+              (selectionEmitted)="servicedSelectionReceived($event)"
+              [deselectItemObservable]="deselectServicedTrackingSubject.asObservable()">
+            </consolidation-table>
+        </mat-tab>
 
-    <div class="finalizing-table" *ngIf="mode==='edit' && tempDataSource.data.length > 0">
-      <table mat-table [dataSource]="tempDataSource">
-        <ng-container matColumnDef="trackingNumber">
-          <th mat-header-cell *matHeaderCellDef> Tracking Number </th>
-          <td mat-cell *matCellDef="let item" class="p-0">
-            <a
-              matSuffix
-              mat-icon-button
-              color="warn"
-              (click)="addItemBack(item)"
-              style="position: relative; bottom: 1px;">
-              <mat-icon style="color: blue;">add</mat-icon>
-            </a>
-            {{item.trackingNumber}} </td>
-        </ng-container>
+        <mat-tab label="In-person">
+          <consolidation-table
+              [tableDataObservable]="inPersonTrackingDataSubject.asObservable()"
+              (selectionEmitted)="inPersonSelectionReceived($event)"
+              [deselectItemObservable]="deselectInPersonTrackingSubject.asObservable()">
+          </consolidation-table>
+        </mat-tab>
+      </mat-tab-group>
 
-        <ng-container matColumnDef="Weight">
-          <th mat-header-cell *matHeaderCellDef> Weight </th>
-          <td mat-cell *matCellDef="let item">
-            {{item.generalInfo.totalWeight}}
-          </td>
-        </ng-container>
+      <div class="finalizing-table" *ngIf="mode==='edit' && tempDataSource.data.length > 0">
+        <table mat-table [dataSource]="tempDataSource">
+          <ng-container matColumnDef="trackingNumber">
+            <th mat-header-cell *matHeaderCellDef> Tracking Number </th>
+            <td mat-cell *matCellDef="let item" class="p-0">
+              <a
+                matSuffix
+                mat-icon-button
+                color="warn"
+                (click)="addItemBack(item)"
+                style="position: relative; bottom: 1px;">
+                <mat-icon style="color: blue;">add</mat-icon>
+              </a>
+              {{item.trackingNumber}} </td>
+          </ng-container>
 
-        <ng-container matColumnDef="Cost">
-          <th mat-header-cell *matHeaderCellDef> Cost </th>
-          <td mat-cell *matCellDef="let item">
-            {{item.generalInfo.finalCost}}
-          </td>
-        </ng-container>
+          <ng-container matColumnDef="Weight">
+            <th mat-header-cell *matHeaderCellDef> Weight </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.totalWeight}}
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="finalizingDefinedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: finalizingDefinedColumns;"></tr>
-      </table>
-    </div>
+          <ng-container matColumnDef="Cost">
+            <th mat-header-cell *matHeaderCellDef> Cost </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.finalCost}}
+            </td>
+          </ng-container>
 
-    <div class="finalizing-table">
-      <table mat-table [dataSource]="finalizingDataSource">
-        <ng-container matColumnDef="trackingNumber">
-          <th mat-header-cell *matHeaderCellDef> Tracking Number </th>
-          <td mat-cell *matCellDef="let item" class="p-0">
-            <a
-              matSuffix
-              mat-icon-button
-              color="warn"
-              (click)="removeItem(item)"
-              style="position: relative; bottom: 1px;">
-              <mat-icon>clear</mat-icon>
-            </a>
-            {{item.trackingNumber}} </td>
-          <td mat-footer-cell *matFooterCellDef> Total </td>
-        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="finalizingDefinedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: finalizingDefinedColumns;"></tr>
+        </table>
+      </div>
 
-        <ng-container matColumnDef="Weight">
-          <th mat-header-cell *matHeaderCellDef> Weight </th>
-          <td mat-cell *matCellDef="let item">
-            {{item.generalInfo.totalWeight}}
-          </td>
-          <td mat-footer-cell *matFooterCellDef> {{getTotalWeight()}} kg </td>
-        </ng-container>
+      <div class="finalizing-table">
+        <table mat-table [dataSource]="finalizingDataSource">
+          <ng-container matColumnDef="trackingNumber">
+            <th mat-header-cell *matHeaderCellDef> Tracking Number </th>
+            <td mat-cell *matCellDef="let item" class="p-0">
+              <a
+                matSuffix
+                mat-icon-button
+                color="warn"
+                (click)="removeItem(item)"
+                style="position: relative; bottom: 1px;">
+                <mat-icon>clear</mat-icon>
+              </a>
+              {{item.trackingNumber}} </td>
+            <td mat-footer-cell *matFooterCellDef> Total </td>
+          </ng-container>
 
-        <ng-container matColumnDef="Cost">
-          <th mat-header-cell *matHeaderCellDef> Cost </th>
-          <td mat-cell *matCellDef="let item">
-            {{item.generalInfo.finalCost}}
-          </td>
-          <td mat-footer-cell *matFooterCellDef> $ {{getTotalCost()}} </td>
-        </ng-container>
+          <ng-container matColumnDef="Weight">
+            <th mat-header-cell *matHeaderCellDef> Weight </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.totalWeight}}
+            </td>
+            <td mat-footer-cell *matFooterCellDef> {{getTotalWeight()}} kg </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="finalizingDefinedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: finalizingDefinedColumns;"></tr>
-        <tr mat-footer-row *matFooterRowDef="finalizingDefinedColumns; sticky: true"></tr>
-      </table>
-    </div>
+          <ng-container matColumnDef="Cost">
+            <th mat-header-cell *matHeaderCellDef> Cost </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.finalCost}}
+            </td>
+            <td mat-footer-cell *matFooterCellDef> $ {{getTotalCost()}} </td>
+          </ng-container>
 
-    <div class="my-4">
-      <file-uploader #fileUploader
-      [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
-    </div>
+          <tr mat-header-row *matHeaderRowDef="finalizingDefinedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: finalizingDefinedColumns;"></tr>
+          <tr mat-footer-row *matFooterRowDef="finalizingDefinedColumns; sticky: true"></tr>
+        </table>
+      </div>
 
-    <mat-form-field appearance="outline" class="mt-4">
-      <mat-label>Notes</mat-label>
-      <textarea
-      matInput
-      rows='10'
-      formControlName='content'
-      ></textarea>
-    </mat-form-field>
+      <div class="my-4">
+        <file-uploader #fileUploader
+        [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
+      </div>
 
-    <div class="mt-4">
-      <button
-      mat-raised-button
-      color='primary'
-      type='submit'
-      class="mr-2">
-      Save
-      </button>
-      <button
+      <mat-form-field appearance="outline" class="mt-4">
+        <mat-label>Notes</mat-label>
+        <textarea
+        matInput
+        rows='10'
+        formControlName='content'
+        ></textarea>
+      </mat-form-field>
+
+      <div class="mt-4">
+        <button
         mat-raised-button
-        color='warn'
-        type=''>
-        Cancel
-      </button>
+        color='primary'
+        type='submit'
+        class="mr-2">
+        Save
+        </button>
+        <button
+          mat-raised-button
+          color='warn'
+          type=''>
+          Cancel
+        </button>
+      </div>
     </div>
-  </div>
-</form>
+  </form>
+</div>
+

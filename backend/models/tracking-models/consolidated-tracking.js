@@ -15,6 +15,8 @@ const consolidatedTrackingSchema = mongoose.Schema({
 }, {timestamps: true, autoCreate: true });
 
 consolidatedTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
-consolidatedTrackingSchema.plugin(fuzzySearch, { fields: [] });
+consolidatedTrackingSchema.plugin(fuzzySearch, { fields: [
+  "trackingNumber"
+] });
 
 module.exports = mongoose.model('consolidated-tracking', consolidatedTrackingSchema);

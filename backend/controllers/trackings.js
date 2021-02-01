@@ -89,6 +89,9 @@ exports.createTracking = async (req, res, next) => {
   } catch (error) {
     console.error(`createTracking: ${req.body.generalInfo.trackingNumber}: ${error}`);
     console.error(`createTracking: ${req.body.generalInfo.trackingNumber}: ${JSON.stringify(error, null, 2)}`);
+    if (error.message.includes("`carrierTrackingNumber` to be unique")) {
+      return res.status(500).json({message: `Carrier tracking number ${req.body.carrierTrackingNumber} already existed`});
+    }
     return res.status(500).json({message: `Tracking creation failed, please check your info or contact Admin with tracking number ${req.body.generalInfo.trackingNumber}. If this is an online order, check if your carrier/ carrier tracking number is correct`});
   }
 };
@@ -290,23 +293,65 @@ updateImages = async (req, currentFilesPath) => {
 }
 
 exports.fuzzySearch = async (req, res, next) => {
-  const trackingQuery = onlineTracking.fuzzySearch({ query: req.query.searchTerm, minSize: 2, exact: true});
-  return await fetchTrackingsHelper(req, res, trackingQuery).populate('comments').exec()
-    .then(documents => {
-      fetchedTrackings = documents
-      return documents.length;
+  try {
+    assert(req.query.orgId != null, "orgId is null");
+    results = []
+    switch (req.query.type) {
+      case TrackingTypes.ONLINE:
+        results = await fuzzySearchHelper(req, OnlineTrackingModel, TrackingTypes.ONLINE);
+        break;
+      case TrackingTypes.SERVICED:
+        results = await fuzzySearchHelper(req, ServicedTrackingModel, TrackingTypes.SERVICED);
+        break;
+      case TrackingTypes.INPERSON:
+        results = await fuzzySearchHelper(req, InPersonTrackingModel, TrackingTypes.INPERSON);
+        break;
+      case TrackingTypes.CONSOLIDATED:
+        results = await fuzzySearchHelper(req, ConsolidatedTrackingModel, TrackingTypes.CONSOLIDATED);
+        break;
+      case TrackingTypes.MASTER:
+        results = await fuzzySearchHelper(req, MasterTrackingModel, TrackingTypes.MASTER);
+        break;
+    }
+
+    return res.status(200).json({
+      trackings: results,
+      count: results.length
     })
-    .then(count => {
-      return res.status(200).json({
-        // No error message needed
-        trackings: fetchedTrackings,
-        count: count
-      });
+  } catch (error) {
+    console.log("trackingFuzzySearch: " + error.message);
+    return res.status(500).json({message: "Couldn't search for this term"});
+  }
+}
+
+fuzzySearchHelper = async (req, model, type) => {
+  let extraPopulation = '';
+
+  if (type === TrackingTypes.ONLINE) {
+    extraPopulation = 'carrierTracking'
+  }
+
+  return await model.find({'generalInfo.organizationId': req.query.orgId}).populate(extraPopulation).populate('comments').then(docs => {
+    docs = docs.filter((doc) => {
+      let result = false;
+      if (type === TrackingTypes.ONLINE) {
+        result = result || doc.carrierTracking.carrierTrackingNumber.match(new RegExp(req.query.searchTerm, 'i')) ||
+        doc.carrierTracking.status.match(new RegExp(req.query.searchTerm, 'i')) ||
+        doc.carrierTracking.carrier.match(new RegExp(req.query.searchTerm, 'i'))
+      }
+      result = result || doc.trackingNumber.match(new RegExp(req.query.searchTerm, 'i')) ||
+      doc.generalInfo.status.match(new RegExp(req.query.searchTerm, 'i'))
+
+      if (type !== TrackingTypes.MASTER) {
+        result = result || doc.generalInfo.sender.match(new RegExp(req.query.searchTerm, 'i'))
+      }
+
+      return result;
     })
-    .catch(error => {
-      console.log("fuzzySearch: " + error.message);
-      return res.status(500).json({message: "Couldn't search for this term"});
-    });
+    return docs;
+  })
+  // const trackingQuery = model.fuzzySearch({ query: req.query.searchTerm, minSize: 2, exact: true});
+
 }
 
 exports.getTrackings = async (req, res, next) => {
@@ -315,7 +360,7 @@ exports.getTrackings = async (req, res, next) => {
     assert(req.query.orgId != null, "orgId is null");
 
     queryBody = {
-      'generalInfo.organizationId': req.query.orgId
+      'generalInfo.organizationId': req.userData.orgId
     }
 
     if (req.query.origin) {
@@ -362,7 +407,7 @@ exports.getTrackings = async (req, res, next) => {
 
     assert(trackingQuery != null, "trackingQuery is null");
 
-    return await fetchTrackingsHelper(req, res, trackingQuery).populate('generalInfo.comments').populate(extraPopulation1).exec()
+    return await fetchTrackingsHelper(req, trackingQuery).populate('generalInfo.comments').populate(extraPopulation1).exec()
       .then(documents => {
         fetchedTrackings = documents
         return totalCount;
@@ -380,7 +425,7 @@ exports.getTrackings = async (req, res, next) => {
   };
 }
 
-fetchTrackingsHelper = (req, res, trackingQuery) => {
+fetchTrackingsHelper = (req, trackingQuery) => {
   // Pagination
   const pageSize = +req.query.pageSize; // Convert to int
   const currentPage = +req.query.currentPage;
@@ -398,7 +443,7 @@ exports.getTracking = async (req, res, next) => {
     switch(req.params.id.substring(0, 3)) {
       case TrackingTypes.ONLINE:
         return await OnlineTrackingModel.findOne({trackingNumber: req.params.id, 'generalInfo.organizationId': req.params.orgId}).populate('carrierTracking').exec()
-          .then(tracking => {
+          .then(async tracking => {
             assert(tracking != null);
             return res.status(200).json(tracking);
           });

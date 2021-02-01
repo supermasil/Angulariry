@@ -2,9 +2,9 @@
 <div class="mx-auto" style="width: 99%;">
   <mat-accordion *ngIf='trackings.length > 0'>
     <mat-expansion-panel *ngFor='let tracking of trackings'>
-      <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.status)}}>
+      <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.status)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
         <mat-panel-title>
-          <div><b>{{tracking.trackingNumber}} </b> <span class="badge" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.status)" style="color: white;">{{tracking.generalInfo.status}}</span></div>
+          <div><b>{{tracking.trackingNumber}} </b> <span class="badge" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.status)" style="color: white;">{{tracking.generalInfo.status}}</span> {{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}</div>
           <div class="ml-auto">{{formatDateTime(tracking.updatedAt)}}</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
@@ -78,14 +78,17 @@
         </div>
       </ng-template>
 
-      <mat-action-row>
+      <mat-action-row *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)">
         <div>
           <a mat-button color='primary' [routerLink]="['/trackings/edit', tracking.trackingNumber]" >Edit</a>
-          <button mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</button>
+          <!-- <button mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</button> -->
         </div>
       </mat-action-row>
     </mat-expansion-panel>
   </mat-accordion>
-  <mat-paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [(pageSize)]='trackingsPerPage' [pageSizeOptions]='pageSizeOptions' (page)='pageDataChange($event)'></mat-paginator>
+  <mat-paginator #paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [(pageSize)]='currentPageSize' [pageSizeOptions]='pageSizeOptions' (page)='pageDataChange($event)'></mat-paginator>
+  <div *ngIf='trackings.length == 0' class="text-center">
+    No data found
+  </div>
 </div>
 

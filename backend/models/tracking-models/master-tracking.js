@@ -17,6 +17,8 @@ const masterTrackingSchema = mongoose.Schema({
 }, {timestamps: true, autoCreate: true });
 
 masterTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
-masterTrackingSchema.plugin(fuzzySearch, { fields: [] });
+masterTrackingSchema.plugin(fuzzySearch, { fields: [
+  "trackingNumber"
+] });
 
 module.exports = mongoose.model('master-tracking', masterTrackingSchema);

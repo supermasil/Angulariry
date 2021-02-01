@@ -3,7 +3,7 @@ import { AfterContentInit, AfterViewChecked, AfterViewInit, ChangeDetectorRef, C
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { element } from 'protractor';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AlertService } from 'src/app/alert-message';
+import { AlertService } from 'src/app/custom-components/alert-message';
 import { AuthService } from 'src/app/auth/auth.service';
 import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
 import { GlobalConstants } from 'src/app/global-constants';
@@ -59,7 +59,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
       this.currentValidItemNames = p.items.map(i => i.name);
       this.itemNamesSubject.next(this.itemNames);
     }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch pricing");
+      this.authService.redirectToMainPageWithMessage("Couldn't fetch pricing");
     });
 
     this.itemsForm = new FormGroup({
@@ -69,7 +69,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
     this.userIdObservable.subscribe((u: string) => {
       this.userId = u;
     }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch user id");
+      this.authService.redirectToMainPageWithMessage("Couldn't fetch user id");
     });
 
     this.pricingUpdatedObservable.subscribe(changes => {

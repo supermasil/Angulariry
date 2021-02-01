@@ -7,7 +7,7 @@ const ListItemSchema = require('./list-item-schema');
 
 const onlineTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true, index: true},
-  carrierTracking: {type: mongoose.Types.ObjectId, ref: "carrier-tracking", index: true},
+  carrierTracking: {type: mongoose.Types.ObjectId, ref: "carrier-tracking"},
   generalInfo: {type: GeneralInfoSchema, required: true},
   itemsList: {type: [ListItemSchema], required: true},
   received: {type: Boolean, required: true},
@@ -15,5 +15,7 @@ const onlineTrackingSchema = mongoose.Schema({
 }, {timestamps: true, autoCreate: true });
 
 onlineTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
-onlineTrackingSchema.plugin(fuzzySearch, { fields: [] });
+onlineTrackingSchema.plugin(fuzzySearch, { fields: [
+  "trackingNumber"
+  ]});
 module.exports = mongoose.model('online-tracking', onlineTrackingSchema);

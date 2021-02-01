@@ -18,19 +18,24 @@ const firebase = require('firebase/app');
 const admin = require('firebase-admin');
 
 // Connected to dev config in nodemon but prod config in Elastic Beanstalk
-const firebaseConfig = {
-  apiKey: process.env.fireBaseApiKey,
-  authDomain: process.env.authDomain,
-  databaseURL: process.env.databaseURL,
-  projectId: process.env.projectId,
-  storageBucket: process.env.storageBucket,
-  messagingSenderId: process.env.messagingSenderId,
-  appId: process.env.appId,
-  measurementId: process.env.measurementId
+var serviceAccount = {
+  type: process.env.admin_type,
+  project_id: process.env.admin_project_id,
+  private_key_id: process.env.admin_private_key_id,
+  private_key: process.env.admin_private_key,
+  client_email: process.env.admin_client_email,
+  client_id: process.env.admin_client_id,
+  auth_uri: process.env.admin_auth_uri,
+  token_uri: process.env.admin_token_uri,
+  auth_provider_x509_cert_url: process.env.admin_auth_provider_x509_cert_url,
+  client_x509_cert_url: process.env.admin_client_x509_cert_url
 }
 
-firebase.initializeApp(firebaseConfig);
-admin.initializeApp(firebaseConfig);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://musicacademy-fac23.firebaseio.com"
+});
 
 const options = {
   useNewUrlParser: true,
@@ -38,7 +43,6 @@ const options = {
   useFindAndModify: false,
   useCreateIndex: true,
 };
-
 
 mongoose.connect("mongodb+srv://supermasil:" + process.env.MONGO_ATLAS_PW + "@cluster0-8khn5.mongodb.net/node-angular?retryWrites=true&w=majority", options)
   .then(() => {

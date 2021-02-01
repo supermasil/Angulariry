@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 import { AngularFireAuth } from '@angular/fire/auth';
 import * as firebase from 'firebase/app';
 import{ GlobalConstants } from '../global-constants';
-import { AlertService } from '../alert-message';
+import { AlertService } from '../custom-components/alert-message';
 import { UserModel } from '../models/user.model';
 import { OrganizationModel } from '../models/organization.model';
 
@@ -27,7 +27,13 @@ export class AuthService {
   private signUpMode = false;
   private loginMode = false;
 
-  constructor(private httpClient: HttpClient, private router: Router, private firebaseAuth: AngularFireAuth, private alertService: AlertService, private zone: NgZone) {
+  constructor(
+    private httpClient: HttpClient,
+    private router: Router,
+    private firebaseAuth: AngularFireAuth,
+    private firebaseAuthSecond: AngularFireAuth,
+    private alertService: AlertService,
+    private zone: NgZone) {
     this.firebaseAuth.onAuthStateChanged(async firebaseUser => {
       if (!this.signUpMode) {
         await this.refreshAuthentication(firebaseUser);
@@ -38,8 +44,11 @@ export class AuthService {
   async refreshAuthentication(firebaseUser: firebase.User) {
     if (firebaseUser) {
       this.getUser(firebaseUser.uid).subscribe(async (user: UserModel) => {
+        this.mongoDbUser = user;
         if (firebaseUser.uid === user._id) {
           this.getOrganization(user.organization).subscribe(async (org: OrganizationModel) => {
+            this.userOrg = org;
+
             await this.authenticate(firebaseUser, user, org);
             this.redirecting();
             if (this.loginMode) {
@@ -68,7 +77,7 @@ export class AuthService {
     if (this.loginMode) {
       if (this.redirectUrl && this.redirectUrl !== "/auth") {
         this.zone.run(() => {
-          this.router.navigate([this.redirectUrl, this.redirectData]);
+          this.router.navigate([this.redirectUrl], this.redirectData);
         });
       } else {
         this.zone.run(() => {
@@ -96,7 +105,6 @@ export class AuthService {
       setTimeout(() => {this.alertService.warn("Session times out after 8 hours, please re-login", GlobalConstants.flashMessageOptions); this.logout();}, millisecondsUntilExpiration);
       this.firebaseUser = firebaseUser;
       this.mongoDbUser = mongoDbUser;
-      this.userOrg = userOrg;
       this.refreshUsers();
       this.authStatusListener.next(true);
       // console.log("User authenticated");
@@ -137,7 +145,7 @@ export class AuthService {
   async logout() {
     await this.firebaseAuth.signOut().then(() => {
       this.zone.run(() => {
-        this.router.navigate(["/"]);
+        this.router.navigate(["/auth"]);
       });
       this.alertService.success("See you later!", GlobalConstants.flashMessageOptions);
     }).catch(error => {
@@ -153,37 +161,55 @@ export class AuthService {
     })
   }
 
+  // async createUpdateUser(formData: any) {
+  //   if (!formData._id) { // create case
+  //     this.signUpMode = true;
+  //     await this.firebaseAuthSecond.createUserWithEmailAndPassword(formData["email"], formData["password"])
+  //       .then(userData => {
+  //         formData["_id"] = userData.user.uid;
+  //         formData["newUser"] = true;
+  //         delete formData["password"]; // Remove password from the object
+  //         this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
+  //           .subscribe((responseData) => {
+  //             // this.refreshAuthentication(firebase.auth().currentUser); // Only logged in user can create user
+  //             this.zone.run(() => {
+  //               this.router.navigate(["/"]);
+  //             });
+  //           }, error => {
+  //             // Has to be in this block
+  //             // if (firebase.auth().currentUser) {
+  //               userData.user.delete().then(() => {
+  //                 console.log("Deleted user after failed database creation");
+  //               });
+  //             // }
+  //           });
+  //       })
+  //       .catch(error => {
+  //         // Firebase error
+  //         this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+  //       });
+  //     this.signUpMode = false;
+  //   } else { // edit case
+  //     formData["newUser"] = false;
+  //     delete formData["password"]; // Remove password from the object
+  //     this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
+  //       .subscribe((responseData) => {});
+  //   }
+  // }
+
   async createUpdateUser(formData: any) {
     if (!formData._id) { // create case
       this.signUpMode = true;
-      await this.firebaseAuth.createUserWithEmailAndPassword(formData["email"], formData["password"])
-        .then(userData => {
-          formData["_id"] = userData.user.uid;
-          formData["newUser"] = true;
-          delete formData["password"]; // Remove password from the object
-          this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
-            .subscribe((responseData) => {
-              this.refreshAuthentication(firebase.auth().currentUser);
-              this.zone.run(() => {
-                this.router.navigate(["/"]);
-              });
-            }, error => {
-              // Has to be in this block
-              if (firebase.auth().currentUser) {
-                firebase.auth().currentUser.delete().then(() => {
-                  console.log("Deleted user after failed database creation");
-                });
-              }
-            });
-        })
-        .catch(error => {
-          // Firebase error
-          this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+      // delete formData["password"]; // Remove password from the object
+      this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
+        .subscribe((responseData) => {
+          // this.refreshAuthentication(firebase.auth().currentUser); // Only logged in user can create user
+          this.zone.run(() => {
+            this.router.navigate(["/"]);
+          });
         });
       this.signUpMode = false;
     } else { // edit case
-      formData["newUser"] = false;
-      delete formData["password"]; // Remove password from the object
       this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
         .subscribe((responseData) => {});
     }
@@ -213,7 +239,7 @@ export class AuthService {
   }
 
   getOrganizations() {
-    return this.httpClient.get<{organizations: [OrganizationModel], count: number}>(ORGANIZATION_BACKEND_URL);
+    return this.httpClient.get<{organizations: OrganizationModel[], count: number}>(ORGANIZATION_BACKEND_URL);
   }
 
   deleteOrganization(id: string) {
@@ -228,6 +254,8 @@ export class AuthService {
     });
     sessionStorage.setItem("isAuthenticated", "true");
     sessionStorage.setItem("uid", user.uid);
+    sessionStorage.setItem("mongoDBUser", JSON.stringify(this.mongoDbUser));
+    sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
   }
 
   clearSessionStorage() {
@@ -240,6 +268,14 @@ export class AuthService {
 
   getMongoDbUserListener() {
     return this.mongoDbUserSubject.asObservable();
+  }
+
+  getMongoDbUser() {
+    return JSON.parse(sessionStorage.getItem("mongoDBUser")) as UserModel;
+  }
+
+  getUserOrg() {
+    return JSON.parse(sessionStorage.getItem("userOrg")) as OrganizationModel;
   }
 
   getUserOrgListener() {
@@ -262,7 +298,7 @@ export class AuthService {
     return sessionStorage.getItem("utoken");
   }
 
-  redirectOnFailedSubscription(message: string) {
+  redirectToMainPageWithMessage(message: string) {
     this.alertService.error(message, GlobalConstants.flashMessageOptions);
       this.zone.run(() => {
         this.router.navigate(["/"]);

@@ -35,13 +35,13 @@ export class OnboardingFormComponent implements OnInit {
         this.authService.getOrganization(paramMap.get("orgId")).subscribe(organization => {
           this.organizationOnboardingForm = this.createOrganizationOnboardingForm(organization);
         }, error => {
-          this.authService.redirectOnFailedSubscription("Couldn't fetch organization");
+          this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
         });
       } else {
         this.organizationOnboardingForm = this.createOrganizationOnboardingForm(null);
       }
     }, error => {
-      this.authService.redirectOnFailedSubscription("Couldn't fetch organization id from paramMap");
+      this.authService.redirectToMainPageWithMessage("Couldn't fetch organization id from paramMap");
     });
   }
 

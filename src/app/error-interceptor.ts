@@ -3,7 +3,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { Injectable, NgZone } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AlertService } from './alert-message/alert.service';
+import { AlertService } from './custom-components/alert-message/alert.service';
 import { GlobalConstants } from './global-constants';
 import { Router } from '@angular/router';
 

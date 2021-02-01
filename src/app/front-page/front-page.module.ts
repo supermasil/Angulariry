@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { AngularMaterialModule } from '../angular-material.module';
 import { AppRoutingModule } from '../app-routing.module';
+import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
 import { FrontPageComponent } from './front-page.component';
 
 @NgModule({
@@ -11,7 +12,8 @@ import { FrontPageComponent } from './front-page.component';
   imports: [
     CommonModule,
     AngularMaterialModule,
-    AppRoutingModule
+    AppRoutingModule,
+    SearchBarModule
   ]
 })
 export class FrontPageModule {

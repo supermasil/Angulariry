@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthGlobals } from 'src/app/auth/auth-globals';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TrackingGlobals } from '../tracking-globals';
 
@@ -14,6 +15,7 @@ import { TrackingGlobals } from '../tracking-globals';
 export class TrackingCreateEditComponent implements OnInit {
   selectedIndex = 0;
   enabled = [false, false, false, false, false];
+  authGlobals = AuthGlobals;
 
   constructor(
     private route: ActivatedRoute,
@@ -56,5 +58,13 @@ export class TrackingCreateEditComponent implements OnInit {
       }
     });
     this.enabled = [...temp];
+  }
+
+  canView(roles: string[]) {
+    return roles.includes(this.authService.getMongoDbUser().role);
+  }
+
+  isAuth() {
+    return this.authService.getIsAuth();
   }
 }

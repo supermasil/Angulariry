@@ -12,7 +12,7 @@ import { CarrierTrackingModel } from "../../../models/tracking-models/carrier-tr
 })
 export class ServicedFormCreateComponent implements OnInit {
   servicedForm: FormGroup;
-  customerCodes = ["Alex", "John", "Kay"];
+  userCodes = ["Alex", "John", "Kay"];
   internalStatus = ["Received at US WH", "Consolidated"];
 
   readonly separatorKeysCodes: number[] = [ENTER, COMMA];

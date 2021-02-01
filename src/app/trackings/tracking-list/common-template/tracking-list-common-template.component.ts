@@ -1,14 +1,17 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
-import { PageEvent } from "@angular/material/paginator";
+import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import * as moment from "moment";
 import { Observable } from "rxjs";
-import { CommentService } from "src/app/comments/comment.service";
+import { AuthGlobals } from "src/app/auth/auth-globals";
+import { AuthService } from "src/app/auth/auth.service";
+import { CommentService } from "src/app/custom-components/comments/comment.service";
 import { ConsolidatedTrackingModel } from "src/app/models/tracking-models/consolidated-tracking.model";
 import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
 import { MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
+import { UserModel } from "src/app/models/user.model";
 import { TrackingGlobals } from "../../tracking-globals";
 import { TrackingService } from "../../tracking.service";
 
@@ -22,15 +25,17 @@ export class TrackingListCommonTemplateComponent implements OnInit {
   trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
 
   totalTrackings = 0;
-  pageSizeOptions = [10, 20, 50, 100];
-  trackingsPerPage = this.pageSizeOptions[0];
-  currentPage = 1;
+  pageSizeOptions = TrackingGlobals.defaultPageSizes;
+  currentPageSize = this.pageSizeOptions[0];
+  currentUser: UserModel;
+  authGlobal = AuthGlobals;
 
   getBadgeColor = TrackingGlobals.getBadgeColor;
 
   commentForm: FormGroup;
 
   @ViewChild('f') myCommentForm; // To be able to reset form without triggering validators
+  @ViewChild('paginator') paginator: MatPaginator;
 
   preTransitCodes = TrackingGlobals.preTransitCodes;
   inTransitCodes = TrackingGlobals.inTransitCodes
@@ -38,14 +43,18 @@ export class TrackingListCommonTemplateComponent implements OnInit {
   failureCodes = TrackingGlobals.failureCodes;
 
   @Input() trackingsObservable: Observable<{trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}> = new Observable();
+  @Input() resetPaginatorObservable = new Observable()
   @Output() pageDataChangeEvent = new EventEmitter<PageEvent>();
 
   constructor(
     private trackingService: TrackingService,
-    private commentService: CommentService
+    private commentService: CommentService,
+    private authService: AuthService
   ){}
 
   ngOnInit() {
+    this.currentUser = this.authService.getMongoDbUser();
+
     this.commentForm = new FormGroup({
       commentContent: new FormControl(null, {validators: [Validators.required]})
     }, {updateOn: 'blur'});
@@ -53,7 +62,11 @@ export class TrackingListCommonTemplateComponent implements OnInit {
     this.trackingsObservable.subscribe((data: {trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}) => {
       this.trackings = data.trackings;
       this.totalTrackings = data.count;
-    })
+    });
+
+    this.resetPaginatorObservable.subscribe(() =>{
+      this.paginator.firstPage();
+    });
   }
 
   onDelete(trackingId: string) {
@@ -95,5 +108,17 @@ export class TrackingListCommonTemplateComponent implements OnInit {
 
   formatDateTime(date: Date) {
     return moment(moment.utc(date).toDate()).fromNow(); //.local().format("MM-DD-YY hh:mm:ss")
+  }
+
+  canView(roles: string[]) {
+    return roles.includes(this.authService.getMongoDbUser().role);
+  }
+
+  canEdit(roles: string[], creatorId: string) {
+    return roles.includes(this.authService.getMongoDbUser().role) || creatorId === this.currentUser._id
+  }
+
+  isAuth() {
+    return this.authService.getIsAuth();
   }
 }
