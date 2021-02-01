@@ -21,7 +21,7 @@ var serviceAccount = {
   type: process.env.admin_type,
   project_id: process.env.admin_project_id,
   private_key_id: process.env.admin_private_key_id,
-  private_key: process.env.admin_private_key,
+  private_key: process.env.admin_private_key.replace(/\\n/g, '\n'),
   client_email: process.env.admin_client_email,
   client_id: process.env.admin_client_id,
   auth_uri: process.env.admin_auth_uri,
