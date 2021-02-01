@@ -14,7 +14,6 @@ const pricingstRoutes = require('./routes/pricings');
 
 // Firebase App (the core Firebase SDK) is always required and
 // must be listed before other Firebase SDKs
-const firebase = require('firebase/app');
 const admin = require('firebase-admin');
 
 // Connected to dev config in nodemon but prod config in Elastic Beanstalk
