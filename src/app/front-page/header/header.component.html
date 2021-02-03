@@ -22,7 +22,7 @@
         <a class="nav-link" (click)="redirect('/trackings/create')" routerLinkActive="mat-accent">Create</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" *ngIf="!isAuth() || canView(authGlobals.internal)" (click)="redirect('/auth')" routerLinkActive="mat-accent">Auth</a>
+        <a class="nav-link" *ngIf="!isAuth() || canView(authGlobals.internal)" (click)="redirect('/auth')" routerLinkActive="mat-accent">User</a>
       </li>
       <li class="nav-item" *ngIf="isAuth()">
         <a class="nav-link" (click)="onLogOut()">Logout</a>

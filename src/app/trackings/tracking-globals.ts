@@ -53,11 +53,23 @@ export class TrackingGlobals {
     ReceivedAtOrigin: "Received at origin",
     Consolidated: "Consolidated",
     ReadyToFly: "Ready to fly",
-    BeingShippedToDestination: "Being shipped to destination",
+    Flying: "Flying",
     ReceivedAtDestination: "Received at destination",
     BeingDeliveredToRecipient: "Being delivered to recipient",
     DeliveredToRecipient: "Delivered to recipient"
   }
+
+  public static statuses = Object.values(TrackingGlobals.allStatusTypes);
+  public static postReceivedAtOrigin = Object.values(TrackingGlobals.allStatusTypes).slice(4);
+  public static postConsolidated = Object.values(TrackingGlobals.allStatusTypes).slice(5);
+  public static postReadyToFly = Object.values(TrackingGlobals.allStatusTypes).slice(6);
+  public static postFlying = Object.values(TrackingGlobals.allStatusTypes).slice(7);
+  public static postReceivedAtDestination = Object.values(TrackingGlobals.allStatusTypes).slice(8);
+
+  public static internalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(3);
+  public static externalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(0, 3);
+
+  public static defaultPageSizes = [10, 20, 50, 100];
 
   public static getBadgeColor = (status: string) => {
     switch (status) {
@@ -75,7 +87,7 @@ export class TrackingGlobals {
         return "#e040fb"
       case TrackingGlobals.allStatusTypes.ReadyToFly:
         return "#03a9f4"
-      case TrackingGlobals.allStatusTypes.BeingShippedToDestination:
+      case TrackingGlobals.allStatusTypes.Flying:
         return "#ffeb3b"
       case TrackingGlobals.allStatusTypes.ReceivedAtDestination:
         return "#8bc34a"
@@ -86,10 +98,4 @@ export class TrackingGlobals {
     }
   }
 
-  public static statuses = Object.values(TrackingGlobals.allStatusTypes);
-  public static postCreationStatuses = [...TrackingGlobals.statuses].splice(4);
-  public static postConsolidationStatuses = [...TrackingGlobals.statuses].splice(5);
-
-
-  public static defaultPageSizes = [10, 20, 50, 100];
 }

@@ -13,6 +13,7 @@ import { OrganizationModel } from "src/app/models/organization.model";
 import { UserModel } from "src/app/models/user.model";
 import { ReplaySubject, Subject } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: 'app-tracking-list',
@@ -41,10 +42,31 @@ export class TrackingListComponent {
   constructor(
     public trackingService: TrackingService,
     private authService: AuthService,
-    private codeScannerService: CodeScannerService
+    private codeScannerService: CodeScannerService,
+    private route: ActivatedRoute
   ) {} // Public simplifies code
 
   async ngOnInit() {
+    switch (this.route.snapshot.paramMap.get('type')) {
+      case TrackingGlobals.trackingTypes.ONLINE:
+        this.selectedIndex = 0;
+        break;
+      case TrackingGlobals.trackingTypes.SERVICED:
+        this.selectedIndex = 1;
+        break;
+      case TrackingGlobals.trackingTypes.INPERSON:
+        this.selectedIndex = 2;
+        break;
+      case TrackingGlobals.trackingTypes.CONSOLIDATED:
+        this.selectedIndex = 3;
+        break;
+      case TrackingGlobals.trackingTypes.MASTER:
+        this.selectedIndex = 4;
+        break;
+    }
+
+    this.setTab(this.selectedIndex);
+
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
@@ -65,7 +87,7 @@ export class TrackingListComponent {
     if (this.currentUser.role === AuthGlobals.roles.Customer) {
       sender = this.currentUser._id;
     }
-    this.trackingService.getTrackings(trackingsPerPage, currenPage, type, this.organization._id, null, null, sender).subscribe((transformedTrackings) => {
+    this.trackingService.getTrackings(trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
       this.trackingsSubject.next(transformedTrackings);
     });
   }
@@ -82,30 +104,30 @@ export class TrackingListComponent {
     this.resetPaginatorSubject.next();
   }
 
-  tabChanged(index: Number) {
-    this.searchMode = true;
+  setTab(index: Number) {
     switch (index) {
       case 0:
         this.currentTrackingType = TrackingGlobals.trackingTypes.ONLINE;
-        this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
         break;
       case 1:
         this.currentTrackingType = TrackingGlobals.trackingTypes.SERVICED;
-        this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
         break;
       case 2:
         this.currentTrackingType = TrackingGlobals.trackingTypes.INPERSON;
-        this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
         break;
       case 3:
         this.currentTrackingType = TrackingGlobals.trackingTypes.CONSOLIDATED;
-        this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
         break;
       case 4:
         this.currentTrackingType = TrackingGlobals.trackingTypes.MASTER;
-        this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
         break;
     }
+  }
+
+  tabChanged(index: Number) {
+    this.searchMode = false;
+    this.setTab(index);
+    this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
   }
 
   onFuzzySearch(searchTerm: string) {
@@ -116,7 +138,6 @@ export class TrackingListComponent {
     this.resetPaginator();
 
     this.searchMode = true;
-    console.log(this.currentTrackingType)
     this.trackingService.fuzzySearch(searchTerm, this.organization._id, this.currentTrackingType).subscribe(trackingData => {
       this.searchedTrackings = trackingData.trackings;
       this.trackingsSubject.next({trackings: this.searchedTrackings.slice(0, TrackingGlobals.defaultPageSizes[0]) , count: this.searchedTrackings.length});

@@ -44,7 +44,6 @@
         </a>
       </div>
     </div>
-    <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
 
     <div class="mt-2">
       <file-uploader
@@ -98,16 +97,9 @@
         mat-raised-button
         color='warn'
         type='button'
-        (click)="printPage()">
+        routerLink="/">
         Cancel
       </button>
-      <button mat-mini-fab color="primary" class="float-right" type="button" ngxPrint printSectionId="print-section" ><mat-icon>print</mat-icon></button>
     </div>
   </form>
-</div>
-
-<!-- Printing section -->
-
-<div hidden id="print-section">
-  <h1>HEllo</h1>
 </div>

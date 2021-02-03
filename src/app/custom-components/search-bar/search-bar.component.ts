@@ -1,5 +1,6 @@
-import { Component, EventEmitter, OnInit, Output, ViewChild } from "@angular/core";
-import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { Component, EventEmitter, NgZone, OnInit, Output } from "@angular/core";
+import { FormControl, FormGroup } from "@angular/forms";
+import { CodeScannerService } from "../code-scanner/code-scanner.service";
 
 
 @Component({
@@ -13,11 +14,19 @@ export class SearchBarComponent implements OnInit {
   scannerOpened = false;
   @Output() onSearchEvent = new EventEmitter<string>();
 
+  constructor(
+    private zone: NgZone,
+    private codeScannerService: CodeScannerService) {}
 
   ngOnInit() {
     this.searchForm = new FormGroup({
       searchTerm: new FormControl("")
-    })
+    });
+
+    this.codeScannerService.getCodeScannerUpdateListener()
+      .subscribe(code => {
+        this.searchForm.get('searchTerm').setValue(code);
+      });
   }
 
   onSearch() {
@@ -30,5 +39,11 @@ export class SearchBarComponent implements OnInit {
   clearContent() {
     this.onSearchEvent.emit("");
     this.searchForm.reset();
+  }
+
+  openScanner() {
+    this.zone.run(() => {
+      this.scannerOpened = !this.scannerOpened;
+    })
   }
 }

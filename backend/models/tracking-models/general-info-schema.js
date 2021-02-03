@@ -27,6 +27,8 @@ const GeneralInfoSchema = mongoose.Schema({
   creatorId: {type: String, required: true}, // Google id, has to be string
   creatorName: {type: String, required: true},
 
+  paid: {type: Boolean, required: true, default: false},
+
   filePaths: [{type: String}],
   comments: [{type: mongoose.Types.ObjectId, ref: "comment"}]
 }, { _id: false });

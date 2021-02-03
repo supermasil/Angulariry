@@ -7,7 +7,6 @@ import { TrackingDetailModel } from '../../models/easy-post-models/tracking-deta
 import { GeneralMethods } from '../../shared/general-methods';
 import { TrackingGlobals } from '../tracking-globals';
 import { CodeScannerService } from 'src/app/custom-components/code-scanner/code-scanner.service';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-tracking',
@@ -39,8 +38,6 @@ export class TrackingToolComponent implements OnInit {
   tracked = false;
   tracker: TrackerModel;
 
-  private codeScannerSub: Subscription;
-
   capitalizeFirstLetter = GeneralMethods.capitalizeFirstLetter;
 
   constructor(
@@ -57,11 +54,6 @@ export class TrackingToolComponent implements OnInit {
         validators: [Validators.required]
       })
     });
-
-    this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
-      .subscribe((code: {code: string}) => {
-        this.searchForm.controls['trackingNumber'].setValue(code.code);
-      });
   }
 
   resetStatus() {
@@ -72,7 +64,8 @@ export class TrackingToolComponent implements OnInit {
     this.failureTrackingDetails = [];
   }
 
-  async onSearch() {
+  async onSearch(value: string) {
+    this.searchForm.get('trackingNumber').setValue(value);
     if (this.searchForm.invalid) {
       return;
     }

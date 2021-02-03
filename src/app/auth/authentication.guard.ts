@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { AlertService } from '../custom-components/alert-message';
 import { GlobalConstants } from '../global-constants';
 import { UserModel } from '../models/user.model';
+import { auth } from 'firebase';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -30,10 +31,15 @@ export class AuthGuard implements CanActivate {
 
   checkAuthentication(url: string, data: {}) {
     const isAuth = this.authService.getIsAuth();
+    this.authService.redirectUrl = url;
+    this.authService.redirectData = data;
+
     if(!isAuth) {
-      this.authService.redirectUrl = url;
-      this.authService.redirectData = data;
-      this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
+      this.authService.getAuthStatusListener().subscribe(authenticated => {
+        if (!authenticated) {
+          this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
+        }
+      });
       this.zone.run(() => {
         this.router.navigate(["/auth"]);
       });

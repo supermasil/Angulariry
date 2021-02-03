@@ -15,7 +15,4 @@ const onlineTrackingSchema = mongoose.Schema({
 }, {timestamps: true, autoCreate: true });
 
 onlineTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
-onlineTrackingSchema.plugin(fuzzySearch, { fields: [
-  "trackingNumber"
-  ]});
 module.exports = mongoose.model('online-tracking', onlineTrackingSchema);

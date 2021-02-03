@@ -80,12 +80,11 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
       this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
         this.patchFormValue(generalInfo);
         if (!this.disableSender) {
-          this.authService.getUser(generalInfo.sender).subscribe((user: UserModel) => {
-            this.selectSenderSubject.next(user.userCode + " " + user.name)
-            if (!this.disableRecipient) {
-              this.selectRecipientSubject.next(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
-            }
-          })
+            this.selectSenderSubject.next(generalInfo.sender.userCode + " " + generalInfo.sender.name)
+        }
+
+        if (!this.disableRecipient) {
+          this.selectRecipientSubject.next(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
         }
         this.formValidityStatus.emit(this.generalInfoForm.valid);
       });
@@ -96,7 +95,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   createGeneralInfoForm() {
     let form = new FormGroup({
       trackingNumber: new FormControl({value: "", disabled: true}, {validators: [Validators.required]}), // Set through subscription
-      status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: !AuthGlobals.managerAdmins.includes(this.currentUser.role)}, {validators: [Validators.required]}),
+      // status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: !AuthGlobals.managerAdmins.includes(this.currentUser.role)}, {validators: [Validators.required]}),
+      status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: true}, {validators: [Validators.required]}),
       origin: new FormControl("", {validators: [Validators.required]}),
       destination: new FormControl("", {validators: [Validators.required]}),
     });

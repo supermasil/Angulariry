@@ -21,6 +21,7 @@ mat-form-field {
 }
 
 .scroll-box {
+  width: 100%;
   overflow: auto;
   min-height: 0px;
   height: 100%;

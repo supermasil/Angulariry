@@ -4,7 +4,7 @@
       mat-mini-fab
       color='primary'
       class="mt-2 d-inline mr-2"
-      (click)="scannerOpened = !scannerOpened">
+      (click)="openScanner()">
       <mat-icon>qr_code</mat-icon>
     </a>
     <mat-form-field appearance="outline">
@@ -23,7 +23,7 @@
       </button>
     </mat-form-field>
     <a
-      mat-mini-fab
+      mat-mini-fba
       color='primary'
       (click)="onSearch()"
       class="mt-2 d-inline ml-2">
@@ -32,4 +32,4 @@
   </div>
 </form>
 
-<app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
+<app-code-scanner *ngIf="scannerOpened">Code Scanner</app-code-scanner>

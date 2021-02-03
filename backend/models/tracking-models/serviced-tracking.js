@@ -23,8 +23,5 @@ const servicedTrackingSchema = mongoose.Schema({
 }, {timestamps: true, autoCreate: true });
 
 servicedTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
-servicedTrackingSchema.plugin(fuzzySearch, { fields: [
-  "trackingNumber"
-] });
 
 module.exports = mongoose.model('serviced-tracking', servicedTrackingSchema);

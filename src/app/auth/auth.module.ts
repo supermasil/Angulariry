@@ -13,6 +13,7 @@ import { PasswordResetFormComponent } from './auth/auth-forms/password-reset.com
 import { SignUpFormComponent } from './auth/auth-forms/signup.component';
 import { OnboardingFormComponent } from './auth/auth-forms/onboarding.component';
 import { AutoCompleteInputModule } from '../custom-components/auto-complete-input/auto-complete-input.module';
+import { EditUserFormComponent } from './auth/auth-forms/edit-user.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { AutoCompleteInputModule } from '../custom-components/auto-complete-inpu
     LoginFormComponent,
     PasswordResetFormComponent,
     SignUpFormComponent,
-    OnboardingFormComponent
+    OnboardingFormComponent,
+    EditUserFormComponent
   ],
   imports: [
     CommonModule,

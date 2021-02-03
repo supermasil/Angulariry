@@ -109,7 +109,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
           this.usersSubject.next(users.filter(u => u.role === AuthGlobals.roles.Customer));
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: ConsolidatedTrackingModel) => {
+                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: ConsolidatedTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.consolidatedForm = this.createConcolidatedForm(response);
@@ -150,18 +150,18 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   fetchTrackings(origin: string, destination: string, sender: string) {
-    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreationStatuses.includes(i.generalInfo.status));
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
+      this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
     });;
 
-    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.serviceTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreationStatuses.includes(i.generalInfo.status));
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
+      this.serviceTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
       this.servicedTrackingDataSubject.next(this.serviceTrackings);
     });;
 
-    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, this.organization._id, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postCreationStatuses.includes(i.generalInfo.status));
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, origin, destination, sender).subscribe((transformedTrackings) => {
+      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
       this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
     });;
   }
@@ -315,11 +315,11 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
     this.tempDataSource.data.forEach(row => {
       if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
-        removedOnlineTrackings.push(row._id);
+        removedOnlineTrackings.push(row.trackingNumber);
       } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
-        removedServicedTrackings.push(row._id);
+        removedServicedTrackings.push(row.trackingNumber);
       } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
-        removedInPersonTrackings.push(row._id);
+        removedInPersonTrackings.push(row.trackingNumber);
       }
     });
 

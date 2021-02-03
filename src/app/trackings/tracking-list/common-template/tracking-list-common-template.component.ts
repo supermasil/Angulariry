@@ -1,13 +1,16 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angular/core";
-import { FormGroup, FormControl, Validators } from "@angular/forms";
+import { AfterViewChecked, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from "@angular/core";
+import { FormGroup, FormControl, Validators, Form, FormArray } from "@angular/forms";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
+import { MatSlideToggleChange } from "@angular/material/slide-toggle";
 import * as moment from "moment";
 import { Observable } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { AuthService } from "src/app/auth/auth.service";
 import { CommentService } from "src/app/custom-components/comments/comment.service";
+import { OrganizationModel } from "src/app/models/organization.model";
 import { ConsolidatedTrackingModel } from "src/app/models/tracking-models/consolidated-tracking.model";
 import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
+import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
 import { MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
@@ -21,20 +24,19 @@ import { TrackingService } from "../../tracking.service";
   templateUrl: './tracking-list-common-template.component.html',
   styleUrls: ['./tracking-list-common-template.component.css', "../tracking-list.component.css"]
 })
-export class TrackingListCommonTemplateComponent implements OnInit {
+export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChecked {
   trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
 
   totalTrackings = 0;
   pageSizeOptions = TrackingGlobals.defaultPageSizes;
   currentPageSize = this.pageSizeOptions[0];
   currentUser: UserModel;
+  currentOrg: OrganizationModel;
   authGlobal = AuthGlobals;
+  trackingGlobal = TrackingGlobals;
 
   getBadgeColor = TrackingGlobals.getBadgeColor;
 
-  commentForm: FormGroup;
-
-  @ViewChild('f') myCommentForm; // To be able to reset form without triggering validators
   @ViewChild('paginator') paginator: MatPaginator;
 
   preTransitCodes = TrackingGlobals.preTransitCodes;
@@ -49,15 +51,14 @@ export class TrackingListCommonTemplateComponent implements OnInit {
   constructor(
     private trackingService: TrackingService,
     private commentService: CommentService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cd: ChangeDetectorRef,
+    private zone: NgZone
   ){}
 
   ngOnInit() {
     this.currentUser = this.authService.getMongoDbUser();
-
-    this.commentForm = new FormGroup({
-      commentContent: new FormControl(null, {validators: [Validators.required]})
-    }, {updateOn: 'blur'});
+    this.currentOrg = this.authService.getUserOrg();
 
     this.trackingsObservable.subscribe((data: {trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}) => {
       this.trackings = data.trackings;
@@ -65,8 +66,12 @@ export class TrackingListCommonTemplateComponent implements OnInit {
     });
 
     this.resetPaginatorObservable.subscribe(() =>{
-      this.paginator.firstPage();
+      this.paginator?.firstPage();
     });
+  }
+
+  ngAfterViewChecked() {
+    this.cd.detectChanges();
   }
 
   onDelete(trackingId: string) {
@@ -81,7 +86,7 @@ export class TrackingListCommonTemplateComponent implements OnInit {
   }
 
   onCommentSubmit(trackingId: string, trackingNumber: string, content: string) {
-    if (this.commentForm.invalid) {
+    if (!content.trim()) {
       return;
     }
     let filePaths: string[] = [];
@@ -89,7 +94,6 @@ export class TrackingListCommonTemplateComponent implements OnInit {
       .subscribe(response => {
         this.trackings.filter(t => t._id === trackingId)[0].generalInfo.comments.unshift(response)
       });
-    this.myCommentForm.resetForm();
   }
 
   getHeaderColor(status: string) {
@@ -110,6 +114,10 @@ export class TrackingListCommonTemplateComponent implements OnInit {
     return moment(moment.utc(date).toDate()).fromNow(); //.local().format("MM-DD-YY hh:mm:ss")
   }
 
+  now() {
+    return moment().format("LLLL");
+  }
+
   canView(roles: string[]) {
     return roles.includes(this.authService.getMongoDbUser().role);
   }
@@ -120,5 +128,19 @@ export class TrackingListCommonTemplateComponent implements OnInit {
 
   isAuth() {
     return this.authService.getIsAuth();
+  }
+
+  getItemCharge(item: ListItemModel) {
+    return item.extraChargeUnit === '%'? item.declaredValue * item.quantity * (item.extraCharge / 100) + item.weight * item.unitCharge + item.declaredValue * item.quantity * (item.insurance / 100) :
+                            item.extraCharge * item.quantity + item.weight * item.unitCharge + item.declaredValue * item.quantity * (item.insurance/ 100)
+
+  }
+
+  trackingToggle(event: MatSlideToggleChange, tracking: OnlineTrackingModel | MasterTrackingModel, index: number, status: string) {
+    this.trackingService.changeTrackingStatus(status, tracking.trackingNumber).subscribe(response => {
+      this.zone.run(() => {
+        this.trackings[index] = response.tracking;
+      })
+    });
   }
 }

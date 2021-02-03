@@ -51,7 +51,7 @@
                 </mat-chip-list>
                 <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption (optionSelected)="selectItem($event.option.value, i); chipInput.value = '';">
                   <mat-option *ngFor="let t of filteredTrackings | async" [value]="t.trackingNumber">
-                    {{t.trackingNumber}} {{t.generalInfo.sender}} {{t.generalInfo.status}}
+                    {{t.trackingNumber}} {{t.generalInfo.sender.name}} {{t.generalInfo.sender.userCode}} {{t.generalInfo.status}}
                   </mat-option>
                 </mat-autocomplete>
                 <a matSuffix mat-mini-fab color="warn" (click)="removeBox(i, masterForm)">
@@ -101,7 +101,8 @@
         <button
           mat-raised-button
           color='warn'
-          type=''>
+          type='button'
+          routerLink="/">
           Cancel
         </button>
       </div>

@@ -1,7 +1,7 @@
 
 <div class="mx-auto" style="width: 99%;">
   <mat-accordion *ngIf='trackings.length > 0'>
-    <mat-expansion-panel *ngFor='let tracking of trackings'>
+    <mat-expansion-panel *ngFor='let tracking of trackings, let i = index'>
       <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.status)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
         <mat-panel-title>
           <div><b>{{tracking.trackingNumber}} </b> <span class="badge" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.status)" style="color: white;">{{tracking.generalInfo.status}}</span> {{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}</div>
@@ -33,39 +33,41 @@
         <hr>
         <div class="row">
           <div class="col-lg-6">
+            <mat-form-field appearance="outline">
+              <mat-label>Notes</mat-label>
+              <textarea
+                readonly
+                rows="2"
+                value="{{tracking.generalInfo.content}}"
+                matInput
+                ></textarea>
+            </mat-form-field>
             <span class="d-block mat-h4"><b>Origin</b> {{tracking.generalInfo.origin}}</span>
               <span class="d-block mat-h4"><b>Destination</b> {{tracking.generalInfo.destination}}</span>
-              <span class="d-block mat-h4" *ngIf="tracking.generalInfo.sender"><b>Sender</b> {{tracking.generalInfo.sender}}</span>
-              <span class="d-block mat-h4" *ngIf="tracking.generalInfo.recipient"><b>Recipient</b> {{tracking.generalInfo.recipient.name}} <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a></span>
-            <div class="scroll-box">
-              <span class="d-block mat-h4" style="white-space: pre-line;">{{tracking.generalInfo.content}}</span>
-            </div>
+              <span class="d-block mat-h4" *ngIf="tracking.generalInfo.sender"><b>Sender</b> {{tracking.generalInfo.sender.name}} | {{tracking.generalInfo.sender.userCode}} | {{tracking.generalInfo.sender.phoneNumber}}</span>
+              <span class="d-block mat-h4" *ngIf="tracking.generalInfo.recipient"><b>Recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</span>
+
           </div>
           <div class="col-lg-6 mt-xs-2 mt-md-0">
-            <ng-container *ngIf="true">
-              <form [formGroup]='commentForm' #f='ngForm' (submit)='onCommentSubmit(tracking._id, tracking.trackingNumber, comment.value)'>
-                <div class="d-flex">
-                  <mat-form-field appearance="outline" class="mr-2">
-                    <mat-label>Comment</mat-label>
-                    <textarea
-                      #comment
-                      rows="2"
-                      matInput
-                      formControlName='commentContent'
-                      cdkTextareaAutosize>
-                    </textarea>
-                  </mat-form-field>
-                  <button
-                    mat-icon-button
-                    color='primary'
-                    type='submit'
-                    class="mt-2 d-inline">
-                    <mat-icon>send</mat-icon>
-                  </button>
-                </div>
-              </form>
-            </ng-container>
-
+            <form class="ml-0" (submit)="onCommentSubmit(tracking._id, tracking.trackingNumber, comment.value); comment.value = ''" (keydown.meta.enter)="onCommentSubmit(tracking._id, tracking.trackingNumber, comment.value); comment.value = ''">
+              <div class="d-flex">
+                <mat-form-field appearance="outline" class="mr-2">
+                  <mat-label>Comment</mat-label>
+                  <textarea
+                    #comment
+                    rows="2"
+                    matInput
+                    cdkTextareaAutosize></textarea>
+                </mat-form-field>
+                <button
+                  mat-icon-button
+                  color='primary'
+                  type='submit'
+                  class="mt-2 d-inline">
+                  <mat-icon>send</mat-icon>
+                </button>
+              </div>
+            </form>
             <div class="scroll-box">
               <ng-container *ngFor="let comment of tracking.generalInfo.comments">
                 <div class="mat-body-strong">{{comment?.creatorName}}   <span class="dimmed-text">{{formatDateTime(comment?.updatedAt)}}</span></div>
@@ -76,12 +78,320 @@
             </div>
           </div>
         </div>
+
+        <div class="row mt-4" *ngIf="trackingGlobal.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3)) && tracking.itemsList.length > 0">
+          <div class="col scroll-box w-100">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Declared Value</th>
+                  <th>Quantity</th>
+                  <th>Insurance</th>
+                  <th>Weight</th>
+                  <th>Weight Unit Charge</th>
+                  <th>Extra Charge</th>
+                  <th>Final Charge</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let item of tracking.itemsList">
+                  <tr>
+                    <td>{{item.name}}</td>
+                    <td>$ {{item.declaredValue}}</td>
+                    <td>{{item.quantity}}</td>
+                    <td>% {{item.insurance}}</td>
+                    <td>Kg {{item.weight}}</td>
+                    <td>$ {{item.unitCharge}}</td>
+                    <td>{{item.extraChargeUnit}} {{item.extraCharge}}</td>
+                    <td>$ {{getItemCharge(item)}}</td>
+                    <td>{{item.status}}</td>
+                  </tr>
+                </ng-container>
+              </tbody>
+              <tfoot class="mt-4">
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th>Total weight</th>
+                  <th>Kg {{tracking.generalInfo.totalWeight}}</th>
+                  <th>Cost adjustment</th>
+                  <th>$ {{tracking.generalInfo.costAdjustment}}</th>
+                  <th>Final cost</th>
+                  <th>$ {{tracking.generalInfo.finalCost}}</th>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.CONSOLIDATED">
+          <div class="col scroll-box w-100">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th>Tracking Number</th>
+                  <th>Sender</th>
+                  <th>Sender's Code</th>
+                  <th>Recipient's Address</th>
+                  <th>Weight</th>
+                  <th>Final Charge</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let item of tracking.onlineTrackings">
+                  <tr>
+                    <td>{{item?.trackingNumber}}</td>
+                    <td>{{item?.generalInfo?.sender?.name}}</td>
+                    <td>{{item?.generalInfo?.sender?.userCode}}</td>
+                    <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
+                    <td>Kg {{item?.generalInfo?.weight}}</td>
+                    <td>$ {{item?.generalInfo?.finalCost}}</td>
+                  </tr>
+                </ng-container>
+
+                <ng-container *ngFor="let item of tracking.servicedTrackings">
+                  <tr>
+                    <td>{{item?.trackingNumber}}</td>
+                    <td>{{item?.generalInfo?.sender?.name}}</td>
+                    <td>{{item?.generalInfo?.sender?.userCode}}</td>
+                    <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
+                    <td>Kg {{item?.generalInfo?.weight}}</td>
+                    <td>$ {{item?.generalInfo?.finalCost}}</td>
+                  </tr>
+                </ng-container>
+
+                <ng-container *ngFor="let item of tracking.inPersonTrackings">
+                  <tr>
+                    <td>{{item?.trackingNumber}}</td>
+                    <td>{{item?.generalInfo?.sender?.name}}</td>
+                    <td>{{item?.generalInfo?.sender?.userCode}}</td>
+                    <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
+                    <td>Kg {{item?.generalInfo?.weight}}</td>
+                    <td>$ {{item?.generalInfo?.finalCost}}</td>
+                  </tr>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.MASTER">
+          <div class="col scroll-box w-100">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th>Tracking Number</th>
+                  <th>Sender</th>
+                  <th>Sender's Code</th>
+                  <th>Recipient's Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let box of tracking.boxes">
+                  <ng-container *ngFor="let item of box.items">
+                    <tr>
+                      <td>{{item?.trackingNumber}}</td>
+                      <td>{{item?.generalInfo?.sender?.name}}</td>
+                      <td>{{item?.generalInfo?.sender?.userCode}}</td>
+                      <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Printing section -->
+
+        <div hidden id="print-section">
+            <table>
+              <tbody>
+                <h1>{{currentOrg.name}}</h1>
+              </tbody>
+            </table>
+            <table style="width: 100%;">
+              <tbody>
+                <tr>
+                  <div *ngFor="let location of currentOrg.locations">
+                    <td><b>{{location.name}}</b></td>
+                  </div>
+                </tr>
+                <tr>
+                  <div *ngFor="let location of currentOrg.locations">
+                    <td>{{location.phoneNumber}}</td>
+                  </div>
+                </tr>
+                <tr>
+                  <div *ngFor="let location of currentOrg.locations">
+                    <td>{{location.address.address}} {{location.address.addressLineTwo}}</td>
+                  </div>
+                </tr>
+              </tbody>
+            </table>
+
+            <table style="width: 100%; margin-top: 1rem;">
+              <tbody>
+                <tr>
+                  <td><b>Tracking Number</b></td>
+                  <td><b>Invoice timestamp</b></td>
+                </tr>
+                <tr>
+                  <td>{{tracking.trackingNumber}}</td>
+                  <td>{{now()}}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div *ngIf="tracking.trackingNumber.substring(0, 3) != trackingGlobal.trackingTypes.MASTER">
+              <table style="width: 100%; margin-top: 1rem;">
+                <tbody>
+                  <tr>
+                    <td><b>Sender</b></td>
+                    <td><b>Recipient</b></td>
+                  </tr>
+                  <tr>
+                    <td>{{tracking.generalInfo.sender.name}} {{tracking.generalInfo.sender.userCode}}</td>
+                    <td>{{tracking.generalInfo.recipient.name}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{tracking.generalInfo.sender.phoneNumber}}</td>
+                    <td>{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</td>
+                  </tr>
+                  <tr>
+                    <td>{{tracking.generalInfo.sender.email}}</td>
+                    <td>{{tracking.generalInfo.recipient.email}} {{tracking.generalInfo.recipient.phoneNumber}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div *ngIf="trackingGlobal.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3))">
+              <table style="width: 100%; margin-top: 1rem;">
+                <thead>
+                  <tr>
+                    <td><b>Item Name</b></td>
+                    <td><b>Declared Value</b></td>
+                    <td><b>Quantity</b></td>
+                    <td><b>Insurance</b></td>
+                    <td><b>Weight</b></td>
+                    <td><b>Weight Charge</b></td>
+                    <td><b>Extra Charge</b></td>
+                    <td><b>Final Charge</b></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let item of tracking.itemsList">
+                    <tr>
+                      <td>{{item.name}}</td>
+                      <td>$ {{item.declaredValue}}</td>
+                      <td>{{item.quantity}}</td>
+                      <td>% {{item.insurance}}</td>
+                      <td>Kg {{item.weight}}</td>
+                      <td>$ {{item.unitCharge}}</td>
+                      <td>{{item.extraChargeUnit}} {{item.extraCharge}}</td>
+                      <td>$ {{getItemCharge(item)}}</td>
+
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+
+              <table style="width: 100%; margin-top: 1rem;">
+                <tr>
+                  <td><b>Total weight</b></td>
+                  <td><b>Cost adjustment</b></td>
+                  <td><b>Final cost</b></td>
+                </tr>
+                <tr>
+                  <td>Kg {{tracking.generalInfo.totalWeight}}</td>
+                  <td>$ {{tracking.generalInfo.costAdjustment}}</td>
+                  <td>$ {{tracking.generalInfo.finalCost}}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.CONSOLIDATED">
+              <table style="width: 100%; margin-top: 1rem;">
+                <tr>
+                  <td><b>Online Trackings</b></td>
+                  <td><b>Serviced Trackings</b></td>
+                  <td><b>In Person Trackings</b></td>
+                </tr>
+                <tr>
+                  <table>
+                    <div *ngFor="let tracking of tracking.onlineTrackings">
+                      <tr>
+                        {{tracking.trackingNumber}}
+                      </tr>
+                    </div>
+                  </table>
+                  <table>
+                    <div *ngFor="let tracking of tracking.servicedTrackings">
+                      <tr>
+                        {{tracking.trackingNumber}}
+                      </tr>
+                    </div>
+                  </table>
+                  <table>
+                    <div *ngFor="let tracking of tracking.inPersonTrackings">
+                      <tr>
+                        {{tracking.trackingNumber}}
+                      </tr>
+                    </div>
+                  </table>
+                </tr>
+              </table>
+            </div>
+
+            <table style="width: 100%; margin-top: 1rem;">
+              <tr>
+                <td><h3>Signature</h3></td>
+              </tr>
+            </table>
+        </div>
       </ng-template>
 
-      <mat-action-row *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)">
-        <div>
-          <a mat-button color='primary' [routerLink]="['/trackings/edit', tracking.trackingNumber]" >Edit</a>
-          <!-- <button mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</button> -->
+      <mat-action-row>
+        <div class="row">
+          <div class="col-lg">
+            <div class="d-flex justify-content-end">
+              <div *ngIf="tracking.trackingNumber.substring(0,3) == trackingGlobal.trackingTypes.ONLINE" style="position: relative; bottom: -6px;">
+                <mat-slide-toggle
+                  [checked]="trackingGlobal.postReceivedAtOrigin.includes(tracking.generalInfo.status)"
+                  [disabled]="trackingGlobal.postConsolidated.includes(tracking.generalInfo.status)"
+                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.ReceivedAtOrigin): trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.Created)"
+                  class="mr-2">
+                  Received at Origin
+                </mat-slide-toggle>
+              </div>
+              <div *ngIf="tracking.trackingNumber.substring(0,3) == trackingGlobal.trackingTypes.MASTER" style="position: relative; bottom: -6px;">
+                <div class="d-block">
+                  <mat-slide-toggle
+                    #Flying
+                    [checked]="trackingGlobal.postFlying.includes(tracking.generalInfo.status)"
+                    [disabled]="trackingGlobal.postReceivedAtDestination.includes(tracking.generalInfo.status)"
+                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.Flying): trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.ReadyToFly)"
+                    class="mr-2">Flying
+                  </mat-slide-toggle>
+                  <mat-slide-toggle
+                    [checked]="trackingGlobal.postReceivedAtDestination.includes(tracking.generalInfo.status)"
+                    [disabled]="!Flying.checked"
+                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.ReceivedAtDestination): trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.Flying)"
+                    class="mr-2">Received at Destination
+                  </mat-slide-toggle>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg mt-2 mt-lg-0">
+            <div class="d-flex justify-content-end">
+              <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit', tracking.trackingNumber]" >Edit</a>
+              <!-- <a class="mr-2" mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</a> -->
+              <button mat-mini-fab color="primary" class="mr-4" type="button" ngxPrint printSectionId="print-section" ><mat-icon>print</mat-icon></button>
+            </div>
+          </div>
         </div>
       </mat-action-row>
     </mat-expansion-panel>
@@ -91,4 +401,3 @@
     No data found
   </div>
 </div>
-

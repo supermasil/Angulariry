@@ -1,0 +1,12 @@
+<div class="mt-2">
+  <auto-complete-input
+    [dataObservable]="usersSubject.asObservable()"
+    [enforeSelection]="true"
+    (itemSelected)="userSelected($event)"
+    [matLabel]="'User to edit'"
+    [matErrorMessage]="'Please select one from the drowdown'"
+    [lockOption]="'true'"
+    >
+  </auto-complete-input>
+</div>
+

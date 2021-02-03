@@ -1,51 +1,28 @@
-<form [formGroup]="searchForm" (submit)="onSearch()" class="mt-3" (keydown.enter)="$event.preventDefault()">
-  <div class="d-flex">
-    <a
-      mat-mini-fab
-      color='primary'
-      class="mt-2 d-inline"
-      (click)="scannerOpened = !scannerOpened">
-      <mat-icon>qr_code</mat-icon>
-    </a>
-    <div class="d-inline w-100 mx-4">
-      <div class="row">
-        <mat-form-field appearance="outline">
-          <mat-label>Tracking Number</mat-label>
-          <input
-          matInput
-          type='text'
-          formControlName='trackingNumber'>
-          <button mat-button *ngIf="searchForm.controls['trackingNumber'].value" matSuffix mat-icon-button aria-label="Clear" (click)="searchForm.controls['trackingNumber'].setValue('')">
-            <mat-icon>close</mat-icon>
-          </button>
-          <mat-error *ngIf="searchForm.get('trackingNumber').invalid">Please enter a Tracking Number</mat-error>
-        </mat-form-field>
-        <button hidden #submitButton type="submit"></button>
-      </div>
-      <div class="row">
-        <mat-form-field appearance="outline">
-          <mat-label>Carrier</mat-label>
-          <mat-select formControlName="carrier">
-            <mat-option *ngFor="let carrier of carriers" [value]="carrier">
-              {{carrier}}
-            </mat-option>
-          </mat-select>
-          <mat-error>Please choose a carrier</mat-error>
-          <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
-        </mat-form-field>
-      </div>
+<form [formGroup]="searchForm" (submit)="onSearch(null)" class="mt-3" (keydown.enter)="$event.preventDefault()">
+  <div class="row d-flex justify-content-center">
+    <div class="col">
+      <mat-form-field appearance="outline">
+        <mat-label>Carrier</mat-label>
+        <mat-select formControlName="carrier">
+          <mat-option *ngFor="let carrier of carriers" [value]="carrier">
+            {{carrier}}
+          </mat-option>
+        </mat-select>
+        <mat-error>Please choose a carrier</mat-error>
+        <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
+      </mat-form-field>
     </div>
-    <a
-      mat-mini-fab
-      color='primary'
-      (click)="submitButton.click()"
-      class="mt-2 d-inline">
-      <mat-icon>search</mat-icon>
-    </a>
   </div>
+
+  <div class="row">
+    <div class="col">
+      <search-bar
+      (onSearchEvent)="onSearch($event)">
+      </search-bar>
+    </div>
+  </div>
+
   <app-code-scanner *ngIf="scannerOpened"></app-code-scanner>
-
-
 </form>
 
 <div *ngIf="tracker">

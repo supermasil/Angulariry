@@ -21,4 +21,5 @@ export class AuthGlobals {
   public static nonSuperAdmin = Object.values(AuthGlobals.roles).slice(1);
   public static admins = Object.values(AuthGlobals.roles).slice(0,2);
   public static managerAdmins = Object.values(AuthGlobals.roles).slice(0, 3);
+  public static nonAdminOfficers = Object.values(AuthGlobals.roles).slice(2, 6);
 }

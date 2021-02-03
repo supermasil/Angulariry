@@ -80,7 +80,7 @@ export class MasterFormCreateComponent implements OnInit {
           this.usersSubject.next(users);
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: MasterTrackingModel) => {
+                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: MasterTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.masterForm = this.createMasterForm(response);
@@ -147,8 +147,8 @@ export class MasterFormCreateComponent implements OnInit {
   }
 
   fetchTrackings(origin: string, destination: string) {
-    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.CONSOLIDATED, this.organization._id, origin, destination, null).subscribe((transformedTrackings) => {
-      this.allTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidationStatuses.includes(i.generalInfo.status));
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.CONSOLIDATED, origin, destination, null).subscribe((transformedTrackings) => {
+      this.allTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
       this.trackingsReference = [...this.allTrackings];
       this.filteredTrackings = of(this.allTrackings);
     });
@@ -230,16 +230,17 @@ export class MasterFormCreateComponent implements OnInit {
   }
 
   translateTrackingNumbersToIds(formData: any) {
-    let tempValues = [];
+    let trackingNumbers = [];
+    let trackingIds = [];
     this.masterForm.get('boxes')['controls'].forEach((box, index) => {
+      trackingNumbers.push(...box.get('items').value);
       box.get('items').value.forEach(t => {
-        tempValues.push([...this.trackingsReference, ...this.currentConsolidatedTrackings].filter(i => i.trackingNumber === t)[0]._id);
+        trackingIds.push([...this.trackingsReference, ...this.currentConsolidatedTrackings].filter(i => i.trackingNumber === t)[0]._id);
       })
-      formData.boxes[index].items = tempValues;
-      tempValues = [];
+      formData.boxes[index].items = trackingIds;
+      trackingIds = [];
     });
-
-    this.removedConsolidatedTrackingNumbers = this.removedConsolidatedTrackingNumbers.map(item => [...this.trackingsReference, ...this.currentConsolidatedTrackings].filter(i => i.trackingNumber === item)[0]._id);
+    formData['validTrackingNumbers'] = trackingNumbers; // For changing status purpose
   }
 
   onSave() {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthGlobals } from '../auth-globals';
 import { AuthService } from '../auth.service';
@@ -11,10 +11,13 @@ import { AuthService } from '../auth.service';
 export class AuthComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    private zone: NgZone
   ) {}
 
-  selectedTabIndex = 0;
+  isLoading = true;
+
+  public selectedTabIndex = 0;
   mode = 'create'
   authGlobals = AuthGlobals;
 
@@ -26,6 +29,11 @@ export class AuthComponent implements OnInit {
         this.selectedTabIndex = 0;
         this.mode = 'edit'
       }
+    });
+    this.authService.getAuthStatusListener().subscribe(authenticated => {
+      this.zone.run(() => {
+        this.isLoading = false;
+      })
     });
   }
 

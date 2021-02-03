@@ -162,7 +162,6 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   }
 
   checkAuthorization() {
-    console.log(this.currentUser._id)
     if (this.currentUser._id !== this.editUser._id) {
       if (this.currentUser.role === AuthGlobals.roles.Admin && AuthGlobals.admins.includes(this.editUser.role) ||
         AuthGlobals.internalNonAdmin.includes(this.currentUser.role) && this.editUser.role != AuthGlobals.roles.Customer ||
@@ -247,6 +246,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
       return;
     }
     (this.signupForm.get(field) as FormArray).removeAt(i);
+    this.recipientNamesValidator()(new FormControl(" ")); // Trigger validation when removing a recipient
   }
 
   setButtonTimeOut() {

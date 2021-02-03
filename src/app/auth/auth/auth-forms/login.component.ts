@@ -13,14 +13,12 @@ import { AuthService } from "../../auth.service";
 export class LoginFormComponent implements OnInit{
 
   loginForm: FormGroup;
-  isLoading = false;
+  buttonIsLoading = false;
 
   constructor(
     private authService: AuthService,
     public route: ActivatedRoute,
-    private zone: NgZone,
-    public router: Router,
-    private alertService: AlertService
+    public router: Router
   ) {}
 
   ngOnInit() {
@@ -39,7 +37,7 @@ export class LoginFormComponent implements OnInit{
   }
 
   setButtonTimeOut() {
-    this.isLoading = true;
-    setTimeout(() => this.isLoading = false, 3000);
+    this.buttonIsLoading = true;
+    setTimeout(() => this.buttonIsLoading = false, 3000);
   }
 }

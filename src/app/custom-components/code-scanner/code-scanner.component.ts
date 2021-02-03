@@ -25,7 +25,7 @@ export class CodeScannerComponent {
   public enableTorchToggle: boolean = false;
   public enableVibrateOnScan: boolean = false;
   public cameraAccess: boolean = true;
-  public enableSoundOnScan: boolean = false;
+  public enableSoundOnScan: boolean = true;
 
   public possibleCameras: Camera[] = [];
 
@@ -34,7 +34,7 @@ export class CodeScannerComponent {
       enabledSymbologies: [Barcode.Symbology.CODE128, Barcode.Symbology.EAN8, Barcode.Symbology.UPCA, Barcode.Symbology.UPCE, Barcode.Symbology.EAN13],
       maxNumberOfCodesPerFrame: 1,
       searchArea: {"x":0,"y":0.35,"width":1,"height":0.3},
-      codeDuplicateFilter: 1000,
+      codeDuplicateFilter: 500,
     });
 
     CameraAccess.getCameras().then((cameras) => {
@@ -45,7 +45,6 @@ export class CodeScannerComponent {
       resolutionPreference: CameraSettings.ResolutionPreference.FULL_HD,
     };
   }
-
 
   public onScan(result: ScanResult): void {
     this.codeScannerService.updateCodeScannerUpdateListener(result.barcodes[0].data);

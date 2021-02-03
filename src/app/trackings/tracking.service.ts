@@ -74,7 +74,6 @@ export class TrackingService{
     return this.httpClient
       .get<{trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((trackingData) => {
-        console.log(trackingData.trackings)
         return {
           trackings: trackingData.trackings.map(tracking => {return tracking as OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel}),
           count: trackingData.count
@@ -88,17 +87,17 @@ export class TrackingService{
       .post<{message: string, tracking: any}>(BACKEND_URL, formData)
       .subscribe((responseData) => {
         this.zone.run(() => {
-          this.router.navigate(["/trackings"]);
+          this.router.navigate(["/trackings", {type: responseData.tracking.trackingNumber.substring(0, 3)}]);
         });
       });
   }
 
-  getTracking(trackingNumber: string, orgId: string) {
-    return this.httpClient.get<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel |ConsolidatedTrackingModel | MasterTrackingModel>(BACKEND_URL + orgId + "/" +trackingNumber ); // return an observable
+  getTracking(trackingNumber: string) {
+    return this.httpClient.get<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel |ConsolidatedTrackingModel | MasterTrackingModel>(BACKEND_URL + "/" +trackingNumber ); // return an observable
   }
 
-  getTrackings(trackingsPerPage: number, currentPage: number, type: string, orgId: string, origin: string, destination: string, sender: string) {
-    let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&orgId=${orgId}&type=${type}`;
+  getTrackings(trackingsPerPage: number, currentPage: number, type: string, origin: string, destination: string, sender: string) {
+    let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&type=${type}`;
     if (origin) {
       queryParams = queryParams.concat(`&origin=${origin}`);
     }
@@ -113,7 +112,7 @@ export class TrackingService{
       .get<{trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((response) => {
         return {
-          trackings: response.trackings.map(tracking => {return this.setTrackingModel(tracking)}),
+          trackings: response.trackings,
           count: response.count};
         })
       );
@@ -123,86 +122,12 @@ export class TrackingService{
     return this.httpClient.delete(BACKEND_URL + trackingNumber);
   }
 
-  setTrackingModel(tracking: any) {
-    let prefix = tracking.trackingNumber.substring(0, 3);
-    switch (prefix) {
-      case TrackingGlobals.trackingTypes.ONLINE:
-        return tracking as OnlineTrackingModel;
-      case TrackingGlobals.trackingTypes.SERVICED:
-        return tracking as ServicedTrackingModel;
-      case TrackingGlobals.trackingTypes.INPERSON:
-        return tracking as InPersonTrackingModel;
-      case TrackingGlobals.trackingTypes.CONSOLIDATED:
-        return tracking as ConsolidatedTrackingModel;
-      case TrackingGlobals.trackingTypes.MASTER:
-        return tracking as MasterTrackingModel;
-      default:
-        this.alertService.error("Couldn't find tracking type", GlobalConstants.flashMessageOptions);
-        return tracking;
+  changeTrackingStatus(status: string, trackingNumber: string) {
+    let formData = {
+      status: status,
+      trackingNumber: trackingNumber
     }
-  }
-
-  setTransformedTrackings(trackings: any, comment: CommentModel, trackingNumber: string) {
-    let prefix = trackings[0]?.trackingNumber.substring(0, 3);
-    switch (prefix) {
-      case TrackingGlobals.trackingTypes.ONLINE:
-        if (trackingNumber) {
-          this.onlineTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
-        else {
-          this.onlineTrackings = trackings;
-        }
-        this.onlineTrackingsUpdated.next({
-          trackings: [...this.onlineTrackings],
-          count: this.onlineTrackings.length
-        });
-        break;
-      case TrackingGlobals.trackingTypes.SERVICED:
-        if (trackingNumber) {
-          this.servicedTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
-        else {
-          this.servicedTrackings = trackings;
-        }
-        this.servicedTrackingsUpdated.next({
-          trackings: [...this.servicedTrackings],
-          count: this.servicedTrackings.length
-        });
-        break;
-      case TrackingGlobals.trackingTypes.INPERSON:
-        if (trackingNumber) {
-          this.inPersonTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
-        else {
-          this.inPersonTrackings = trackings;
-        }
-        this.inPersonTrackingsUpdated.next({
-          trackings: [...this.inPersonTrackings],
-          count: this.inPersonTrackings.length
-        });
-        break;
-      case TrackingGlobals.trackingTypes.CONSOLIDATED:
-        if (trackingNumber) {
-          this.consolidatedTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
-        else {
-          this.consolidatedTrackings = trackings;
-        }
-        this.consolidatedTrackingsUpdated.next({
-          trackings: [...this.consolidatedTrackings],
-          count: this.consolidatedTrackings.length
-        });
-        break;
-      case TrackingGlobals.trackingTypes.MASTER:
-        if (trackingNumber) {
-          this.masterTrackings.find(item => item.trackingNumber == trackingNumber)?.generalInfo.comments.unshift(comment);}
-        else {
-          this.masterTrackings = trackings;
-        }
-        this.masterTrackingsUpdated.next({
-          trackings: [...this.masterTrackings],
-          count: this.masterTrackings.length
-        });
-        break;
-      default:
-        this.alertService.error("Couldn't find transformed trackings type", GlobalConstants.flashMessageOptions);
-        return;
-    }
+    return this.httpClient
+      .post<{message: string, tracking: any}>(BACKEND_URL + "changeStatus", formData);
   }
 }

@@ -22,6 +22,6 @@
     <mat-error>At least 6 characters are required</mat-error>
   </mat-form-field>
   <br>
-  <button *ngIf="!isLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Login</button>
-  <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+  <button *ngIf="!buttonIsLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Login</button>
+  <mat-progress-spinner *ngIf="buttonIsLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
 </form>

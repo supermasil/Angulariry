@@ -84,7 +84,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: InPersonTrackingModel) => {
+                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: InPersonTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.inPersonForm = this.createInPersonForm(response);
@@ -142,10 +142,12 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     if (input.valid) {
       this.showFinalizedInfo = true;
       this.itemsListSubject.next(input.data.items);
+
     } else {
-      this.showFinalizedInfo = true;
+      this.showFinalizedInfo = false;
       this.itemsListSubject.next(null);
     }
+    this.cd.detectChanges();
   }
 
   pricingUpdate(changes) {

@@ -14,7 +14,4 @@ const inPersonTrackingSchema = mongoose.Schema({
 }, {timestamps: true, autoCreate: true });
 
 inPersonTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
-inPersonTrackingSchema.plugin(fuzzySearch, { fields: [
-  "trackingNumber"
-] });
 module.exports = mongoose.model('in-person-tracking', inPersonTrackingSchema);

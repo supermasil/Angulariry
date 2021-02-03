@@ -7,9 +7,11 @@ router.get('/tracking-tool', checkAuth.isAuthenticated, TrackingController.getTr
 
 router.get('/search', checkAuth.isAuthenticated, TrackingController.fuzzySearch); // Has to be before get /:id
 
-router.get('/:orgId/:id', checkAuth.isAuthenticated, TrackingController.getTracking) // Get one
+router.get('/:id', checkAuth.isAuthenticated, TrackingController.getTracking) // Get one
 
 router.get('/', checkAuth.isAuthenticated, TrackingController.getTrackings); // Get all
+
+router.post('/changeStatus', checkAuth.isAuthenticated, TrackingController.changeTrackingStatus); // Create
 
 router.post('/', checkAuth.isAuthenticated, TrackingController.createTracking); // Create
 

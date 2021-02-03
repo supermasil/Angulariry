@@ -1,10 +1,9 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from "@angular/material/checkbox";
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { AuthService } from "src/app/auth/auth.service";
-import { CodeScannerService } from 'src/app/custom-components/code-scanner/code-scanner.service';
 import { FileUploaderComponent } from "src/app/custom-components/file-uploader/file-uploader.component";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { PricingModel } from "src/app/models/pricing.model";
@@ -60,25 +59,20 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   currentTracking: OnlineTrackingModel; // edit case
   mode = "create";
 
-  private codeScannerSub: Subscription;
   scannerOpened = false;
   showItemsList = false;
   showFinalizedInfo = false;
 
+  trackingGlobals = TrackingGlobals;
 
   constructor(
     private trackingService: TrackingService,
     private route: ActivatedRoute,
-    private codeScannerService: CodeScannerService,
     private authService: AuthService,
     private pricingService: PricingService,
     private zone: NgZone,
     private cd: ChangeDetectorRef
   ) {}
-
-  ngOnDestroy(): void {
-    this.codeScannerSub.unsubscribe();
-  }
 
   ngOnInit() {
     this.trackingNumeberSubject.next("onl-" + Date.now() + Math.floor(Math.random() * 10000));
@@ -97,7 +91,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
             this.defaultPricingSubject.next(pricing);
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), this.organization._id).subscribe((response: OnlineTrackingModel) => {
+                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: OnlineTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.onlineForm = this.createOnlineForm(response);
@@ -123,13 +117,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     }, error => {
       this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
     });
-
-    this.codeScannerSub = this.codeScannerService.getCodeScannerUpdateListener()
-      .subscribe((code: {code: string}) => {
-        this.onlineForm.controls['trackingNumber'].setValue(code.code);
-      }, error => {
-        this.authService.redirectToMainPageWithMessage("Couldn't load code scanner");
-      });
   }
 
   emitChanges() {
@@ -146,7 +133,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       _id: new FormControl(formData?._id? formData._id :null),
       carrierTrackingNumber: new FormControl(formData?.carrierTracking?.carrierTrackingNumber? formData.carrierTracking.carrierTrackingNumber: "", {validators: [Validators.required]}),
       carrier: new FormControl(formData?.carrierTracking?.carrier? formData.carrierTracking.carrier: "", {validators: [Validators.required]}),
-      received: new FormControl(formData?.received? formData.received : false, {validators: [Validators.required]}),
+      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.status)? true : false, disabled: this.trackingGlobals.postConsolidated.includes(formData?.generalInfo?.status)}, {validators: [Validators.required]}),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content: ""),
     });
 
@@ -164,11 +151,12 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     if (input.valid) {
       this.showFinalizedInfo = true;
       this.itemsListSubject.next(input.data.items);
+
     } else {
-      this.showFinalizedInfo = true;
+      this.showFinalizedInfo = false;
       this.itemsListSubject.next(null);
     }
-
+    this.cd.detectChanges();
   }
 
   ngAfterViewChecked() {
@@ -187,7 +175,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     if (event.checked) {
       this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.ReceivedAtOrigin);
     } else {
-      this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.Pending);
+      this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.Created);
     }
     // this.onlineForm.get('received').disable();
   }
@@ -221,9 +209,5 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     }
 
     this.trackingService.createUpdateTracking(formData);
-  }
-
-  printPage() {
-    window.print();
   }
 }

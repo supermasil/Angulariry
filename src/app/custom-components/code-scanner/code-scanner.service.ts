@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: "root"})
 export class CodeScannerService {
-  private codeScannerUpdated = new Subject<{code: string}>();
+  private codeScannerUpdated = new Subject<string>();
 
   constructor() {}
 
@@ -13,8 +13,6 @@ export class CodeScannerService {
   }
 
   updateCodeScannerUpdateListener(code: string) {
-    this.codeScannerUpdated.next({
-      code: code
-    })
+    this.codeScannerUpdated.next(code)
   }
 }

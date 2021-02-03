@@ -18,8 +18,9 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { SpinnerInterceptor } from './spinner-interceptor';
 import { NgxImageCompressService } from 'ngx-image-compress';
 import { ScanditSdkModule } from "scandit-sdk-angular";
-const licenseKey = "AbSvESvhNMdSIJKYhj4Nlucp58OiO9KdnXEaxxRP3DSmbQ5yGCFbVKNtOnZISO91dmLwVf4yPajIdRITfFNb9bZuU4yLA2mDVlENTjpUoq24dSHgj1ORjcFdBdcfMiY+82hYIHl033GHEmfzTB98WdpDmiGUGChTIzSXYQ7BkZO1xEkHDRqD6brQAkqTbaUr7V6hq1S5c7u7qg/zhHQBy1J0wgvhAl04hZAkm5150u8tg/wOqCrEbu9znuWZJ3q7pJgTi+e/Jam3inEdJeAhx21lTPRk5rR/nbDBKXPaVFNZckur9sD390/IQLy23xWPTSQcvvh17UE4S9M0qAauM3uI4oCvMtNB6go9VShSDcB0LLlT4gKIp606V8H6wJmjgTzMkyx4Op2lgJ8KbmE8EP7J2tqCVX/h56sCZxPOczhD0c4hJ/B+TTcjI/cN1pUZEF+Jo8r8PVFL695SU5VekjrOA+6PVAQC/bByv25MhzERL8HSXATbXzqNgAKgfcONWS3RkcVqUARK/GnRuSWUYhAYi72v4snr+GdZcdBN+DBKE5krquWGdgVwlJZwG+esDMIUvstlCd/4f0WQV7rasS7UOEhuG9qs9VMX5y3luz7wqKpyzLOeD04syie9vSJiuDMhkXzylhK0ICcb215JmcMcSTs5cdbTe5HApXbKxgINY6N4AOow9IWUHwg+FqcHLTLvBDy8qQqihPm6UEj1G43XeWrA5yYcTiPUEZ1iGs6A9MECjybwLAh+R4e69SMsFbVR4YA1TbPCYpDD7iHqFBzGKlZc1/UFIoXvfHNkAjskNVeER2aJPk6vUOgYEdw+obC+iRav";
-const engineLocation = "https://cdn.jsdelivr.net/npm/scandit-sdk@4.x/build";
+import { CodeScannerModule } from './custom-components/code-scanner/code-scanner.module';
+const licenseKey = "AS2fwy8iD1jHGne5/yEE7/AywHX9K/13NRUpt5kYfikjf+LmpG+cJjR+pAgNUEYqaHmVBRAvCIvKSnGH0GYe7UMg4mL7H+mnNWxuaU4s5hpCYlt0JXIbVc196TkKe/PCDEp3Im1D++/yEZJv3kF+C6UfBSooA4Xu8rjx6L0I5kuH8bghHkFyQa0Za4J4KGUlgReVgjWg1jAyDSpyvF40C/UcmNgtITA47Sz4wqLbf0HVETGaQQiKrgW2BNgMNb95cmCBjCI0Zp07wB38X4eorxIJFXObopfYxAeU3i+ngzvMO6aZ27eVTnYYbHSKiGodsuKONiihJYh25Mc8UQYJlxclSr6TP7Exvg+b7yjUn31G78YHGgfOLPz0HaTrfKVSfXEs0uW6qRCxDsQ95J4Woze3iejs7VBcHQFUit0i07vsvo/pPFC1s3nfZ3x4+97Sg2rdcHjHtJ4RGdgRvPsBqvpM0421QtjNEGtoe5kGKRjri6hEDbJzRtaEjGubcE4jM8VFSHICZanqYQm7Y1x/XAjbd6A3Li49OCWP9jMX38t2MUbj9pXPuexV8lXFjFnZK6oXTPO9ok2EEscXltyN7MaBfkksFo8q+ko6hAaVQ4KmANaQza5urfZXS8hjv5TcJUC4MyO4uK1EXnoGB8dtFl7fWV9Ory09uwHZLhn9Bx6YkkxeqlndOIH8Cx/gaeuHgFXd/osYAtHBSLsSVx9C1sLfMgRl74v3CFON9rfD1TN8JWzvvRjNiezMEYLCwMBRZ5fOfnyuyA9jHh4oAhJnxrNRHQvT28gRN0VzVrtXqK5YPve8uUIOgE/6Yu6mgLfB66C43juv"
+const engineLocation = "https://cdn.jsdelivr.net/npm/scandit-sdk@5.x/build/";
 
 
 @NgModule({
@@ -38,7 +39,8 @@ const engineLocation = "https://cdn.jsdelivr.net/npm/scandit-sdk@4.x/build";
     AlertModule,
     FrontPageModule,
     NgxSpinnerModule,
-    ScanditSdkModule.forRoot(licenseKey, { engineLocation, preloadEngine: true, preloadBlurryRecognition: true })
+    ScanditSdkModule.forRoot(licenseKey, { engineLocation, preloadEngine: true, preloadBlurryRecognition: true }),
+    CodeScannerModule
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
