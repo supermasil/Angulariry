@@ -363,75 +363,66 @@ exports.getTrackings = async (req, res, next) => {
       queryBody['generalInfo.sender'] = req.query.sender;
     }
 
-    let trackingQuery = null;
-
-    let totalCount = 0;
-    finalQuery = null;
-
-    switch (req.query.type) {
-      case TrackingTypes.ONLINE:
-        trackingQuery = OnlineTrackingModel.find(queryBody);
-        finalQuery = fetchTrackingsHelper(req, trackingQuery).populate("carrierTracking");
-        totalCount = await OnlineTrackingModel.countDocuments().then(count => {return count});
-        break;
-      case TrackingTypes.SERVICED:
-        trackingQuery = ServicedTrackingModel.find(queryBody);
-        finalQuery = fetchTrackingsHelper(req, trackingQuery);
-        totalCount = await ServicedTrackingModel.countDocuments().then(count => {return count});
-        break;
-      case TrackingTypes.INPERSON:
-        trackingQuery = InPersonTrackingModel.find(queryBody);
-        finalQuery = fetchTrackingsHelper(req, trackingQuery);
-        totalCount = await InPersonTrackingModel.countDocuments().then(count => {return count});
-        break;
-      case TrackingTypes.CONSOLIDATED:
-        trackingQuery = ConsolidatedTrackingModel.find(queryBody);
-        finalQuery = fetchTrackingsHelper(req, trackingQuery).populate("onlineTrackings").populate("servicedTrackings").populate("inPersonTrackings");
-        totalCount = await ConsolidatedTrackingModel.countDocuments().then(count => {return count});
-        break;
-      case TrackingTypes.MASTER:
-        trackingQuery = MasterTrackingModel.find(queryBody);
-        finalQuery = fetchTrackingsHelper(req, trackingQuery).populate("boxes.items");
-        totalCount = await MasterTrackingModel.countDocuments().then(count => {return count});
-        break;
-    }
-
-    assert(trackingQuery != null, "trackingQuery is null");
-
-    return await finalQuery.populate('generalInfo.comments').lean().exec()
-      .then(async documents => {
-        for (d of documents) {
-          d.generalInfo.sender = await UserController.getUserByIdHelper(d.generalInfo.sender);
-          if (d.trackingNumber.substring(0,3) === TrackingTypes.CONSOLIDATED) {
-            for (t of d.onlineTrackings) {
-              t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
-            }
-            for (t of d.servicedTrackings) {
-              t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
-            }
-            for (t of d.inPersonTrackings) {
-              t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
-            }
+    let callbackfunction = async documents => {
+      for (d of documents) {
+        d.generalInfo.sender = await UserController.getUserByIdHelper(d.generalInfo.sender);
+        if (d.trackingNumber.substring(0,3) === TrackingTypes.CONSOLIDATED) {
+          for (t of d.onlineTrackings) {
+            t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
           }
+          for (t of d.servicedTrackings) {
+            t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
+          }
+          for (t of d.inPersonTrackings) {
+            t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
+          }
+        }
 
-          if (d.trackingNumber.substring(0,3) === TrackingTypes.MASTER) {
-            for (b of d.boxes) {
-              for (t of b.items) {
-                t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
-              }
+        if (d.trackingNumber.substring(0,3) === TrackingTypes.MASTER) {
+          for (b of d.boxes) {
+            for (t of b.items) {
+              t.generalInfo.sender = await UserController.getUserByIdHelper(t.generalInfo.sender);
             }
           }
         }
-        fetchedTrackings = documents
-        return totalCount;
-      })
-      .then(count => {
+      }
+      return res.status(200).json({
+        // No error message needed
+        trackings: documents,
+        count: totalCount
+      });
+    }
+
+    let totalCount = 0;
+
+    switch (req.query.type) {
+      case TrackingTypes.ONLINE:
+        let trackingQuery1 = OnlineTrackingModel.find(queryBody);
+        totalCount = await OnlineTrackingModel.countDocuments().then(count => {return count});
+        return await fetchTrackingsHelper(req, trackingQuery1).populate("carrierTracking").populate('generalInfo.comments').lean().exec().then(callbackfunction);
+      case TrackingTypes.SERVICED:
+        let trackingQuery2 = ServicedTrackingModel.find(queryBody);
+        totalCount = await ServicedTrackingModel.countDocuments().then(count => {return count});
+        return await fetchTrackingsHelper(req, trackingQuery2).populate('generalInfo.comments').lean().exec().then(callbackfunction);
+      case TrackingTypes.INPERSON:
+        let trackingQuery3 = InPersonTrackingModel.find(queryBody);
+        totalCount = await InPersonTrackingModel.countDocuments().then(count => {return count});
+        return await fetchTrackingsHelper(req, trackingQuery3).populate('generalInfo.comments').lean().exec().then(callbackfunction);
+      case TrackingTypes.CONSOLIDATED:
+        let trackingQuery4 = ConsolidatedTrackingModel.find(queryBody);
+        totalCount = await ConsolidatedTrackingModel.countDocuments().then(count => {return count});
+        return await fetchTrackingsHelper(req, trackingQuery4).populate("onlineTrackings").populate("servicedTrackings").populate("inPersonTrackings").populate('generalInfo.comments').lean().exec().then(callbackfunction);
+      case TrackingTypes.MASTER:
+        let trackingQuery5 = MasterTrackingModel.find(queryBody);
+        totalCount = await MasterTrackingModel.countDocuments().then(count => {return count});
+        return await fetchTrackingsHelper(req, trackingQuery5).populate("boxes.items").populate('generalInfo.comments').lean().exec().then(callbackfunction);
+      default:
         return res.status(200).json({
           // No error message needed
-          trackings: fetchedTrackings,
-          count: count
+          trackings: [],
+          count: 0
         });
-      })
+    }
   } catch(error) {
     console.log("getTrackings: " + error.message);
     return res.status(500).json({message: "Couldn't fetch trackings"});

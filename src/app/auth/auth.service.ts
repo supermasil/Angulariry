@@ -79,7 +79,7 @@ export class AuthService {
       const authTime = idTokenResult.claims.auth_time * 1000;
       const sessionDuration = 8 * 60 * 60 * 1000; // 8 hours in miliseconds
       const millisecondsUntilExpiration = sessionDuration - (Date.now() - authTime);
-      setTimeout(() => {this.alertService.warn("Session times out after 8 hours, please re-login", GlobalConstants.flashMessageOptions); this.logout();}, millisecondsUntilExpiration);
+      setTimeout(() => {this.logout();}, millisecondsUntilExpiration);
       this.firebaseUser = firebaseUser;
       this.mongoDbUser = mongoDbUser;
       this.refreshUsers();
@@ -87,7 +87,7 @@ export class AuthService {
       // console.log("User authenticated");
       this.redirecting();
       if (this.loginMode) {
-        this.alertService.success("Logged in successfully", GlobalConstants.flashMessageOptions);
+        this.alertService.success("Welcome back", GlobalConstants.flashMessageOptions);
         this.loginMode = false;
       }
     });

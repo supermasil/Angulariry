@@ -19,10 +19,10 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   senders: UserModel[] = [];
   sendersSubject = new BehaviorSubject<string[]>([]);
-  @Input() usersObservable = new Observable<UserModel[]>();
+
 
   recipientsSubject = new BehaviorSubject<string[]>([]);
-
+  @Input() usersObservable = new Observable<UserModel[]>();
   @Input() defaultLocationsObservable = new Observable<string[]>();
   @Input() trackingNumberObservable = new Observable<string>();
   @Input() generalInfoObservable = new Observable<GeneralInfoModel>();

@@ -163,7 +163,7 @@
               <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
                 <th>Total</th>
                 <th>Kg {{getConsolidatedTotalWeightCost(tracking, true)}}</th>
-                <th>{{getConsolidatedTotalWeightCost(tracking, false) | currency: 'VND'}}</th>
+                <th>{{getConsolidatedTotalWeightCost(tracking, false) | currency: 'USD'}}</th>
             </tfoot>
             </table>
           </div>
@@ -300,7 +300,7 @@
                 <tr>
                   <td>Kg {{tracking.generalInfo.totalWeight}}</td>
                   <td>{{tracking.generalInfo.costAdjustment  | currency: 'USD'}}</td>
-                  <td>VND {{tracking.generalInfo.exchange}}</td>
+                  <td>{{tracking.generalInfo.exchange | currency: 'VND'}}</td>
                   <td>{{tracking.generalInfo.finalCost  | currency: 'USD'}}</td>
                   <td><b>{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange  | currency: 'VND'}}</b></td>
                 </tr>
@@ -309,34 +309,56 @@
 
             <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.CONSOLIDATED">
               <table style="width: 100%; margin-top: 1rem;">
-                <tr>
-                  <td><b>Online Trackings</b></td>
-                  <td><b>Serviced Trackings</b></td>
-                  <td><b>In Person Trackings</b></td>
-                </tr>
-                <tr>
-                  <table>
-                    <div *ngFor="let tracking of tracking.onlineTrackings">
-                      <tr>
+                <thead>
+                  <tr>
+                    <td><b>Tracking</b></td>
+                    <td><b>Weight</b></td>
+                    <td><b>Final Charge</b></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <div *ngFor="let tracking of tracking.onlineTrackings">
+                    <tr>
+                      <td>
                         {{tracking.trackingNumber}}
-                      </tr>
-                    </div>
-                  </table>
-                  <table>
-                    <div *ngFor="let tracking of tracking.servicedTrackings">
-                      <tr>
+                      </td>
+                      <td>
+                        {{tracking.generalInfo.totalWeight}}
+                      </td>
+                      <td>
+                        {{tracking.generalInfo.finalCost | currency: "USD"}}
+                      </td>
+                    </tr>
+                  </div>
+                  <tr></tr>
+                  <div *ngFor="let tracking of tracking.servicedTrackings">
+                    <tr>
+                      <td>
                         {{tracking.trackingNumber}}
-                      </tr>
-                    </div>
-                  </table>
-                  <table>
-                    <div *ngFor="let tracking of tracking.inPersonTrackings">
-                      <tr>
+                      </td>
+                      <td>
+                        {{tracking.generalInfo.totalWeight}}
+                      </td>
+                      <td>
+                        {{tracking.generalInfo.finalCost | currency: "USD"}}
+                      </td>
+                    </tr>
+                  </div>
+                  <tr></tr>
+                  <div *ngFor="let tracking of tracking.inPersonTrackings">
+                    <tr>
+                      <td>
                         {{tracking.trackingNumber}}
-                      </tr>
-                    </div>
-                  </table>
-                </tr>
+                      </td>
+                      <td>
+                        {{tracking.generalInfo.totalWeight}}
+                      </td>
+                      <td>
+                        {{tracking.generalInfo.finalCost | currency: "USD"}}
+                      </td>
+                    </tr>
+                  </div>
+                </tbody>
               </table>
             </div>
 

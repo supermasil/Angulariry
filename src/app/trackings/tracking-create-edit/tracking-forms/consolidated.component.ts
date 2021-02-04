@@ -150,6 +150,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   fetchTrackings(origin: string, destination: string, sender: string) {
+    // 0 per page to find all
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
       this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
@@ -211,6 +212,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   generalInfoUpdated(changes: { sender: string, origin: string, destination: string}) {
+    console.log(changes.sender);
     this.fetchTrackings(changes.origin, changes.destination, changes.sender)
   }
 
