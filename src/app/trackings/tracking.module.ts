@@ -20,7 +20,6 @@ import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/fi
 import { NgxPrintModule } from 'ngx-print';
 import { ConsolidationTableComponent } from './tracking-create-edit/consolidation-table/consolidation-table.component';
 import { TrackingListCommonTemplateComponent } from './tracking-list/common-template/tracking-list-common-template.component';
-import { CodeScannerModule } from '../custom-components/code-scanner/code-scanner.module';
 import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
 
 
@@ -50,7 +49,6 @@ import { SearchBarModule } from '../custom-components/search-bar/search-bar.modu
     AutoCompleteInputModule,
     TrackingRoutingModule,
     NgxPrintModule,
-    CodeScannerModule,
     SearchBarModule
   ]
 })

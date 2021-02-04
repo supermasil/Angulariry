@@ -1,5 +1,5 @@
 <div *ngIf="inPersonForm">
-  <form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
+  <form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4">
     <general-info
         #generalInfo
         [usersObservable]="usersSubject.asObservable()"
@@ -39,7 +39,8 @@
       <finalized-info
         #finalizedInfo
         [itemsListObservable]="itemsListSubject.asObservable()"
-        [costAdjustmentObservable]="costAdjustmentSubject.asObservable()">
+        [costAdjustmentObservable]="costAdjustmentSubject.asObservable()"
+        [exchangeObservable]="exchangeSubject.asObservable()">
       </finalized-info>
     </div>
 
@@ -47,10 +48,10 @@
       <mat-label>Notes</mat-label>
       <textarea
       matInput
-      rows='10'
+      rows='2'
+      cdkTextareaAutosize
       formControlName='content'
       ></textarea>
-      <mat-error>Please enter some post content</mat-error>
     </mat-form-field>
 
     <div class="mt-2">

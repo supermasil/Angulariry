@@ -21,21 +21,41 @@
       <mat-form-field>
         <input
         matInput
-        type='number'
         formControlName='costAdjustment'
-        (change)="getFinalizedInfo()">
-        <span class="mat-h4"  style="position: relative; bottom: 1px;" matPrefix>$&nbsp;</span>
+        currencyMask
+        [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: true}"
+        (keyup)="getFinalizedInfo()">
       </mat-form-field>
 
-      <span class="d-block mat-h3 mb-0"><b style="color: red;">Final Charge</b></span>
+      <span class="d-block mat-h3 mb-0"><b>Exchange</b></span>
       <mat-form-field>
         <input
         matInput
-        type='number'
+        formControlName='exchange'
+        currencyMask
+        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: false}"
+        (keyup)="getFinalizedInfo()">
+      </mat-form-field>
+
+      <span class="d-block mat-h3 mb-0"><b style="color: red; font-size: 1.5rem;">Final Charge</b></span>
+      <mat-form-field>
+        <input
+        matInput
+        currencyMask
+        [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: false}"
         formControlName='finalCost'
         readonly
-        style="font-size: 2rem;">
-        <span class="mat-h4" style="position: relative; bottom: 8px;" matPrefix>$&nbsp;</span>
+        style="font-size: 1.5rem;">
+      </mat-form-field>
+
+      <mat-form-field>
+        <input
+        matInput
+        currencyMask
+        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: false}"
+        formControlName='finalCostVND'
+        readonly
+        style="font-size: 1.5rem;">
       </mat-form-field>
     </div>
   </div>

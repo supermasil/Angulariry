@@ -4,6 +4,7 @@ export class TrackingGlobals {
     "UPS",
     "Fedex",
     "USPS",
+    "DHLExpress",
     "AmazonMws",
     "OnTrac"
   ];

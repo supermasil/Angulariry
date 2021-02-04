@@ -123,7 +123,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   canEdit(roles: string[], creatorId: string) {
-    return roles.includes(this.authService.getMongoDbUser().role) || creatorId === this.currentUser._id
+    return roles.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser._id
   }
 
   isAuth() {
@@ -142,5 +142,29 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
         this.trackings[index] = response.tracking;
       })
     });
+  }
+
+  getConsolidatedTotalWeightCost(tracking: ConsolidatedTrackingModel, weight: boolean) {
+    let totalWeight = 0;
+    let totalCost = 0;
+
+    tracking.onlineTrackings.forEach(t => {
+      totalWeight += t.generalInfo.totalWeight;
+      totalCost += t.generalInfo.finalCost;
+    });
+    tracking.servicedTrackings.forEach(t => {
+      totalWeight += t.generalInfo.totalWeight;
+      totalCost += t.generalInfo.finalCost;
+    });
+    tracking.inPersonTrackings.forEach(t => {
+      totalWeight += t.generalInfo.totalWeight;
+      totalCost += t.generalInfo.finalCost;
+    });
+
+    if (weight) {
+      return totalWeight;
+    } else {
+      return totalCost;
+    }
   }
 }

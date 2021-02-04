@@ -14,6 +14,7 @@ export class FinalizedInfoComponent implements OnInit{
   itemsList: any;
   @Input() itemsListObservable = new Observable<any>();
   @Input() costAdjustmentObservable = new Observable<any>();
+  @Input() exchangeObservable = new Observable<any>();
 
   totalWeight = 0;
   totalWeightCharge = 0;
@@ -28,9 +29,11 @@ export class FinalizedInfoComponent implements OnInit{
 
   ngOnInit() {
     this.finalizedInfoForm = new FormGroup({
-      finalCost: new FormControl(this.finalCharge, {validators: [Validators.required]}),
+      finalCost: new FormControl(0, {validators: [Validators.required]}),
+      finalCostVND: new FormControl(0, {validators: [Validators.required]}),
       costAdjustment: new FormControl(0, {validators: [Validators.required]}),
-      totalWeight: new FormControl(this.totalWeight, {validators: [Validators.required]})
+      exchange: new FormControl(0, {validators: [Validators.required]}),
+      totalWeight: new FormControl(0, {validators: [Validators.required]})
     });
 
     this.itemsListObservable.subscribe(itemsList => {
@@ -46,6 +49,11 @@ export class FinalizedInfoComponent implements OnInit{
       this.finalizedInfoForm.get('costAdjustment').setValue(c);
       this.getFinalizedInfo();
     })
+
+    this.exchangeObservable.subscribe(c => {
+      this.finalizedInfoForm.get('exchange').setValue(c);
+      this.getFinalizedInfo();
+    })
   }
 
   resetInfo() {
@@ -57,6 +65,7 @@ export class FinalizedInfoComponent implements OnInit{
     this.totalInsurance = 0;
     this.finalizedInfoForm.get('totalWeight').setValue(0);
     this.finalizedInfoForm.get('finalCost').setValue(0);
+    this.finalizedInfoForm.get('finalCostVND').setValue(0);
   }
 
   getFinalizedInfo() {
@@ -74,26 +83,11 @@ export class FinalizedInfoComponent implements OnInit{
         this.totalExtraCharge += item.quantity * item.declaredValue * (item.extraCharge / 100);
         this.totalSaving += item.quantity * item.declaredValue * (item.extraChargeSaving / 100);
       }
-
-      this.finalCharge = this.totalWeightCharge + this.totalExtraCharge + this.totalInsurance + this.finalizedInfoForm.get('costAdjustment').value;
     });
-    this.roundEverythingAndSetFields();
-  }
-
-  round(value: number, precision: number) {
-    let multiplier = Math.pow(10, precision || 0);
-    return Math.round(value * multiplier) / multiplier;
-  }
-
-  roundEverythingAndSetFields() {
-    this.totalWeight = this.round(this.totalWeight, 2);
-    this.totalWeightCharge = this.round(this.totalWeightCharge, 2);
-    this.totalExtraCharge = this.round(this.totalExtraCharge, 2);
-    this.totalSaving = this.round(this.totalSaving, 2);
-    this.totalInsurance = this.round(this.totalInsurance, 2);
-    this.finalCharge = this.round(this.finalCharge, 2);
+    this.finalCharge = (this.totalWeightCharge + this.totalExtraCharge + this.totalInsurance + this.finalizedInfoForm.get('costAdjustment').value);
     this.finalizedInfoForm.get('totalWeight').setValue(this.totalWeight);
     this.finalizedInfoForm.get('finalCost').setValue(this.finalCharge);
+    this.finalizedInfoForm.get('finalCostVND').setValue(this.finalCharge * this.finalizedInfoForm.get('exchange').value);
   }
 
   getFormValidity() {

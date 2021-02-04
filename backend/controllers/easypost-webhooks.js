@@ -1,9 +1,14 @@
-const OnlineTrackingModel = require('../models/tracking-models/online-tracking');
+const CarrierTrackingController = require("../controllers/carrier-trackings");
 
 //{"id":"hook_45098b81d06e412ba3f02306cbfedf9b","object":"Webhook","mode":"production","url":"https://weshippee.com/api/easypost","disabled_at":null}
 
 exports.updateTracker = (req, res, next) => {
-  OnlineTrackingModel.updateOne({ trackingNumber: req.body.result.tracking_code}, {status: req.body.result.status })
+  if (req.body.result.status === "unknown") {
+    console.log(`EasyPostWebhook: Ignore updating for status unknown`);
+    return;
+  }
+
+  CarrierTrackingController.updateOne({ carrierTrackingNumber: req.body.result.tracking_code}, {status: req.body.result.status })
     .then(
       console.log(`EasyPostWebhook: Updated tracking ${req.body.result.tracking_code} to status ${req.body.result.status}`)
     )

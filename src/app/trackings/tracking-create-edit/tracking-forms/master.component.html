@@ -1,5 +1,5 @@
 <div *ngIf="masterForm">
-  <form [formGroup]="masterForm" (submit)="onSave()" class="my-4" (keydown.enter)="$event.preventDefault()">
+  <form [formGroup]="masterForm" (submit)="onSave()" class="my-4">
 
     <general-info
       #generalInfo
@@ -85,7 +85,8 @@
         <mat-label>Notes</mat-label>
         <textarea
         matInput
-        rows='10'
+        rows='2'
+        cdkTextareaAutosize
         formControlName='content'
         ></textarea>
       </mat-form-field>

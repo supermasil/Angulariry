@@ -199,6 +199,7 @@ generalInfoSetupHelper = async req => {
     totalWeight: req.body.finalizedInfo.totalWeight,
     finalCost: req.body.finalizedInfo.finalCost,
     costAdjustment: req.body.finalizedInfo.costAdjustment,
+    exchange: req.body.finalizedInfo.exchange,
 
     currentLocation: req.body.currentLocation? req.body.currentLocation : req.body.generalInfo.origin,
     origin: req.body.generalInfo.origin,
@@ -588,13 +589,11 @@ changeStatusForMasterHelper = async (req) => { // When turning the switches
   })
 
   await changeStatusForConsolidatedHelper(req, consolidatedTrackings);
-  await changeTrackingStatusByTrackingNumbers(req, TrackingTypes.MASTER, req.body.status, [masterTracking.trackingNumber]);
 
   if (req.body.status === allStatusTypes.ReadyToFly) {
-    console.log(req.body.status)
     req.body.status = allStatusTypes.Created;
   }
-
+  await changeTrackingStatusByTrackingNumbers(req, TrackingTypes.MASTER, req.body.status, [masterTracking.trackingNumber]);
   masterTracking.generalInfo.status = req.body.status;
   return masterTracking;
 }

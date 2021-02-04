@@ -8,7 +8,7 @@ const shippingOptionsSchema = mongoose.Schema({
 
 // This is only used at sub-document
 const GeneralInfoSchema = mongoose.Schema({
-  sender: {type: String}, // Customer Code // Master doesn't have sender // user _id
+  sender: {type: String, index: true}, // Customer Code // Master doesn't have sender // user _id
   recipient: RecipientSchema,
   organizationId: {type: mongoose.Types.ObjectId, ref: "organization"},
   content: {type: String, default: ''}, // Note
@@ -18,6 +18,7 @@ const GeneralInfoSchema = mongoose.Schema({
   totalWeight: {type: Number, default: 0}, // Can be updated later on
   finalCost: {type: Number, default: 0}, // The money to charge customer
   costAdjustment: {type: Number, default: 0},
+  exchange: {type: Number, default: 0},
 
   currentLocation: {type: String, required: true}, //Unknown, Oregon, HN, SG....
   origin: {type: String, required: true},

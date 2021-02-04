@@ -52,6 +52,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
 
   updateExistingItemsSubject = new ReplaySubject<ListItemModel[]>();
   costAdjustmentSubject = new ReplaySubject<number>();
+  exchangeSubject = new ReplaySubject<number>();
   updateExistingImagesSubject = new ReplaySubject<string[]>();
 
   statusChangeSubject = new ReplaySubject<string>();
@@ -64,6 +65,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   showFinalizedInfo = false;
 
   trackingGlobals = TrackingGlobals;
+  authGlobals = AuthGlobals;
 
   constructor(
     private trackingService: TrackingService,
@@ -124,6 +126,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
     this.costAdjustmentSubject.next(this.currentTracking.generalInfo.costAdjustment);
+    this.exchangeSubject.next(this.currentTracking.generalInfo.exchange);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
     this.itemsListSubject.next(this.itemsList?.getRawValues()?.items);
   }
@@ -133,7 +136,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       _id: new FormControl(formData?._id? formData._id :null),
       carrierTrackingNumber: new FormControl(formData?.carrierTracking?.carrierTrackingNumber? formData.carrierTracking.carrierTrackingNumber: "", {validators: [Validators.required]}),
       carrier: new FormControl(formData?.carrierTracking?.carrier? formData.carrierTracking.carrier: "", {validators: [Validators.required]}),
-      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.status)? true : false, disabled: this.trackingGlobals.postConsolidated.includes(formData?.generalInfo?.status)}, {validators: [Validators.required]}),
+      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.status)? true : false, disabled: !this.canView(this.authGlobals.internal) || this.trackingGlobals.postConsolidated.includes(formData?.generalInfo?.status)}, {validators: [Validators.required]}),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content: ""),
     });
 
@@ -178,6 +181,10 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.Created);
     }
     // this.onlineForm.get('received').disable();
+  }
+
+  canView(roles: string[]) {
+    return roles.includes(this.authService.getMongoDbUser()?.role);
   }
 
   onSave() {

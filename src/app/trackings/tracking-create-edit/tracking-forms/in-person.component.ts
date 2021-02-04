@@ -49,6 +49,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
   updateExistingItemsSubject = new ReplaySubject<ListItemModel[]>();
   costAdjustmentSubject = new ReplaySubject<number>();
+  exchangeSubject = new ReplaySubject<number>();
   updateExistingImagesSubject = new ReplaySubject<string[]>();
 
   showItemsList = false;
@@ -117,6 +118,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
     this.costAdjustmentSubject.next(this.currentTracking.generalInfo.costAdjustment);
+    this.exchangeSubject.next(this.currentTracking.generalInfo.exchange);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
   }
 

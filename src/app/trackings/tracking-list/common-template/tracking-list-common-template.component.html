@@ -99,41 +99,38 @@
                 <ng-container *ngFor="let item of tracking.itemsList">
                   <tr>
                     <td>{{item.name}}</td>
-                    <td>$ {{item.declaredValue}}</td>
+                    <td>{{item.declaredValue | currency: 'USD'}}</td>
                     <td>{{item.quantity}}</td>
                     <td>% {{item.insurance}}</td>
                     <td>Kg {{item.weight}}</td>
-                    <td>$ {{item.unitCharge}}</td>
+                    <td>{{item.unitCharge | currency: 'USD'}}</td>
                     <td>{{item.extraChargeUnit}} {{item.extraCharge}}</td>
-                    <td>$ {{getItemCharge(item)}}</td>
+                    <td>{{getItemCharge(item) | currency: 'USD'}}</td>
                     <td>{{item.status}}</td>
                   </tr>
                 </ng-container>
               </tbody>
-              <tfoot class="mt-4">
-                  <th></th>
-                  <th></th>
-                  <th></th>
+              <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
                   <th>Total weight</th>
                   <th>Kg {{tracking.generalInfo.totalWeight}}</th>
                   <th>Cost adjustment</th>
-                  <th>$ {{tracking.generalInfo.costAdjustment}}</th>
+                  <th>{{tracking.generalInfo.costAdjustment | currency: 'USD'}}</th>
+                  <th>Exchange</th>
+                  <th>{{tracking.generalInfo.exchange | currency: 'VND'}}</th>
                   <th>Final cost</th>
-                  <th>$ {{tracking.generalInfo.finalCost}}</th>
+                  <th>{{tracking.generalInfo.finalCost | currency: 'USD'}}</th>
+                  <th>{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange | currency: 'VND'}}</th>
               </tfoot>
             </table>
           </div>
         </div>
 
-        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.CONSOLIDATED">
+        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.CONSOLIDATED && (tracking.onlineTrackings.length > 0 || tracking.servicedTrackings.length > 0 || tracking.inPersonTrackings.length > 0)">
           <div class="col scroll-box w-100">
             <table style="width: 100%;">
               <thead>
                 <tr>
                   <th>Tracking Number</th>
-                  <th>Sender</th>
-                  <th>Sender's Code</th>
-                  <th>Recipient's Address</th>
                   <th>Weight</th>
                   <th>Final Charge</th>
                 </tr>
@@ -142,36 +139,32 @@
                 <ng-container *ngFor="let item of tracking.onlineTrackings">
                   <tr>
                     <td>{{item?.trackingNumber}}</td>
-                    <td>{{item?.generalInfo?.sender?.name}}</td>
-                    <td>{{item?.generalInfo?.sender?.userCode}}</td>
-                    <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
-                    <td>Kg {{item?.generalInfo?.weight}}</td>
-                    <td>$ {{item?.generalInfo?.finalCost}}</td>
+                    <td>Kg {{item?.generalInfo?.totalWeight}}</td>
+                    <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                   </tr>
                 </ng-container>
 
                 <ng-container *ngFor="let item of tracking.servicedTrackings">
                   <tr>
                     <td>{{item?.trackingNumber}}</td>
-                    <td>{{item?.generalInfo?.sender?.name}}</td>
-                    <td>{{item?.generalInfo?.sender?.userCode}}</td>
-                    <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
-                    <td>Kg {{item?.generalInfo?.weight}}</td>
-                    <td>$ {{item?.generalInfo?.finalCost}}</td>
+                    <td>Kg {{item?.generalInfo?.totalWeight}}</td>
+                    <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                   </tr>
                 </ng-container>
 
                 <ng-container *ngFor="let item of tracking.inPersonTrackings">
                   <tr>
                     <td>{{item?.trackingNumber}}</td>
-                    <td>{{item?.generalInfo?.sender?.name}}</td>
-                    <td>{{item?.generalInfo?.sender?.userCode}}</td>
-                    <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
-                    <td>Kg {{item?.generalInfo?.weight}}</td>
-                    <td>$ {{item?.generalInfo?.finalCost}}</td>
+                    <td>Kg {{item?.generalInfo?.totalWeight}}</td>
+                    <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                   </tr>
                 </ng-container>
               </tbody>
+              <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                <th>Total</th>
+                <th>Kg {{getConsolidatedTotalWeightCost(tracking, true)}}</th>
+                <th>{{getConsolidatedTotalWeightCost(tracking, false) | currency: 'VND'}}</th>
+            </tfoot>
             </table>
           </div>
         </div>
@@ -181,10 +174,9 @@
             <table style="width: 100%;">
               <thead>
                 <tr>
-                  <th>Tracking Number</th>
-                  <th>Sender</th>
-                  <th>Sender's Code</th>
-                  <th>Recipient's Address</th>
+                  <td><b>Consolidated Trackings</b></td>
+                  <td><b>Sender's info</b></td>
+                  <td><b>Recipient's info</b></td>
                 </tr>
               </thead>
               <tbody>
@@ -192,9 +184,8 @@
                   <ng-container *ngFor="let item of box.items">
                     <tr>
                       <td>{{item?.trackingNumber}}</td>
-                      <td>{{item?.generalInfo?.sender?.name}}</td>
-                      <td>{{item?.generalInfo?.sender?.userCode}}</td>
-                      <td><a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">Google maps</a></td>
+                      <td>{{item?.generalInfo?.sender?.name}} {{item?.generalInfo?.sender?.userCode}}</td>
+                      <td>{{item?.generalInfo?.recipient.name}} <a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">{{item?.generalInfo?.recipient.address.address}} {{item?.generalInfo?.recipient.address.addressLineTwo}}</a></td>
                     </tr>
                   </ng-container>
                 </ng-container>
@@ -205,7 +196,7 @@
 
         <!-- Printing section -->
 
-        <div hidden id="print-section">
+        <div hidden id="print-section{{i}}">
             <table>
               <tbody>
                 <h1>{{currentOrg.name}}</h1>
@@ -285,13 +276,13 @@
                   <ng-container *ngFor="let item of tracking.itemsList">
                     <tr>
                       <td>{{item.name}}</td>
-                      <td>$ {{item.declaredValue}}</td>
+                      <td>{{item.declaredValue | currency: 'USD'}}</td>
                       <td>{{item.quantity}}</td>
                       <td>% {{item.insurance}}</td>
                       <td>Kg {{item.weight}}</td>
-                      <td>$ {{item.unitCharge}}</td>
+                      <td>{{item.unitCharge | currency: 'USD'}}</td>
                       <td>{{item.extraChargeUnit}} {{item.extraCharge}}</td>
-                      <td>$ {{getItemCharge(item)}}</td>
+                      <td>{{getItemCharge(item) | currency: 'USD'}}</td>
 
                     </tr>
                   </ng-container>
@@ -302,12 +293,16 @@
                 <tr>
                   <td><b>Total weight</b></td>
                   <td><b>Cost adjustment</b></td>
+                  <td><b>Exchange</b></td>
                   <td><b>Final cost</b></td>
+                  <td></td>
                 </tr>
                 <tr>
                   <td>Kg {{tracking.generalInfo.totalWeight}}</td>
-                  <td>$ {{tracking.generalInfo.costAdjustment}}</td>
-                  <td>$ {{tracking.generalInfo.finalCost}}</td>
+                  <td>{{tracking.generalInfo.costAdjustment  | currency: 'USD'}}</td>
+                  <td>VND {{tracking.generalInfo.exchange}}</td>
+                  <td>{{tracking.generalInfo.finalCost  | currency: 'USD'}}</td>
+                  <td><b>{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange  | currency: 'VND'}}</b></td>
                 </tr>
               </table>
             </div>
@@ -342,6 +337,25 @@
                     </div>
                   </table>
                 </tr>
+              </table>
+            </div>
+
+            <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.MASTER">
+              <table style="width: 100%; margin-top: 1rem;">
+                <tr>
+                  <td><b>Consolidated Trackings</b></td>
+                  <td><b>Sender's info</b></td>
+                  <td><b>Recipient's info</b></td>
+                </tr>
+                <ng-container *ngFor="let box of tracking.boxes">
+                  <ng-container *ngFor="let item of box.items">
+                    <tr>
+                      <td>{{item?.trackingNumber}}</td>
+                      <td>{{item?.generalInfo?.sender?.name}} {{item?.generalInfo?.sender?.userCode}}</td>
+                      <td>{{item?.generalInfo?.recipient.name}} <a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">{{item?.generalInfo?.recipient.address.address}} {{item?.generalInfo?.recipient.address.addressLineTwo}}</a></td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
               </table>
             </div>
 
@@ -389,7 +403,7 @@
             <div class="d-flex justify-content-end">
               <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit', tracking.trackingNumber]" >Edit</a>
               <!-- <a class="mr-2" mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</a> -->
-              <button mat-mini-fab color="primary" class="mr-4" type="button" ngxPrint printSectionId="print-section" ><mat-icon>print</mat-icon></button>
+              <button mat-mini-fab color="primary" class="mr-4" type="button" ngxPrint printSectionId="print-section{{i}}"><mat-icon>print</mat-icon></button>
             </div>
           </div>
         </div>

@@ -35,7 +35,7 @@
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="Consolidated" *ngIf="enabled[3]">
+  <mat-tab label="Consolidated" *ngIf="enabled[3] && canView(authGlobals.internal)">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"

@@ -43,7 +43,9 @@ const options = {
   useCreateIndex: true,
 };
 
-mongoose.connect("mongodb+srv://supermasil:" + process.env.MONGO_ATLAS_PW + "@cluster0-8khn5.mongodb.net/node-angular?retryWrites=true&w=majority", options)
+console.log(process.env.dbName)
+
+mongoose.connect(`mongodb+srv://supermasil:${process.env.MONGO_ATLAS_PW}@cluster0-8khn5.mongodb.net/${process.env.dbName}?retryWrites=true&w=majority`, options)
   .then(() => {
     console.log('Connected to database');
   })

@@ -84,7 +84,11 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
     });
 
     this.itemsForm.valueChanges.subscribe(valid => {
-      this.formValidity.emit({valid: this.itemsForm.valid, data: this.itemsForm.getRawValue()});
+      let validity = this.itemsForm.valid;
+      if (this.itemsForm.get('items')['controls'].length == 0) {
+        validity = false;
+      }
+      this.formValidity.emit({valid: validity, data: this.itemsForm.getRawValue()});
     });
 
     this.updateExistingItemsObservable.subscribe((items: ListItemModel[]) => {
@@ -199,9 +203,8 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
     // if((this.itemsForm.get('items') as FormArray).length == 1) {
     //   return;
     // }
-    if (i > this.totalOldItems - 1) { // Only for new items
-      this.addItemName(this.itemsForm.get('items')['controls'][i].get('name').value);
-    } else {
+    this.addItemName(this.itemsForm.get('items')['controls'][i].get('name').value);
+    if (i <= this.totalOldItems - 1) {
       this.totalOldItems -= 1;
     }
 

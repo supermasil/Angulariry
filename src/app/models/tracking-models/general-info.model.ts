@@ -13,6 +13,7 @@ export interface GeneralInfoModel { // From backend
   totalWeight: number; // Can be updated later on
   finalCost: number; // The money to charge customer
   costAdjustment: number;
+  exchange: number
 
   currentLocation: string; //Unknown, Oregon, HN, SG....
   origin: string;

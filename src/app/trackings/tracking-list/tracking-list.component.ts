@@ -149,7 +149,7 @@ export class TrackingListComponent {
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser().role);
+    return roles.includes(this.authService.getMongoDbUser()?.role);
   }
 
   isAuth() {
