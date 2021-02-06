@@ -11,13 +11,15 @@ import { AuthGlobals } from './auth/auth-globals';
 const routes: Routes = [
   { path: '', component: FrontPageComponent, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}},
+  { path: 'trackings/tracking-tool', component: TrackingToolComponent, canActivate: [AuthGuard], data: {
+    roles: AuthGlobals.everyone}},
+  { path: 'trackings/:type', component: TrackingListComponent, canActivate: [AuthGuard], data: {
+    roles: AuthGlobals.everyone}},
   { path: 'trackings', component: TrackingListComponent, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}},
-  { path: 'trackings/create', loadChildren: () => import("./trackings/tracking.module").then(module => module.TrackingModule), canActivate: [AuthGuard], data: {
+  { path: 'trackings/create/:type', loadChildren: () => import("./trackings/tracking.module").then(module => module.TrackingModule), canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}},
   { path: 'trackings/edit/:trackingId', component: TrackingCreateEditComponent, canActivate: [AuthGuard], data: {
-    roles: AuthGlobals.everyone}},
-  { path: 'trackings/tracking-tool', component: TrackingToolComponent, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}},
   { path: 'pricings', loadChildren: () => import("./custom-components/pricings/pricing.module").then(module => module.PricingModule), canActivate: [AuthGuard], data: {
     roles: [AuthGlobals.roles.SuperAdmin, AuthGlobals.roles.Admin, AuthGlobals.roles.Manager]}},

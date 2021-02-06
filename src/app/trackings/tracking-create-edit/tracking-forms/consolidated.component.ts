@@ -212,7 +212,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   generalInfoUpdated(changes: { sender: string, origin: string, destination: string}) {
-    console.log(changes.sender);
     this.fetchTrackings(changes.origin, changes.destination, changes.sender)
   }
 

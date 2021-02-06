@@ -26,6 +26,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSortModule } from '@angular/material/sort';
 import { MatChipsModule } from '@angular/material/chips';
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 @NgModule({
@@ -66,7 +67,8 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     MatMenuModule,
     MatSortModule,
     MatChipsModule,
-    ClipboardModule
+    ClipboardModule,
+    MatTooltipModule
   ]
 })
 

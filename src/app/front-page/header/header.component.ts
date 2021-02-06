@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core/';
 import { Router } from '@angular/router';
 import { AuthGlobals } from 'src/app/auth/auth-globals';
+import { UserModel } from 'src/app/models/user.model';
 
 @Component({
   selector: 'app-header',
@@ -15,7 +16,11 @@ export class HeaderComponent implements OnInit, OnDestroy{
   constructor(private authService: AuthService, private changeDetector: ChangeDetectorRef, private zone: NgZone, private router: Router) {}
   private authListenerSub: Subscription;
   authGlobals = AuthGlobals;
-  ngOnInit() {}
+  user: UserModel;
+
+  ngOnInit() {
+    this.user = this.authService.getMongoDbUser();
+  }
 
   onLogOut() {
     this.authService.logout();

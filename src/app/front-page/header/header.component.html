@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-sm navbar-dark">
-  <a class="navbar-brand" href="/"><mat-icon>near_me</mat-icon></a>
+  <a class="navbar-brand" href="/"><mat-icon>near_me</mat-icon> (beta)</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -7,7 +7,14 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <a id="hello" class="nav-link" routerLink="/trackings">Trackings</a>
+        <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Trackings</a>
+        <mat-menu #createMenu="matMenu">
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/onl')" routerLinkActive="mat-accent">Online</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/sev')" routerLinkActive="mat-accent">Serviced (Not ready)</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/inp')" routerLinkActive="mat-accent">In Person</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/csl')" routerLinkActive="mat-accent">Consolidated</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/mst')" routerLinkActive="mat-accent">Master</a>
+        </mat-menu>
       </li>
       <li class="nav-item">
         <a class="nav-link" (click)="redirect('/trackings/tracking-tool')">Tracking Tool</a>
@@ -19,13 +26,24 @@
         <a class="nav-link" (click)="redirect('/pricings')" routerLinkActive="mat-accent">Pricing</a>
       </li>
       <li class="nav-item" *ngIf="isAuth() && canView(authGlobals.everyone)">
-        <a class="nav-link" (click)="redirect('/trackings/create')" routerLinkActive="mat-accent">Create</a>
+        <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Create</a>
+        <mat-menu #createMenu="matMenu">
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/create/onl')" routerLinkActive="mat-accent">Online</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/create/sev')" routerLinkActive="mat-accent">Serviced (Not ready)</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/create/inp')" routerLinkActive="mat-accent">In Person</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/create/csl')" routerLinkActive="mat-accent">Consolidated</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/create/mst')" routerLinkActive="mat-accent">Master</a>
+        </mat-menu>
+        <!-- <a class="nav-link" (click)="redirect('/trackings/create')" routerLinkActive="mat-accent">Create</a> -->
       </li>
       <li class="nav-item">
         <a class="nav-link" *ngIf="!isAuth() || canView(authGlobals.internal)" (click)="redirect('/auth')" routerLinkActive="mat-accent">User</a>
       </li>
       <li class="nav-item" *ngIf="isAuth()">
         <a class="nav-link" (click)="onLogOut()">Logout</a>
+      </li>
+      <li class="nav-item" *ngIf="isAuth()">
+        <a class="nav-link" (click)="redirect('/auth/users/edit/' + user._id)">{{user?.role}}</a>
       </li>
     </ul>
   </div>

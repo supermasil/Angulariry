@@ -63,9 +63,6 @@ export class MasterFormCreateComponent implements OnInit {
     private route: ActivatedRoute,
     private trackingService: TrackingService
   ) {
-    this.filteredTrackings = this.trackingCtrl.valueChanges.pipe(
-      startWith(null),
-      map((t: string | null) => t && typeof t === "string" ? this._filter(t) : this.allTrackings.slice()));
   }
 
   ngOnInit() {
@@ -84,6 +81,8 @@ export class MasterFormCreateComponent implements OnInit {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.masterForm = this.createMasterForm(response);
+                  this.setFilter();
+                  console.log(this.trackingCtrl)
                   this.emitChanges();
                   this.setUpData();
                 }, error => {
@@ -91,6 +90,7 @@ export class MasterFormCreateComponent implements OnInit {
                 });
               } else {
                 this.masterForm = this.createMasterForm(null);
+                this.setFilter();
               }
             }, error => {
               this.authService.redirect404();
@@ -112,8 +112,20 @@ export class MasterFormCreateComponent implements OnInit {
       boxes: new FormArray([]),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content : "")
     });
+
     return form
   }
+
+  setFilter() {
+    this.trackingCtrl.valueChanges.subscribe(value => {
+      if (value) {
+        const filterValue = value.toLowerCase();
+        this.filteredTrackings = of(this.allTrackings.filter(t => t.trackingNumber ? t.trackingNumber.includes(filterValue) : false));
+      }
+    });
+  }
+
+
 
   emitChanges() {
     this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
@@ -175,11 +187,6 @@ export class MasterFormCreateComponent implements OnInit {
       this.removedConsolidatedTrackingNumbers = this.removedConsolidatedTrackingNumbers.filter(i => i != value);
     }
     this.filteredTrackings = of(this.allTrackings);
-  }
-
-  private _filter(value: string): ConsolidatedTrackingModel[] {
-    const filterValue = value.toLowerCase();
-    return this.allTrackings.filter(t => t.trackingNumber ? t.trackingNumber.includes(filterValue) : false);
   }
 
   createBox(formData: any): FormGroup {

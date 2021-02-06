@@ -138,7 +138,7 @@ export class TrackingListComponent {
     this.resetPaginator();
 
     this.searchMode = true;
-    this.trackingService.fuzzySearch(searchTerm, this.organization._id, this.currentTrackingType).subscribe(trackingData => {
+    this.trackingService.fuzzySearch(searchTerm, this.currentTrackingType).subscribe(trackingData => {
       this.searchedTrackings = trackingData.trackings;
       this.trackingsSubject.next({trackings: this.searchedTrackings.slice(0, TrackingGlobals.defaultPageSizes[0]) , count: this.searchedTrackings.length});
     });

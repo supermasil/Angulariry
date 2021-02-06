@@ -125,6 +125,8 @@ export class AuthService {
   }
 
   async logout() {
+    this.redirectUrl = null;
+    this.redirectData = {};
     await this.firebaseAuth.signOut().then(() => {
       this.zone.run(() => {
         this.router.navigate(["/auth"]);
@@ -155,10 +157,13 @@ export class AuthService {
         });
     } else { // edit case
       this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
-        .subscribe((responseData) => {});
+        .subscribe((responseData) => {
+          this.zone.run(() => {
+            this.router.navigate(["/"]);
+          });
+        });
     }
   }
-
 
   getUser(id: string | UserModel) {
     return this.httpClient.get<UserModel>(USER_BACKEND_URL + id);

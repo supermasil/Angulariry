@@ -66,6 +66,8 @@ export class TrackingGlobals {
   public static postReadyToFly = Object.values(TrackingGlobals.allStatusTypes).slice(6);
   public static postFlying = Object.values(TrackingGlobals.allStatusTypes).slice(7);
   public static postReceivedAtDestination = Object.values(TrackingGlobals.allStatusTypes).slice(8);
+  public static postDelivering = Object.values(TrackingGlobals.allStatusTypes).slice(9);
+  public static postDelivered = Object.values(TrackingGlobals.allStatusTypes).slice(10);
 
   public static internalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(3);
   public static externalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(0, 3);

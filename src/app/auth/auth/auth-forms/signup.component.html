@@ -50,7 +50,7 @@
 
   <mat-form-field appearance="outline">
     <mat-label>Role</mat-label>
-    <mat-select matInput formControlName="role" required>
+    <mat-select matInput formControlName="role" required matTooltip="Only admin can edit this">
       <mat-option *ngFor="let role of roles" [value]="role">
         {{role}}
       </mat-option>
@@ -85,7 +85,7 @@
     <mat-label>User Code</mat-label>
     <input
     matInput
-    placeholder='Select a enter a unique code for your customer'
+    placeholder='Enter a unique code for your customer'
     formControlName='userCode'
     required>
     <mat-error *ngIf="signupForm.getError('invalidUserCode', 'userCode') as error">{{error}}</mat-error>
@@ -128,9 +128,9 @@
       </mat-card>
     </div>
   </div>
-  <div class="mb-4 d-flex justify-content-end">
+  <!-- <div class="mb-4 d-flex justify-content-end">
     <a mat-mini-fab color="primary" (click)="addAddressOrRecipient('addresses')"><mat-icon>add</mat-icon></a>
-  </div>
+  </div> -->
   <h2>Recipient's addresses</h2>
   <div formArrayName="recipients" *ngFor="let item of signupForm.get('recipients')['controls']; let i = index;">
     <div [formGroupName]="i">

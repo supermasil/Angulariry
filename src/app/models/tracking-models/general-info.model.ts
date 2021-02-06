@@ -26,6 +26,8 @@ export interface GeneralInfoModel { // From backend
   creatorId: string; // Google id, has to be string
   creatorName: string;
 
+  paid: boolean;
+
   filePaths: string[];
   comments: CommentModel[];
 }

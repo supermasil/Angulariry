@@ -26,25 +26,20 @@ export class TrackingCreateEditComponent implements OnInit {
   ngOnInit() {
     // Subcribe to see the active route
     this.route.paramMap.subscribe((paramMap) => {
-      if (this.router.url.includes('edit')) {
-        if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.ONLINE)) {
-          this.selectedIndex = 0;
-        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.SERVICED)) {
-          this.selectedIndex = 1;
-        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.INPERSON)) {
-          this.selectedIndex = 2;
-        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.CONSOLIDATED)) {
-          this.selectedIndex = 3;
-        } else if (paramMap.get('trackingId').includes(TrackingGlobals.trackingTypes.MASTER)) {
-          this.selectedIndex = 4;
-        } else {
-          return this.authService.redirect404();
-        }
-        this.disableTheRest(this.selectedIndex);
-
+      if (paramMap.get('trackingId')?.includes(TrackingGlobals.trackingTypes.ONLINE) || paramMap.get('type')?.includes(TrackingGlobals.trackingTypes.ONLINE)) {
+        this.selectedIndex = 0;
+      } else if (paramMap.get('trackingId')?.includes(TrackingGlobals.trackingTypes.SERVICED) || paramMap.get('type')?.includes(TrackingGlobals.trackingTypes.SERVICED)) {
+        this.selectedIndex = 1;
+      } else if (paramMap.get('trackingId')?.includes(TrackingGlobals.trackingTypes.INPERSON) || paramMap.get('type')?.includes(TrackingGlobals.trackingTypes.INPERSON)) {
+        this.selectedIndex = 2;
+      } else if (paramMap.get('trackingId')?.includes(TrackingGlobals.trackingTypes.CONSOLIDATED) || paramMap.get('type')?.includes(TrackingGlobals.trackingTypes.CONSOLIDATED)) {
+        this.selectedIndex = 3;
+      } else if (paramMap.get('trackingId')?.includes(TrackingGlobals.trackingTypes.MASTER) || paramMap.get('type')?.includes(TrackingGlobals.trackingTypes.MASTER)) {
+        this.selectedIndex = 4;
       } else {
-        this.enabled = [true, false, true, true, true];
+        return this.authService.redirect404();
       }
+      this.disableTheRest(this.selectedIndex);
     });
   }
 

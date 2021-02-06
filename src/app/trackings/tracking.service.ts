@@ -69,8 +69,8 @@ export class TrackingService{
     return this.httpClient.get<Object>(BACKEND_URL + queryParams);
   }
 
-  fuzzySearch(searchTerm: string, orgId: string, type: string) {
-    const queryParams = `search?searchTerm=${searchTerm}&orgId=${orgId}&type=${type}`;
+  fuzzySearch(searchTerm: string, type: string) {
+    const queryParams = `search?searchTerm=${searchTerm}&type=${type}`;
     return this.httpClient
       .get<{trackings: any, count: number}>(BACKEND_URL + queryParams)
       .pipe(map((trackingData) => {
@@ -87,7 +87,7 @@ export class TrackingService{
       .post<{message: string, tracking: any}>(BACKEND_URL, formData)
       .subscribe((responseData) => {
         this.zone.run(() => {
-          this.router.navigate(["/trackings", {type: responseData.tracking.trackingNumber.substring(0, 3)}]);
+          this.router.navigate([`/trackings/${responseData.tracking.trackingNumber.substring(0, 3)}`]);
         });
       });
   }

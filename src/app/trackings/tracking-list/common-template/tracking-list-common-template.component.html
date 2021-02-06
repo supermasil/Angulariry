@@ -43,9 +43,10 @@
                 ></textarea>
             </mat-form-field>
             <span class="d-block mat-h4"><b>Origin</b> {{tracking.generalInfo.origin}}</span>
-              <span class="d-block mat-h4"><b>Destination</b> {{tracking.generalInfo.destination}}</span>
-              <span class="d-block mat-h4" *ngIf="tracking.generalInfo.sender"><b>Sender</b> {{tracking.generalInfo.sender.name}} | {{tracking.generalInfo.sender.userCode}} | {{tracking.generalInfo.sender.phoneNumber}}</span>
-              <span class="d-block mat-h4" *ngIf="tracking.generalInfo.recipient"><b>Recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</span>
+            <span class="d-block mat-h4"><b>Destination</b> {{tracking.generalInfo.destination}}</span>
+            <span class="d-block mat-h4" *ngIf="tracking.generalInfo.sender"><b>Sender</b> {{tracking.generalInfo.sender.name}} | {{tracking.generalInfo.sender.userCode}} | {{tracking.generalInfo.sender.phoneNumber}}</span>
+            <span class="d-block mat-h4" *ngIf="tracking.generalInfo.recipient"><b>Recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</span>
+            <span class="d-block mat-h4" *ngIf="tracking.linkedTo"><b>Linked to</b> {{tracking.linkedTo.trackingNumber}}</span>
 
           </div>
           <div class="col-lg-6 mt-xs-2 mt-md-0">
@@ -79,7 +80,7 @@
           </div>
         </div>
 
-        <div class="row mt-4" *ngIf="trackingGlobal.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3)) && tracking.itemsList.length > 0">
+        <div class="row mt-4" *ngIf="trackingGlobals.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3)) && tracking.itemsList.length > 0">
           <div class="col scroll-box w-100">
             <table style="width: 100%;">
               <thead>
@@ -125,12 +126,14 @@
           </div>
         </div>
 
-        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.CONSOLIDATED && (tracking.onlineTrackings.length > 0 || tracking.servicedTrackings.length > 0 || tracking.inPersonTrackings.length > 0)">
+        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobals.trackingTypes.CONSOLIDATED && (tracking.onlineTrackings.length > 0 || tracking.servicedTrackings.length > 0 || tracking.inPersonTrackings.length > 0)">
           <div class="col scroll-box w-100">
             <table style="width: 100%;">
               <thead>
                 <tr>
                   <th>Tracking Number</th>
+                  <th>Status</th>
+                  <th>Paid</th>
                   <th>Weight</th>
                   <th>Final Charge</th>
                 </tr>
@@ -139,6 +142,8 @@
                 <ng-container *ngFor="let item of tracking.onlineTrackings">
                   <tr>
                     <td>{{item?.trackingNumber}}</td>
+                    <td>{{item?.generalInfo.status}}</td>
+                    <td>{{item?.generalInfo.paid == true? "Yes" : "No"}}</td>
                     <td>Kg {{item?.generalInfo?.totalWeight}}</td>
                     <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                   </tr>
@@ -147,6 +152,8 @@
                 <ng-container *ngFor="let item of tracking.servicedTrackings">
                   <tr>
                     <td>{{item?.trackingNumber}}</td>
+                    <td>{{item?.generalInfo.status}}</td>
+                    <td>{{item?.generalInfo.paid == true? "Yes" : "No"}}</td>
                     <td>Kg {{item?.generalInfo?.totalWeight}}</td>
                     <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                   </tr>
@@ -155,6 +162,8 @@
                 <ng-container *ngFor="let item of tracking.inPersonTrackings">
                   <tr>
                     <td>{{item?.trackingNumber}}</td>
+                    <td>{{item?.generalInfo.status}}</td>
+                    <td>{{item?.generalInfo.paid == true? "Yes" : "No"}}</td>
                     <td>Kg {{item?.generalInfo?.totalWeight}}</td>
                     <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                   </tr>
@@ -162,6 +171,8 @@
               </tbody>
               <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
                 <th>Total</th>
+                <th></th>
+                <th></th>
                 <th>Kg {{getConsolidatedTotalWeightCost(tracking, true)}}</th>
                 <th>{{getConsolidatedTotalWeightCost(tracking, false) | currency: 'USD'}}</th>
             </tfoot>
@@ -169,13 +180,15 @@
           </div>
         </div>
 
-        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.MASTER">
+        <div class="row mt-4" *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobals.trackingTypes.MASTER">
           <div class="col scroll-box w-100">
             <table style="width: 100%;">
               <thead>
                 <tr>
                   <td><b>Consolidated Trackings</b></td>
+                  <td><b>Status</b></td>
                   <td><b>Sender's info</b></td>
+                  <td><b>Fully paid</b></td>
                   <td><b>Recipient's info</b></td>
                 </tr>
               </thead>
@@ -184,7 +197,9 @@
                   <ng-container *ngFor="let item of box.items">
                     <tr>
                       <td>{{item?.trackingNumber}}</td>
+                      <td>{{item?.generalInfo.status}}</td>
                       <td>{{item?.generalInfo?.sender?.name}} {{item?.generalInfo?.sender?.userCode}}</td>
+                      <td>{{item?.generalInfo?.paid == true? "Yes": "No"}}</td>
                       <td>{{item?.generalInfo?.recipient.name}} <a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">{{item?.generalInfo?.recipient.address.address}} {{item?.generalInfo?.recipient.address.addressLineTwo}}</a></td>
                     </tr>
                   </ng-container>
@@ -235,7 +250,7 @@
               </tbody>
             </table>
 
-            <div *ngIf="tracking.trackingNumber.substring(0, 3) != trackingGlobal.trackingTypes.MASTER">
+            <div *ngIf="tracking.trackingNumber.substring(0, 3) != trackingGlobals.trackingTypes.MASTER">
               <table style="width: 100%; margin-top: 1rem;">
                 <tbody>
                   <tr>
@@ -258,7 +273,7 @@
               </table>
             </div>
 
-            <div *ngIf="trackingGlobal.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3))">
+            <div *ngIf="trackingGlobals.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3))">
               <table style="width: 100%; margin-top: 1rem;">
                 <thead>
                   <tr>
@@ -307,7 +322,7 @@
               </table>
             </div>
 
-            <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.CONSOLIDATED">
+            <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobals.trackingTypes.CONSOLIDATED">
               <table style="width: 100%; margin-top: 1rem;">
                 <thead>
                   <tr>
@@ -362,7 +377,7 @@
               </table>
             </div>
 
-            <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobal.trackingTypes.MASTER">
+            <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobals.trackingTypes.MASTER">
               <table style="width: 100%; margin-top: 1rem;">
                 <tr>
                   <td><b>Consolidated Trackings</b></td>
@@ -392,36 +407,65 @@
       <mat-action-row>
         <div class="row">
           <div class="col-lg">
-            <div class="d-flex justify-content-end">
-              <div *ngIf="tracking.trackingNumber.substring(0,3) == trackingGlobal.trackingTypes.ONLINE" style="position: relative; bottom: -6px;">
+            <div class="d-flex">
+              <div *ngIf="tracking.trackingNumber.substring(0,3) == trackingGlobals.trackingTypes.ONLINE" style="position: relative; bottom: -6px;">
                 <mat-slide-toggle
-                  [checked]="trackingGlobal.postReceivedAtOrigin.includes(tracking.generalInfo.status)"
-                  [disabled]="trackingGlobal.postConsolidated.includes(tracking.generalInfo.status)"
-                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.ReceivedAtOrigin): trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.Created)"
+                  [checked]="trackingGlobals.postReceivedAtOrigin.includes(tracking.generalInfo.status)"
+                  [disabled]="trackingGlobals.postConsolidated.includes(tracking.generalInfo.status)"
+                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReceivedAtOrigin): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.Created)"
                   class="mr-2">
                   Received at Origin
                 </mat-slide-toggle>
               </div>
-              <div *ngIf="tracking.trackingNumber.substring(0,3) == trackingGlobal.trackingTypes.MASTER" style="position: relative; bottom: -6px;">
+              <div *ngIf="tracking.trackingNumber.substring(0,3) == trackingGlobals.trackingTypes.MASTER" style="position: relative; bottom: -6px;">
                 <div class="d-block">
                   <mat-slide-toggle
-                    #Flying
-                    [checked]="trackingGlobal.postFlying.includes(tracking.generalInfo.status)"
-                    [disabled]="trackingGlobal.postReceivedAtDestination.includes(tracking.generalInfo.status)"
-                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.Flying): trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.ReadyToFly)"
+                    #flying
+                    [checked]="trackingGlobals.postFlying.includes(tracking.generalInfo.status)"
+                    [disabled]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
+                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.Flying): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReadyToFly)"
                     class="mr-2">Flying
                   </mat-slide-toggle>
                   <mat-slide-toggle
-                    [checked]="trackingGlobal.postReceivedAtDestination.includes(tracking.generalInfo.status)"
-                    [disabled]="!Flying.checked"
-                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.ReceivedAtDestination): trackingToggle($event, tracking, i, trackingGlobal.allStatusTypes.Flying)"
+                    #receivedAtDestination
+                    matTooltip="Only manager/admin can switch it back"
+                    [checked]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
+                    [disabled]="!flying.checked || (receivedAtDestination.checked && !authGlobal.managerAdmins.includes(currentUser.role))"
+                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReceivedAtDestination): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.Flying)"
                     class="mr-2">Received at Destination
                   </mat-slide-toggle>
                 </div>
               </div>
+              <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobals.trackingTypes.CONSOLIDATED || trackingGlobals.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3))" style="position: relative; bottom: -6px;">
+                <mat-slide-toggle
+                  #delivering
+                  [checked]="trackingGlobals.postDelivering.includes(tracking.generalInfo.status)"
+                  [disabled]="trackingGlobals.postDelivered.includes(tracking.generalInfo.status) || !trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
+                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.BeingDeliveredToRecipient): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReceivedAtDestination)"
+                  class="mr-2">
+                  Out for delivery
+                </mat-slide-toggle>
+                <mat-slide-toggle
+                  #delivered
+                  matTooltip="Only manager/admin can switch it back"
+                  [checked]="trackingGlobals.postDelivered.includes(tracking.generalInfo.status)"
+                  [disabled]="!delivering.checked || (delivered.checked && !authGlobal.managerAdmins.includes(currentUser.role))"
+                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.DeliveredToRecipient): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.BeingDeliveredToRecipient)"
+                  class="mr-2">
+                  Delivered
+                </mat-slide-toggle>
+                <mat-slide-toggle
+                  [checked]="tracking.generalInfo.paid"
+                  matTooltip="Only manager/admin can switch it back"
+                  [disabled]="tracking.generalInfo.paid && !authGlobal.managerAdmins.includes(currentUser.role)"
+                  (change)="$event.checked? trackingToggle($event, tracking, i, 'Paid'): trackingToggle($event, tracking, i, 'Unpaid')"
+                  class="mr-2">
+                  Paid
+                </mat-slide-toggle>
+              </div>
             </div>
           </div>
-          <div class="col-lg mt-2 mt-lg-0">
+          <div class="col-lg mt-4 mt-lg-0">
             <div class="d-flex justify-content-end">
               <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit', tracking.trackingNumber]" >Edit</a>
               <!-- <a class="mr-2" mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</a> -->

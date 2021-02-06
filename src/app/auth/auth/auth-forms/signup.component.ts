@@ -9,6 +9,7 @@ import { AutoCompleteInputComponent } from "src/app/custom-components/auto-compl
 import { ValidatorsService } from "src/app/validators.service";
 import { AuthService } from "../../auth.service";
 import { AuthGlobals } from "../../auth-globals";
+import { auth } from "firebase";
 
 
 @Component({
@@ -57,7 +58,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
               this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
                 this.editUser = user;
                 if (this.checkAuthorization()) {
-                  this.roles = AuthGlobals.everyone;
+                  this.roles = AuthGlobals.everyone; // so that the role can be set and disabled
                   this.zone.run(() => {
                     this.createSignUpForm(user);
                     this.setRoles();
@@ -122,7 +123,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
       email: new FormControl({value: formData?.email? formData.email : "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.email]}),
       password: new FormControl({value: "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.minLength(6)]}),
       phoneNumber: new FormControl(formData?.phoneNumber? formData.phoneNumber : "", {validators: [phoneNumberValidator, Validators.required]}),
-      role: new FormControl({value: formData?.role? formData.role: "", disabled: this.mode === 'edit' && !AuthGlobals.admins.includes(this.currentUser?.role)}, {validators: [Validators.required]}),
+      role: new FormControl({value: formData?.role? formData.role: "", disabled: (this.mode === 'edit' && !AuthGlobals.admins.includes(this.currentUser?.role)) || this.currentUser?._id  == this.editUser?._id}, {validators: [Validators.required]}),
       defaultLocation: new FormControl(formData?.defaultLocation? formData.defaultLocation : "", {validators: [Validators.required]}),
       addresses: new FormArray(formData?.addresses && formData.addresses.length > 0 ? this.createAddresses(formData.addresses) : this.createAddresses([null])),
       recipients: new FormArray(formData?.recipients && formData.recipients.length > 0 ? this.createRecipients(formData.recipients): this.createRecipients([])),
@@ -133,29 +134,29 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   }
 
   setRoles() {
+    if (this.currentUser.role === AuthGlobals.roles.SuperAdmin) {
+      this.roles = AuthGlobals.everyone;
+    } else if (this.currentUser.role === AuthGlobals.roles.Admin) {
+      this.roles = AuthGlobals.nonAdmin;
+    }
+
     if (this.mode === 'edit') { // edit case
-      if (AuthGlobals.admins.includes(this.currentUser.role)) {
-        this.roles = AuthGlobals.internal;
+      if (this.currentUser._id  == this.editUser._id) { // Edit self
+        this.roles = AuthGlobals.everyone;
       }
+
       this.companyCodeSubject.next(this.editUser.companyCode);
+
+      // Disabled user code for Customer, customer can only edit himself
       if (this.currentUser.role === AuthGlobals.roles.Customer) {
         this.signupForm.get('userCode').disable();
       }
       this.companyCodeSubject.next(this.editUser.companyCode);
     } else { // create case
-      if (this.currentUser.role === AuthGlobals.roles.Admin) {
-        this.roles = AuthGlobals.nonAdmin;
-      } else if (this.currentUser.role === AuthGlobals.roles.SuperAdmin) {
-        this.roles = AuthGlobals.nonSuperAdmin;
-      } else {
-        this.roles = [AuthGlobals.roles.Customer];
-      }
-
       if (this.currentUser.role !== AuthGlobals.roles.SuperAdmin) {
         this.companyCodeSubject.next(this.currentUser.companyCode);
       }
     }
-
     if (this.currentUser.role !== AuthGlobals.roles.SuperAdmin) {
       this.signupForm.get('companyCode').disable();
     }
@@ -163,9 +164,9 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
 
   checkAuthorization() {
     if (this.currentUser._id !== this.editUser._id) {
-      if (this.currentUser.role === AuthGlobals.roles.Admin && AuthGlobals.admins.includes(this.editUser.role) ||
-        AuthGlobals.internalNonAdmin.includes(this.currentUser.role) && this.editUser.role != AuthGlobals.roles.Customer ||
-        this.currentUser.role === AuthGlobals.roles.Customer) {
+      if (this.currentUser.role === AuthGlobals.roles.Admin && AuthGlobals.admins.includes(this.editUser.role)
+        || AuthGlobals.internalNonAdmin.includes(this.currentUser.role) && this.editUser.role != AuthGlobals.roles.Customer
+        || this.currentUser.role === AuthGlobals.roles.Customer) {
           this.authService.redirectToMainPageWithMessage("You're not authorized");
           return false;
       }

@@ -10,7 +10,7 @@ const inPersonTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true},
   generalInfo: {type: GeneralInfoSchema, required: true},
   itemsList: {type: [ListItemSchema], required: true},
-  linkedTo: [{type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}]
+  linkedTo: {type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}
 }, {timestamps: true, autoCreate: true });
 
 inPersonTrackingSchema.plugin(uniqueValidator); // Throw error if not unique

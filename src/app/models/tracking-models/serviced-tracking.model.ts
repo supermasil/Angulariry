@@ -1,4 +1,5 @@
 import { CarrierTrackingModel } from "./carrier-tracking.model";
+import { ConsolidatedTrackingModel } from "./consolidated-tracking.model";
 import { GeneralInfoModel } from "./general-info.model";
 import { ListItemModel } from "./list-item.model";
 
@@ -15,7 +16,7 @@ export interface ServicedTrackingModel { // From backend
   }];
   generalInfo: GeneralInfoModel;
   itemsList: ListItemModel[];
-  linkedTo: string[];
+  linkedTo: ConsolidatedTrackingModel;
   createdAt: Date;
   updatedAt: Date;
 }

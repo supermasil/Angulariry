@@ -11,7 +11,7 @@ requestedItem = mongoose.Schema({
   specifications: {type: String, required: true},
   quantity: {type: Number, required: true},
   orderNumbers: [{type: String}], // A link can have multiple order numbers
-  carrierTrackings: [{type: mongoose.Types.ObjectId, ref: "carrier-tracking"}]
+  carrierTrackings: {type: mongoose.Types.ObjectId, ref: "carrier-tracking"}
 }, {_id: false});
 
 const servicedTrackingSchema = mongoose.Schema({
@@ -19,7 +19,7 @@ const servicedTrackingSchema = mongoose.Schema({
   requestedItems: [requestedItem],
   generalInfo: {type: GeneralInfoSchema, required: true},
   itemsList: {type: [ListItemSchema], required: true},
-  linkedTo: [{type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}]
+  linkedTo: {type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}
 }, {timestamps: true, autoCreate: true });
 
 servicedTrackingSchema.plugin(uniqueValidator); // Throw error if not unique

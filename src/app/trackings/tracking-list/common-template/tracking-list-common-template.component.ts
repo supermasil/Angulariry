@@ -33,7 +33,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   currentUser: UserModel;
   currentOrg: OrganizationModel;
   authGlobal = AuthGlobals;
-  trackingGlobal = TrackingGlobals;
+  trackingGlobals = TrackingGlobals;
 
   getBadgeColor = TrackingGlobals.getBadgeColor;
 
@@ -119,11 +119,11 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser().role);
+    return roles?.includes(this.authService.getMongoDbUser().role);
   }
 
   canEdit(roles: string[], creatorId: string) {
-    return roles.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser._id
+    return roles?.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser._id
   }
 
   isAuth() {
@@ -136,7 +136,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
 
   }
 
-  trackingToggle(event: MatSlideToggleChange, tracking: OnlineTrackingModel | MasterTrackingModel, index: number, status: string) {
+  trackingToggle(event: MatSlideToggleChange, tracking: OnlineTrackingModel | InPersonTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {
     this.trackingService.changeTrackingStatus(status, tracking.trackingNumber).subscribe(response => {
       this.zone.run(() => {
         this.trackings[index] = response.tracking;
