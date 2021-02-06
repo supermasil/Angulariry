@@ -3,7 +3,6 @@ import { PageEvent } from '@angular/material/paginator';
 import { AuthService } from 'src/app/auth/auth.service';
 import { TrackingGlobals } from '../tracking-globals';
 import { TrackingService } from '../tracking.service';
-import { CodeScannerService } from 'src/app/custom-components/code-scanner/code-scanner.service';
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
 import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
@@ -13,7 +12,7 @@ import { OrganizationModel } from "src/app/models/organization.model";
 import { UserModel } from "src/app/models/user.model";
 import { ReplaySubject, Subject } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 
 @Component({
   selector: 'app-tracking-list',
@@ -40,32 +39,34 @@ export class TrackingListComponent {
   searchedTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
 
   constructor(
-    public trackingService: TrackingService,
+    private trackingService: TrackingService,
     private authService: AuthService,
-    private codeScannerService: CodeScannerService,
-    private route: ActivatedRoute
-  ) {} // Public simplifies code
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   async ngOnInit() {
-    switch (this.route.snapshot.paramMap.get('type')) {
-      case TrackingGlobals.trackingTypes.ONLINE:
-        this.selectedIndex = 0;
-        break;
-      case TrackingGlobals.trackingTypes.SERVICED:
-        this.selectedIndex = 1;
-        break;
-      case TrackingGlobals.trackingTypes.INPERSON:
-        this.selectedIndex = 2;
-        break;
-      case TrackingGlobals.trackingTypes.CONSOLIDATED:
-        this.selectedIndex = 3;
-        break;
-      case TrackingGlobals.trackingTypes.MASTER:
-        this.selectedIndex = 4;
-        break;
-    }
-
-    this.setTab(this.selectedIndex);
+    this.route.params.subscribe(val => {
+      console.log(val)
+      switch (this.route.snapshot.paramMap.get('type')) {
+        case TrackingGlobals.trackingTypes.ONLINE:
+          this.selectedIndex = 0;
+          break;
+        case TrackingGlobals.trackingTypes.SERVICED:
+          this.selectedIndex = 1;
+          break;
+        case TrackingGlobals.trackingTypes.INPERSON:
+          this.selectedIndex = 2;
+          break;
+        case TrackingGlobals.trackingTypes.CONSOLIDATED:
+          this.selectedIndex = 3;
+          break;
+        case TrackingGlobals.trackingTypes.MASTER:
+          this.selectedIndex = 4;
+          break;
+      }
+      this.setTab(this.selectedIndex);
+    });
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
@@ -108,18 +109,23 @@ export class TrackingListComponent {
     switch (index) {
       case 0:
         this.currentTrackingType = TrackingGlobals.trackingTypes.ONLINE;
+        this.router.navigate(['/trackings/onl']);
         break;
       case 1:
         this.currentTrackingType = TrackingGlobals.trackingTypes.SERVICED;
+        this.router.navigate(['/trackings/sev']);
         break;
       case 2:
         this.currentTrackingType = TrackingGlobals.trackingTypes.INPERSON;
+        this.router.navigate(['/trackings/inp']);
         break;
       case 3:
         this.currentTrackingType = TrackingGlobals.trackingTypes.CONSOLIDATED;
+        this.router.navigate(['/trackings/csl']);
         break;
       case 4:
         this.currentTrackingType = TrackingGlobals.trackingTypes.MASTER;
+        this.router.navigate(['/trackings/mst']);
         break;
     }
   }

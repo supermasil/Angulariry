@@ -19,7 +19,9 @@ export class HeaderComponent implements OnInit, OnDestroy{
   user: UserModel;
 
   ngOnInit() {
-    this.user = this.authService.getMongoDbUser();
+    this.authService.getMongoDbUserListener().subscribe(user => {
+      this.user = user;
+    });
   }
 
   onLogOut() {

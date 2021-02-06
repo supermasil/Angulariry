@@ -4,7 +4,7 @@
   (onSearchEvent)="onFuzzySearch($event)"
 ></search-bar>
 
-<mat-tab-group (selectedIndexChange)="tabChanged($event)"class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
+<mat-tab-group (selectedIndexChange)="tabChanged($event)" class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
   <mat-tab label="Online" *ngIf="enabled[0]">
     <ng-template matTabContent>
       <tracking-list-common-template

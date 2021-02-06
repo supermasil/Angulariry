@@ -236,6 +236,14 @@
                 </tr>
               </tbody>
             </table>
+            <table>
+              <td><ngx-qrcode
+                [elementType]="'url'"
+                [value]="tracking.trackingNumber"
+                cssClass="aclass"
+                errorCorrectionLevel="L">
+              </ngx-qrcode></td>
+            </table>
 
             <table style="width: 100%; margin-top: 1rem;">
               <tbody>
@@ -469,7 +477,7 @@
             <div class="d-flex justify-content-end">
               <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit', tracking.trackingNumber]" >Edit</a>
               <!-- <a class="mr-2" mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</a> -->
-              <button mat-mini-fab color="primary" class="mr-4" type="button" ngxPrint printSectionId="print-section{{i}}"><mat-icon>print</mat-icon></button>
+              <button mat-mini-fab color="primary" class="mr-4" type="button" ngxPrint printSectionId="print-section{{i}}" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
             </div>
           </div>
         </div>

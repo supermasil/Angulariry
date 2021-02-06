@@ -293,7 +293,7 @@ updateImages = async (req, currentFilesPath) => {
 
 exports.fuzzySearch = async (req, res, next) => {
   try {
-    response = await getTrackingsHelper(req);
+    response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
     response.trackings = response.trackings.filter((doc) => {
       let result = false;
 

@@ -31,9 +31,9 @@ export class CodeScannerComponent {
 
   constructor(private codeScannerService: CodeScannerService) {
     this.activeSettings = new ScanSettings({
-      enabledSymbologies: [Barcode.Symbology.CODE128, Barcode.Symbology.EAN8, Barcode.Symbology.UPCA, Barcode.Symbology.UPCE, Barcode.Symbology.EAN13],
+      enabledSymbologies: [Barcode.Symbology.QR, Barcode.Symbology.PDF417, Barcode.Symbology.MAXICODE, Barcode.Symbology.CODE128, Barcode.Symbology.EAN8, Barcode.Symbology.UPCA, Barcode.Symbology.UPCE, Barcode.Symbology.EAN13],
       maxNumberOfCodesPerFrame: 1,
-      searchArea: {"x":0,"y":0.35,"width":1,"height":0.3},
+      searchArea: {"x":0,"y":0.25,"width":1,"height":0.5},
       codeDuplicateFilter: 500,
     });
 

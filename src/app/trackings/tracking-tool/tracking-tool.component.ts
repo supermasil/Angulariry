@@ -6,7 +6,6 @@ import { TrackerModel } from '../../models/easy-post-models/tracker.model';
 import { TrackingDetailModel } from '../../models/easy-post-models/tracking-details.model';
 import { GeneralMethods } from '../../shared/general-methods';
 import { TrackingGlobals } from '../tracking-globals';
-import { CodeScannerService } from 'src/app/custom-components/code-scanner/code-scanner.service';
 
 @Component({
   selector: 'app-tracking',
@@ -41,8 +40,8 @@ export class TrackingToolComponent implements OnInit {
   capitalizeFirstLetter = GeneralMethods.capitalizeFirstLetter;
 
   constructor(
-    private trackingService: TrackingService,
-    private codeScannerService: CodeScannerService){}
+    private trackingService: TrackingService)
+    {}
 
   ngOnInit() {
     // Set up form

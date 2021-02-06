@@ -16,18 +16,19 @@ export class AuthComponent implements OnInit {
   ) {}
 
   isLoading = true;
-
-  public selectedTabIndex = 0;
   mode = 'create'
+  selectedTabIndex = 0;
+
   authGlobals = AuthGlobals;
+  enabled = [true, true, true, true, true, true];
 
   ngOnInit() {
     this.route.paramMap.subscribe((paramMap) => {
       if (paramMap.has("orgId")) {
-        this.selectedTabIndex = 2;
+        this.disableTheRest(4);
       } else if (paramMap.has("userId")) {
-        this.selectedTabIndex = 0;
         this.mode = 'edit'
+        this.disableTheRest(2);
       }
     });
     this.authService.getAuthStatusListener().subscribe(authenticated => {
@@ -37,8 +38,16 @@ export class AuthComponent implements OnInit {
     });
   }
 
-  setTabIndex(index: number) {
-    this.selectedTabIndex = index;
+  disableTheRest(index: number) {
+    let temp = [...this.enabled];
+    this.enabled.forEach((tab, i) => {
+      if (i != index) {
+        temp[i] = false;
+      } else {
+        temp[i] = true;
+      }
+    });
+    this.enabled = [...temp];
   }
 
   canView(roles: string[]) {

@@ -42,7 +42,7 @@
         <input
         matInput
         currencyMask
-        [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: false}"
+        [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: true}"
         formControlName='finalCost'
         readonly
         style="font-size: 1.5rem;">
@@ -52,7 +52,7 @@
         <input
         matInput
         currencyMask
-        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: false}"
+        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: true}"
         formControlName='finalCostVND'
         readonly
         style="font-size: 1.5rem;">
