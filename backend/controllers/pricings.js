@@ -3,7 +3,7 @@ const PricingModel = require('../models/pricing');
 
 exports.addItems = async (req, res, next) => {
   try {
-    const pricing = await this.getPricingByIdHelper(req.body._id);
+    const pricing = await this.getPricingByIdHelper(req.body._id, req.userData.orgId);
     // console.log(JSON.stringify(req.body.items, null, 2));
     let currentItemNames = pricing.items.map(item => item.name);
     let toBeaddedItems = [];
@@ -37,7 +37,7 @@ exports.addItems = async (req, res, next) => {
 
 exports.updateItems = async (req, res, next) => {
   try {
-    const pricing = await this.getPricingByIdHelper(req.body._id);
+    const pricing = await this.getPricingByIdHelper(req.body._id, req.userData.orgId);
     let items = itemsSetupHelper(req.body.items, false);
     // console.log(JSON.stringify(items,null,2));
     pricing.items = items;
@@ -122,7 +122,7 @@ itemsSetupHelper = (items, createMode) => {
 
 exports.getPricing = async (req, res, next) => {
   try {
-    foundPricing = await this.getPricingByIdHelper(req.params.id);
+    foundPricing = await this.getPricingByIdHelper(req.params.id, req.userData.orgId);
     if (foundPricing == null) {
       throw new Error("Pricing is null");
     }
@@ -184,7 +184,7 @@ exports.getPricing = async (req, res, next) => {
 
 exports.deleteItem = async (req, res, next) => {
   try {
-    const pricing = await this.getPricingByIdHelper(req.params.pricingId);
+    const pricing = await this.getPricingByIdHelper(req.params.pricingId, req.userData.orgId);
     let tempItems = pricing.items.filter(i => i._id != req.params.itemId);
     pricing.items = tempItems;
 
@@ -216,7 +216,7 @@ exports.deletePricing = async (req, res, next) => {
 
 exports.cleanUpPricing = async (req, res, next) => {
   try {
-    const pricing = await this.getPricingByIdHelper(req.params.id);
+    const pricing = await this.getPricingByIdHelper(req.params.id, req.userData.orgId);
     pricing.items = [];
 
     await pricing.save().then(response => {});
@@ -231,14 +231,8 @@ exports.cleanUpPricing = async (req, res, next) => {
   }
 }
 
-exports.getPricingByIdHelper = async (pricingId) => {
-  return await PricingModel.findById(pricingId).then(foundPricing => {
-    return foundPricing;
-  });
-}
-
-exports.getDefaultPricingForOrg = async (orgId) => {
-  return await PricingModel.findOne({organization: orgId, getDefaultPricingForOrg: false}).then(foundPricing => {
+exports.getPricingByIdHelper = async (pricingId, orgId) => {
+  return await PricingModel.findOne({_id: pricingId, organization: orgId}).then(foundPricing => {
     return foundPricing;
   });
 }

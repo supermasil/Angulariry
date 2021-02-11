@@ -31,7 +31,7 @@ const itemSchema = mongoose.Schema({
 }, { timestamps: true });
 
 const pricingSchema = mongoose.Schema({
-  organization: {type: mongoose.Types.ObjectId, ref: "organization", index: true},
+  organization: {type: mongoose.Types.ObjectId, ref: "organization", required: true, index: true},
   items: [itemSchema]
 }, { timestamps: true, autoCreate: true });
 

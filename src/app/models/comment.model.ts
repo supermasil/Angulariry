@@ -6,6 +6,7 @@ export interface CommentModel { // From backend
   imagePaths: [string];
   content: string;
   attachmentPaths: [string];
+  organization: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,5 +1,5 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from "@angular/core";
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 import { ReplaySubject } from 'rxjs';
 import { AuthService } from "src/app/auth/auth.service";
@@ -16,6 +16,7 @@ import { FinalizedInfoComponent } from "../finalized-info/finalized-info.compone
 import { GeneralInfoComponent } from "../general-info/general-info.component";
 import { ItemsListComponent } from "../items-list/items-list.component";
 import { AuthGlobals } from "src/app/auth/auth-globals";
+import { TrackingGlobals } from "../../tracking-globals";
 
 
 @Component({
@@ -76,9 +77,9 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
-        this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
-          this.users = users;
-          this.usersSubject.next(users.filter(u => u.role === AuthGlobals.roles.Customer));
+        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+          this.users = response.users;
+          this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
             this.defaultPricingSubject.next(pricing);
@@ -126,11 +127,16 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     let form = new FormGroup({
       _id: new FormControl(formData?._id? formData._id :null),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content : ""),
+      paid: new FormControl({value: formData?.generalInfo?.paid? true : false, disabled: !this.canView(AuthGlobals.internal) || formData?.linkedToCsl }, {validators: [Validators.required]}),
       // payAtDestination: new FormControl(false, {validators: [Validators.required]}),
       // receiveAtDestinationWH: new FormControl(false, {validators: [Validators.required]})
     });
 
     return form
+  }
+
+  canView(roles: string[]) {
+    return roles.includes(this.authService.getMongoDbUser()?.role);
   }
 
   generalInfoValidity(valid: boolean) {
@@ -153,9 +159,6 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   pricingUpdate(changes) {
-    let userCode = changes.sender.split(' ')[0];
-    let user = this.users?.filter(u => u.userCode == userCode)[0];
-    changes.sender = user?._id;
     this.pricingUpdatedSubject.next(changes);
     // Error is handled in itemsListComponent
   }
@@ -178,7 +181,6 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
 
     let formData = this.inPersonForm.getRawValue();
-    formData['organizationId'] = this.organization._id
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
     formData['generalInfo']['recipient'] = recipient;
     formData['itemsList'] = this.itemsList?.getRawValues()?.items ? this.itemsList.getRawValues().items : [];

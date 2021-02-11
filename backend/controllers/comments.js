@@ -24,6 +24,7 @@ exports.createComment = async (req, res, next) => {
       creatorName: user.name,
       filePaths: req.body.imagePaths,
       content: req.body.content,
+      organization: req.userData.orgId
     });
 
 
@@ -70,7 +71,7 @@ exports.createComment = async (req, res, next) => {
 }
 
 exports.deleteComment = async (req, res, next) => {
-  return await CommentModel.deleteOne({ _id: req.body._id, creatorId: req.userData.uid })
+  return await CommentModel.deleteOne({ _id: req.body._id, organization: req.userData.orgId })
   .then(deletedCommentData => {
     if (deletedCommentData.deletedCount > 0) {
       return res.status(201).json({message: "Comment deleted sucessfully"});
@@ -90,7 +91,7 @@ exports.updateComment = async (req, res, next) => {
     content: req.body.content
   });
 
-  return await CommentModel.updateOne({ _id: req.body._id, creatorId: req.userData.uid }, comment)
+  return await CommentModel.updateOne({ _id: req.body._id, organization: req.userData.orgId }, comment)
     .then(updatedComment => {
       if (updatedComment.nModified > 0) {
         return res.status(201).json({message: "Comment updated sucessfully"});

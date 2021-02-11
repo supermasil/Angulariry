@@ -29,9 +29,12 @@ export class OnboardingFormComponent implements OnInit {
     private validatorsService: ValidatorsService
   ) {}
 
+  mode = "create"
+
   ngOnInit() {
     this.route.paramMap.subscribe((paramMap) => {
       if (paramMap.has("orgId")) {
+        this.mode = 'edit'
         this.authService.getOrganization(paramMap.get("orgId")).subscribe(organization => {
           this.organizationOnboardingForm = this.createOrganizationOnboardingForm(organization);
         }, error => {
@@ -60,7 +63,7 @@ export class OnboardingFormComponent implements OnInit {
     let results: FormGroup[] = [];
     locations.forEach(location => {
       let form = new FormGroup({
-        name: new FormControl(location?.name? location.name : "", {validators: [Validators.required]}),
+        name: new FormControl({value: location?.name? location.name : "", disabled: this.mode === 'edit'}, {validators: [Validators.required]}),
         phoneNumber: new FormControl(location?.phoneNumber? location.phoneNumber : "", {validators: [phoneNumberValidator, Validators.minLength(1)]}),
         faxNumber: new FormControl(location?.faxNumber? location.faxNumber : ""),
         address: new FormControl({value: location?.address?.address? location.address.address : "", disabled: location?.address?.address? true : false}, {validators: [Validators.required, this.validatorsService.addressValidator()]}),

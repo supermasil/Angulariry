@@ -4,9 +4,9 @@ export class AuthGlobals {
     SuperAdmin: "SuperAdmin",
     Admin: "Admin",
     Manager: "Manager",
-    Sales: "Sales",
     Accounting: "Accounting",
     Operation: "Operation",
+    Sales: "Sales",
     Receiving: "Receiving",
     Shipping: "Shipping",
     Customer: "Customer"
@@ -22,4 +22,5 @@ export class AuthGlobals {
   public static admins = Object.values(AuthGlobals.roles).slice(0,2);
   public static managerAdmins = Object.values(AuthGlobals.roles).slice(0, 3);
   public static nonAdminOfficers = Object.values(AuthGlobals.roles).slice(2, 6);
+  public static nonSalesOfficers = Object.values(AuthGlobals.roles).slice(0, 5);
 }

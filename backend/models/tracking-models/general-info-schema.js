@@ -10,7 +10,7 @@ const shippingOptionsSchema = mongoose.Schema({
 const GeneralInfoSchema = mongoose.Schema({
   sender: {type: String, index: true}, // user _id
   recipient: RecipientSchema,
-  organizationId: {type: mongoose.Types.ObjectId, ref: "organization"},
+  organization: {type: mongoose.Types.ObjectId, ref: "organization", required: true},
   content: {type: String, default: ''}, // Note
   status: {type: String, required: true, default: "Unknown"},
   active: {type: Boolean, required: true}, // This should be false to prevent edit after certain stage

@@ -23,6 +23,10 @@
       [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
     </div>
 
+    <div class="mt-2">
+      <mat-checkbox matInput formControlName="paid">Paid</mat-checkbox>
+    </div>
+
     <div class="mt-2" *ngIf="showItemsList">
       <items-list
         #itemsList

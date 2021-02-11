@@ -1,7 +1,6 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from "@angular/core";
-import { FormGroup, FormControl, Validators, Form, FormArray } from "@angular/forms";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
-import { MatSlideToggleChange } from "@angular/material/slide-toggle";
+import { read } from "fs";
 import * as moment from "moment";
 import { Observable } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
@@ -11,7 +10,7 @@ import { OrganizationModel } from "src/app/models/organization.model";
 import { ConsolidatedTrackingModel } from "src/app/models/tracking-models/consolidated-tracking.model";
 import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
 import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
-import { MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
+import { MasterTrackingBox, MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
 import { UserModel } from "src/app/models/user.model";
@@ -136,7 +135,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
 
   }
 
-  trackingToggle(event: MatSlideToggleChange, tracking: OnlineTrackingModel | InPersonTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {
+  trackingToggle(tracking: OnlineTrackingModel | InPersonTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {
     this.trackingService.changeTrackingStatus(status, tracking.trackingNumber).subscribe(response => {
       this.zone.run(() => {
         this.trackings[index] = response.tracking;
@@ -144,27 +143,72 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
     });
   }
 
-  getConsolidatedTotalWeightCost(tracking: ConsolidatedTrackingModel, weight: boolean) {
+  childTrackingToggle(parentTracking: ConsolidatedTrackingModel, tracking: OnlineTrackingModel | InPersonTrackingModel | ServicedTrackingModel, index: number, childIndex: number, status: string) {
+    this.trackingService.changeTrackingStatus(status, tracking.trackingNumber).subscribe(response => {
+      this.trackingService.getTracking(parentTracking.trackingNumber).subscribe(foundTracking => {
+        this.trackings[index] = foundTracking;
+      })
+
+      // this.zone.run(() => {
+      //   if (tracking.trackingNumber.substring(0, 3) === this.trackingGlobals.trackingTypes.ONLINE) {
+      //     (this.trackings[index] as ConsolidatedTrackingModel).onlineTrackings[childIndex] = response.tracking;
+      //   } else if (tracking.trackingNumber.substring(0, 3) === this.trackingGlobals.trackingTypes.SERVICED) {
+      //     (this.trackings[index] as ConsolidatedTrackingModel).servicedTrackings[childIndex] = response.tracking;
+      //   } else if (tracking.trackingNumber.substring(0, 3) === this.trackingGlobals.trackingTypes.INPERSON) {
+      //     (this.trackings[index] as ConsolidatedTrackingModel).inPersonTrackings[childIndex] = response.tracking;
+      //   }
+      // })
+    });
+  }
+
+  getConsolidatedTotalWeightCost(tracking: ConsolidatedTrackingModel) {
+    return this.getTotalWeightCostHelper(tracking);
+  }
+
+  getMasterTotalWeightCost(boxes: MasterTrackingBox[]) {
     let totalWeight = 0;
     let totalCost = 0;
+    boxes.forEach(b => {
+      let response = this.getTotalWeightCostHelper(b);
+      totalWeight += response.weight;
+      totalCost += response.cost;
+    })
+    return {weight: totalWeight, cost: totalCost};
+  }
 
-    tracking.onlineTrackings.forEach(t => {
+  getTotalWeightCostHelper(item: ConsolidatedTrackingModel | MasterTrackingBox) {
+    let totalWeight = 0;
+    let totalCost = 0;
+    item.onlineTrackings.forEach(t => {
       totalWeight += t.generalInfo.totalWeight;
       totalCost += t.generalInfo.finalCost;
     });
-    tracking.servicedTrackings.forEach(t => {
+    item.servicedTrackings.forEach(t => {
       totalWeight += t.generalInfo.totalWeight;
       totalCost += t.generalInfo.finalCost;
     });
-    tracking.inPersonTrackings.forEach(t => {
+    item.inPersonTrackings.forEach(t => {
       totalWeight += t.generalInfo.totalWeight;
       totalCost += t.generalInfo.finalCost;
     });
 
-    if (weight) {
-      return totalWeight;
-    } else {
-      return totalCost;
+    return {weight: totalWeight, cost: totalCost};
+  }
+
+  combineTrackings(arr1: OnlineTrackingModel[], arr2: ServicedTrackingModel[], arr3: InPersonTrackingModel[]) {
+    return [...arr1, ...arr2, ...arr3];
+  }
+
+  getConsolidatedTrackingOverallStatus(tracking: ConsolidatedTrackingModel, statuses: string[]) {
+    let result = true;
+    let trackingStatuses = this.combineTrackings(tracking.onlineTrackings, tracking.servicedTrackings, tracking.inPersonTrackings).map(t => t.generalInfo.status);
+    for (let s of trackingStatuses) {
+      if (!statuses.includes(s)) {
+        result =  false;
+        break;
+      }
     }
+
+    return result;
   }
 }

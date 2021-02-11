@@ -184,19 +184,19 @@ exports.getUsers = async (req, res, next) => {
   };
 }
 
-exports.getUsersByOrgId = async (req, res, next) => {
-  try {
-    await UserModel.find({organization: req.params.id})
-      .then(users => {
-        return res.status(200).json(users);
-      });
-  } catch (error) {
-    console.log(`getUserByOrgId: ${req.params.id}: ${error.message}`);
-    return res.status(404).json({
-      message: "Couldn't find users"
-    });
-  }
-}
+// exports.getUsersByOrgId = async (req, res, next) => {
+//   try {
+//     await UserModel.find({organization: req.params.id})
+//       .then(users => {
+//         return res.status(200).json(users);
+//       });
+//   } catch (error) {
+//     console.log(`getUserByOrgId: ${req.params.id}: ${error.message}`);
+//     return res.status(404).json({
+//       message: "Couldn't find users"
+//     });
+//   }
+// }
 
 // exports.deleteUser = async (req, res, next) => {
 //   try {
@@ -213,7 +213,7 @@ exports.getUsersByOrgId = async (req, res, next) => {
 // }
 
 
-exports.getUserByIdHelper = async (userId) => {
+exports.getUserByIdHelper = async (userId) => {  // Can't enfore orgId here since user is enquired at authentication
   return await UserModel.findById(userId).then(foundUser => {
     return foundUser;
   });

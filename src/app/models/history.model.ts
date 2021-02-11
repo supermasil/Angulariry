@@ -5,6 +5,7 @@ export interface HistoryModel { // From backend
   postId: string;  // sev-123213 mst123452
   createdAt: Date;
   updatedAt: Date;
+  organization: string;
 }
 
 

@@ -4,7 +4,14 @@
     <mat-expansion-panel *ngFor='let tracking of trackings, let i = index'>
       <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.status)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
         <mat-panel-title>
-          <div><b>{{tracking.trackingNumber}} </b> <span class="badge" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.status)" style="color: white;">{{tracking.generalInfo.status}}</span> {{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}</div>
+          <div>
+            <b class="mr-1">{{tracking.trackingNumber}}</b>
+            <span style="position: relative; bottom: 2px;">
+              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.status)" style="color: white;">{{tracking.generalInfo.status}}</span>
+              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor('Consolidated')" style="color: white;" *ngIf="tracking.linkedToCsl?.trackingNumber">Consolidated</span>
+              <span class="badge" [style.backgroundColor]="getBadgeColor(trackingGlobals.financialStatuses.Paid)" style="color: white;" *ngIf="trackingGlobals.externalTrackingTypes.includes(tracking.trackingNumber.substring(0, 3)) && tracking.generalInfo.paid">Paid</span>
+            </span> {{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}
+            </div>
           <div class="ml-auto">{{formatDateTime(tracking.updatedAt)}}</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
@@ -46,7 +53,8 @@
             <span class="d-block mat-h4"><b>Destination</b> {{tracking.generalInfo.destination}}</span>
             <span class="d-block mat-h4" *ngIf="tracking.generalInfo.sender"><b>Sender</b> {{tracking.generalInfo.sender.name}} | {{tracking.generalInfo.sender.userCode}} | {{tracking.generalInfo.sender.phoneNumber}}</span>
             <span class="d-block mat-h4" *ngIf="tracking.generalInfo.recipient"><b>Recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</span>
-            <span class="d-block mat-h4" *ngIf="tracking.linkedTo"><b>Linked to</b> {{tracking.linkedTo.trackingNumber}}</span>
+            <span class="d-block mat-h4" *ngIf="tracking.linkedToCsl"><b>Linked to</b> {{tracking.linkedToCsl.trackingNumber}}</span>
+            <span class="d-block mat-h4" *ngIf="tracking.linkedToMst"><b>Linked to</b> {{tracking.linkedToMst.trackingNumber}}</span>
 
           </div>
           <div class="col-lg-6 mt-xs-2 mt-md-0">
@@ -133,49 +141,84 @@
                 <tr>
                   <th>Tracking Number</th>
                   <th>Status</th>
-                  <th>Paid</th>
                   <th>Weight</th>
                   <th>Final Charge</th>
+                  <th>Paid</th>
+                  <th>Delivering</th>
+                  <th>Delivered</th>
                 </tr>
               </thead>
               <tbody>
-                <ng-container *ngFor="let item of tracking.onlineTrackings">
+                <ng-container *ngFor="let item of combineTrackings(tracking.onlineTrackings, tracking.servicedTrackings, tracking.inPersonTrackings) let l = index">
                   <tr>
                     <td>{{item?.trackingNumber}}</td>
                     <td>{{item?.generalInfo.status}}</td>
-                    <td>{{item?.generalInfo.paid == true? "Yes" : "No"}}</td>
                     <td>Kg {{item?.generalInfo?.totalWeight}}</td>
                     <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
-                  </tr>
-                </ng-container>
-
-                <ng-container *ngFor="let item of tracking.servicedTrackings">
-                  <tr>
-                    <td>{{item?.trackingNumber}}</td>
-                    <td>{{item?.generalInfo.status}}</td>
-                    <td>{{item?.generalInfo.paid == true? "Yes" : "No"}}</td>
-                    <td>Kg {{item?.generalInfo?.totalWeight}}</td>
-                    <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
-                  </tr>
-                </ng-container>
-
-                <ng-container *ngFor="let item of tracking.inPersonTrackings">
-                  <tr>
-                    <td>{{item?.trackingNumber}}</td>
-                    <td>{{item?.generalInfo.status}}</td>
-                    <td>{{item?.generalInfo.paid == true? "Yes" : "No"}}</td>
-                    <td>Kg {{item?.generalInfo?.totalWeight}}</td>
-                    <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
+                    <td>
+                      <mat-slide-toggle
+                        [checked]="item?.generalInfo.paid"
+                        matTooltip="Only manager/admin can switch it back"
+                        [disabled]="!authGlobal.managerAdmins.includes(currentUser.role) || authGlobal.roles.Accounting.includes(currentUser.role)"
+                        (change)="$event.checked? childTrackingToggle(tracking, item, i, l, trackingGlobals.financialStatuses.Paid): childTrackingToggle(tracking, item, i, l, trackingGlobals.financialStatuses.Unpaid)"
+                        class="mr-2">
+                      </mat-slide-toggle>
+                    </td>
+                    <td>
+                      <mat-slide-toggle
+                        #delivering
+                        [checked]="trackingGlobals.postDelivering.includes(item.generalInfo.status)"
+                        [disabled]="!authGlobal.nonSalesOfficers.includes(currentUser.role) || !trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.status)"
+                        (change)="$event.checked? childTrackingToggle(tracking, item, i, l, trackingGlobals.trackingStatuses.BeingDeliveredToRecipient): childTrackingToggle(tracking, item, i, l, trackingGlobals.trackingStatuses.ReceivedAtDestination)"
+                        class="mr-2">
+                      </mat-slide-toggle>
+                    </td>
+                    <td>
+                      <mat-slide-toggle
+                        #delivered
+                        matTooltip="Only manager/admin can switch it back"
+                        [checked]="trackingGlobals.postDelivered.includes(item.generalInfo.status)"
+                        [disabled]="!delivering.checked || !authGlobal.nonSalesOfficers.includes(currentUser.role)"
+                        (change)="$event.checked? childTrackingToggle(tracking, item, i, l, trackingGlobals.trackingStatuses.DeliveredToRecipient): childTrackingToggle(tracking, item, i, l, trackingGlobals.trackingStatuses.BeingDeliveredToRecipient)"
+                        class="mr-2">
+                      </mat-slide-toggle>
+                    </td>
                   </tr>
                 </ng-container>
               </tbody>
               <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
                 <th>Total</th>
                 <th></th>
-                <th></th>
-                <th>Kg {{getConsolidatedTotalWeightCost(tracking, true)}}</th>
-                <th>{{getConsolidatedTotalWeightCost(tracking, false) | currency: 'USD'}}</th>
-            </tfoot>
+                <th>Kg {{getConsolidatedTotalWeightCost(tracking).weight}}</th>
+                <th>{{getConsolidatedTotalWeightCost(tracking).cost | currency: 'USD'}}</th>
+                <th>
+                  <mat-slide-toggle
+                    [checked]="tracking.generalInfo.status === trackingGlobals.financialStatuses.Paid? true : false"
+                    matTooltip="Only can switch it back"
+                    [disabled]="!authGlobal.managerAdmins.includes(currentUser.role) || authGlobal.roles.Accounting.includes(currentUser.role)"
+                    (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.financialStatuses.Paid): trackingToggle(tracking, i, trackingGlobals.financialStatuses.Unpaid)"
+                    class="mr-2">
+                  </mat-slide-toggle>
+                </th>
+                <th>
+                  <mat-slide-toggle
+                    [checked]="getConsolidatedTrackingOverallStatus(tracking, [trackingGlobals.trackingStatuses.BeingDeliveredToRecipient, trackingGlobals.trackingStatuses.DeliveredToRecipient])"
+                    matTooltip="Only manager/admin can switch it back"
+                    [disabled]="!authGlobal.nonSalesOfficers.includes(currentUser.role) || !getConsolidatedTrackingOverallStatus(tracking, trackingGlobals.postReceivedAtDestination)"
+                    (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.BeingDeliveredToRecipient): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.ReceivedAtDestination)"
+                    class="mr-2">
+                  </mat-slide-toggle>
+                </th>
+                <th>
+                  <mat-slide-toggle
+                    [checked]="getConsolidatedTrackingOverallStatus(tracking, [trackingGlobals.trackingStatuses.DeliveredToRecipient])"
+                    matTooltip="Only manager/admin can switch it back"
+                    [disabled]="!authGlobal.nonSalesOfficers.includes(currentUser.role) || !getConsolidatedTrackingOverallStatus(tracking, trackingGlobals.postDelivering)"
+                    (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.DeliveredToRecipient): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.BeingDeliveredToRecipient)"
+                    class="mr-2">
+                  </mat-slide-toggle>
+                </th>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -185,26 +228,33 @@
             <table style="width: 100%;">
               <thead>
                 <tr>
-                  <td><b>Consolidated Trackings</b></td>
-                  <td><b>Status</b></td>
-                  <td><b>Sender's info</b></td>
-                  <td><b>Fully paid</b></td>
-                  <td><b>Recipient's info</b></td>
+                  <th>Tracking Number</th>
+                  <th>Status</th>
+                  <th>Paid</th>
+                  <th>Weight</th>
+                  <th>Final Charge</th>
                 </tr>
               </thead>
               <tbody>
                 <ng-container *ngFor="let box of tracking.boxes">
-                  <ng-container *ngFor="let item of box.items">
+                  <ng-container *ngFor="let item of combineTrackings(box.onlineTrackings, box.servicedTrackings,  box.inPersonTrackings)">
                     <tr>
                       <td>{{item?.trackingNumber}}</td>
                       <td>{{item?.generalInfo.status}}</td>
-                      <td>{{item?.generalInfo?.sender?.name}} {{item?.generalInfo?.sender?.userCode}}</td>
-                      <td>{{item?.generalInfo?.paid == true? "Yes": "No"}}</td>
-                      <td>{{item?.generalInfo?.recipient.name}} <a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">{{item?.generalInfo?.recipient.address.address}} {{item?.generalInfo?.recipient.address.addressLineTwo}}</a></td>
+                      <td>{{item?.generalInfo.paid == true? "Yes" : "No"}}</td>
+                      <td>Kg {{item?.generalInfo?.totalWeight}}</td>
+                      <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                     </tr>
                   </ng-container>
                 </ng-container>
               </tbody>
+              <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
+                <th>Total</th>
+                <th></th>
+                <th></th>
+                <th>Kg {{getMasterTotalWeightCost(tracking.boxes).weight}}</th>
+                <th>{{getMasterTotalWeightCost(tracking.boxes).cost | currency: 'USD'}}</th>
+            </tfoot>
             </table>
           </div>
         </div>
@@ -419,8 +469,8 @@
               <div *ngIf="tracking.trackingNumber.substring(0,3) == trackingGlobals.trackingTypes.ONLINE" style="position: relative; bottom: -6px;">
                 <mat-slide-toggle
                   [checked]="trackingGlobals.postReceivedAtOrigin.includes(tracking.generalInfo.status)"
-                  [disabled]="trackingGlobals.postConsolidated.includes(tracking.generalInfo.status)"
-                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReceivedAtOrigin): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.Created)"
+                  [disabled]="trackingGlobals.postReadyToFly.includes(tracking.generalInfo.status)"
+                  (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.ReceivedAtOrigin): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.Created)"
                   class="mr-2">
                   Received at Origin
                 </mat-slide-toggle>
@@ -431,7 +481,7 @@
                     #flying
                     [checked]="trackingGlobals.postFlying.includes(tracking.generalInfo.status)"
                     [disabled]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
-                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.Flying): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReadyToFly)"
+                    (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.Flying): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.ReadyToFly)"
                     class="mr-2">Flying
                   </mat-slide-toggle>
                   <mat-slide-toggle
@@ -439,37 +489,10 @@
                     matTooltip="Only manager/admin can switch it back"
                     [checked]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
                     [disabled]="!flying.checked || (receivedAtDestination.checked && !authGlobal.managerAdmins.includes(currentUser.role))"
-                    (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReceivedAtDestination): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.Flying)"
+                    (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.ReceivedAtDestination): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.Flying)"
                     class="mr-2">Received at Destination
                   </mat-slide-toggle>
                 </div>
-              </div>
-              <div *ngIf="tracking.trackingNumber.substring(0,3) === trackingGlobals.trackingTypes.CONSOLIDATED || trackingGlobals.externalTrackingTypes.includes(tracking.trackingNumber.substring(0,3))" style="position: relative; bottom: -6px;">
-                <mat-slide-toggle
-                  #delivering
-                  [checked]="trackingGlobals.postDelivering.includes(tracking.generalInfo.status)"
-                  [disabled]="trackingGlobals.postDelivered.includes(tracking.generalInfo.status) || !trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
-                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.BeingDeliveredToRecipient): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.ReceivedAtDestination)"
-                  class="mr-2">
-                  Out for delivery
-                </mat-slide-toggle>
-                <mat-slide-toggle
-                  #delivered
-                  matTooltip="Only manager/admin can switch it back"
-                  [checked]="trackingGlobals.postDelivered.includes(tracking.generalInfo.status)"
-                  [disabled]="!delivering.checked || (delivered.checked && !authGlobal.managerAdmins.includes(currentUser.role))"
-                  (change)="$event.checked? trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.DeliveredToRecipient): trackingToggle($event, tracking, i, trackingGlobals.allStatusTypes.BeingDeliveredToRecipient)"
-                  class="mr-2">
-                  Delivered
-                </mat-slide-toggle>
-                <mat-slide-toggle
-                  [checked]="tracking.generalInfo.paid"
-                  matTooltip="Only manager/admin can switch it back"
-                  [disabled]="tracking.generalInfo.paid && !authGlobal.managerAdmins.includes(currentUser.role)"
-                  (change)="$event.checked? trackingToggle($event, tracking, i, 'Paid'): trackingToggle($event, tracking, i, 'Unpaid')"
-                  class="mr-2">
-                  Paid
-                </mat-slide-toggle>
               </div>
             </div>
           </div>

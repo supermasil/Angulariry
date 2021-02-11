@@ -31,7 +31,7 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   @Input() disableRecipient = false;
   generalInfo : GeneralInfoModel;
 
-  statuses = TrackingGlobals.statuses;
+  statuses = [...Object.values(TrackingGlobals.trackingStatuses), ...Object.values(TrackingGlobals.financialStatuses)];
 
   @Output() formValidityStatus = new EventEmitter<boolean>();
   @Output() generalInfoUpdated = new EventEmitter<any>();
@@ -62,6 +62,9 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
     this.trackingNumberObservable.subscribe((trackingNumber: string) => {
       this.generalInfoForm.get('trackingNumber').patchValue(trackingNumber);
+      if (trackingNumber.substring(0, 3) === TrackingGlobals.trackingTypes.CONSOLIDATED) {
+        this.generalInfoForm.get('status').patchValue(TrackingGlobals.financialStatuses.Unpaid);
+      }
     });
 
     this.statusChangeObservable.subscribe((status: string) => {
@@ -95,8 +98,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   createGeneralInfoForm() {
     let form = new FormGroup({
       trackingNumber: new FormControl({value: "", disabled: true}, {validators: [Validators.required]}), // Set through subscription
-      // status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: !AuthGlobals.managerAdmins.includes(this.currentUser.role)}, {validators: [Validators.required]}),
-      status: new FormControl({value: TrackingGlobals.allStatusTypes.Created, disabled: true}, {validators: [Validators.required]}),
+      // status: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: !AuthGlobals.managerAdmins.includes(this.currentUser.role)}, {validators: [Validators.required]}),
+      status: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: true}, {validators: [Validators.required]}),
       origin: new FormControl("", {validators: [Validators.required]}),
       destination: new FormControl("", {validators: [Validators.required]}),
     });

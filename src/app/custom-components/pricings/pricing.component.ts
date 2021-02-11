@@ -4,7 +4,6 @@ import { AuthService } from "src/app/auth/auth.service";
 import { UserModel } from "src/app/models/user.model";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { PricingDestinationModel, PricingDiscountModel, PricingItemModel, PricingModel, PricingRouteModel } from "src/app/models/pricing.model";
-import { Router } from "@angular/router";
 import { ReplaySubject } from "rxjs";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
@@ -13,6 +12,8 @@ import { animate, state, style, transition, trigger } from "@angular/animations"
 import { PricingService } from "./pricing.service";
 import { AlertService } from "../alert-message";
 import { GlobalConstants } from "../../global-constants";
+import { AuthGlobals } from "src/app/auth/auth-globals";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: 'pricing-form',
@@ -50,14 +51,31 @@ export class PricingComponent implements OnInit, AfterViewChecked {
   extraChargeUnits = ["$", "%"];
   discountUnits = ["%", "$", "Fixed"];
 
+  enabled = [false, false, false];
+
   constructor(
     private authService: AuthService,
     private pricingService: PricingService,
     private alertService: AlertService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
+    this.route.paramMap.subscribe((paramMap) => {
+      if (paramMap.get('type')?.includes("new")) {
+        this.selectedIndex = 0;
+      } else if (paramMap.get('type')?.includes('edit')) {
+        this.selectedIndex = 1;
+      } else if (paramMap.get('type')?.includes('custom')) {
+        this.selectedIndex = 2;
+      } else {
+        return this.authService.redirect404();
+      }
+
+      this.disableTheRest(this.selectedIndex);
+    });
+
     this.newPricingForm = this.createPricingForm(null);
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
@@ -65,9 +83,9 @@ export class PricingComponent implements OnInit, AfterViewChecked {
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocations.next(org.locations.map(item => item.name));
-        this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
-          this.users = users;
-          this.userCodes.next(users.map(user => user.userCode));
+        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+          this.users = response.users.filter(u => u.role === AuthGlobals.roles.Customer);
+          this.userCodes.next(this.users.map(user => user.userCode));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.orgDefaultPricing = pricing;
             this.itemNames.next(pricing.items.map(i => i.name));
@@ -84,6 +102,26 @@ export class PricingComponent implements OnInit, AfterViewChecked {
     }, error => {
       this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
     });
+  }
+
+  disableTheRest(index: number) {
+    let temp = [...this.enabled];
+    this.enabled.forEach((tab, i) => {
+      if (i != index) {
+        temp[i] = false;
+      } else {
+        temp[i] = true;
+      }
+    });
+    this.enabled = [...temp];
+  }
+
+  canView(roles: string[]) {
+    return roles.includes(this.authService.getMongoDbUser().role);
+  }
+
+  isAuth() {
+    return this.authService.getIsAuth();
   }
 
   ngAfterViewChecked() {

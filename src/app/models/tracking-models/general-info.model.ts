@@ -5,7 +5,7 @@ import { UserModel } from '../user.model';
 export interface GeneralInfoModel { // From backend
   sender: UserModel; // Unique index
   recipient: RecipientModel;
-  organizationId: string;
+  organization: string;
   content: string; // Note
   status: string;
   active: boolean; // This should be false to prevent edit after certain stage

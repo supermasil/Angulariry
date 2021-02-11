@@ -104,9 +104,9 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
-        this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
-          this.users = users;
-          this.usersSubject.next(users.filter(u => u.role === AuthGlobals.roles.Customer));
+        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+          this.users = response.users;
+          this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
                 this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: ConsolidatedTrackingModel) => {
@@ -150,19 +150,20 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   fetchTrackings(origin: string, destination: string, sender: string) {
+    // this.resetSelectedData();
     // 0 per page to find all
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.onlineTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
+      this.onlineTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
     });;
 
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.serviceTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
+      this.serviceTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
       this.servicedTrackingDataSubject.next(this.serviceTrackings);
     });;
 
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !TrackingGlobals.postConsolidated.includes(i.generalInfo.status));
+      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
       this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
     });;
   }
@@ -213,6 +214,14 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   generalInfoUpdated(changes: { sender: string, origin: string, destination: string}) {
     this.fetchTrackings(changes.origin, changes.destination, changes.sender)
+  }
+
+  resetSelectedData() {
+    this.tempDataSource = new MatTableDataSource([]);
+    this.finalizingDataSource = new MatTableDataSource([]);
+    this.selectedOnlineTrackings = [];
+    this.selectedServicedTrackings = [];
+    this.selectedInPersonTrackings = [];
   }
 
   getTotalWeight() {
@@ -283,7 +292,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
 
     let formData = this.consolidatedForm.getRawValue();
-    formData['organizationId'] = this.organization._id
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
     formData['generalInfo']['recipient'] = recipient;
 

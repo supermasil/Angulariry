@@ -4,44 +4,27 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { map } from 'rxjs/operators';
-import { CommentService } from '../custom-components/comments/comment.service';
 import { OnlineTrackingModel } from '../models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from '../models/tracking-models/serviced-tracking.model';
 import { InPersonTrackingModel } from '../models/tracking-models/in-person-tracking.model';
 import { ConsolidatedTrackingModel } from '../models/tracking-models/consolidated-tracking.model';
 import { MasterTrackingModel } from '../models/tracking-models/master-tracking.model';
-import { AlertService } from '../custom-components/alert-message';
-import { GlobalConstants } from '../global-constants';
-import { CommentModel } from '../models/comment.model';
-import { query } from '@angular/animations';
-import { TrackingGlobals } from './tracking-globals';
 
 const BACKEND_URL = environment.apiURL + "/trackings/";
 
 
 @Injectable({ providedIn: "root"})
 export class TrackingService{
-  private onlineTrackings: OnlineTrackingModel[] = [];
   private onlineTrackingsUpdated = new Subject<{trackings: OnlineTrackingModel[], count: number}>();
-
-  private servicedTrackings: ServicedTrackingModel[] = [];
   private servicedTrackingsUpdated = new Subject<{trackings: ServicedTrackingModel[], count: number}>();
-
-  private inPersonTrackings: InPersonTrackingModel[] = [];
   private inPersonTrackingsUpdated = new Subject<{trackings: InPersonTrackingModel[], count: number}>();
-
-  private consolidatedTrackings: ConsolidatedTrackingModel[] = [];
   private consolidatedTrackingsUpdated = new Subject<{trackings: ConsolidatedTrackingModel[], count: number}>();
-
-  private masterTrackings: MasterTrackingModel[] = [];
   private masterTrackingsUpdated = new Subject<{trackings: MasterTrackingModel[], count: number}>();
 
   constructor(
     private httpClient: HttpClient,
     private router: Router,
-    private commentService: CommentService,
-    private zone: NgZone,
-    private alertService: AlertService
+    private zone: NgZone
     ) {}
 
   getOnlineTrackingUpdateListener() {
@@ -109,7 +92,7 @@ export class TrackingService{
     }
 
     return this.httpClient
-      .get<{trackings: any, count: number}>(BACKEND_URL + queryParams)
+      .get<{trackings: any[], count: number}>(BACKEND_URL + queryParams)
       .pipe(map((response) => {
         return {
           trackings: response.trackings,

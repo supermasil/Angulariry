@@ -47,7 +47,6 @@ export class TrackingListComponent {
 
   async ngOnInit() {
     this.route.params.subscribe(val => {
-      console.log(val)
       switch (this.route.snapshot.paramMap.get('type')) {
         case TrackingGlobals.trackingTypes.ONLINE:
           this.selectedIndex = 0;

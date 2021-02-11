@@ -32,8 +32,8 @@ export class EditUserFormComponent implements OnInit{
       this.currentUser = user;
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.currentOrg = org;
-        this.authService.getUsersByOrg(this.currentOrg._id).subscribe((users: UserModel[]) => {
-          this.users = users;
+        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+          this.users = response.users;
           this.filterUsers();
         })
       });

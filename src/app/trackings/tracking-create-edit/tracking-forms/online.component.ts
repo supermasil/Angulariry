@@ -85,9 +85,9 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
-        this.authService.getUsersByOrg(org._id).subscribe((users: UserModel[] ) => {
-          this.users = users;
-          this.usersSubject.next(users.filter(u => u.role === AuthGlobals.roles.Customer));
+        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+          this.users = response.users;
+          this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
             this.defaultPricingSubject.next(pricing);
@@ -136,7 +136,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       _id: new FormControl(formData?._id? formData._id :null),
       carrierTrackingNumber: new FormControl(formData?.carrierTracking?.carrierTrackingNumber? formData.carrierTracking.carrierTrackingNumber: "", {validators: [Validators.required]}),
       carrier: new FormControl(formData?.carrierTracking?.carrier? formData.carrierTracking.carrier: "", {validators: [Validators.required]}),
-      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.status)? true : false, disabled: !this.canView(this.authGlobals.internal) || this.trackingGlobals.postConsolidated.includes(formData?.generalInfo?.status)}, {validators: [Validators.required]}),
+      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.status)? true : false, disabled: !this.canView(this.authGlobals.internal) || this.trackingGlobals.postReadyToFly.includes(formData?.generalInfo?.status)}, {validators: [Validators.required]}),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content: ""),
     });
 
@@ -167,18 +167,15 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   }
 
   pricingUpdate(changes) {
-    let userCode = changes.sender.split(' ')[0];
-    let user = this.users?.filter(u => u.userCode == userCode)[0];
-    changes.sender = user?._id;
     this.pricingUpdatedSubject.next(changes);
     // Error is handled in itemsListComponent
   }
 
   receivedCheckboxChecked(event: MatCheckboxChange) {
     if (event.checked) {
-      this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.ReceivedAtOrigin);
+      this.statusChangeSubject.next(TrackingGlobals.trackingStatuses.ReceivedAtOrigin);
     } else {
-      this.statusChangeSubject.next(TrackingGlobals.allStatusTypes.Created);
+      this.statusChangeSubject.next(TrackingGlobals.trackingStatuses.Created);
     }
     // this.onlineForm.get('received').disable();
   }
@@ -200,7 +197,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
 
     let formData = this.onlineForm.getRawValue();
-    formData['organizationId'] = this.organization._id
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
     formData['generalInfo']['recipient'] = recipient;
     formData['itemsList'] = this.itemsList?.getRawValues()?.items ? this.itemsList.getRawValues().items : [];

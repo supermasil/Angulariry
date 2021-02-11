@@ -5,7 +5,8 @@ const uniqueValidator = require('mongoose-unique-validator');
 const historySchema = mongoose.Schema({
   userId: {type: String, required: true},
   action: {type: String, required: true},
-  postId: {type: String, required: true}  // sev-123213 mst123452
+  postId: {type: String, required: true},  // sev-123213 mst123452
+  organization: {type: mongoose.Types.ObjectId, ref: "organization"}
 }, { timestamps: true, autoCreate: true });
 
 

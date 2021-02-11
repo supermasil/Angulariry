@@ -11,7 +11,6 @@ export interface ConsolidatedTrackingModel { // From backend
   servicedTrackings: ServicedTrackingModel[];
   inPersonTrackings: InPersonTrackingModel[];
   generalInfo: GeneralInfoModel;
-  linkedTo: MasterTrackingModel;
   createdAt: Date;
   updatedAt: Date;
 }

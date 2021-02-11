@@ -6,7 +6,8 @@ const commentSchema = mongoose.Schema({
   creatorId: { type: String, required: true }, // google Id, has to be string
   creatorName: { type: String, required: true },
   filePaths: [{ type: String }],
-  content: { type: String }
+  content: { type: String },
+  organization: {type: mongoose.Types.ObjectId, ref: "organization", required: true}
 }, { timestamps: true, autoCreate: true }); // AutoCreate is needed to create with session
 
 commentSchema.plugin(uniqueValidator); // Throw error if not unique

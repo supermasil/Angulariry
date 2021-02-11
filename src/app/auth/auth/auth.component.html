@@ -1,40 +1,40 @@
 <mat-spinner *ngIf="isLoading"></mat-spinner>
 <div *ngIf="!isLoading">
   <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex">
-    <mat-tab *ngIf="enabled[0] && !isAuth()" label="Login">
+    <mat-tab *ngIf="!isAuth()" label="Login">
       <ng-template matTabContent>
         <login-form></login-form>
       </ng-template>
     </mat-tab>
 
-    <mat-tab *ngIf="enabled[1] && isAuth() && canView(authGlobals.everyone)" label="Signup">
-      <ng-template matTabContent>
-        <signup-form></signup-form>
-      </ng-template>
-    </mat-tab>
-
-    <mat-tab *ngIf="enabled[2] && isAuth() && mode=='edit' && canView(authGlobals.everyone)" label="Edit User">
-      <ng-template matTabContent>
-        <signup-form></signup-form>
-      </ng-template>
-    </mat-tab>
-
-    <mat-tab *ngIf="enabled[3] && (isAuth() && canView(authGlobals.everyone)) || !isAuth()" label="Forgot password?">
+    <mat-tab *ngIf="!isAuth()" label="Forgot password?">
       <ng-template matTabContent>
         <password-reset-form></password-reset-form>
       </ng-template>
     </mat-tab>
 
-    <mat-tab *ngIf="enabled[4] && isAuth() && canView([authGlobals.roles.SuperAdmin])" label="Onboarding">
+    <mat-tab *ngIf="enabled[0] && isAuth() && canView(authGlobals.internal)" label="Signup">
+      <ng-template matTabContent>
+        <signup-form></signup-form>
+      </ng-template>
+    </mat-tab>
+
+    <mat-tab *ngIf="enabled[1] && isAuth() && canView(authGlobals.everyone)" label="Edit User">
+      <ng-template matTabContent>
+        <signup-form></signup-form>
+      </ng-template>
+    </mat-tab>
+
+    <mat-tab *ngIf="enabled[2] && isAuth() && canView(authGlobals.admins)" label="Edit organization">
       <ng-template matTabContent>
         <onboarding-form></onboarding-form>
       </ng-template>
     </mat-tab>
 
-    <mat-tab *ngIf="enabled[5] && isAuth() && canView(authGlobals.officers)" label="Select User To Edit">
+    <!-- <mat-tab *ngIf="enabled[4] && isAuth() && canView(authGlobals.officers)" label="Select User To Edit">
       <ng-template matTabContent>
         <edit-user-form></edit-user-form>
       </ng-template>
-    </mat-tab>
+    </mat-tab> -->
   </mat-tab-group>
 </div>

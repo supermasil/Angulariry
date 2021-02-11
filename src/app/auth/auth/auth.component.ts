@@ -12,25 +12,32 @@ export class AuthComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService,
-    private zone: NgZone
+    private zone: NgZone,
+    private router: Router
   ) {}
 
   isLoading = true;
-  mode = 'create'
   selectedTabIndex = 0;
 
   authGlobals = AuthGlobals;
-  enabled = [true, true, true, true, true, true];
+  enabled = [true, true, true, true];
 
   ngOnInit() {
-    this.route.paramMap.subscribe((paramMap) => {
-      if (paramMap.has("orgId")) {
-        this.disableTheRest(4);
-      } else if (paramMap.has("userId")) {
-        this.mode = 'edit'
-        this.disableTheRest(2);
-      }
-    });
+    if (this.router.url != "/auth") {
+      this.route.paramMap.subscribe((paramMap) => {
+        if (paramMap.has("orgId")) {
+          this.selectedTabIndex = 2;
+        } else if (paramMap.has("userId")) {
+          this.selectedTabIndex = 1;
+        } else if (this.router.url === "/auth/users/new") {
+          this.selectedTabIndex = 0;
+        } else {
+          return this.authService.redirect404();
+        }
+      });
+      this.disableTheRest(this.selectedTabIndex);
+    }
+
     this.authService.getAuthStatusListener().subscribe(authenticated => {
       this.zone.run(() => {
         this.isLoading = false;

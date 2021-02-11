@@ -46,13 +46,12 @@ export class TrackingGlobals {
     MASTER: "mst"
   }
 
-  public static allStatusTypes = {
+  public static trackingStatuses = {
     Unknown: "Unknown",
     Created: "Created",
     Pending: "Pending",
     BeingShippedToOrigin: "Being shipped to origin",
     ReceivedAtOrigin: "Received at origin",
-    Consolidated: "Consolidated",
     ReadyToFly: "Ready to fly",
     Flying: "Flying",
     ReceivedAtDestination: "Received at destination",
@@ -60,14 +59,18 @@ export class TrackingGlobals {
     DeliveredToRecipient: "Delivered to recipient"
   }
 
-  public static statuses = Object.values(TrackingGlobals.allStatusTypes);
-  public static postReceivedAtOrigin = Object.values(TrackingGlobals.allStatusTypes).slice(4);
-  public static postConsolidated = Object.values(TrackingGlobals.allStatusTypes).slice(5);
-  public static postReadyToFly = Object.values(TrackingGlobals.allStatusTypes).slice(6);
-  public static postFlying = Object.values(TrackingGlobals.allStatusTypes).slice(7);
-  public static postReceivedAtDestination = Object.values(TrackingGlobals.allStatusTypes).slice(8);
-  public static postDelivering = Object.values(TrackingGlobals.allStatusTypes).slice(9);
-  public static postDelivered = Object.values(TrackingGlobals.allStatusTypes).slice(10);
+  public static financialStatuses = {
+    Unpaid: "Unpaid",
+    Paid: "Paid",
+    PartiallyPaid: "Partially paid"
+  }
+
+  public static postReceivedAtOrigin = Object.values(TrackingGlobals.trackingStatuses).slice(4);
+  public static postReadyToFly = Object.values(TrackingGlobals.trackingStatuses).slice(5);
+  public static postFlying = Object.values(TrackingGlobals.trackingStatuses).slice(6);
+  public static postReceivedAtDestination = Object.values(TrackingGlobals.trackingStatuses).slice(7);
+  public static postDelivering = Object.values(TrackingGlobals.trackingStatuses).slice(8);
+  public static postDelivered = Object.values(TrackingGlobals.trackingStatuses).slice(9);
 
   public static internalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(3);
   public static externalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(0, 3);
@@ -76,28 +79,34 @@ export class TrackingGlobals {
 
   public static getBadgeColor = (status: string) => {
     switch (status) {
-      case TrackingGlobals.allStatusTypes.Unknown:
+      case TrackingGlobals.trackingStatuses.Unknown:
         return "#f44336"
-      case TrackingGlobals.allStatusTypes.Created:
+      case TrackingGlobals.trackingStatuses.Created:
         return "#ff5722"
-      case TrackingGlobals.allStatusTypes.Pending:
+      case TrackingGlobals.trackingStatuses.Pending:
         return "#607d8b"
-      case TrackingGlobals.allStatusTypes.BeingShippedToOrigin:
+      case TrackingGlobals.trackingStatuses.BeingShippedToOrigin:
         return "#e91e63"
-      case TrackingGlobals.allStatusTypes.ReceivedAtOrigin:
+      case TrackingGlobals.trackingStatuses.ReceivedAtOrigin:
         return "#9c27b0"
-      case TrackingGlobals.allStatusTypes.Consolidated:
-        return "#e040fb"
-      case TrackingGlobals.allStatusTypes.ReadyToFly:
+      case TrackingGlobals.trackingStatuses.ReadyToFly:
         return "#03a9f4"
-      case TrackingGlobals.allStatusTypes.Flying:
+      case TrackingGlobals.trackingStatuses.Flying:
         return "#ffeb3b"
-      case TrackingGlobals.allStatusTypes.ReceivedAtDestination:
+      case TrackingGlobals.trackingStatuses.ReceivedAtDestination:
         return "#8bc34a"
-      case TrackingGlobals.allStatusTypes.BeingDeliveredToRecipient:
+      case TrackingGlobals.trackingStatuses.BeingDeliveredToRecipient:
         return "#ccff90"
-      case TrackingGlobals.allStatusTypes.DeliveredToRecipient:
+      case TrackingGlobals.trackingStatuses.DeliveredToRecipient:
         return "#76ff03"
+      case TrackingGlobals.financialStatuses.Unpaid:
+        return "#e040fb"
+      case 'Consolidated':
+        return "#e040ff"
+      case TrackingGlobals.financialStatuses.Paid:
+        return "#c060ff"
+      case TrackingGlobals.financialStatuses.PartiallyPaid:
+        return "#d35000"
     }
   }
 

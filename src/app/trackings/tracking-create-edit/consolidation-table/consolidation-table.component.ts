@@ -37,7 +37,6 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
   selection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>(true, []);
   filterselection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>(true, []);
   isAllSelected = false;
-  selectedTabIndex = 0;
 
   @Input() tableDataObservable: Observable<OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonTrackingModel[]> = new Observable();
   @Input() deselectItemObservable: Observable<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel> = new Observable();
@@ -52,12 +51,21 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
 
   ngOnInit() {
     this.tableDataObservable.subscribe((data: OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonTrackingModel[]) => {
+      // this.resetData();
       this.updateData(data);
     });
 
     this.deselectItemObservable.subscribe((row: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel) => {
       this.rowSelectionClicked(row);
     })
+  }
+
+  resetData() {
+    this.filterselection.clear();
+    this.selection.clear();
+    this.dataSource = new MatTableDataSource([]);
+    this.filterDataSource = [];
+    this.isAllSelected = false;
   }
 
 

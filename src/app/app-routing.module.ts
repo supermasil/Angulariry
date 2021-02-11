@@ -21,13 +21,16 @@ const routes: Routes = [
     roles: AuthGlobals.everyone}},
   { path: 'trackings/edit/:trackingId', component: TrackingCreateEditComponent, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}},
-  { path: 'pricings', loadChildren: () => import("./custom-components/pricings/pricing.module").then(module => module.PricingModule), canActivate: [AuthGuard], data: {
+  { path: 'pricing/:type', loadChildren: () => import("./custom-components/pricings/pricing.module").then(module => module.PricingModule), canActivate: [AuthGuard], data: {
     roles: [AuthGlobals.roles.SuperAdmin, AuthGlobals.roles.Admin, AuthGlobals.roles.Manager]}},
-  { path: "auth", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule)}, // Lazy loading
+
   { path: "auth/users/edit/:userId", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}}, // Lazy loading
-  { path: "auth/organizations/edit/:orgId", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {
-    roles: [AuthGlobals.roles.SuperAdmin, AuthGlobals.roles.Admin]}}, // Lazy loading
+  { path: "auth/orgs/edit/:orgId", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {
+    roles: AuthGlobals.admins}}, // Lazy loading
+  { path: "auth/users/new", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {
+    roles: AuthGlobals.internal}}, // Lazy loading
+  { path: "auth", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule)}, // Lazy loading
   { path: "404", component: Component404},
   { path: "**", component: Component404} // Must be last
 ];

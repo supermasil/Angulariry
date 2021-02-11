@@ -23,7 +23,12 @@
 
     <ul class="navbar-nav ml-auto">
       <li class="nav-item" *ngIf="isAuth() && canView(authGlobals.managerAdmins)">
-        <a class="nav-link" (click)="redirect('/pricings')" routerLinkActive="mat-accent">Pricing</a>
+        <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Pricing</a>
+        <mat-menu #createMenu="matMenu">
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/pricing/new')" routerLinkActive="mat-accent">New Pricing</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/pricing/edit')" routerLinkActive="mat-accent">Edit Pricing</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/pricing/custom')" routerLinkActive="mat-accent">Custom pricing</a>
+        </mat-menu>
       </li>
       <li class="nav-item" *ngIf="isAuth() && canView(authGlobals.everyone)">
         <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Create</a>
@@ -36,8 +41,13 @@
         </mat-menu>
         <!-- <a class="nav-link" (click)="redirect('/trackings/create')" routerLinkActive="mat-accent">Create</a> -->
       </li>
-      <li class="nav-item">
-        <a class="nav-link" *ngIf="isAuth() && canView(authGlobals.everyone)" (click)="redirect('/auth')" routerLinkActive="mat-accent">Users</a>
+      <li class="nav-item" *ngIf="isAuth()">
+        <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Users</a>
+        <mat-menu #createMenu="matMenu">
+          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="isAuth() && canView(authGlobals.officers)" (click)="redirect('/auth/users/new')" routerLinkActive="mat-accent">New user</a>
+          <!-- <a style="color: black;" mat-menu-item class="nav-link" *ngIf="isAuth() && canView(authGlobals.internal)" (click)="redirect('/auth/users/edit')" routerLinkActive="mat-accent">Edit Pricing</a> -->
+          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="isAuth() && canView(authGlobals.admins)" (click)="redirect('/auth/orgs/edit/' + user?.organization)" routerLinkActive="mat-accent">Organization</a>
+        </mat-menu>
       </li>
       <li class="nav-item" *ngIf="isAuth()">
         <a class="nav-link" (click)="onLogOut()">Logout</a>

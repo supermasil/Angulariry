@@ -14,7 +14,7 @@ const userSchema = mongoose.Schema({
   recipients: [RecipientSchema],
   companyCode: {type: String, required: true},
   userCode: {type: String, required: true, index: true}, // Can have duplicates across org
-  organization: {type: mongoose.Types.ObjectId, ref: "organization", index: true},
+  organization: {type: mongoose.Types.ObjectId, ref: "organization", index: true, required: true},
   pricings: {type: mongoose.Types.ObjectId, ref: "pricing"},
   creatorId: {type: String, required: true},
   active: {type: Boolean, required: true, default: true},

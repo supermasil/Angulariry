@@ -11,7 +11,8 @@ const onlineTrackingSchema = mongoose.Schema({
   generalInfo: {type: GeneralInfoSchema, required: true},
   itemsList: {type: [ListItemSchema], required: true},
   received: {type: Boolean, required: true},
-  linkedTo: {type: mongoose.Types.ObjectId, ref: "consolidated-tracking"}
+  linkedToCsl: {type: mongoose.Types.ObjectId, ref: "consolidated-tracking"},
+  linkedToMst: {type: mongoose.Types.ObjectId, ref: "master-tracking"}
 }, {timestamps: true, autoCreate: true });
 
 onlineTrackingSchema.plugin(uniqueValidator); // Throw error if not unique

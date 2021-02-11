@@ -50,8 +50,8 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
       this.authService.getOrganizations().subscribe(orgsData => {
         this.organizations = orgsData.organizations;
         this.companyCodesSubject.next(orgsData.organizations.map(item => item.companyCode));
-        this.authService.getUsersByOrg(this.authService.getUserOrg()._id).subscribe((users: UserModel[]) => {
-          this.userCodes = users.map(u => u.userCode.toLowerCase());
+        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+          this.userCodes = response.users.map(u => u.userCode.toLowerCase());
           this.route.paramMap.subscribe((paramMap) => {
             if (paramMap.has("userId")) { // Edit case
               this.mode = 'edit';

@@ -5,9 +5,9 @@ const checkAuth = require("../middleware/check-auth");
 
 router.post('/', checkAuth.isAuthenticated, UserController.createUpdateUser);
 
-router.get('/byOrg/:id', checkAuth.isAuthenticated, UserController.getUsersByOrgId) // Get one
+// router.get('/byOrg/:id', checkAuth.isAuthenticated, UserController.getUsersByOrgId) // Get one
 
-router.get('/:id', UserController.getUser) // Get one
+router.get('/:id', checkAuth.isAuthenticated, UserController.getUser) // Get one
 
 router.get('/', checkAuth.isAuthenticated, UserController.getUsers); // Get All
 

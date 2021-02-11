@@ -39,17 +39,22 @@ export class AuthService {
 
   async refreshAuthentication(firebaseUser: firebase.User) {
     if (firebaseUser) {
+      await this.setupSessionUToken(firebaseUser); // Has to await here. SET THIS UP RIGHT AWAY to be authenticated in the back end
       this.getUser(firebaseUser.uid).subscribe(async (user: UserModel) => {
-        this.mongoDbUser = user;
+
         if (firebaseUser.uid === user._id) {
           this.getOrganization(user.organization).subscribe(async (org: OrganizationModel) => {
+            this.firebaseUser = firebaseUser;
+            this.mongoDbUser = user;
             this.userOrg = org;
-            await this.authenticate(firebaseUser, user);
+            await this.authenticate();
           }, error => {
+            console.log(error);
             this.unAuthenticate();
           })
         }
       }, error => {
+        console.log(error);
         this.unAuthenticate();
         this.logout();
       });
@@ -73,15 +78,13 @@ export class AuthService {
   }
 
 
-  async authenticate(firebaseUser: firebase.User, mongoDbUser: UserModel) {
-    await this.setupSessionStorage(firebaseUser); // Has to await here. SET THIS UP RIGHT AWAY
-    await firebaseUser.getIdTokenResult().then(idTokenResult => {
+  async authenticate() {
+    await this.setupSessionBackEndInfo();
+    await this.firebaseUser.getIdTokenResult().then(idTokenResult => {
       const authTime = idTokenResult.claims.auth_time * 1000;
       const sessionDuration = 8 * 60 * 60 * 1000; // 8 hours in miliseconds
       const millisecondsUntilExpiration = sessionDuration - (Date.now() - authTime);
       setTimeout(() => {this.logout();}, millisecondsUntilExpiration);
-      this.firebaseUser = firebaseUser;
-      this.mongoDbUser = mongoDbUser;
       this.refreshUsers();
       this.authStatusListener.next(true);
       // console.log("User authenticated");
@@ -169,8 +172,8 @@ export class AuthService {
     return this.httpClient.get<UserModel>(USER_BACKEND_URL + id);
   }
 
-  getUsersByOrg(orgId: string) {
-    return this.httpClient.get<UserModel[]>(USER_BACKEND_URL + "byOrg/" + orgId);
+  getUsers() {
+    return this.httpClient.get<{users: UserModel[], count: number}>(USER_BACKEND_URL);
   }
 
   deleteUser(id: string) {
@@ -195,14 +198,18 @@ export class AuthService {
     return this.httpClient.delete<{message: string}>(ORGANIZATION_BACKEND_URL + id);
   }
 
-  async setupSessionStorage(user) { // Has to be async to be done before any auth can be effective
+  async setupSessionUToken(user) { // Has to be async to be done before any auth can be effective
     await user.getIdToken(true).then(idToken => {
       sessionStorage.setItem('utoken', idToken);
     }).catch((error) => {
       console.log(error);
     });
+
+  }
+
+  async setupSessionBackEndInfo() {
+    sessionStorage.setItem("uid", this.firebaseUser.uid);
     sessionStorage.setItem("isAuthenticated", "true");
-    sessionStorage.setItem("uid", user.uid);
     sessionStorage.setItem("mongoDBUser", JSON.stringify(this.mongoDbUser));
     sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
   }

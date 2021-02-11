@@ -180,7 +180,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
       extraChargeSaving: new FormControl(formData?.extraChargeSaving? formData.extraChargeSaving : 0, {validators:[Validators.required]}),
       weight: new FormControl(formData?.weight? formData.weight : 0, {validators:[Validators.required]}),
       insurance: new FormControl(formData?.insurance? formData.insurance : 0, {validators: [Validators.required]}),
-      status: new FormControl(formData?.status? formData.status : TrackingGlobals.allStatusTypes.Created, {validators:[Validators.required]}),
+      status: new FormControl(formData?.status? formData.status : TrackingGlobals.trackingStatuses.Created, {validators:[Validators.required]}),
       order: new FormControl(this.increment)
     });
 
