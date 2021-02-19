@@ -37,7 +37,7 @@
         (keyup)="getFinalizedInfo()">
       </mat-form-field>
 
-      <span class="d-block mat-h3 mb-0"><b style="color: red; font-size: 1.5rem;">Final Charge</b></span>
+      <span class="d-block mat-h3 mb-0"><b style="font-size: 1.5rem;">Final Charge</b></span>
       <mat-form-field>
         <input
         matInput
@@ -52,7 +52,7 @@
         <input
         matInput
         currencyMask
-        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: true}"
+        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: true, precision: 0}"
         formControlName='finalCostVND'
         readonly
         style="font-size: 1.5rem;">

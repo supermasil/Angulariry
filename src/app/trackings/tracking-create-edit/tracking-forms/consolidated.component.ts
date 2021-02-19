@@ -10,12 +10,13 @@ import { FileUploaderComponent } from 'src/app/custom-components/file-uploader/f
 import { OrganizationModel } from 'src/app/models/organization.model';
 import { ConsolidatedTrackingModel } from 'src/app/models/tracking-models/consolidated-tracking.model';
 import { GeneralInfoModel } from 'src/app/models/tracking-models/general-info.model';
-import { InPersonTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
+import { InPersonSubTrackingModel, InPersonTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
 import { OnlineTrackingModel } from 'src/app/models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from 'src/app/models/tracking-models/serviced-tracking.model';
 import { UserModel } from 'src/app/models/user.model';
 import { TrackingGlobals } from '../../tracking-globals';
 import { TrackingService } from '../../tracking.service';
+import { ConsolidationTableComponent } from '../consolidation-table/consolidation-table.component';
 import { GeneralInfoComponent } from '../general-info/general-info.component';
 
 
@@ -37,6 +38,9 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
   @ViewChild('generalInfo') generalInfo: GeneralInfoComponent;
+  @ViewChild('onlineTable') onlineTable: ConsolidationTableComponent;
+  @ViewChild('servicedTable') servicedTable: ConsolidationTableComponent;
+  @ViewChild('inPersonTable') inPersonTable: ConsolidationTableComponent;
 
   currentUser: UserModel;
   selectedUser: UserModel;
@@ -55,32 +59,32 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   currentTracking: ConsolidatedTrackingModel; // edit case
   mode = "create";
 
-  onlineTrackings: OnlineTrackingModel[];
-  serviceTrackings: ServicedTrackingModel[];
-  inPersonTrackings: InPersonTrackingModel[];
+  onlineTrackings: OnlineTrackingModel[] = [];
+  serviceTrackings: ServicedTrackingModel[] = [];
+  inPersonTrackings: InPersonSubTrackingModel[] = [];
 
   selectedTabIndex = 0;
 
   showTable = false;
 
-  finalizingDataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>;
+  finalizingDataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>;
   finalizingDefinedColumns: string[] = ['trackingNumber', 'Weight', 'Cost'];
-  tempDataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>;
+  tempDataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>;
 
   onlineTrackingDataSubject = new ReplaySubject<OnlineTrackingModel[]>();
   servicedTrackingDataSubject = new ReplaySubject<ServicedTrackingModel[]>();
-  inPersonTrackingDataSubject = new ReplaySubject<InPersonTrackingModel[]>();
+  inPersonTrackingDataSubject = new ReplaySubject<InPersonSubTrackingModel[]>();
 
-  deselectOnlineTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>();
-  deselectServicedTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>();
-  deselectInPersonTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>();
+  deselectOnlineTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>();
+  deselectServicedTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>();
+  deselectInPersonTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>();
 
   selectedOnlineTrackings: OnlineTrackingModel[] = [];
   selectedServicedTrackings: ServicedTrackingModel[] = [];
-  selectedInPersonTrackings: InPersonTrackingModel[] = [];
+  selectedInPersonTrackings: InPersonSubTrackingModel[] = [];
 
-  currentTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel)[] = []; // edit case
-  currentTrackingsReference: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel)[] = []; // edit case
+  currentTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel)[] = []; // edit case
+  currentTrackingsReference: (OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel)[] = []; // edit case
 
   constructor(
     private zone: NgZone,
@@ -150,22 +154,44 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   fetchTrackings(origin: string, destination: string, sender: string) {
-    // this.resetSelectedData();
     // 0 per page to find all
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
       this.onlineTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
+
+      this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
+        this.serviceTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
+        this.servicedTrackingDataSubject.next(this.serviceTrackings);
+
+        this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, origin, destination, sender).subscribe((transformedTrackings) => {
+          this.inPersonTrackings = [];
+          transformedTrackings.trackings.forEach((t: InPersonTrackingModel) => {
+              let subTrackings = t.subTrackings.filter(i => !i.linkedToCsl);
+              subTrackings.forEach(s => {
+                s['parentTrackingId'] = t._id;
+                Object.assign(s.generalInfo, {
+                  sender: t.generalInfo.sender,
+                  recipient: t.generalInfo.recipient,
+                  organization: t.generalInfo.organization,
+                  origin: t.generalInfo.origin,
+                  destination: t.generalInfo.destination,
+                  creatorId: t.generalInfo.creatorId,
+                  creatorName: t.generalInfo.creatorName
+                });
+              });
+              this.inPersonTrackings.push(...subTrackings);
+          });
+
+          this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
+          this.showTable = true;
+          this.resetSelectedData();
+        });
+      });;
     });;
 
-    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.serviceTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
-      this.servicedTrackingDataSubject.next(this.serviceTrackings);
-    });;
 
-    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, origin, destination, sender).subscribe((transformedTrackings) => {
-      this.inPersonTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
-      this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
-    });;
+
+
   }
 
   ngAfterViewChecked() {
@@ -182,7 +208,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     this.combineData();
   }
 
-  inPersonSelectionReceived(selection: InPersonTrackingModel[]) {
+  inPersonSelectionReceived(selection: InPersonSubTrackingModel[]) {
     this.selectedInPersonTrackings = selection;
     this.combineData();
   }
@@ -198,7 +224,12 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   setUpDataSource() {
-    this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...this.currentTracking.inPersonTrackings];
+    let inPersonSubtrackings: InPersonSubTrackingModel[] = [];
+    this.currentTracking.inPersonTrackings.map(t => {
+      inPersonSubtrackings.push(...t.subTrackings);
+    })
+
+    this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...inPersonSubtrackings];
     this.currentTrackingsReference = [...this.currentTrackings];
     this.combineData();
   }
@@ -208,12 +239,17 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
       this.zone.run(() => {
         this.showTable = true;
       });
+    } else {
+      this.zone.run(() => {
+        this.showTable = false;
+      });
     }
     // Don't change it back to false
   }
 
   generalInfoUpdated(changes: { sender: string, origin: string, destination: string}) {
-    this.fetchTrackings(changes.origin, changes.destination, changes.sender)
+    this.showTable = false;
+    this.fetchTrackings(changes.origin, changes.destination, changes.sender);
   }
 
   resetSelectedData() {
@@ -222,6 +258,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     this.selectedOnlineTrackings = [];
     this.selectedServicedTrackings = [];
     this.selectedInPersonTrackings = [];
+    this.combineData();
   }
 
   getTotalWeight() {
@@ -240,7 +277,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     return totalCost;
   }
 
-  removeItem(row: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel) {
+  removeItem(row: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel) {
     if (this.mode === "create") {
       this.deselectRow(row);
     } else if (this.mode === "edit") {
@@ -253,7 +290,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     }
   }
 
-  deselectRow(row: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel) {
+  deselectRow(row: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel) {
     if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
       this.deselectOnlineTrackingSubject.next(row);
     } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
@@ -263,7 +300,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     }
   }
 
-  addItemBack(row: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel) {
+  addItemBack(row: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel) {
     this.moveBetweenTables(this.tempDataSource, this.finalizingDataSource, row);
     this.currentTrackings.push(row);
   }
@@ -317,17 +354,27 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
         onlineTrackings.push(row._id);
       } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
         servicedTrackings.push(row._id);
-      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
-        inPersonTrackings.push(row._id);
+      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) { // These are subtrackings
+        inPersonTrackings.push(row);
       }
     });
+
+    let tempMap = new Map(inPersonTrackings.map(r => [r.parentTrackingId, []]));
+
+    inPersonTrackings.forEach(r => {
+      tempMap.set(r.parentTrackingId, [...tempMap.get(r.parentTrackingId), r._id]);
+    });
+
+    console.log(tempMap);
+
+    inPersonTrackings = Array.from(tempMap);
 
     this.tempDataSource.data.forEach(row => {
       if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
         removedOnlineTrackings.push(row.trackingNumber);
       } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
         removedServicedTrackings.push(row.trackingNumber);
-      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
+      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) { // These are subtrackings
         removedInPersonTrackings.push(row.trackingNumber);
       }
     });

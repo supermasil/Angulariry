@@ -5,7 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
-import { InPersonTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
+import { InPersonSubTrackingModel, InPersonTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
 import { OnlineTrackingModel } from 'src/app/models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from 'src/app/models/tracking-models/serviced-tracking.model';
 
@@ -27,20 +27,20 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
   definedColumns: string[] = ['select', 'trackingNumber', 'status', 'recipient'];
   displayedColumns: string[] = ['select', 'Tracking Number', "Status", "Recipient's address"];
 
-  expandedElement: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | null;
+  expandedElement: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel | null;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  dataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>;
+  dataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>;
   filterDataSource = [];
-  selection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>(true, []);
-  filterselection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel>(true, []);
+  selection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>(true, []);
+  filterselection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>(true, []);
   isAllSelected = false;
 
-  @Input() tableDataObservable: Observable<OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonTrackingModel[]> = new Observable();
-  @Input() deselectItemObservable: Observable<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel> = new Observable();
-  @Output() selectionEmitted: EventEmitter<OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonTrackingModel[]> = new EventEmitter();
+  @Input() tableDataObservable: Observable<OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonSubTrackingModel[]> = new Observable();
+  @Input() deselectItemObservable: Observable<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel> = new Observable();
+  @Output() selectionEmitted: EventEmitter<any> = new EventEmitter();
 
   constructor(
     private cd: ChangeDetectorRef
@@ -50,22 +50,22 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit() {
-    this.tableDataObservable.subscribe((data: OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonTrackingModel[]) => {
+    this.tableDataObservable.subscribe((data: OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonSubTrackingModel[]) => {
       // this.resetData();
       this.updateData(data);
     });
 
-    this.deselectItemObservable.subscribe((row: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel) => {
+    this.deselectItemObservable.subscribe((row: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel) => {
       this.rowSelectionClicked(row);
     })
   }
 
-  resetData() {
+  public resetData() {
+    this.isAllSelected = false;
     this.filterselection.clear();
     this.selection.clear();
     this.dataSource = new MatTableDataSource([]);
     this.filterDataSource = [];
-    this.isAllSelected = false;
   }
 
 
@@ -74,7 +74,7 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
   }
 
 
-  updateData(data: OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonTrackingModel[]) {
+  updateData(data: any) {
     this.dataSource = new MatTableDataSource(data);
     // this.dataSource.filterPredicate = (data: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel, filter: string) => {
     //   return data.OrderNumber.includes(filter);
@@ -138,14 +138,14 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
   }
 
   /** The label for the checkbox on the passed row */
-  checkboxLabel(row?: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel): string {
+  checkboxLabel(row?: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel): string {
     if (!row) {
       return `${this.isAllSelected ? 'select' : 'deselect'} all`;
     }
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.trackingNumber + 1}`;
   }
 
-  rowSelectionClicked(row?: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel) {
+  rowSelectionClicked(row?: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel) {
     this.selection.toggle(row);
     this.filterselection.toggle(row);
     this.allSelectCheck();

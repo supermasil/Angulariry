@@ -203,7 +203,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
     // if((this.itemsForm.get('items') as FormArray).length == 1) {
     //   return;
     // }
-    this.addItemName(this.itemsForm.get('items')['controls'][i].get('name').value);
+    // this.addItemName(this.itemsForm.get('items')['controls'][i].get('name').value);
     if (i <= this.totalOldItems - 1) {
       this.totalOldItems -= 1;
     }
@@ -212,12 +212,12 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
   }
 
   itemSelected(value: string, index: number) {
-    let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
-    if (previousValue) {
-      this.addItemName(previousValue);
-    }
+    // let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
+    // if (previousValue) {
+    //   this.addItemName(previousValue);
+    // }
     this.itemsForm.get('items')['controls'][index].get('name').setValue(value);
-    this.subtractItemName(value);
+    // this.subtractItemName(value);
   }
 
   subtractItemName(value: string) {
@@ -234,9 +234,9 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
 
   itemInvalid(value: string, index: number) {
     let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
-    if (previousValue && !this.itemNames.includes(previousValue)) {
-      this.addItemName(previousValue);
-    }
+    // if (previousValue && !this.itemNames.includes(previousValue)) {
+    //   this.addItemName(previousValue);
+    // }
     if (index > this.totalOldItems - 1) { // Only new items
       this.itemsForm.get('items')['controls'][index].get('name').setValue('');
       this.itemsForm.get('items')['controls'][index].get('unitCharge').setValue(null);

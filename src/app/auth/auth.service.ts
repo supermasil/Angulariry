@@ -133,6 +133,7 @@ export class AuthService {
     await this.firebaseAuth.signOut().then(() => {
       this.zone.run(() => {
         this.router.navigate(["/auth"]);
+        window.location.reload();
       });
       this.alertService.success("See you later!", GlobalConstants.flashMessageOptions);
     }).catch(error => {

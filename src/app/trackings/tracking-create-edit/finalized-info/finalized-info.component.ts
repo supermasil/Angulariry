@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
@@ -15,6 +15,7 @@ export class FinalizedInfoComponent implements OnInit{
   @Input() itemsListObservable = new Observable<any>();
   @Input() costAdjustmentObservable = new Observable<any>();
   @Input() exchangeObservable = new Observable<any>();
+  @Output() formValidity = new EventEmitter<any>();
 
   totalWeight = 0;
   totalWeightCharge = 0;
@@ -33,7 +34,10 @@ export class FinalizedInfoComponent implements OnInit{
       finalCostVND: new FormControl(0, {validators: [Validators.required]}),
       costAdjustment: new FormControl(0, {validators: [Validators.required]}),
       exchange: new FormControl(0, {validators: [Validators.required]}),
-      totalWeight: new FormControl(0, {validators: [Validators.required]})
+      totalWeight: new FormControl(0, {validators: [Validators.required]}),
+      totalExtraCharge: new FormControl(0, {validators: [Validators.required]}),
+      totalSaving: new FormControl(0, {validators: [Validators.required]}),
+      totalInsurance: new FormControl(0, {validators: [Validators.required]}),
     });
 
     this.itemsListObservable.subscribe(itemsList => {
@@ -53,7 +57,12 @@ export class FinalizedInfoComponent implements OnInit{
     this.exchangeObservable.subscribe(c => {
       this.finalizedInfoForm.get('exchange').setValue(c);
       this.getFinalizedInfo();
-    })
+    });
+
+    this.finalizedInfoForm.valueChanges.subscribe(valid => {
+      let validity = this.finalizedInfoForm.valid;
+      this.formValidity.emit({valid: validity, data: this.finalizedInfoForm.getRawValue()});
+    });
   }
 
   resetInfo() {
@@ -88,6 +97,10 @@ export class FinalizedInfoComponent implements OnInit{
     this.finalizedInfoForm.get('totalWeight').setValue(this.totalWeight);
     this.finalizedInfoForm.get('finalCost').setValue(this.finalCharge);
     this.finalizedInfoForm.get('finalCostVND').setValue(this.finalCharge * this.finalizedInfoForm.get('exchange').value);
+
+    this.finalizedInfoForm.get('totalExtraCharge').setValue(this.totalExtraCharge);
+    this.finalizedInfoForm.get('totalSaving').setValue(this.totalSaving);
+    this.finalizedInfoForm.get('totalInsurance').setValue(this.totalInsurance);
   }
 
   getFormValidity() {

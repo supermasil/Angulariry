@@ -1,6 +1,5 @@
 import { GeneralInfoModel } from "./general-info.model";
-import { InPersonTrackingModel } from "./in-person-tracking.model";
-import { MasterTrackingModel } from "./master-tracking.model";
+import { InPersonSubTrackingModel, InPersonTrackingModel } from "./in-person-tracking.model";
 import { OnlineTrackingModel } from "./online-tracking.model";
 import { ServicedTrackingModel } from "./serviced-tracking.model";
 

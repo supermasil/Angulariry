@@ -1,7 +1,6 @@
 
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
-const fuzzySearch = require('mongoose-fuzzy-searching');
 
 const GeneralInfoSchema = require('./general-info-schema');
 

@@ -1,5 +1,5 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from "@angular/core";
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 import { ReplaySubject } from 'rxjs';
 import { AuthService } from "src/app/auth/auth.service";
@@ -7,7 +7,7 @@ import { FileUploaderComponent } from "src/app/custom-components/file-uploader/f
 import { OrganizationModel } from "src/app/models/organization.model";
 import { PricingModel } from "src/app/models/pricing.model";
 import { GeneralInfoModel } from "src/app/models/tracking-models/general-info.model";
-import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
+import { InPersonSubTrackingModel, InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
 import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
 import { UserModel } from "src/app/models/user.model";
 import { PricingService } from "src/app/custom-components/pricings/pricing.service";
@@ -17,6 +17,8 @@ import { GeneralInfoComponent } from "../general-info/general-info.component";
 import { ItemsListComponent } from "../items-list/items-list.component";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { TrackingGlobals } from "../../tracking-globals";
+import { Alert, AlertService } from "src/app/custom-components/alert-message";
+import { GlobalConstants } from "src/app/global-constants";
 
 
 @Component({
@@ -26,11 +28,14 @@ import { TrackingGlobals } from "../../tracking-globals";
 })
 export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   inPersonForm: FormGroup;
+  subTrackingsForm: FormGroup;
 
-  @ViewChild('itemsList') itemsList: ItemsListComponent;
+  @ViewChildren('itemsList') itemsListRef: QueryList<ItemsListComponent>;
+  @ViewChildren('finalizedInfo') finalizedInfoRef: QueryList<FinalizedInfoComponent>;
+
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
   @ViewChild('generalInfo', {static: false}) generalInfo: GeneralInfoComponent;
-  @ViewChild('finalizedInfo') finalizedInfo: FinalizedInfoComponent;
+
 
   currentUser: UserModel;
   selectedUser: UserModel;
@@ -43,21 +48,34 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   selectedUserIdSubject = new ReplaySubject<string>();
 
   usersSubject = new ReplaySubject<UserModel[]>();
-  trackingNumeberSubject = new ReplaySubject<string>();
   pricingUpdatedSubject = new ReplaySubject<{sender: string, origin: string, destination: string}>();
-  itemsListSubject = new ReplaySubject<any>();
   generalInfoSubject = new ReplaySubject<GeneralInfoModel>();
 
-  updateExistingItemsSubject = new ReplaySubject<ListItemModel[]>();
-  costAdjustmentSubject = new ReplaySubject<number>();
-  exchangeSubject = new ReplaySubject<number>();
+  trackingNumberSubject = new ReplaySubject<string>(); // Main tracking number
+
+  updateExistingItemsSubjects: ReplaySubject<ListItemModel[]>[] = [];
+  itemsListSubjects: ReplaySubject<any>[] = [];
+  costAdjustmentSubjects: ReplaySubject<number>[] = [];
+  exchangeSubject: ReplaySubject<number>[] = [];
+
+
   updateExistingImagesSubject = new ReplaySubject<string[]>();
 
-  showItemsList = false;
-  showFinalizedInfo = false;
+  showFinalizedInfo = [];
+
+  showTotalFinalizedInfo = false;
+  totalWeightCharge = 0;
+  totalExtraCharge = 0;
+  totalInsurance = 0;
+  totalWeight = 0;
+  totalSaving = 0;
+  totalFinalCost = 0;
+  totalFinalCostVND = 0;
 
   currentTracking: InPersonTrackingModel; // edit case
   mode = "create";
+
+  trackingNumber = "";
 
   constructor(
     private trackingService: TrackingService,
@@ -65,11 +83,13 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     private authService: AuthService,
     private zone: NgZone,
     private pricingService: PricingService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private alertService: AlertService
   ) {}
 
   ngOnInit() {
-    this.trackingNumeberSubject.next("inp-" + Date.now() + Math.floor(Math.random() * 10000));
+    this.trackingNumber = "inp-" + Date.now() + Math.floor(Math.random() * 10000);
+    this.trackingNumberSubject.next(this.trackingNumber);
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
@@ -89,13 +109,15 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
                 this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: InPersonTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
-                  this.inPersonForm = this.createInPersonForm(response);
+                  this.createInPersonForm(response);
+                  this.createSubTrackingsForm(response);
                   this.emitChanges();
                 }, error => {
                   this.authService.redirect404();
                 });
               } else {
-                this.inPersonForm = this.createInPersonForm(null);
+                this.createInPersonForm(null);
+                this.createSubTrackingsForm(null);
               }
             }, error => {
               this.authService.redirect404();
@@ -115,24 +137,71 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   emitChanges() {
-    this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
+    this.trackingNumberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
-    this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
-    this.costAdjustmentSubject.next(this.currentTracking.generalInfo.costAdjustment);
-    this.exchangeSubject.next(this.currentTracking.generalInfo.exchange);
+    // this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
+    // this.costAdjustmentSubject.next(this.currentTracking.generalInfo.costAdjustment);
+    // this.exchangeSubject.next(this.currentTracking.generalInfo.exchange);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
   }
 
   createInPersonForm (formData: InPersonTrackingModel) {
-    let form = new FormGroup({
+    this.inPersonForm = new FormGroup({
       _id: new FormControl(formData?._id? formData._id :null),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content : ""),
-      paid: new FormControl({value: formData?.generalInfo?.paid? true : false, disabled: !this.canView(AuthGlobals.internal) || formData?.linkedToCsl }, {validators: [Validators.required]}),
-      // payAtDestination: new FormControl(false, {validators: [Validators.required]}),
-      // receiveAtDestinationWH: new FormControl(false, {validators: [Validators.required]})
+      finalCost: new FormControl(0, {validators: [Validators.required]}),
+      finalCostVND: new FormControl(0, {validators: [Validators.required]}),
+    });
+  }
+
+  createSubTrackingsForm (formData: InPersonTrackingModel) {
+    this.subTrackingsForm = new FormGroup({
+      subTrackings: new FormArray([])
     });
 
-    return form
+    if (formData?.subTrackings) {
+      formData.subTrackings.forEach((s, index) => {
+        this.addSubTracking(s);
+        this.updateExistingItemsSubjects[index].next(s.itemsList);
+        this.costAdjustmentSubjects[index].next(s.generalInfo.costAdjustment);
+        this.exchangeSubject[index].next(s.generalInfo.exchange);
+      })
+    }
+  }
+
+  getNextIndex() {
+    let subTrackingIndexes = [0];
+    this.subTrackingsForm.get('subTrackings')['controls'].forEach(form => {
+      subTrackingIndexes.push(parseInt(form.get('trackingNumber').value.split('-')[2]));
+    });
+    return Math.max(...subTrackingIndexes) + 1;
+  }
+
+  addSubTracking(formData: InPersonSubTrackingModel) {
+    let form = new FormGroup({
+      trackingNumber: new FormControl({value: formData?.trackingNumber? formData.trackingNumber : this.trackingNumber + '-' + this.getNextIndex(), disabled: true}),
+      paid: new FormControl({value: formData?.generalInfo?.paid? formData.generalInfo.paid : false, disabled: !this.canView(AuthGlobals.internal) || formData?.linkedToCsl }, {validators: [Validators.required]}),
+      status: new FormControl({value: formData?.generalInfo?.status? formData.generalInfo.status: TrackingGlobals.trackingStatuses.Created, disabled: true})
+    });
+
+    this.updateExistingItemsSubjects.push(new ReplaySubject<ListItemModel[]>());
+    this.itemsListSubjects.push(new ReplaySubject<any>());
+    this.costAdjustmentSubjects.push(new ReplaySubject<number>());
+    this.exchangeSubject.push(new ReplaySubject<number>());
+    this.showFinalizedInfo.push(false);
+
+    (this.subTrackingsForm.get('subTrackings') as FormArray).push(form);
+  }
+
+  deleteSubTracking(index: number) {
+    this.updateExistingItemsSubjects.splice(index, 1);
+    this.itemsListSubjects.splice(index, 1);
+    this.costAdjustmentSubjects.splice(index, 1);
+    this.exchangeSubject.splice(index, 1);
+    this.showFinalizedInfo.splice(index, 1);
+    (this.subTrackingsForm.get('subTrackings') as FormArray).removeAt(index);
+    this.cd.detectChanges();
+    this.getTotalFinalizedInfo();
   }
 
   canView(roles: string[]) {
@@ -140,22 +209,59 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   generalInfoValidity(valid: boolean) {
-    if (valid) {
-      this.zone.run(() => {this.showItemsList = true;});
-    }
     // Don't change it back to false
   }
 
-  itemsListValidity(input: any) {
+  itemsListValidity(input: any, index: number) {
     if (input.valid) {
-      this.showFinalizedInfo = true;
-      this.itemsListSubject.next(input.data.items);
-
+      this.showFinalizedInfo[index] = true;
+      this.itemsListSubjects[index].next(input.data.items);
+      this.getTotalFinalizedInfo();
     } else {
-      this.showFinalizedInfo = false;
-      this.itemsListSubject.next(null);
+      this.showFinalizedInfo[index] = false;
+      this.itemsListSubjects[index].next(null);
+      this.showTotalFinalizedInfo = false;
     }
     this.cd.detectChanges();
+  }
+
+  finalizedInfoValidty(input: any) {
+    this.getTotalFinalizedInfo();
+  }
+
+  getTotalFinalizedInfo() {
+    this.resetTotalFinalizedInfo();
+    let itemsListsValidity = true;
+    this.itemsListRef.forEach((i, index) => {
+      itemsListsValidity = i.getFormValidity() && itemsListsValidity;
+    });
+
+    if (itemsListsValidity) {
+      this.finalizedInfoRef.forEach((i) => {
+        this.totalWeightCharge += i.getRawValues().totalWeight;
+        this.totalExtraCharge += i.getRawValues().totalExtraCharge;
+        this.totalInsurance += i.getRawValues().totalInsurance;
+        this.totalWeight += i.getRawValues().totalWeight;
+        this.totalSaving += i.getRawValues().totalSaving;
+        this.totalFinalCost += i.getRawValues().finalCost;
+        this.totalFinalCostVND += i.getRawValues().finalCostVND;
+      });
+      this.inPersonForm.get('finalCost').setValue(this.totalFinalCost);
+      this.inPersonForm.get('finalCostVND').setValue(this.totalFinalCostVND);
+      this.showTotalFinalizedInfo = true;
+    }
+  }
+
+  resetTotalFinalizedInfo() {
+    this.totalWeightCharge = 0;
+    this.totalExtraCharge = 0;
+    this.totalInsurance = 0;
+    this.totalWeight = 0;
+    this.totalSaving = 0;
+    this.totalFinalCost = 0;
+    this.totalFinalCostVND = 0;
+    this.inPersonForm.get('finalCost').setValue(0);
+    this.inPersonForm.get('finalCostVND').setValue(0);
   }
 
   pricingUpdate(changes) {
@@ -163,17 +269,35 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     // Error is handled in itemsListComponent
   }
 
-
   ngAfterViewChecked() {
     this.cd.detectChanges();
   }
 
   onSave() {
     this.generalInfo.getFormValidity();
-    this.itemsList?.getFormValidity();
-    this.finalizedInfo?.getFormValidity();
+    let subTrackings = this.subTrackingsForm.getRawValue().subTrackings;
 
-    if (!this.inPersonForm.valid || !this.generalInfo.getFormValidity() || (this.itemsList && !this.itemsList.getFormValidity()) || (this.finalizedInfo && !this.finalizedInfo.getFormValidity())) {
+    let itemsListsValidity = true;
+
+
+    let finalizedInfoValidity = true;
+    this.finalizedInfoRef.forEach((i, index) => {
+      i.getFormValidity()
+      finalizedInfoValidity = i.getFormValidity() && finalizedInfoValidity;
+      subTrackings[index]['finalizedInfo'] = i.getRawValues();
+    });
+
+    for (const {i, index} of this.itemsListRef.map((i, index) => ({i, index}))) {
+      i.getFormValidity()
+      itemsListsValidity = i.getFormValidity() && itemsListsValidity;
+      if (i.getRawValues().items.length == 0) {
+        this.alertService.warn("Subtracking with empty items list is not allowed", GlobalConstants.flashMessageOptions);
+        return;
+      }
+      subTrackings[index]['itemsList'] = i.getRawValues().items;
+    };
+
+    if (!this.inPersonForm.valid || !this.generalInfo.getFormValidity() || !itemsListsValidity || !finalizedInfoValidity) {
       return;
     }
 
@@ -183,8 +307,12 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     let formData = this.inPersonForm.getRawValue();
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
     formData['generalInfo']['recipient'] = recipient;
-    formData['itemsList'] = this.itemsList?.getRawValues()?.items ? this.itemsList.getRawValues().items : [];
-    formData['finalizedInfo'] = this.finalizedInfo?.getRawValues() ? this.finalizedInfo.getRawValues() : [];
+    formData['subTrackings'] = subTrackings;
+
+    formData['finalizedInfo'] = {};
+    formData['finalizedInfo']['totalWeight'] = this.totalWeight;
+    formData['finalizedInfo']['finalCost'] = this.totalFinalCost;
+
     if (this.mode === "edit") {
       formData['_id'] = this.currentTracking._id;
       formData['filesToAdd'] = JSON.stringify(this.fileUploader.getFilesToAdd());

@@ -61,7 +61,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   mode = "create";
 
   scannerOpened = false;
-  showItemsList = false;
   showFinalizedInfo = false;
 
   trackingGlobals = TrackingGlobals;
@@ -144,9 +143,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   }
 
   generalInfoValidity(valid: boolean) {
-    if (valid) {
-      this.zone.run(() => {this.showItemsList = true;});
-    }
     // Don't change it back to false
   }
 

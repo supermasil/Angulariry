@@ -16,6 +16,7 @@
       <mat-tab-group [@.disabled]="true" [(selectedIndex)]="selectedTabIndex" color="accent">
         <mat-tab label="Online">
           <consolidation-table
+            #onlineTable
             [tableDataObservable]="onlineTrackingDataSubject.asObservable()"
             (selectionEmitted)="onlineSelectionReceived($event)"
             [deselectItemObservable]="deselectOnlineTrackingSubject.asObservable()">
@@ -24,6 +25,7 @@
 
         <mat-tab label="Serviced">
           <consolidation-table
+              #servicedTable
               [tableDataObservable]="servicedTrackingDataSubject.asObservable()"
               (selectionEmitted)="servicedSelectionReceived($event)"
               [deselectItemObservable]="deselectServicedTrackingSubject.asObservable()">
@@ -32,6 +34,7 @@
 
         <mat-tab label="In-person">
           <consolidation-table
+              #inPersonTable
               [tableDataObservable]="inPersonTrackingDataSubject.asObservable()"
               (selectionEmitted)="inPersonSelectionReceived($event)"
               [deselectItemObservable]="deselectInPersonTrackingSubject.asObservable()">
