@@ -88,7 +88,6 @@ export class TrackingListComponent {
       sender = this.currentUser._id;
     }
     this.trackingService.getTrackings(trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
-      console.log(transformedTrackings.trackings);
       this.trackingsSubject.next(transformedTrackings);
     });
   }

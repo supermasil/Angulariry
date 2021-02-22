@@ -202,13 +202,15 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   getConsolidatedTrackingOverallStatus(tracking: ConsolidatedTrackingModel, statuses: string[]) {
     let result = true;
     let trackingStatuses = this.combineTrackings(tracking.onlineTrackings, tracking.servicedTrackings, tracking.inPersonTrackings).map(t => t.generalInfo.status);
+
+    if (trackingStatuses.length == 0) {return false;}
+
     for (let s of trackingStatuses) {
       if (!statuses.includes(s)) {
         result =  false;
         break;
       }
     }
-
     return result;
   }
 }

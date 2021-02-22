@@ -11,7 +11,6 @@ const db = require('mongoose');
 const S3 = require('../shared/upload-files');
 let assert = require('assert');
 const onlineTracking = require('../models/tracking-models/online-tracking');
-const { create } = require('../models/tracking-models/online-tracking');
 
 const TrackingTypes = Object.freeze({
   ONLINE: "onl",
@@ -141,7 +140,7 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
     if (type === TrackingTypes.CONSOLIDATED) {
       updateBody['onlineTrackings'] = req.body.onlineTrackings;
       updateBody['servicedTrackings'] = req.body.servicedTrackings;
-      updateBody['inPersonTrackings'] = req.body.inPersonTrackings;
+      updateBody['inPersonTrackings'] = req.body.inPersonTrackings.map(i => i[0]);
     }
 
     if (type === TrackingTypes.MASTER) {
@@ -152,7 +151,6 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
     updateBody['generalInfo'] = generalInfo;
 
     createdTracking = await MODEL.findByIdAndUpdate(req.body._id, updateBody, {new: true}).session(session).then(result => {return result});
-
   } else { // create case
 
     newBody = {
@@ -267,6 +265,7 @@ itemsListSetupHelper = itemsList => {
 subTrackingsSetupHelper = req => {
   let subTrackings = [];
   req.body.subTrackings.forEach(sub =>{
+    console.log(sub.linkedToCsl)
     subTrackings.push({
       trackingNumber: sub.trackingNumber,
       itemsList: itemsListSetupHelper(sub.itemsList),
@@ -277,7 +276,9 @@ subTrackingsSetupHelper = req => {
         exchange: sub.finalizedInfo.exchange,
         paid: sub.paid,
         status: sub.status
-      }
+      },
+      linkedToCsl: sub.linkedToCslId,
+      linkedToMst: sub.linkedToMst
     });
   });
 
@@ -464,6 +465,7 @@ populateSubTrackings = async (documents) => {
 
 populateSenderInfo = async (documents) => {
   for (d of documents) {
+    assert(d != null, "populateSenderInfo: Document is null");
     d.generalInfo.sender = await UserController.getUserByIdHelper(d.generalInfo.sender);
     if (d.trackingNumber.substring(0,3) === TrackingTypes.CONSOLIDATED) {
       for (t of d.onlineTrackings) {
@@ -507,7 +509,6 @@ exports.getTracking = async (req, res, next) => {
   try {
     let tracking = await getTrackingHelper(req.params.id.substring(0, 3), req.params.id, req.userData.orgId, false);
     assert(tracking != null);
-    tracking.generalInfo.sender = await UserController.getUserByIdHelper(tracking.generalInfo.sender);
     return res.status(200).json(tracking);
 
   } catch(error) {
@@ -528,39 +529,36 @@ getTrackingHelper = async (type, id, orgId, byId) => {
     queryParams['trackingNumber'] = id;
   }
 
+  let callbackfunction = async document => {
+    await populateSenderInfo([document]);
+    await populateSubTrackings([document]);
+    return document;
+  }
+
   let tracking = null;
   switch(type) {
     case TrackingTypes.ONLINE:
       return await OnlineTrackingModel.findOne(queryParams).populate('carrierTracking').populate('linkedToCsl').populate('linkedToMst').lean()
-        .then(async tracking => {
-          await populateSenderInfo([tracking]);
-          return tracking;});
+        .then(callbackfunction);
     case TrackingTypes.SERVICED:
       break;
     case TrackingTypes.INPERSON:
       return await InPersonTrackingModel.findOne(queryParams).populate('subTrackings.linkedToCsl').populate('subTrackings.linkedToMst').populate('linkedToMst').lean()
-        .then(async tracking => {
-          await  populateSenderInfo([tracking]);
-          return tracking;});
+        .then(callbackfunction);
     case TrackingTypes.CONSOLIDATED:
       return await ConsolidatedTrackingModel.findOne(queryParams)
       .populate('onlineTrackings')
       .populate('servicedTrackings')
       .populate('inPersonTrackings')
       .lean()
-        .then(async tracking => {
-          await populateSenderInfo([tracking]);
-          return tracking;});
+        .then(callbackfunction);
     case TrackingTypes.MASTER:
       return await MasterTrackingModel.findOne(queryParams)
       .populate('boxes.onlineTrackings')
       .populate('boxes.servicedTrackings')
       .populate('boxes.inPersonTrackings')
       .lean()
-        .then(async tracking => {
-          await populateSenderInfo([tracking]);
-          return tracking;
-        });
+        .then(callbackfunction);
     default:
       return tracking;
   }
@@ -650,7 +648,6 @@ changeStatusForMasterHelper = async (userId, orgId, status, masterTrackingNumber
  */
 changeStatusForConsolidatedHelper = async (userId, orgId, status, consolidatedTrackingIdNumber, edit, validTrackingIds, removedTrackingNumbers, session) => {
   if (edit) {
-
     await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, validTrackingIds, consolidatedTrackingIdNumber, TrackingTypes.CONSOLIDATED, true, session); // Link
     await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, removedTrackingNumbers, null, TrackingTypes.CONSOLIDATED, false, session); // Unlink
 
@@ -700,9 +697,17 @@ linkUnlinkTrackingHelper = async (userId, orgId, type, itemsList, toTrackingId, 
 
   if (type === TrackingTypes.INPERSON) {
     for (i of itemsList) {
-      await InPersonTrackingModel.findById(i[0]).then(async t => {
+      let query = null;
+      if (byIds) {
+        query = InPersonTrackingModel.findById(i[0]);
+      } else {
+        query = InPersonTrackingModel.findOne({trackingNumber: i[0]});
+      }
+
+      await query.then(async t => {
+        assert(t != null, "linkUnlinkTrackingHelper: Found tracking is null");
         for (s of t.subTrackings) {
-          if (i[1].includes(s._id.toString())) {
+          if (i[1].includes(s._id.toString()) || i[1].includes(s.trackingNumber)) {
             if (toTrackingType === TrackingTypes.CONSOLIDATED) {
               s.linkedToCsl = toTrackingId;
             } else if (toTrackingType === TrackingTypes.MASTER) {
@@ -710,11 +715,14 @@ linkUnlinkTrackingHelper = async (userId, orgId, type, itemsList, toTrackingId, 
             }
           }
         };
-        await InPersonTrackingModel.findByIdAndUpdate(i[0], t).session(session);
+        if (byIds) {
+          await InPersonTrackingModel.findByIdAndUpdate(i[0], t).session(session);
+        } else {
+          await InPersonTrackingModel.updateOne({'trackingNumber': i[0]}, t).session(session);
+        }
       });
     };
   } else {
-    console.log("here1")
     if (setParams) {
       await updateManyGeneralHelper(type, queryParams, setParams, session);
     }

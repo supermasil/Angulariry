@@ -137,11 +137,9 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   emitChanges() {
+    this.trackingNumber = this.currentTracking.trackingNumber;
     this.trackingNumberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
-    // this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
-    // this.costAdjustmentSubject.next(this.currentTracking.generalInfo.costAdjustment);
-    // this.exchangeSubject.next(this.currentTracking.generalInfo.exchange);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
   }
 
@@ -181,7 +179,11 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     let form = new FormGroup({
       trackingNumber: new FormControl({value: formData?.trackingNumber? formData.trackingNumber : this.trackingNumber + '-' + this.getNextIndex(), disabled: true}),
       paid: new FormControl({value: formData?.generalInfo?.paid? formData.generalInfo.paid : false, disabled: !this.canView(AuthGlobals.internal) || formData?.linkedToCsl }, {validators: [Validators.required]}),
-      status: new FormControl({value: formData?.generalInfo?.status? formData.generalInfo.status: TrackingGlobals.trackingStatuses.Created, disabled: true})
+      status: new FormControl({value: formData?.generalInfo?.status? formData.generalInfo.status: TrackingGlobals.trackingStatuses.Created, disabled: true}),
+      linkedToCsl: new FormControl({value: formData?.linkedToCsl? formData.linkedToCsl.trackingNumber: null, disabled: true}),
+      linkedToMst: new FormControl({value: formData?.linkedToMst? formData.linkedToMst.trackingNumber: null, disabled: true}),
+      linkedToCslId: new FormControl({value: formData?.linkedToCsl? formData.linkedToCsl._id: null, disabled: true}),
+      linkedToMstId: new FormControl({value: formData?.linkedToMst? formData.linkedToMst._id: null, disabled: true}),
     });
 
     this.updateExistingItemsSubjects.push(new ReplaySubject<ListItemModel[]>());

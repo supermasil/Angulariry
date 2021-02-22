@@ -35,9 +35,9 @@
         <mat-tab label="In-person">
           <consolidation-table
               #inPersonTable
-              [tableDataObservable]="inPersonTrackingDataSubject.asObservable()"
+              [tableDataObservable]="inPersonSubTrackingDataSubject.asObservable()"
               (selectionEmitted)="inPersonSelectionReceived($event)"
-              [deselectItemObservable]="deselectInPersonTrackingSubject.asObservable()">
+              [deselectItemObservable]="deselectInPersonSubTrackingSubject.asObservable()">
           </consolidation-table>
         </mat-tab>
       </mat-tab-group>

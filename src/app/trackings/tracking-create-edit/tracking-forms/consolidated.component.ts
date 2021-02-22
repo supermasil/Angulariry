@@ -61,7 +61,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   onlineTrackings: OnlineTrackingModel[] = [];
   serviceTrackings: ServicedTrackingModel[] = [];
-  inPersonTrackings: InPersonSubTrackingModel[] = [];
+  inPersonSubTrackings: InPersonSubTrackingModel[] = [];
 
   selectedTabIndex = 0;
 
@@ -73,15 +73,15 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   onlineTrackingDataSubject = new ReplaySubject<OnlineTrackingModel[]>();
   servicedTrackingDataSubject = new ReplaySubject<ServicedTrackingModel[]>();
-  inPersonTrackingDataSubject = new ReplaySubject<InPersonSubTrackingModel[]>();
+  inPersonSubTrackingDataSubject = new ReplaySubject<InPersonSubTrackingModel[]>();
 
   deselectOnlineTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>();
   deselectServicedTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>();
-  deselectInPersonTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>();
+  deselectInPersonSubTrackingSubject = new ReplaySubject<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>();
 
   selectedOnlineTrackings: OnlineTrackingModel[] = [];
   selectedServicedTrackings: ServicedTrackingModel[] = [];
-  selectedInPersonTrackings: InPersonSubTrackingModel[] = [];
+  selectedInPersonSubTrackings: InPersonSubTrackingModel[] = [];
 
   currentTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel)[] = []; // edit case
   currentTrackingsReference: (OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel)[] = []; // edit case
@@ -164,34 +164,34 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
         this.servicedTrackingDataSubject.next(this.serviceTrackings);
 
         this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, origin, destination, sender).subscribe((transformedTrackings) => {
-          this.inPersonTrackings = [];
-          transformedTrackings.trackings.forEach((t: InPersonTrackingModel) => {
-              let subTrackings = t.subTrackings.filter(i => !i.linkedToCsl);
-              subTrackings.forEach(s => {
-                s['parentTrackingId'] = t._id;
-                Object.assign(s.generalInfo, {
-                  sender: t.generalInfo.sender,
-                  recipient: t.generalInfo.recipient,
-                  organization: t.generalInfo.organization,
-                  origin: t.generalInfo.origin,
-                  destination: t.generalInfo.destination,
-                  creatorId: t.generalInfo.creatorId,
-                  creatorName: t.generalInfo.creatorName
-                });
-              });
-              this.inPersonTrackings.push(...subTrackings);
-          });
-
-          this.inPersonTrackingDataSubject.next(this.inPersonTrackings);
+          this.inPersonSubTrackings = this.setUpSubTrackings(transformedTrackings.trackings);
+          this.inPersonSubTrackings = this.inPersonSubTrackings.filter(t => !t.linkedToCsl);
+          this.inPersonSubTrackingDataSubject.next(this.inPersonSubTrackings);
           this.showTable = true;
           this.resetSelectedData();
         });
       });;
     });;
+  }
 
-
-
-
+  setUpSubTrackings(trackings: InPersonTrackingModel[]) {
+    let temp = [];
+    trackings.forEach((t: InPersonTrackingModel) => {
+      t.subTrackings.forEach(s => {
+        s['parentTrackingId'] = t._id;
+        Object.assign(s.generalInfo, {
+          sender: t.generalInfo.sender,
+          recipient: t.generalInfo.recipient,
+          organization: t.generalInfo.organization,
+          origin: t.generalInfo.origin,
+          destination: t.generalInfo.destination,
+          creatorId: t.generalInfo.creatorId,
+          creatorName: t.generalInfo.creatorName
+        });
+      });
+      temp.push(...t.subTrackings);
+    });
+    return temp;
   }
 
   ngAfterViewChecked() {
@@ -209,12 +209,12 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   inPersonSelectionReceived(selection: InPersonSubTrackingModel[]) {
-    this.selectedInPersonTrackings = selection;
+    this.selectedInPersonSubTrackings = selection;
     this.combineData();
   }
 
   combineData() {
-    this.finalizingDataSource.data = [...this.selectedOnlineTrackings, ...this.selectedServicedTrackings, ...this.selectedInPersonTrackings, ...this.currentTrackings];
+    this.finalizingDataSource.data = [...this.currentTrackings, ...this.selectedOnlineTrackings, ...this.selectedServicedTrackings, ...this.selectedInPersonSubTrackings];
   }
 
   redirectOnEdit(trackingNumber: string) {
@@ -224,14 +224,10 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   setUpDataSource() {
-    let inPersonSubtrackings: InPersonSubTrackingModel[] = [];
-    this.currentTracking.inPersonTrackings.map(t => {
-      inPersonSubtrackings.push(...t.subTrackings);
-    })
-
-    this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...inPersonSubtrackings];
+    let currentInPersonSubtrackings = this.setUpSubTrackings(this.currentTracking.inPersonTrackings);
+    this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...currentInPersonSubtrackings.filter(t => t.linkedToCsl?._id === this.currentTracking._id)];
     this.currentTrackingsReference = [...this.currentTrackings];
-    this.combineData();
+    // this.combineData();
   }
 
   generalInfoValidity(valid: boolean) {
@@ -257,7 +253,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     this.finalizingDataSource = new MatTableDataSource([]);
     this.selectedOnlineTrackings = [];
     this.selectedServicedTrackings = [];
-    this.selectedInPersonTrackings = [];
+    this.selectedInPersonSubTrackings = [];
     this.combineData();
   }
 
@@ -296,7 +292,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
       this.deselectServicedTrackingSubject.next(row);
     } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
-      this.deselectInPersonTrackingSubject.next(row);
+      this.deselectInPersonSubTrackingSubject.next(row);
     }
   }
 
@@ -359,15 +355,13 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
       }
     });
 
-    let tempMap = new Map(inPersonTrackings.map(r => [r.parentTrackingId, []]));
+    console.log(inPersonTrackings)
 
+    let validTempMap = new Map(inPersonTrackings.map(r => [r.parentTrackingId, []]));
     inPersonTrackings.forEach(r => {
-      tempMap.set(r.parentTrackingId, [...tempMap.get(r.parentTrackingId), r._id]);
+      validTempMap.set(r.parentTrackingId, [...validTempMap.get(r.parentTrackingId), r._id]);
     });
-
-    console.log(tempMap);
-
-    inPersonTrackings = Array.from(tempMap);
+    inPersonTrackings = Array.from(validTempMap);
 
     this.tempDataSource.data.forEach(row => {
       if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
@@ -378,6 +372,12 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
         removedInPersonTrackings.push(row.trackingNumber);
       }
     });
+
+    let removedTempMap = new Map(removedInPersonTrackings.map(r => [r.substring(0, r.lastIndexOf("-")), []]));
+    removedInPersonTrackings.forEach(r => {
+      removedTempMap.set(r.substring(0, r.lastIndexOf("-")), [...removedTempMap.get(r.substring(0, r.lastIndexOf("-"))), r]);
+    });
+    removedInPersonTrackings = Array.from(removedTempMap);
 
     formData['onlineTrackings'] = onlineTrackings; // Don't stringify it
     formData['servicedTrackings'] = servicedTrackings;

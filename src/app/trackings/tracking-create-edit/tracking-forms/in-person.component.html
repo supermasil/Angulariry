@@ -24,24 +24,25 @@
     </div>
 
     <div class="mt-2">
-      <form [formGroup]="subTrackingsForm" class="m-0 p-0">
+      <form [formGroup]="subTrackingsForm">
         <div formArrayName="subTrackings" *ngFor="let subTracking of subTrackingsForm.get('subTrackings')['controls']; let i = index;">
           <div style="margin-bottom: 50px;">
             <mat-card>
               <div [formGroupName]="i">
                 <div class="row">
-                  <div class="col-lg-10">
+                  <div class="col-lg-7">
                     <mat-form-field appearance="outline">
                       <mat-label>Tracking Number</mat-label>
                       <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
-                      <a
+                      <button
+                        [disabled]="subTracking.get('linkedToCsl').value || subTracking.get('linkedToMst').value"
                         matSuffix
                         mat-mini-fab
                         color="warn"
                         class="mr-2"
                         (click)="deleteSubTracking(i)">
                         <mat-icon>remove_circle</mat-icon>
-                      </a>
+                      </button>
                       <a
                         matSuffix
                         mat-mini-fab
@@ -52,6 +53,18 @@
                     </mat-form-field>
                   </div>
                   <div class="col-lg-2">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Linked To Consolidated</mat-label>
+                      <input type='text' matInput formControlName="linkedToCsl">
+                    </mat-form-field>
+                  </div>
+                  <div class="col-lg-2">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Linked To Master</mat-label>
+                      <input type='text' matInput formControlName="linkedToMst">
+                    </mat-form-field>
+                  </div>
+                  <div class="col-lg-1">
                     <mat-checkbox matInput formControlName="paid" style="position: relative; bottom: -15px;">Paid</mat-checkbox>
                   </div>
                 </div>

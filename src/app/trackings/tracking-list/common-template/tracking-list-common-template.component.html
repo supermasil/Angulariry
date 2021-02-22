@@ -161,8 +161,9 @@
                 <ng-container *ngFor="let subtracking of tracking.subTrackings">
                   <tr style="background-color: #9C27B0;">
                     <td style="color: white" colspan="3"><b>Subtracking Number</b> {{subtracking.trackingNumber}}</td>
-                    <td style="color: white" colspan="3"><span *ngIf="subtracking?.linkedToCsl?.trackingNumber"><b>Linked to</b> {{subtracking.linkedToCsl.trackingNumber}}</span></td>
-                    <td style="color: white" colspan="3"><span *ngIf="subtracking?.linkedToMst?.trackingNumber"><b>Linked to</b> {{subtracking.linkedToMst.trackingNumber}}</span></td>
+                    <td style="color: white" colspan="2"><span *ngIf="subtracking?.linkedToCsl?.trackingNumber"><b>Linked to</b> {{subtracking.linkedToCsl.trackingNumber}}</span></td>
+                    <td style="color: white" colspan="2"><span *ngIf="subtracking?.linkedToMst?.trackingNumber"><b>Linked to</b> {{subtracking.linkedToMst.trackingNumber}}</span></td>
+                    <td style="color: white" colspan="2"><span><b>Status</b> {{subtracking.generalInfo.status}}</span></td>
                   </tr>
                   <ng-container *ngFor="let item of subtracking.itemsList">
                     <tr>
@@ -260,7 +261,7 @@
 
                 <ng-container *ngFor="let item of tracking.inPersonTrackings, let l = index">
                   <ng-container *ngFor="let sub of item.subTrackings; let k = index">
-                    <tr>
+                    <tr *ngIf="sub.linkedToCsl?._id === tracking._id">
                       <td>{{sub?.trackingNumber}}</td>
                       <td>{{sub?.generalInfo.status}}</td>
                       <td>Kg {{sub?.generalInfo?.totalWeight}}</td>
