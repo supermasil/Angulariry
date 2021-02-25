@@ -75,8 +75,8 @@ export class TrackingService{
       });
   }
 
-  getTracking(trackingNumber: string) {
-    return this.httpClient.get<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel |ConsolidatedTrackingModel | MasterTrackingModel>(BACKEND_URL + "/" +trackingNumber ); // return an observable
+  getTracking(trackingNumber: string, type: string) {
+    return this.httpClient.get<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel |ConsolidatedTrackingModel | MasterTrackingModel>(BACKEND_URL + "/" + trackingNumber + `?type=${type}`); // return an observable
   }
 
   getTrackings(trackingsPerPage: number, currentPage: number, type: string, origin: string, destination: string, sender: string) {
@@ -105,12 +105,13 @@ export class TrackingService{
     return this.httpClient.delete(BACKEND_URL + trackingNumber);
   }
 
-  changeTrackingStatus(status: string, trackingNumber: string) {
+  changeTrackingStatus(status: string, trackingNumber: string, type: string) {
     let formData = {
       status: status,
-      trackingNumber: trackingNumber
+      trackingNumber: trackingNumber,
+      type: type
     }
     return this.httpClient
-      .post<{message: string, tracking: any}>(BACKEND_URL + "changeStatus", formData);
+      .post<{message: string}>(BACKEND_URL + "changeStatus", formData);
   }
 }

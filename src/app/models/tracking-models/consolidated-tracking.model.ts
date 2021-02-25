@@ -1,5 +1,5 @@
 import { GeneralInfoModel } from "./general-info.model";
-import { InPersonSubTrackingModel, InPersonTrackingModel } from "./in-person-tracking.model";
+import { InPersonSubTrackingModel } from "./in-person-tracking.model";
 import { OnlineTrackingModel } from "./online-tracking.model";
 import { ServicedTrackingModel } from "./serviced-tracking.model";
 
@@ -8,7 +8,7 @@ export interface ConsolidatedTrackingModel { // From backend
   trackingNumber: string;
   onlineTrackings: OnlineTrackingModel[];
   servicedTrackings: ServicedTrackingModel[];
-  inPersonTrackings: InPersonTrackingModel[];
+  inPersonSubTrackings: InPersonSubTrackingModel[];
   generalInfo: GeneralInfoModel;
   createdAt: Date;
   updatedAt: Date;

@@ -1,6 +1,5 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
-import { read } from "fs";
 import * as moment from "moment";
 import { Observable } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
@@ -8,7 +7,7 @@ import { AuthService } from "src/app/auth/auth.service";
 import { CommentService } from "src/app/custom-components/comments/comment.service";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { ConsolidatedTrackingModel } from "src/app/models/tracking-models/consolidated-tracking.model";
-import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
+import { InPersonSubTrackingModel, InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
 import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
 import { MasterTrackingBox, MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
@@ -135,32 +134,6 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
 
   }
 
-  trackingToggle(tracking: OnlineTrackingModel | InPersonTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {
-    this.trackingService.changeTrackingStatus(status, tracking.trackingNumber).subscribe(response => {
-      this.zone.run(() => {
-        this.trackings[index] = response.tracking;
-      })
-    });
-  }
-
-  childTrackingToggle(parentTracking: ConsolidatedTrackingModel, tracking: OnlineTrackingModel | InPersonTrackingModel | ServicedTrackingModel, index: number, childIndex: number, status: string) {
-    this.trackingService.changeTrackingStatus(status, tracking.trackingNumber).subscribe(response => {
-      this.trackingService.getTracking(parentTracking.trackingNumber).subscribe(foundTracking => {
-        this.trackings[index] = foundTracking;
-      })
-
-      // this.zone.run(() => {
-      //   if (tracking.trackingNumber.substring(0, 3) === this.trackingGlobals.trackingTypes.ONLINE) {
-      //     (this.trackings[index] as ConsolidatedTrackingModel).onlineTrackings[childIndex] = response.tracking;
-      //   } else if (tracking.trackingNumber.substring(0, 3) === this.trackingGlobals.trackingTypes.SERVICED) {
-      //     (this.trackings[index] as ConsolidatedTrackingModel).servicedTrackings[childIndex] = response.tracking;
-      //   } else if (tracking.trackingNumber.substring(0, 3) === this.trackingGlobals.trackingTypes.INPERSON) {
-      //     (this.trackings[index] as ConsolidatedTrackingModel).inPersonTrackings[childIndex] = response.tracking;
-      //   }
-      // })
-    });
-  }
-
   getConsolidatedTotalWeightCost(tracking: ConsolidatedTrackingModel) {
     return this.getTotalWeightCostHelper(tracking);
   }
@@ -187,7 +160,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
       totalWeight += t.generalInfo.totalWeight;
       totalCost += t.generalInfo.finalCost;
     });
-    item.inPersonTrackings.forEach(t => {
+    item.inPersonSubTrackings.forEach(t => {
       totalWeight += t.generalInfo.totalWeight;
       totalCost += t.generalInfo.finalCost;
     });
@@ -195,22 +168,28 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
     return {weight: totalWeight, cost: totalCost};
   }
 
-  combineTrackings(arr1: OnlineTrackingModel[], arr2: ServicedTrackingModel[], arr3: InPersonTrackingModel[]) {
+  combineTrackings(arr1: any[], arr2: any[], arr3: any[]) {
     return [...arr1, ...arr2, ...arr3];
   }
 
-  getConsolidatedTrackingOverallStatus(tracking: ConsolidatedTrackingModel, statuses: string[]) {
-    let result = true;
-    let trackingStatuses = this.combineTrackings(tracking.onlineTrackings, tracking.servicedTrackings, tracking.inPersonTrackings).map(t => t.generalInfo.status);
+  trackingToggle(tracking: OnlineTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {
+    this.trackingService.changeTrackingStatus(status, tracking.trackingNumber, tracking.trackingNumber.substring(0,3)).subscribe(response => {
+      this.zone.run(() => {
+        this.trackings[index].generalInfo.status = status;
+      })
+    });
+  }
 
-    if (trackingStatuses.length == 0) {return false;}
-
-    for (let s of trackingStatuses) {
-      if (!statuses.includes(s)) {
-        result =  false;
-        break;
-      }
-    }
-    return result;
+  childTrackingToggle(tracking: OnlineTrackingModel | InPersonSubTrackingModel | ServicedTrackingModel, status: string | boolean, parentTracking: ConsolidatedTrackingModel | MasterTrackingModel, index: number) {
+    let type = tracking.trackingNumber.substring(0,3);
+    type = type === TrackingGlobals.trackingTypes.INPERSON && tracking.trackingNumber.split('-').length == 3 ? TrackingGlobals.trackingTypes.INPERSONSUB : type;
+    let tempStatus = status == true? this.trackingGlobals.financialStatuses.Paid : status == false? this.trackingGlobals.financialStatuses.Unpaid: status;
+    this.trackingService.changeTrackingStatus(tempStatus, tracking.trackingNumber, type).subscribe(response => {
+      this.trackingService.getTracking(parentTracking.trackingNumber, parentTracking.trackingNumber.substring(0,3)).subscribe(t => {
+        this.zone.run(() => {
+          this.trackings[index].generalInfo.status = t.generalInfo.status;
+        })
+      })
+    });
   }
 }

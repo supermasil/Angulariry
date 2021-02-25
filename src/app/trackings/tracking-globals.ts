@@ -42,6 +42,7 @@ export class TrackingGlobals {
     ONLINE: "onl",
     SERVICED: "sev",
     INPERSON: "inp",
+    INPERSONSUB: "inpsub",
     CONSOLIDATED: "csl",
     MASTER: "mst"
   }
@@ -65,6 +66,8 @@ export class TrackingGlobals {
     PartiallyPaid: "Partially paid"
   }
 
+  public static allStatuses = Object.values(TrackingGlobals.trackingStatuses);
+  public static allFinancialStatuses = Object.values(TrackingGlobals.financialStatuses);
   public static postReceivedAtOrigin = Object.values(TrackingGlobals.trackingStatuses).slice(4);
   public static postReadyToFly = Object.values(TrackingGlobals.trackingStatuses).slice(5);
   public static postFlying = Object.values(TrackingGlobals.trackingStatuses).slice(6);

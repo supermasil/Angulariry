@@ -8,7 +8,7 @@ const consolidatedTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true, index: true},
   onlineTrackings: [{type: mongoose.Types.ObjectId, ref: "online-tracking"}],
   servicedTrackings: [{type: mongoose.Types.ObjectId, ref: "serviced-tracking"}],
-  inPersonTrackings: [{type: mongoose.Types.ObjectId, ref: "in-person-tracking"}],
+  inPersonSubTrackings: [{type: mongoose.Types.ObjectId, ref: "in-person-tracking-sub"}],
   generalInfo: {type: GeneralInfoSchema, required: true}
 }, {timestamps: true, autoCreate: true });
 

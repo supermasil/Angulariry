@@ -10,7 +10,7 @@ import { FileUploaderComponent } from 'src/app/custom-components/file-uploader/f
 import { OrganizationModel } from 'src/app/models/organization.model';
 import { ConsolidatedTrackingModel } from 'src/app/models/tracking-models/consolidated-tracking.model';
 import { GeneralInfoModel } from 'src/app/models/tracking-models/general-info.model';
-import { InPersonSubTrackingModel, InPersonTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
+import { InPersonSubTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
 import { OnlineTrackingModel } from 'src/app/models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from 'src/app/models/tracking-models/serviced-tracking.model';
 import { UserModel } from 'src/app/models/user.model';
@@ -113,12 +113,13 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
           this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: ConsolidatedTrackingModel) => {
+                this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.CONSOLIDATED).subscribe((response: ConsolidatedTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.consolidatedForm = this.createConcolidatedForm(response);
                   this.emitChanges();
                   this.setUpDataSource();
+                  console.log(this.currentTracking)
                 }, error => {
                   this.authService.redirect404();
                 });
@@ -158,40 +159,17 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
       this.onlineTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
-
       this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
         this.serviceTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
         this.servicedTrackingDataSubject.next(this.serviceTrackings);
-
-        this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSON, origin, destination, sender).subscribe((transformedTrackings) => {
-          this.inPersonSubTrackings = this.setUpSubTrackings(transformedTrackings.trackings);
-          this.inPersonSubTrackings = this.inPersonSubTrackings.filter(t => !t.linkedToCsl);
+        this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, origin, destination, sender).subscribe((transformedTrackings) => {
+          this.inPersonSubTrackings = transformedTrackings.trackings.filter(t => !t.linkedToCsl);
           this.inPersonSubTrackingDataSubject.next(this.inPersonSubTrackings);
           this.showTable = true;
           this.resetSelectedData();
         });
       });;
     });;
-  }
-
-  setUpSubTrackings(trackings: InPersonTrackingModel[]) {
-    let temp = [];
-    trackings.forEach((t: InPersonTrackingModel) => {
-      t.subTrackings.forEach(s => {
-        s['parentTrackingId'] = t._id;
-        Object.assign(s.generalInfo, {
-          sender: t.generalInfo.sender,
-          recipient: t.generalInfo.recipient,
-          organization: t.generalInfo.organization,
-          origin: t.generalInfo.origin,
-          destination: t.generalInfo.destination,
-          creatorId: t.generalInfo.creatorId,
-          creatorName: t.generalInfo.creatorName
-        });
-      });
-      temp.push(...t.subTrackings);
-    });
-    return temp;
   }
 
   ngAfterViewChecked() {
@@ -224,8 +202,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   setUpDataSource() {
-    let currentInPersonSubtrackings = this.setUpSubTrackings(this.currentTracking.inPersonTrackings);
-    this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...currentInPersonSubtrackings.filter(t => t.linkedToCsl?._id === this.currentTracking._id)];
+    this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...this.currentTracking.inPersonSubTrackings];
     this.currentTrackingsReference = [...this.currentTrackings];
     // this.combineData();
   }
@@ -339,52 +316,46 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
     let onlineTrackings = [];
     let servicedTrackings = [];
-    let inPersonTrackings = [];
+    let inPersonSubTrackings = [];
 
     let removedOnlineTrackings = [];
     let removedServicedTrackings = [];
-    let removedInPersonTrackings = [];
+    let removedInPersonSubTrackings = [];
 
     this.finalizingDataSource.data.forEach(row => {
-      if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
-        onlineTrackings.push(row._id);
-      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
-        servicedTrackings.push(row._id);
-      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) { // These are subtrackings
-        inPersonTrackings.push(row);
+      switch (row.trackingNumber.substring(0,3)) {
+        case TrackingGlobals.trackingTypes.ONLINE:
+          onlineTrackings.push(row._id);
+          break;
+        case TrackingGlobals.trackingTypes.SERVICED:
+          servicedTrackings.push(row._id);
+          break;
+        case TrackingGlobals.trackingTypes.INPERSON:
+          inPersonSubTrackings.push(row._id);
+          break;
       }
     });
-
-    console.log(inPersonTrackings)
-
-    let validTempMap = new Map(inPersonTrackings.map(r => [r.parentTrackingId, []]));
-    inPersonTrackings.forEach(r => {
-      validTempMap.set(r.parentTrackingId, [...validTempMap.get(r.parentTrackingId), r._id]);
-    });
-    inPersonTrackings = Array.from(validTempMap);
 
     this.tempDataSource.data.forEach(row => {
-      if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.ONLINE)) {
-        removedOnlineTrackings.push(row.trackingNumber);
-      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
-        removedServicedTrackings.push(row.trackingNumber);
-      } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) { // These are subtrackings
-        removedInPersonTrackings.push(row.trackingNumber);
+      switch (row.trackingNumber.substring(0,3)) {
+        case TrackingGlobals.trackingTypes.ONLINE:
+          removedOnlineTrackings.push(row._id);
+          break;
+        case TrackingGlobals.trackingTypes.SERVICED:
+          removedServicedTrackings.push(row._id);
+          break;
+        case TrackingGlobals.trackingTypes.INPERSON:
+          removedInPersonSubTrackings.push(row._id);
+          break;
       }
     });
-
-    let removedTempMap = new Map(removedInPersonTrackings.map(r => [r.substring(0, r.lastIndexOf("-")), []]));
-    removedInPersonTrackings.forEach(r => {
-      removedTempMap.set(r.substring(0, r.lastIndexOf("-")), [...removedTempMap.get(r.substring(0, r.lastIndexOf("-"))), r]);
-    });
-    removedInPersonTrackings = Array.from(removedTempMap);
 
     formData['onlineTrackings'] = onlineTrackings; // Don't stringify it
     formData['servicedTrackings'] = servicedTrackings;
-    formData['inPersonTrackings'] = inPersonTrackings;
+    formData['inPersonSubTrackings'] = inPersonSubTrackings;
     formData['removedOnlineTrackings'] = removedOnlineTrackings; // Don't stringify it
     formData['removedServicedTrackings'] = removedServicedTrackings;
-    formData['removedInPersonTrackings'] = removedInPersonTrackings;
+    formData['removedInPersonSubTrackings'] = removedInPersonSubTrackings;
 
     formData['finalizedInfo'] = {};
     formData['finalizedInfo']['totalWeight'] = this.getTotalWeight();

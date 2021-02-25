@@ -6,17 +6,12 @@ import { MasterTrackingModel } from "./master-tracking.model";
 export interface InPersonSubTrackingModel {
   _id: string;
   trackingNumber: string;
+  generalInfo: GeneralInfoModel;
   itemsList: ListItemModel[];
   linkedToCsl: ConsolidatedTrackingModel;
   linkedToMst: MasterTrackingModel;
-  generalInfo: {
-    totalWeight: number; // Can be updated later on
-    finalCost: number; // The money to charge customer
-    costAdjustment: number;
-    exchange: number;
-    paid: boolean;
-    status: string;
-  }
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface InPersonTrackingModel { // From backend

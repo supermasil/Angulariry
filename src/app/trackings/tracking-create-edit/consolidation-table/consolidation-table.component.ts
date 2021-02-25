@@ -5,7 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
-import { InPersonSubTrackingModel, InPersonTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
+import { InPersonSubTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
 import { OnlineTrackingModel } from 'src/app/models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from 'src/app/models/tracking-models/serviced-tracking.model';
 
@@ -76,7 +76,7 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
 
   updateData(data: any) {
     this.dataSource = new MatTableDataSource(data);
-    // this.dataSource.filterPredicate = (data: OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel, filter: string) => {
+    // this.dataSource.filterPredicate = (data: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel, filter: string) => {
     //   return data.OrderNumber.includes(filter);
     // };
 

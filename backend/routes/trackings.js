@@ -13,7 +13,7 @@ router.get('/', checkAuth.isAuthenticated, TrackingController.getTrackings); // 
 
 router.post('/changeStatus', checkAuth.isAuthenticated, TrackingController.changeTrackingStatus); // Create
 
-router.post('/', checkAuth.isAuthenticated, TrackingController.createTracking); // Create
+router.post('/', checkAuth.isAuthenticated, TrackingController.createUpdateTracking); // Create
 
 router.delete('/:id', checkAuth.isAuthenticated, TrackingController.deleteTracking); // delete
 

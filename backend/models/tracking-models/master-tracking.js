@@ -12,7 +12,7 @@ const masterTrackingSchema = mongoose.Schema({
     palletNumber: {type: String, required: true},
     onlineTrackings: [{type: mongoose.Types.ObjectId, ref: "online-tracking"}],
     servicedTrackings: [{type: mongoose.Types.ObjectId, ref: "serviced-tracking"}],
-    inPersonTrackings: [{type: mongoose.Types.ObjectId, ref: "in-person-tracking"}],
+    inPersonSubTrackings: [{type: mongoose.Types.ObjectId, ref: "in-person-tracking-sub"}],
     content: {type: String, default: ''}
   }],
   generalInfo: {type: GeneralInfoSchema, required: true}

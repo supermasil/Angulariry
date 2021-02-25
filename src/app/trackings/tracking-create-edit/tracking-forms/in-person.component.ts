@@ -17,7 +17,7 @@ import { GeneralInfoComponent } from "../general-info/general-info.component";
 import { ItemsListComponent } from "../items-list/items-list.component";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { TrackingGlobals } from "../../tracking-globals";
-import { Alert, AlertService } from "src/app/custom-components/alert-message";
+import { AlertService } from "src/app/custom-components/alert-message";
 import { GlobalConstants } from "src/app/global-constants";
 
 
@@ -77,6 +77,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
   trackingNumber = "";
 
+  removedTrackingIds = [];
+
   constructor(
     private trackingService: TrackingService,
     private route: ActivatedRoute,
@@ -106,7 +108,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId')).subscribe((response: InPersonTrackingModel) => {
+                this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.ONLINE).subscribe((response: InPersonTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.createInPersonForm(response);
@@ -145,7 +147,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
   createInPersonForm (formData: InPersonTrackingModel) {
     this.inPersonForm = new FormGroup({
-      _id: new FormControl(formData?._id? formData._id :null),
+      _id: new FormControl(formData?._id? formData._id : null),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content : ""),
       finalCost: new FormControl(0, {validators: [Validators.required]}),
       finalCostVND: new FormControl(0, {validators: [Validators.required]}),
@@ -163,7 +165,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
         this.updateExistingItemsSubjects[index].next(s.itemsList);
         this.costAdjustmentSubjects[index].next(s.generalInfo.costAdjustment);
         this.exchangeSubject[index].next(s.generalInfo.exchange);
-      })
+      });
     }
   }
 
@@ -177,6 +179,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
   addSubTracking(formData: InPersonSubTrackingModel) {
     let form = new FormGroup({
+      _id: new FormControl(formData?._id? formData._id :null),
       trackingNumber: new FormControl({value: formData?.trackingNumber? formData.trackingNumber : this.trackingNumber + '-' + this.getNextIndex(), disabled: true}),
       paid: new FormControl({value: formData?.generalInfo?.paid? formData.generalInfo.paid : false, disabled: !this.canView(AuthGlobals.internal) || formData?.linkedToCsl }, {validators: [Validators.required]}),
       status: new FormControl({value: formData?.generalInfo?.status? formData.generalInfo.status: TrackingGlobals.trackingStatuses.Created, disabled: true}),
@@ -195,7 +198,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     (this.subTrackingsForm.get('subTrackings') as FormArray).push(form);
   }
 
-  deleteSubTracking(index: number) {
+  deleteSubTracking(index: number, trackingId: string) {
     this.updateExistingItemsSubjects.splice(index, 1);
     this.itemsListSubjects.splice(index, 1);
     this.costAdjustmentSubjects.splice(index, 1);
@@ -204,6 +207,9 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     (this.subTrackingsForm.get('subTrackings') as FormArray).removeAt(index);
     this.cd.detectChanges();
     this.getTotalFinalizedInfo();
+    if (trackingId) {
+      this.removedTrackingIds.push(trackingId)
+    }
   }
 
   canView(roles: string[]) {
@@ -227,7 +233,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     this.cd.detectChanges();
   }
 
-  finalizedInfoValidty(input: any) {
+  finalizedInfoValidty() {
     this.getTotalFinalizedInfo();
   }
 
@@ -248,8 +254,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
         this.totalFinalCost += i.getRawValues().finalCost;
         this.totalFinalCostVND += i.getRawValues().finalCostVND;
       });
-      this.inPersonForm.get('finalCost').setValue(this.totalFinalCost);
-      this.inPersonForm.get('finalCostVND').setValue(this.totalFinalCostVND);
+      this.inPersonForm?.get('finalCost').setValue(this.totalFinalCost); // Currency format requires this
+      this.inPersonForm?.get('finalCostVND').setValue(this.totalFinalCostVND);
       this.showTotalFinalizedInfo = true;
     }
   }
@@ -262,8 +268,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     this.totalSaving = 0;
     this.totalFinalCost = 0;
     this.totalFinalCostVND = 0;
-    this.inPersonForm.get('finalCost').setValue(0);
-    this.inPersonForm.get('finalCostVND').setValue(0);
+    this.inPersonForm?.get('finalCost').setValue(0);
+    this.inPersonForm?.get('finalCostVND').setValue(0);
   }
 
   pricingUpdate(changes) {
@@ -272,17 +278,16 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked() {
+    this.getTotalFinalizedInfo();
     this.cd.detectChanges();
   }
 
   onSave() {
     this.generalInfo.getFormValidity();
     let subTrackings = this.subTrackingsForm.getRawValue().subTrackings;
-
     let itemsListsValidity = true;
-
-
     let finalizedInfoValidity = true;
+
     this.finalizedInfoRef.forEach((i, index) => {
       i.getFormValidity()
       finalizedInfoValidity = i.getFormValidity() && finalizedInfoValidity;
@@ -310,6 +315,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
     formData['generalInfo']['recipient'] = recipient;
     formData['subTrackings'] = subTrackings;
+    formData['removedTrackingIds'] = this.removedTrackingIds;
 
     formData['finalizedInfo'] = {};
     formData['finalizedInfo']['totalWeight'] = this.totalWeight;

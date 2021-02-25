@@ -40,7 +40,7 @@
                         mat-mini-fab
                         color="warn"
                         class="mr-2"
-                        (click)="deleteSubTracking(i)">
+                        (click)="deleteSubTracking(i, subTracking.get('_id').value)">
                         <mat-icon>remove_circle</mat-icon>
                       </button>
                       <a
@@ -86,7 +86,7 @@
                     [itemsListObservable]="itemsListSubjects[i].asObservable()"
                     [costAdjustmentObservable]="costAdjustmentSubjects[i].asObservable()"
                     [exchangeObservable]="exchangeSubject[i].asObservable()"
-                    (formValidity)="finalizedInfoValidty($event)">
+                    (formValidity)="finalizedInfoValidty()">
                   </finalized-info>
                 </div>
               </div>
