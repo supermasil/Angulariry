@@ -108,7 +108,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
             this.route.paramMap.subscribe((paramMap) => {
               if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.ONLINE).subscribe((response: InPersonTrackingModel) => {
+                this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.INPERSON).subscribe((response: InPersonTrackingModel) => {
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.createInPersonForm(response);
@@ -278,7 +278,9 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked() {
-    this.getTotalFinalizedInfo();
+    if (this.mode == "edit") {
+      this.getTotalFinalizedInfo();
+    }
     this.cd.detectChanges();
   }
 

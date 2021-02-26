@@ -14,6 +14,7 @@ const GeneralInfoSchema = mongoose.Schema({
   content: {type: String, default: ''}, // Note
   status: {type: String, required: true, default: "Unknown"},
   active: {type: Boolean, required: true}, // This should be false to prevent edit after certain stage
+  type: {type: String, required: true},
 
   totalWeight: {type: Number, default: 0}, // Can be updated later on
   finalCost: {type: Number, default: 0}, // The money to charge customer

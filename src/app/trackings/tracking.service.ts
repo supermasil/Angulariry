@@ -70,7 +70,7 @@ export class TrackingService{
       .post<{message: string, tracking: any}>(BACKEND_URL, formData)
       .subscribe((responseData) => {
         this.zone.run(() => {
-          this.router.navigate([`/trackings/${responseData.tracking.trackingNumber.substring(0, 3)}`]);
+          this.router.navigate([`/trackings/${responseData.tracking.generalInfo.type}`]);
         });
       });
   }
@@ -105,13 +105,13 @@ export class TrackingService{
     return this.httpClient.delete(BACKEND_URL + trackingNumber);
   }
 
-  changeTrackingStatus(status: string, trackingNumber: string, type: string) {
+  changeTrackingStatus(status: string, _id: string, type: string) {
     let formData = {
       status: status,
-      trackingNumber: trackingNumber,
+      _id: _id,
       type: type
     }
     return this.httpClient
-      .post<{message: string}>(BACKEND_URL + "changeStatus", formData);
+      .post<{message: string, tracking: any}>(BACKEND_URL + "changeStatus", formData);
   }
 }

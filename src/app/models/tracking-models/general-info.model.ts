@@ -9,6 +9,7 @@ export interface GeneralInfoModel { // From backend
   content: string; // Note
   status: string;
   active: boolean; // This should be false to prevent edit after certain stage
+  type: string;
 
   totalWeight: number; // Can be updated later on
   finalCost: number; // The money to charge customer

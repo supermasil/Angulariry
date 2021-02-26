@@ -61,9 +61,9 @@ exports.createUpdateTracking = async (req, res, next) => {
   try {
     const session = await db.startSession();
     let createdTracking = null;
+    let type = req.body.generalInfo.trackingNumber.substring(0, 3);
     await session.withTransaction(async () => {
-      let prefix = req.body.generalInfo.trackingNumber.substring(0, 3);
-      switch (prefix) {
+      switch (type) {
         case TrackingTypes.ONLINE:
           createdTracking = await createUpdateTrackingHelper(req, session, TrackingTypes.ONLINE, OnlineTrackingModel);
           break;
@@ -148,9 +148,9 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       updateBody['subTrackings'] = await subTrackingsSetupHelper(req, session);
       break;
     case TrackingTypes.CONSOLIDATED:
-      updateBody['onlineTrackings'] = req.body.onlineTrackings;
-      updateBody['servicedTrackings'] = req.body.servicedTrackings;
-      updateBody['inPersonSubTrackings'] = req.body.inPersonSubTrackings;
+      updateBody['onlineTrackings'] = req.body.onlineTrackingIds;
+      updateBody['servicedTrackings'] = req.body.servicedTrackingIds;
+      updateBody['inPersonSubTrackings'] = req.body.inPersonSubTrackingIds;
       break;
     case TrackingTypes.MASTER:
       updateBody['boxes'] = req.body.boxes;
@@ -170,10 +170,10 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
 
   switch (type) {
     case TrackingTypes.CONSOLIDATED:
-      await changeStatusForConsolidatedHelper(req.userData.uid, req.userData.orgId, createdTracking._id, [req.body.onlineTrackings, req.body.servicedTrackings, req.body.inPersonSubTrackings], [req.body.removedOnlineTrackings, req.body.removedServicedTrackings, req.body.removedInPersonSubTrackings], true, session);
+      await changeStatusForConsolidatedHelper(req.userData.uid, req.userData.orgId, createdTracking._id, [req.body.onlineTrackingIds, req.body.servicedTrackingIds, req.body.inPersonSubTrackingIds], [req.body.removedOnlineTrackingIds, req.body.removedServicedTrackingIds, req.body.removedInPersonSubTrackingIds], true, session);
       break;
     case TrackingTypes.MASTER:
-      await changeStatusForMasterHelper(req.userData.uid, req.userData.orgId, req.body.generalInfo.status, createdTrahcking.trackingNumber, true, [req.body.validOnlineTrackingNumbers, req.body.validServicedTrackingNumbers, req.body.validInPersonTrackingNumbers], [req.body.removedOnlineTrackingNumbers, req.body.removedServicedTrackingNumbers, req.body.removedInPersonTrackingNumbers], createdTracking._id, session);
+      await changeStatusForMasterHelper(req.userData.uid, req.userData.orgId, req.body.generalInfo.status, createdTracking._id, true, [req.body.validOnlineTrackingIds, req.body.validServicedTrackingIds, req.body.validInPersonSubTrackingIds], [req.body.removedOnlineTrackingIds, req.body.removedServicedTrackingIds, req.body.removedInPersonSubTrackingIds], session);
       break;
   }
 
@@ -199,6 +199,7 @@ generalInfoSetupHelper = async req => {
     status: req.body.generalInfo.status? req.body.generalInfo.status : "Created",
     active: req.body.generalInfo.active? req.body.generalInfo.active : true,
     paid: req.body.paid? req.body.paid : false,
+    type: req.body.generalInfo.trackingNumber.substring(0,3),
 
     totalWeight: req.body.finalizedInfo? req.body.finalizedInfo.totalWeight : 0,
     finalCost: req.body.finalizedInfo? req.body.finalizedInfo.finalCost : 0,
@@ -254,6 +255,7 @@ subTrackingsSetupHelper = async (req, session) => {
       generalInfo.exchange = sub.finalizedInfo.exchange;
       generalInfo.status = sub.status;
       generalInfo.paid = sub.paid;
+      generalInfo.type = TrackingTypes.INPERSONSUB;
 
       data = {
         trackingNumber: sub.trackingNumber,
@@ -496,7 +498,6 @@ getTrackingHelper = async (type, id, orgId, byId) => {
     return document;
   }
 
-  let tracking = null;
   switch(type) {
     case TrackingTypes.ONLINE:
       return await OnlineTrackingModel.findOne(queryParams)
@@ -519,16 +520,16 @@ getTrackingHelper = async (type, id, orgId, byId) => {
         .lean().then(callbackfunction);
     case TrackingTypes.CONSOLIDATED:
       return await ConsolidatedTrackingModel.findOne(queryParams)
-      .populate('onlineTrackings')
-      .populate('servicedTrackings')
-      .populate('inPersonSubTrackings')
-      .lean().then(callbackfunction);
+        .populate('onlineTrackings')
+        .populate('servicedTrackings')
+        .populate('inPersonSubTrackings')
+        .lean().then(callbackfunction);
     case TrackingTypes.MASTER:
       return await MasterTrackingModel.findOne(queryParams)
-      .populate('boxes.onlineTrackings')
-      .populate('boxes.servicedTrackings')
-      .populate('boxes.inPersonSubTrackings')
-      .lean().then(callbackfunction);
+        .populate('boxes.onlineTrackings')
+        .populate('boxes.servicedTrackings')
+        .populate('boxes.inPersonSubTrackings')
+        .lean().then(callbackfunction);
     default:
       throw new Error("getTrackingHelper: Tracking type doesn't match any");
   }
@@ -559,14 +560,22 @@ populateSenderInfo = async (documents, type) => {
 }
 
 populateSenderInfoHelper = async (document, sender) => {
-  for (t of document.onlineTrackings) {
-    t.generalInfo.sender = sender
+  if (!document) { return; }
+
+  if (document.onlineTrackings) {
+    for (t of document.onlineTrackings) {
+      t.generalInfo.sender = sender
+    }
   }
-  for (t of document.servicedTrackings) {
-    t.generalInfo.sender = sender
+  if (document.servicedTrackings) {
+    for (t of document.servicedTrackings) {
+      t.generalInfo.sender = sender
+    }
   }
-  for (t of document.inPersonSubTrackings) {
-    t.generalInfo.sender = sender;
+  if (document.inPersonSubTrackings) {
+    for (t of document.inPersonSubTrackings) {
+      t.generalInfo.sender = sender;
+    }
   }
 }
 
@@ -609,91 +618,119 @@ exports.deleteTracking = async (req, res, next) => {
 exports.changeTrackingStatus = async (req, res , next) => {
   try {
     let type = req.body.type;
-    let trackingNumber = req.body.trackingNumber;
+    let _id = req.body._id;
     let tracking = null;
 
     session = await db.startSession();
     await session.withTransaction(async () => {
       switch(type) {
         case TrackingTypes.ONLINE:
-          await changeTrackingStatusHelper(req.userData.uid, req.userData.orgId, type, req.body.status, [trackingNumber], false, session);
+          await changeTrackingStatusHelper(req.userData.uid, req.userData.orgId, type, req.body.status, [_id], true, session);
           break;
         case TrackingTypes.SERVICED:
           throw new Error(`changeTrackingStatus: Tracking type ${TrackingTypes.SERVICED} is not suppported`);
         case TrackingTypes.INPERSONSUB: // We only change status of inpersonsub
-          await changeTrackingStatusHelper(req.userData.uid, req.userData.orgId, type, req.body.status, [trackingNumber], false, session);
+          await changeTrackingStatusHelper(req.userData.uid, req.userData.orgId, type, req.body.status, [_id], true, session);
           break;
         case TrackingTypes.CONSOLIDATED:
           throw new Error(`changeTrackingStatus: Tracking type ${TrackingTypes.CONSOLIDATED} is not suppported`);
         case TrackingTypes.MASTER:
-          await changeStatusForMasterHelper(req.userData.uid, req.userData.orgId, req.body.status, trackingNumber, false, null, null, session);
+          await changeStatusForMasterHelper(req.userData.uid, req.userData.orgId, req.body.status, _id, false, null, null, session);
           break;
         default:
           throw new Error("changeTrackingStatus: Tracking type doesn't match any");
       }
     });
     session.endSession();
-    tracking = await getTrackingHelper(type, req.body.trackingNumber, req.userData.orgId, false);
-    assert (tracking != null, "changeTrackingStatus: Tracking is null");
+    tracking = await getTrackingHelper(type, _id, req.userData.orgId, true);
 
-    // Open another session to flush
-    if (tracking.linkedToCsl._id) {
+    if ([TrackingTypes.ONLINE, TrackingTypes.SERVICED, TrackingTypes.INPERSONSUB].includes(type)) {
+      assert (tracking != null, "changeTrackingStatus: Tracking is null");
+
+      // Open another session to flush
       session = await db.startSession();
-      let consolidatedTracking = await getTrackingHelper(TrackingTypes.CONSOLIDATED, tracking.linkedToCsl._id, req.userData.orgId, true);
-      await populateStatusUpstreamForConsolidatedHelper(req.userData.uid, req.userData.orgId, [consolidatedTracking.onlineTrackings, consolidatedTracking.servicedTrackings, consolidatedTracking.inPersonSubTrackings], consolidatedTracking._id, session);
+      if (tracking.linkedToCsl) {
+        let consolidatedTracking = await getTrackingHelper(TrackingTypes.CONSOLIDATED, tracking.linkedToCsl._id, req.userData.orgId, true);
+        await populateStatusUpstreamForConsolidatedMasterHelper(req.userData.uid, req.userData.orgId, [consolidatedTracking.onlineTrackings.map(t => t._id), consolidatedTracking.servicedTrackings.map(t => t._id), consolidatedTracking.inPersonSubTrackings.map(t => t._id)], consolidatedTracking._id, TrackingTypes.CONSOLIDATED, session);
+      }
+
+      if (tracking.linkedToMst) {
+        let masterTracking = await getTrackingHelper(TrackingTypes.MASTER, tracking.linkedToMst._id, req.userData.orgId, true);
+        let validTrackingIds = [];
+        masterTracking.boxes.forEach(b => {
+          validTrackingIds.push(b.onlineTrackings.map(t => t._id));
+          validTrackingIds.push(b.servicedTrackings.map(t => t._id));
+          validTrackingIds.push(b.inPersonSubTrackings.map(t => t._id));
+        });
+        await populateStatusUpstreamForConsolidatedMasterHelper(req.userData.uid, req.userData.orgId, validTrackingIds, masterTracking._id, TrackingTypes.MASTER, session);
+      }
       session.endSession();
     }
-    return res.status(200).json({message: "Status changed successfully"});
+
+    return res.status(200).json({message: "Status changed successfully", tracking: tracking});
   } catch (error) {
     console.log(`changeTrackingStatus: ${error}`);
     return res.status(500).json({message: "Status change failed"});
   }
 }
 
-changeStatusForMasterHelper = async (userId, orgId, status, masterTrackingNumber, edit, validTrackingNumbers, removedTrackingNumbers, toTrackingId, session) => { // When turning the switches
+changeStatusForMasterHelper = async (userId, orgId, currentStatus, masterTrackingId, edit, validTrackingIds, removedTrackingIds, session) => { // When turning the switches
   if (edit) {
-    status = status === trackingStatuses.Created ? trackingStatuses.ReadyToFly : status;
-
-    await changeStatusForOnlineServicedInPersonHelper(userId, orgId, [status, status, status], validTrackingNumbers, false, session);
-    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, validTrackingNumbers, toTrackingId, TrackingTypes.MASTER, false, session);
-
-    await changeStatusForOnlineServicedInPersonHelper(userId, orgId, [trackingStatuses.ReceivedAtOrigin, trackingStatuses.Created, trackingStatuses.Created], removedTrackingNumbers, false, session);
-    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, removedTrackingNumbers, toTrackingId, TrackingTypes.MASTER, false, session);
-
-  } else {
-    let statuses = [status, status, status];
-    let masterTracking = await getTrackingHelper(TrackingTypes.MASTER, masterTrackingNumber, orgId, false);
+    let status = currentStatus === trackingStatuses.Created ? trackingStatuses.ReadyToFly : currentStatus;
+    await changeStatusForOnlineServicedInPersonHelper(userId, orgId, [status, status, status], validTrackingIds, true, session);
+    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, validTrackingIds, masterTrackingId, TrackingTypes.MASTER, true, session);
+    await changeStatusForOnlineServicedInPersonHelper(userId, orgId, [trackingStatuses.ReceivedAtOrigin, trackingStatuses.Created, trackingStatuses.Created], removedTrackingIds, true, session);
+    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, removedTrackingIds, masterTrackingId, TrackingTypes.MASTER, true, session);
+  } else { // Change status for the whole tracking
+    let masterTracking = await getTrackingHelper(TrackingTypes.MASTER, masterTrackingId, orgId, true);
     for (b of masterTracking.boxes) {
-      await changeStatusForOnlineServicedInPersonHelper(userId, orgId, statuses, [b.onlineTrackings.map(t => t._id), b.servicedTrackings.map(t => t._id), b.inPersonTrackings.map(t => t._id)], true, session);
+      await changeStatusForOnlineServicedInPersonHelper(userId, orgId, [currentStatus, currentStatus, currentStatus], [b.onlineTrackings.map(t => t._id), b.servicedTrackings.map(t => t._id), b.inPersonSubTrackings.map(t => t._id)], true, session);
     }
-    status = status === trackingStatuses.ReadyToFly ? trackingStatuses.Created : status;
-    await changeTrackingStatusHelper(userId, orgId, TrackingTypes.MASTER, status, [masterTrackingNumber], false, session)
-    return await getTrackingHelper(TrackingTypes.MASTER, masterTrackingNumber, orgId, false);
+
+    let status = currentStatus === trackingStatuses.ReadyToFly ? trackingStatuses.Created : currentStatus;
+    await changeTrackingStatusHelper(userId, orgId, TrackingTypes.MASTER, status, [masterTrackingId], true, session);
   }
 }
+
 
 /**
  * Just a helper for other methods, or when switches of consolidated trackings are switched
  * consolidatedTrackings: A list of consolidated tracking numbers
  */
-changeStatusForConsolidatedHelper = async (userId, orgId, consolidatedTrackingIdNumber, validTrackingIds, removedTrackingNumbers, edit, session) => {
+changeStatusForConsolidatedHelper = async (userId, orgId, consolidatedTrackingId, validTrackingIds, removedTrackingIds, edit, session) => {
   if (edit) {
-    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, validTrackingIds, consolidatedTrackingIdNumber, TrackingTypes.CONSOLIDATED, true, session); // Link
-    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, removedTrackingNumbers, null, TrackingTypes.CONSOLIDATED, true, session); // Unlink
-    await populateStatusUpstreamForConsolidatedHelper(userId, orgId, validTrackingIds, consolidatedTrackingIdNumber, session);
+    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, validTrackingIds, consolidatedTrackingId, TrackingTypes.CONSOLIDATED, true, session); // Link
+    await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, removedTrackingIds, null, TrackingTypes.CONSOLIDATED, true, session); // Unlink
+    await populateStatusUpstreamForConsolidatedMasterHelper(userId, orgId, validTrackingIds, consolidatedTrackingId, TrackingTypes.CONSOLIDATED, session);
   } else {
-    await populateStatusUpstreamForConsolidatedHelper(userId, orgId, validTrackingIds, consolidatedTrackingIdNumber, session);
+    await populateStatusUpstreamForConsolidatedMasterHelper(userId, orgId, validTrackingIds, consolidatedTrackingId, TrackingTypes.CONSOLIDATED, session);
   }
 }
 
-populateStatusUpstreamForConsolidatedHelper = async (userId, orgId, validTrackingIds, consolidatedTrackingId, session) => {
+populateStatusUpstreamForConsolidatedMasterHelper = async (userId, orgId, validTrackingIds, trackingId, type, session) => {
   let onlineTrackings = await OnlineTrackingModel.find({_id: {$in: validTrackingIds[0]}}).lean().then(trackings => {return trackings});
   let servicedTrackings = await ServicedTrackingModel.find({_id: {$in: validTrackingIds[1]}}).lean().then(trackings => {return trackings});
   let inPersonSubTrackings = await InPersonSubTrackingModel.find({_id: {$in: validTrackingIds[2]}}).lean().then(trackings => {return trackings});
 
-  let statuses = [...onlineTrackings.map(t => t.generalInfo.paid), ...servicedTrackings.map(t => t.generalInfo.paid), ...inPersonSubTrackings.map(t => t.generalInfo.paid)];
-  let status = statuses.length == 0? financialStatuses.Unpaid : (allEqual(statuses) ? (statuses[0] == true? financialStatuses.Paid: financialStatuses.Unpaid) : financialStatuses.PartiallyPaid);
-  await changeTrackingStatusHelper(userId, orgId, TrackingTypes.CONSOLIDATED, status, [consolidatedTrackingId], true, session);
+  let status = null;
+  let statuses = [];
+  switch (type) {
+    case TrackingTypes.CONSOLIDATED:
+      statuses = [...onlineTrackings.map(t => t.generalInfo.paid), ...servicedTrackings.map(t => t.generalInfo.paid), ...inPersonSubTrackings.map(t => t.generalInfo.paid)];
+      status = statuses.length == 0? financialStatuses.Unpaid : (allEqual(statuses) ? (statuses[0] == true? financialStatuses.Paid: financialStatuses.Unpaid) : financialStatuses.PartiallyPaid);
+      break;
+    case TrackingTypes.MASTER:
+      statuses = [...onlineTrackings.map(t => t.generalInfo.status), ...servicedTrackings.map(t => t.generalInfo.status), ...inPersonSubTrackings.map(t => t.generalInfo.status)];
+      if (statuses.length == 0) {return;}
+      status = allEqual(statuses) ? statuses[0] : trackingStatuses.BeingDeliveredToRecipient;
+      console.log(statuses)
+      break;
+    default:
+      throw new Error("populateStatusUpstreamForConsolidatedMasterHelper: Tracking type doesn't match any");
+  }
+
+  assert(status != null, "populateStatusUpstreamForConsolidatedMasterHelper: Status is null");
+  await changeTrackingStatusHelper(userId, orgId, type, status, [trackingId], true, session);
 }
 
 linkUnlinkForOnlineServicedInPersonHelper = async (userId, orgId, trackings, toTrackingId, toTrackingType, byIds, session) => {
@@ -750,29 +787,33 @@ changeTrackingStatusHelper = async (userId, orgId, type, status, itemsList, byId
 
   await updateManyGeneralHelper(type, queryParams, setParams, session);
   await createHistoryHelper(userId, orgId, `Updated status to ${status}`, itemsList.toString(), session);
-  console.log(`changeTrackingStatus: User id ${userId} updated ${itemsList.toString()} -> ${status}`)
+  console.log(`changeTrackingStatus: User id ${userId} updated type: ${type} ${itemsList.toString()} -> ${status}`)
 }
 
 updateManyGeneralHelper = async (type, queryParams, setParams, session) => {
-  console.log(type);
+  let res = null;
   switch (type) {
     case TrackingTypes.ONLINE:
-      await OnlineTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
+      res = await OnlineTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
       break;
     case TrackingTypes.SERVICED:
-      await ServicedTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
+      res = await ServicedTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
       break;
     case TrackingTypes.INPERSONSUB: // It's actually sub tracking
-      await InPersonSubTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
+      res = await InPersonSubTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
       break;
     case TrackingTypes.CONSOLIDATED:
-      await ConsolidatedTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
+      res = await ConsolidatedTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
       break;
     case TrackingTypes.MASTER:
-      await MasterTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
+      res = await MasterTrackingModel.updateMany(queryParams, {$set: setParams}).session(session).then();
       break;
     default:
       throw new Error("updateManyGeneralHelper: Tracking type doesn't match any");
+  }
+
+  if (!res || res.nModified == 0) {
+    throw new Error(`updateManyGeneralHelper: Nothing got modified ${queryParams} ${setParams}`)
   }
 }
 

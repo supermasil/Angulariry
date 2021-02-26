@@ -119,7 +119,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
                   this.consolidatedForm = this.createConcolidatedForm(response);
                   this.emitChanges();
                   this.setUpDataSource();
-                  console.log(this.currentTracking)
                 }, error => {
                   this.authService.redirect404();
                 });
@@ -166,7 +165,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
           this.inPersonSubTrackings = transformedTrackings.trackings.filter(t => !t.linkedToCsl);
           this.inPersonSubTrackingDataSubject.next(this.inPersonSubTrackings);
           this.showTable = true;
-          this.resetSelectedData();
         });
       });;
     });;
@@ -221,7 +219,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   generalInfoUpdated(changes: { sender: string, origin: string, destination: string}) {
-    this.showTable = false;
+    this.resetSelectedData();
     this.fetchTrackings(changes.origin, changes.destination, changes.sender);
   }
 
@@ -268,7 +266,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
       this.deselectOnlineTrackingSubject.next(row);
     } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.SERVICED)) {
       this.deselectServicedTrackingSubject.next(row);
-    } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSON)) {
+    } else if (row.trackingNumber.includes(TrackingGlobals.trackingTypes.INPERSONSUB)) {
       this.deselectInPersonSubTrackingSubject.next(row);
     }
   }
@@ -323,45 +321,44 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
     let removedInPersonSubTrackings = [];
 
     this.finalizingDataSource.data.forEach(row => {
-      switch (row.trackingNumber.substring(0,3)) {
+      switch (row.generalInfo.type) {
         case TrackingGlobals.trackingTypes.ONLINE:
           onlineTrackings.push(row._id);
           break;
         case TrackingGlobals.trackingTypes.SERVICED:
           servicedTrackings.push(row._id);
           break;
-        case TrackingGlobals.trackingTypes.INPERSON:
+        case TrackingGlobals.trackingTypes.INPERSONSUB:
           inPersonSubTrackings.push(row._id);
           break;
       }
     });
 
     this.tempDataSource.data.forEach(row => {
-      switch (row.trackingNumber.substring(0,3)) {
+      switch (row.generalInfo.type) {
         case TrackingGlobals.trackingTypes.ONLINE:
           removedOnlineTrackings.push(row._id);
           break;
         case TrackingGlobals.trackingTypes.SERVICED:
           removedServicedTrackings.push(row._id);
           break;
-        case TrackingGlobals.trackingTypes.INPERSON:
+        case TrackingGlobals.trackingTypes.INPERSONSUB:
           removedInPersonSubTrackings.push(row._id);
           break;
       }
     });
 
-    formData['onlineTrackings'] = onlineTrackings; // Don't stringify it
-    formData['servicedTrackings'] = servicedTrackings;
-    formData['inPersonSubTrackings'] = inPersonSubTrackings;
-    formData['removedOnlineTrackings'] = removedOnlineTrackings; // Don't stringify it
-    formData['removedServicedTrackings'] = removedServicedTrackings;
-    formData['removedInPersonSubTrackings'] = removedInPersonSubTrackings;
+    formData['onlineTrackingIds'] = onlineTrackings; // Don't stringify it
+    formData['servicedTrackingIds'] = servicedTrackings;
+    formData['inPersonSubTrackingIds'] = inPersonSubTrackings;
+    formData['removedOnlineTrackingIds'] = removedOnlineTrackings; // Don't stringify it
+    formData['removedServicedTrackingIds'] = removedServicedTrackings;
+    formData['removedInPersonSubTrackingIds'] = removedInPersonSubTrackings;
 
     formData['finalizedInfo'] = {};
     formData['finalizedInfo']['totalWeight'] = this.getTotalWeight();
     formData['finalizedInfo']['finalCost'] = this.getTotalCost();
     formData['finalizedInfo']['costAdjustment'] = 0;
-
     this.trackingService.createUpdateTracking(formData);
   }
 }
