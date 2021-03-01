@@ -137,6 +137,7 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
   }
 
   updateBody['generalInfo'] = generalInfo;
+  let subtrackings = [];
 
   switch (type) {
     case TrackingTypes.ONLINE:
@@ -145,7 +146,8 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
     case TrackingTypes.SERVICED:
       break;
     case TrackingTypes.INPERSON:
-      updateBody['subTrackings'] = await subTrackingsSetupHelper(req, session);
+      subtrackings = await subTrackingsSetupHelper(req, session);
+      updateBody['subTrackings'] = subtrackings.map(t => t._id);
       break;
     case TrackingTypes.CONSOLIDATED:
       updateBody['onlineTrackings'] = req.body.onlineTrackingIds;
@@ -176,15 +178,11 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       await changeStatusForMasterHelper(req.userData.uid, req.userData.orgId, req.body.generalInfo.trackingStatus, createdTracking._id, true, [req.body.validOnlineTrackingIds, req.body.validServicedTrackingIds, req.body.validInPersonSubTrackingIds], [req.body.removedOnlineTrackingIds, req.body.removedServicedTrackingIds, req.body.removedInPersonSubTrackingIds], session);
       break;
     case TrackingTypes.INPERSON:
-        for (id of req.body.removedTrackingIds) {
-          // let inpSubTracking = await InPersonSubTrackingModel.findById(id);
-          // await populateStatusUpstreamHelper(req.userData.uid, req.userData.orgId, null, [], [inpSubTracking._id.toString()], inpSubTracking.linkedToCsl, TrackingTypes.CONSOLIDATED, true, session);
-          // await populateStatusUpstreamHelper(req.userData.uid, req.userData.orgId, null, [], [inpSubTracking._id.toString()], inpSubTracking.linkedToMst, TrackingTypes.MASTER, true, session);
-          // await ConsolidatedTrackingModel.findByIdAndUpdate(inpSubTracking.linkedToCsl, {$pull: {inPersonSubTrackings: inpSubTracking._id}});
-          // await MasterTrackingModel.findByIdAndUpdate(inpSubTracking.linkedToMst, {$pull: {inPersonSubTrackings: inpSubTracking._id}});
+      for (id of req.body.removedTrackingIds) {
         await InPersonSubTrackingModel.findByIdAndDelete(id).session(session);
-  }
-      await populateStatusUpstreamHelper(req.userData.uid, req.userData.orgId, null, [], createdTracking._id, TrackingTypes.INPERSON, true, session);
+      }
+      await populateStatusUpstreamHelper(req.userData.uid, req.userData.orgId, [[],[],createdTracking.subTrackings], subtrackings, createdTracking._id, TrackingTypes.INPERSON, true, session);
+      break;
   }
 
   return createdTracking;
@@ -271,18 +269,17 @@ subTrackingsSetupHelper = async (req, session) => {
         linkedToCsl: sub.linkedToCslId,
         linkedToMst: sub.linkedToMstId,
       }
-      let createdId = null;
+      let createdTracking = null;
       if (sub._id) { // old ones
-        createdId = await InPersonSubTrackingModel.findByIdAndUpdate(sub._id, data, {new: true}).session(session).then(result => {return result._id});
+        createdTracking = await InPersonSubTrackingModel.findByIdAndUpdate(sub._id, data, {new: true}).session(session).then(result => {return result});
       } else {
-        createdId = await InPersonSubTrackingModel
+        createdTracking = await InPersonSubTrackingModel
           .create([data], {session: session})
-          .then(createdTracking => {return createdTracking[0]._id});
+          .then(createdTracking => {return createdTracking[0]});
       }
-      assert(createdId != null, "subTrackingsSetupHelper: createdId is null");
-      subTrackings.push(createdId);
+      assert(createdTracking != null, "subTrackingsSetupHelper: createdTracking is null");
+      subTrackings.push(createdTracking);
   };
-
   return subTrackings;
 }
 
@@ -673,7 +670,7 @@ exports.changeTrackingStatus = async (req, res , next) => {
     }
 
     if (TrackingTypes.INPERSONSUB == type) {
-      await populateStatusUpstreamHelper(req.userData.uid, req.userData.orgId, null, [tracking], tracking.trackingNumber.substring(0, t.trackingNumber.lastIndexOf('-')), TrackingTypes.INPERSON, false, session);
+      await populateStatusUpstreamHelper(req.userData.uid, req.userData.orgId, null, [tracking], tracking.trackingNumber.substring(0, tracking.trackingNumber.lastIndexOf('-')), TrackingTypes.INPERSON, false, session);
     }
 
 
@@ -688,12 +685,9 @@ exports.changeTrackingStatus = async (req, res , next) => {
 
 changeStatusForMasterHelper = async (userId, orgId, currentStatus, masterTrackingId, edit, validTrackingIds, removedTrackingIds, session) => { // When turning the switches
 
-  let masterTracking = await getTrackingHelper(TrackingTypes.MASTER, masterTrackingId, orgId, true);
   let inPersonTrackingNumbers = [];
   validTrackings = [[],[],[]];
   removedTrackings = [[],[],[]];
-
-  console.log(currentStatus);
 
   if (edit) {
     currentStatus = currentStatus === trackingStatuses.Created ? trackingStatuses.ReadyToFly : currentStatus;
@@ -707,6 +701,7 @@ changeStatusForMasterHelper = async (userId, orgId, currentStatus, masterTrackin
     await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, validTrackingIds, masterTrackingId, TrackingTypes.MASTER, true, session);
     await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, removedTrackingIds, null, TrackingTypes.MASTER, true, session);
   } else {
+    let masterTracking = await getTrackingHelper(TrackingTypes.MASTER, masterTrackingId, orgId, true);
     validTrackingIds = [[],[],[]]
     for (b of masterTracking.boxes) {
       validTrackings[0].push(...b.onlineTrackings.map(t => t));
@@ -779,28 +774,33 @@ substituteTrackingsInMemory = (trackings, substitutions) => {
   return temp;
 }
 
-populateStatusUpstreamHelper = async (userId, orgId, validTrackingIds, currentTrackingIds, trackingId, type, byIds, session) => {
+populateStatusUpstreamHelper = async (userId, orgId, validTrackingIds, currentTrackings, trackingId, type, byIds, session) => {
   let onlineTrackings = servicedTrackings = inPersonSubTrackings = [];
 
   if (validTrackingIds) {
-    onlineTrackings = substituteTrackingsInMemory(await OnlineTrackingModel.find({_id: {$in: validTrackingIds[0]}}).lean().then(trackings => {return trackings}), currentTrackingIds);
-    servicedTrackings = substituteTrackingsInMemory(await ServicedTrackingModel.find({_id: {$in: validTrackingIds[1]}}).lean().then(trackings => {return trackings}), currentTrackingIds);
-    inPersonSubTrackings = substituteTrackingsInMemory(await InPersonSubTrackingModel.find({_id: {$in: validTrackingIds[2]}}).lean().then(trackings => {return trackings}), currentTrackingIds);
+    onlineTrackings = substituteTrackingsInMemory(await OnlineTrackingModel.find({_id: {$in: validTrackingIds[0]}}).lean().then(trackings => {return trackings}), currentTrackings);
+    servicedTrackings = substituteTrackingsInMemory(await ServicedTrackingModel.find({_id: {$in: validTrackingIds[1]}}).lean().then(trackings => {return trackings}), currentTrackings);
+    inPersonSubTrackings = substituteTrackingsInMemory(await InPersonSubTrackingModel.find({_id: {$in: validTrackingIds[2]}}).lean().then(trackings => {return trackings}), currentTrackings);
   } else if (type == TrackingTypes.CONSOLIDATED) {
     let tracking = await getTrackingHelper(TrackingTypes.CONSOLIDATED, trackingId, orgId, byIds);
-    onlineTrackings = substituteTrackingsInMemory(tracking.onlineTrackings, currentTrackingIds);
-    servicedTrackings = substituteTrackingsInMemory(tracking.servicedTrackings, currentTrackingIds);
-    inPersonSubTrackings = substituteTrackingsInMemory(tracking.inPersonSubTrackings, currentTrackingIds);
+    onlineTrackings = substituteTrackingsInMemory(tracking.onlineTrackings, currentTrackings);
+    servicedTrackings = substituteTrackingsInMemory(tracking.servicedTrackings, currentTrackings);
+    inPersonSubTrackings = substituteTrackingsInMemory(tracking.inPersonSubTrackings, currentTrackings);
   } else if (type == TrackingTypes.MASTER) {
     let tracking = await getTrackingHelper(TrackingTypes.MASTER, trackingId, orgId, byIds);
     tracking.boxes.forEach(b => {
-      onlineTrackings.push(...substituteTrackingsInMemory(b.onlineTrackings, currentTrackingIds));
-      servicedTrackings.push(...substituteTrackingsInMemory(b.servicedTrackings, currentTrackingIds));
-      inPersonSubTrackings.push(...substituteTrackingsInMemory(b.inPersonSubTrackings, currentTrackingIds));
+      onlineTrackings.push(...substituteTrackingsInMemory(b.onlineTrackings, currentTrackings));
+      servicedTrackings.push(...substituteTrackingsInMemory(b.servicedTrackings, currentTrackings));
+      inPersonSubTrackings.push(...substituteTrackingsInMemory(b.inPersonSubTrackings, currentTrackings));
     });
   } else if (type == TrackingTypes.INPERSON) {
+    console.log(trackingId);
     let tracking = await getTrackingHelper(TrackingTypes.INPERSON, trackingId, orgId, byIds);
-    inPersonSubTrackings = substituteTrackingsInMemory(tracking.subTrackings, currentTrackingIds);
+    inPersonSubTrackings = substituteTrackingsInMemory(tracking.subTrackings, currentTrackings);
+  }
+
+  if (type == TrackingTypes.INPERSON && inPersonSubTrackings.length == 0 && currentTrackings.length > 0) { // Inperson create case
+    inPersonSubTrackings = currentTrackings;
   }
 
   let tStatuses = [...onlineTrackings.map(t => t.generalInfo.trackingStatus), ...servicedTrackings.map(t => t.generalInfo.trackingStatus), ...inPersonSubTrackings.map(t => t.generalInfo.trackingStatus)];
