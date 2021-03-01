@@ -12,7 +12,8 @@ const GeneralInfoSchema = mongoose.Schema({
   recipient: RecipientSchema,
   organization: {type: mongoose.Types.ObjectId, ref: "organization", required: true},
   content: {type: String, default: ''}, // Note
-  status: {type: String, required: true, default: "Unknown"},
+  trackingStatus: {type: String, required: true, default: "Unknown"},
+  financialStatus: {type: String, required: true, default: "Unknown"},
   active: {type: Boolean, required: true}, // This should be false to prevent edit after certain stage
   type: {type: String, required: true},
 
@@ -28,8 +29,6 @@ const GeneralInfoSchema = mongoose.Schema({
 
   creatorId: {type: String, required: true}, // Google id, has to be string
   creatorName: {type: String, required: true},
-
-  paid: {type: Boolean, required: true, default: false},
 
   filePaths: [{type: String}],
   comments: [{type: mongoose.Types.ObjectId, ref: "comment"}]

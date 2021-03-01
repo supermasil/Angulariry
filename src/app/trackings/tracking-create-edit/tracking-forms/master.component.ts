@@ -39,7 +39,6 @@ export class MasterFormCreateComponent implements OnInit {
   generalInfoSubject = new ReplaySubject<GeneralInfoModel>();
 
   updateExistingImagesSubject = new ReplaySubject<string[]>();
-  statusChangeSubject = new ReplaySubject<string>();
 
   currentTracking: MasterTrackingModel; // edit case
   currentTrackingNumbers: string[] = []
@@ -173,11 +172,11 @@ export class MasterFormCreateComponent implements OnInit {
 
   fetchTrackings(origin: string, destination: string) {
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, null).subscribe((transformedTrackings) => {
-      this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.status)));
+      this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
       this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, null).subscribe((transformedTrackings) => {
-        this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.status)));
+        this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
         this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, origin, destination, null).subscribe((transformedTrackings) => {
-          this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.status)));
+          this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
           this.trackingsReference = [...this.allTrackings];
           this.filteredTrackings = of(this.allTrackings);
         });
@@ -190,8 +189,9 @@ export class MasterFormCreateComponent implements OnInit {
     let items = this.masterForm.get('boxes')['controls'][boxIndex].get('items').value;
     items.splice(itemIndex, 1);
     if (this.currentTrackingNumbers.includes(item)) {
-      this.allTrackings.push(this.currentTrackings.filter(t => t.trackingNumber === item)[0]);
-      this.removedTrackings.push(item);
+      let foundItem = this.currentTrackings.filter(t => t.trackingNumber === item)[0];
+      this.allTrackings.push(foundItem);
+      this.removedTrackings.push(foundItem);
     } else {
       this.allTrackings.push(this.trackingsReference.filter(t => t.trackingNumber === item)[0]);
     }
@@ -269,9 +269,9 @@ export class MasterFormCreateComponent implements OnInit {
       allTrackings.push(...trackings);
       trackings = [];
     });
-    formData['validOnlineTrackingIds'] = allTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.ONLINE).map(t => t._id); // For changing status purpose
-    formData['validServicedTrackingIds'] = allTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.SERVICED).map(t => t._id); // For changing status purpose
-    formData['validInPersonSubTrackingIds'] = allTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.INPERSONSUB).map(t => t._id); // For changing status purpose
+    formData['validOnlineTrackingIds'] = allTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.ONLINE).map(t => t._id);
+    formData['validServicedTrackingIds'] = allTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.SERVICED).map(t => t._id);
+    formData['validInPersonSubTrackingIds'] = allTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.INPERSONSUB).map(t => t._id);
   }
 
   onSave() {
@@ -304,9 +304,9 @@ export class MasterFormCreateComponent implements OnInit {
     formData['finalizedInfo'] = finalizedInfo;
 
     this.removedTrackings.map(t => [...this.trackingsReference, ...this.currentTrackings].filter(i => i.trackingNumber === t)[0]);
-    formData['removedOnlineTrackingIds'] = this.removedTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.ONLINE).map(t => t._id);
-    formData['removedServicedTrackingIds'] = this.removedTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.SERVICED).map(t => t._id);
-    formData['removedInPersonSubTrackingIds'] = this.removedTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.INPERSONSUB).map(t => t._id);
+    formData['removedOnlineTrackingIds'] = this.removedTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.ONLINE && !formData['validOnlineTrackingIds'].includes(t._id)).map(t => t._id);
+    formData['removedServicedTrackingIds'] = this.removedTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.SERVICED && !formData['validServicedTrackingIds'].includes(t._id)).map(t => t._id);
+    formData['removedInPersonSubTrackingIds'] = this.removedTrackings.filter(t => t.generalInfo.type === TrackingGlobals.trackingTypes.INPERSONSUB && !formData['validInPersonSubTrackingIds'].includes(t._id)).map(t => t._id);
     this.trackingService.createUpdateTracking(formData);
   }
 }

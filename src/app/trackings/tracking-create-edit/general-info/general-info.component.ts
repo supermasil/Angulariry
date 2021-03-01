@@ -26,12 +26,12 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   @Input() defaultLocationsObservable = new Observable<string[]>();
   @Input() trackingNumberObservable = new Observable<string>();
   @Input() generalInfoObservable = new Observable<GeneralInfoModel>();
-  @Input() statusChangeObservable = new Observable<string>();
   @Input() disableSender = false;
   @Input() disableRecipient = false;
   generalInfo : GeneralInfoModel;
 
-  statuses = [...Object.values(TrackingGlobals.trackingStatuses), ...Object.values(TrackingGlobals.financialStatuses)];
+  trackingStatuses = Object.values(TrackingGlobals.trackingStatuses);
+  financialStatuses =  Object.values(TrackingGlobals.financialStatuses)
 
   @Output() formValidityStatus = new EventEmitter<boolean>();
   @Output() generalInfoUpdated = new EventEmitter<any>();
@@ -62,16 +62,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
     this.trackingNumberObservable.subscribe((trackingNumber: string) => {
       this.generalInfoForm.get('trackingNumber').patchValue(trackingNumber);
-      if (trackingNumber.substring(0, 3) === TrackingGlobals.trackingTypes.CONSOLIDATED) {
-        this.generalInfoForm.get('status').patchValue(TrackingGlobals.financialStatuses.Unpaid);
-      }
     });
 
-    this.statusChangeObservable.subscribe((status: string) => {
-      if (this.statuses.includes(status)) {
-        this.generalInfoForm.get('status').setValue(status);
-      }
-    });
 
     this.usersObservable.subscribe((users: UserModel[]) => {
       this.senders = users;
@@ -82,11 +74,11 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
       this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
         this.patchFormValue(generalInfo);
-        if (!this.disableSender) {
+        if (!this.disableSender && generalInfo.sender) {
             this.selectSenderSubject.next(generalInfo.sender.userCode + " " + generalInfo.sender.name)
         }
 
-        if (!this.disableRecipient) {
+        if (!this.disableRecipient && generalInfo.recipient) {
           this.selectRecipientSubject.next(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
         }
         this.formValidityStatus.emit(this.generalInfoForm.valid);
@@ -99,7 +91,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
     let form = new FormGroup({
       trackingNumber: new FormControl({value: "", disabled: true}, {validators: [Validators.required]}), // Set through subscription
       // status: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: !AuthGlobals.managerAdmins.includes(this.currentUser.role)}, {validators: [Validators.required]}),
-      status: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: true}, {validators: [Validators.required]}),
+      trackingStatus: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: true}, {validators: [Validators.required]}),
+      financialStatus: new FormControl({value: TrackingGlobals.financialStatuses.Unpaid, disabled: true}, {validators: [Validators.required]}),
       origin: new FormControl("", {validators: [Validators.required]}),
       destination: new FormControl("", {validators: [Validators.required]}),
     });
@@ -116,11 +109,13 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   }
 
   patchFormValue(formData: GeneralInfoModel) {
+    console.log(formData.trackingStatus)
     this.zone.run(() => {
       this.generalInfoForm.patchValue({
-        status: formData.status,
-        origin: formData.origin,
-        destination: formData.destination
+        trackingStatus: formData.trackingStatus? formData.trackingStatus : this.generalInfoForm.get('trackingStatus').value,
+        financialStatus: formData.financialStatus? formData.financialStatus : this.generalInfoForm.get('financialStatus').value,
+        origin: formData.origin? formData.origin : this.generalInfoForm.get('origin').value,
+        destination: formData.destination? formData.destination : this.generalInfoForm.get('destination').value,
       });
     });
   }

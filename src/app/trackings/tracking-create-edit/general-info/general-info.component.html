@@ -13,10 +13,20 @@
         </a>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="col-lg-6 px-2 pr-lg-0">
-        <mat-label>Status</mat-label>
-        <mat-select formControlName="status">
-          <mat-option *ngFor="let option of statuses" [value]="option">
+      <mat-form-field appearance="outline" class="col-lg-3 px-2 pr-lg-0">
+        <mat-label>Tracking Status</mat-label>
+        <mat-select formControlName="trackingStatus">
+          <mat-option *ngFor="let option of trackingStatuses" [value]="option">
+            {{option}}
+          </mat-option>
+        </mat-select>
+        <mat-error>Please select a status</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-lg-3 px-2 pr-lg-0">
+        <mat-label>Financial Status</mat-label>
+        <mat-select formControlName="financialStatus">
+          <mat-option *ngFor="let option of financialStatuses" [value]="option">
             {{option}}
           </mat-option>
         </mat-select>

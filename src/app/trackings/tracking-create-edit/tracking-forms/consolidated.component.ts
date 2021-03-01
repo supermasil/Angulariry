@@ -54,7 +54,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   generalInfoSubject = new ReplaySubject<GeneralInfoModel>();
 
   updateExistingImagesSubject = new ReplaySubject<string[]>();
-  statusChangeSubject = new ReplaySubject<string>();
 
   currentTracking: ConsolidatedTrackingModel; // edit case
   mode = "create";

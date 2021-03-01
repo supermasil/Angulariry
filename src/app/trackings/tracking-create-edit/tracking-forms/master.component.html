@@ -9,7 +9,6 @@
       (formValidityStatus)="generalInfoValidity($event)"
       (generalInfoUpdated)="generalInfoUpdated($event)"
       [generalInfoObservable]="generalInfoSubject.asObservable()"
-      [statusChangeObservable]="statusChangeSubject.asObservable()"
       [disableSender]="true"
       [disableRecipient]="true">
     </general-info>
@@ -51,7 +50,7 @@
                 </mat-chip-list>
                 <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption (optionSelected)="selectItem($event.option.value, i); chipInput.value = '';">
                   <mat-option *ngFor="let t of filteredTrackings | async" [value]="t.trackingNumber">
-                    {{t.trackingNumber}} {{t.generalInfo.sender.name}} {{t.generalInfo.sender.userCode}} {{t.generalInfo.status}}
+                    {{t.trackingNumber}} {{t.generalInfo.sender?.name}} {{t.generalInfo.sender?.userCode}} {{t.generalInfo.trackingStatus}}
                   </mat-option>
                 </mat-autocomplete>
                 <a matSuffix mat-mini-fab color="warn" (click)="removeBox(i, masterForm)">

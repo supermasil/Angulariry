@@ -104,12 +104,12 @@ export class TrackingGlobals {
         return "#76ff03"
       case TrackingGlobals.financialStatuses.Unpaid:
         return "#e040fb"
-      case 'Consolidated':
-        return "#e040ff"
       case TrackingGlobals.financialStatuses.Paid:
         return "#c060ff"
       case TrackingGlobals.financialStatuses.PartiallyPaid:
         return "#d35000"
+      case 'Consolidated':
+        return "#e040ff"
     }
   }
 

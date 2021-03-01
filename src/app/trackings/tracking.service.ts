@@ -105,10 +105,11 @@ export class TrackingService{
     return this.httpClient.delete(BACKEND_URL + trackingNumber);
   }
 
-  changeTrackingStatus(status: string, _id: string, type: string) {
+  changeTrackingStatus(status: string, _id: string, type: string, parentId: string) {
     let formData = {
       status: status,
       _id: _id,
+      parentId: parentId,
       type: type
     }
     return this.httpClient

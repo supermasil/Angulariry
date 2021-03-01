@@ -1,22 +1,14 @@
 <div *ngIf="inPersonForm">
   <form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4">
     <general-info
-        #generalInfo
-        [usersObservable]="usersSubject.asObservable()"
-        [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
-        [trackingNumberObservable]="trackingNumberSubject.asObservable()"
-        (formValidityStatus)="generalInfoValidity($event)"
-        [generalInfoObservable]="generalInfoSubject.asObservable()"
-        (generalInfoUpdated)="pricingUpdate($event)">
-      </general-info>
-
-  <!--
-    <div class="row">
-      <div class="col">
-        <mat-checkbox matInput formControlName='payAtDestination' class="p-2">Pay at destination</mat-checkbox>
-        <mat-checkbox matInput formControlName='receiveAtDestinationWH' class="p-2">Receive at destination WH</mat-checkbox>
-      </div>
-    </div> -->
+      #generalInfo
+      [usersObservable]="usersSubject.asObservable()"
+      [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
+      [trackingNumberObservable]="trackingNumberSubject.asObservable()"
+      (formValidityStatus)="generalInfoValidity($event)"
+      [generalInfoObservable]="generalInfoSubject.asObservable()"
+      (generalInfoUpdated)="pricingUpdate($event)">
+    </general-info>
 
     <div class="my-2">
       <file-uploader #fileUploader
@@ -30,7 +22,7 @@
             <mat-card>
               <div [formGroupName]="i">
                 <div class="row">
-                  <div class="col-lg-7">
+                  <div class="col-lg-6">
                     <mat-form-field appearance="outline">
                       <mat-label>Tracking Number</mat-label>
                       <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
@@ -64,8 +56,8 @@
                       <input type='text' matInput formControlName="linkedToMst">
                     </mat-form-field>
                   </div>
-                  <div class="col-lg-1">
-                    <mat-checkbox matInput formControlName="paid" style="position: relative; bottom: -15px;">Paid</mat-checkbox>
+                  <div class="col-lg-2">
+                    <mat-checkbox matInput formControlName="financialStatus" style="position: relative; bottom: -15px;">Paid</mat-checkbox>
                   </div>
                 </div>
 

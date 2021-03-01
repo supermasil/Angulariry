@@ -32,6 +32,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   currentOrg: OrganizationModel;
   authGlobal = AuthGlobals;
   trackingGlobals = TrackingGlobals;
+  expanded = [];
 
   getBadgeColor = TrackingGlobals.getBadgeColor;
 
@@ -61,6 +62,9 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
     this.trackingsObservable.subscribe((data: {trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}) => {
       this.trackings = data.trackings;
       this.totalTrackings = data.count;
+      this.trackings.forEach(t => {
+        this.expanded.push(false);
+      })
     });
 
     this.resetPaginatorObservable.subscribe(() =>{
@@ -173,18 +177,16 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   trackingToggle(tracking: OnlineTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {
-    this.trackingService.changeTrackingStatus(status, tracking._id, tracking.generalInfo.type).subscribe(response => {
+    this.trackingService.changeTrackingStatus(status, tracking._id, tracking.generalInfo.type, null).subscribe(response => {
       this.zone.run(() => {
         this.trackings[index] = response.tracking;
-      })
+      });
     });
   }
 
   childTrackingToggle(tracking: OnlineTrackingModel | InPersonSubTrackingModel | ServicedTrackingModel, status: string | boolean, parentTracking: ConsolidatedTrackingModel | MasterTrackingModel, index: number) {
-    let type = tracking.generalInfo.type;
-    type = type === TrackingGlobals.trackingTypes.INPERSON && tracking.trackingNumber.split('-').length == 3 ? TrackingGlobals.trackingTypes.INPERSONSUB : type;
     let tempStatus = status == true? this.trackingGlobals.financialStatuses.Paid : status == false? this.trackingGlobals.financialStatuses.Unpaid: status;
-    this.trackingService.changeTrackingStatus(tempStatus, tracking._id, type).subscribe(response => {
+    this.trackingService.changeTrackingStatus(tempStatus, tracking._id, tracking.generalInfo.type, parentTracking._id).subscribe(response => {
       this.trackingService.getTracking(parentTracking.trackingNumber, parentTracking.generalInfo.type).subscribe(t => {
         this.zone.run(() => {
           this.trackings[index] = t;

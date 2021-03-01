@@ -12,7 +12,7 @@ const ListItemSchema = mongoose.Schema({
   extraChargeUnit: {type: String, required: true},
   unitChargeSaving: {type: Number, required: true, default: 0},
   extraChargeSaving: {type: Number, required: true, default: 0},
-  status: {type: String, required: true, default: "Unknown"}
+  status: {type: String, required: true, default: "-"}
 }, { _id: false });
 
 module.exports = ListItemSchema;

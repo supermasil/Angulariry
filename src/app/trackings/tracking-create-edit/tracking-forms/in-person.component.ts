@@ -181,8 +181,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     let form = new FormGroup({
       _id: new FormControl(formData?._id? formData._id :null),
       trackingNumber: new FormControl({value: formData?.trackingNumber? formData.trackingNumber : this.trackingNumber + '-' + this.getNextIndex(), disabled: true}),
-      paid: new FormControl({value: formData?.generalInfo?.paid? formData.generalInfo.paid : false, disabled: !this.canView(AuthGlobals.internal) || formData?.linkedToCsl }, {validators: [Validators.required]}),
-      status: new FormControl({value: formData?.generalInfo?.status? formData.generalInfo.status: TrackingGlobals.trackingStatuses.Created, disabled: true}),
+      financialStatus: new FormControl({value: formData?.generalInfo?.financialStatus == TrackingGlobals.financialStatuses.Paid? true : false, disabled: !this.canView(AuthGlobals.internal) || formData?.linkedToCsl }, {validators: [Validators.required]}),
+      trackingStatus: new FormControl({value: formData?.generalInfo?.trackingStatus? formData.generalInfo.trackingStatus: TrackingGlobals.trackingStatuses.Created, disabled: true}),
       linkedToCsl: new FormControl({value: formData?.linkedToCsl? formData.linkedToCsl.trackingNumber: null, disabled: true}),
       linkedToMst: new FormControl({value: formData?.linkedToMst? formData.linkedToMst.trackingNumber: null, disabled: true}),
       linkedToCslId: new FormControl({value: formData?.linkedToCsl? formData.linkedToCsl._id: null, disabled: true}),

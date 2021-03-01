@@ -7,7 +7,8 @@ export interface GeneralInfoModel { // From backend
   recipient: RecipientModel;
   organization: string;
   content: string; // Note
-  status: string;
+  trackingStatus: string;
+  financialStatus: string;
   active: boolean; // This should be false to prevent edit after certain stage
   type: string;
 
@@ -26,8 +27,6 @@ export interface GeneralInfoModel { // From backend
 
   creatorId: string; // Google id, has to be string
   creatorName: string;
-
-  paid: boolean;
 
   filePaths: string[];
   comments: CommentModel[];

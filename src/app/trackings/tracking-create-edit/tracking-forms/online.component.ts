@@ -55,8 +55,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   exchangeSubject = new ReplaySubject<number>();
   updateExistingImagesSubject = new ReplaySubject<string[]>();
 
-  statusChangeSubject = new ReplaySubject<string>();
-
   currentTracking: OnlineTrackingModel; // edit case
   mode = "create";
 
@@ -135,7 +133,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       _id: new FormControl(formData?._id? formData._id :null),
       carrierTrackingNumber: new FormControl(formData?.carrierTracking?.carrierTrackingNumber? formData.carrierTracking.carrierTrackingNumber: "", {validators: [Validators.required]}),
       carrier: new FormControl(formData?.carrierTracking?.carrier? formData.carrierTracking.carrier: "", {validators: [Validators.required]}),
-      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.status)? true : false, disabled: !this.canView(this.authGlobals.internal) || this.trackingGlobals.postReadyToFly.includes(formData?.generalInfo?.status)}, {validators: [Validators.required]}),
+      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.trackingStatus)? true : false, disabled: !this.canView(this.authGlobals.internal) || this.trackingGlobals.postReadyToFly.includes(formData?.generalInfo?.trackingStatus)}, {validators: [Validators.required]}),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content: ""),
     });
 
@@ -168,11 +166,13 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   }
 
   receivedCheckboxChecked(event: MatCheckboxChange) {
+    let generalInfo = {}
     if (event.checked) {
-      this.statusChangeSubject.next(TrackingGlobals.trackingStatuses.ReceivedAtOrigin);
+      generalInfo['trackingStatus'] = TrackingGlobals.trackingStatuses.ReceivedAtOrigin;
     } else {
-      this.statusChangeSubject.next(TrackingGlobals.trackingStatuses.Created);
+      generalInfo['trackingStatus'] = TrackingGlobals.trackingStatuses.Created;
     }
+    this.generalInfoSubject.next(generalInfo as GeneralInfoModel);
     // this.onlineForm.get('received').disable();
   }
 

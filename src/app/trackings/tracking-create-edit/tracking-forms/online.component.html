@@ -7,7 +7,6 @@
       [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
       (formValidityStatus)="generalInfoValidity($event)"
       [generalInfoObservable]="generalInfoSubject.asObservable()"
-      [statusChangeObservable]="statusChangeSubject.asObservable()"
       (generalInfoUpdated)="pricingUpdate($event)">
     </general-info>
 

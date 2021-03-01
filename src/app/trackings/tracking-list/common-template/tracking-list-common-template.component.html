@@ -1,17 +1,18 @@
 
 <div class="mx-auto" style="width: 99%;">
   <mat-accordion *ngIf='trackings.length > 0'>
-    <mat-expansion-panel *ngFor='let tracking of trackings, let i = index'>
-      <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.status)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
+    <mat-expansion-panel [(expanded)]="expanded[i]" *ngFor='let tracking of trackings, let i = index'>
+      <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.trackingStatus)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
         <mat-panel-title>
           <div>
-            <b class="mr-1">{{tracking.trackingNumber}}</b>
+            <span><b class="mr-1">{{tracking.trackingNumber}}</b></span>
             <span style="position: relative; bottom: 2px;">
-              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.status)" style="color: white;">{{tracking.generalInfo.status}}</span>
+              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.trackingStatus)" style="color: white;">{{tracking.generalInfo.trackingStatus}}</span>
+              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.financialStatus)" style="color: white;">{{tracking.generalInfo.financialStatus}}</span>
               <span class="badge mr-1" [style.backgroundColor]="getBadgeColor('Consolidated')" style="color: white;" *ngIf="tracking.linkedToCsl?.trackingNumber">Consolidated</span>
-              <span class="badge" [style.backgroundColor]="getBadgeColor(trackingGlobals.financialStatuses.Paid)" style="color: white;" *ngIf="(tracking.generalInfo.type == trackingGlobals.trackingTypes.ONLINE || tracking.generalInfo.type == trackingGlobals.trackingTypes.SERVICED) && tracking.generalInfo.paid">Paid</span>
-            </span> {{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}
-            </div>
+            </span>
+            <span>{{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}</span>
+          </div>
           <div class="ml-auto">{{formatDateTime(tracking.updatedAt)}}</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
@@ -153,11 +154,11 @@
               <tbody>
                 <ng-container *ngFor="let subtracking of tracking.subTrackings">
                   <tr style="background-color: #9C27B0;">
-                    <td style="color: white" colspan="2"><b>Subtracking Number</b> {{subtracking.trackingNumber}}</td>
-                    <td style="color: white" colspan="2"><span *ngIf="subtracking?.linkedToCsl?.trackingNumber"><b>Linked to</b> {{subtracking.linkedToCsl.trackingNumber}}</span></td>
-                    <td style="color: white" colspan="2"><span *ngIf="subtracking?.linkedToMst?.trackingNumber"><b>Linked to</b> {{subtracking.linkedToMst.trackingNumber}}</span></td>
-                    <td style="color: white" colspan="2"><span><b>Status</b> {{subtracking.generalInfo.status}}</span></td>
-                    <td style="color: white" colspan="1"><span *ngIf="subtracking.generalInfo.paid"><b>Paid</b></span></td>
+                    <td style="color: white" colspan="2"><b>{{subtracking.trackingNumber}}</b></td>
+                    <td style="color: white" colspan="2"><b>{{subtracking.linkedToCsl?.trackingNumber}}</b></td>
+                    <td style="color: white" colspan="2"><b>{{subtracking.linkedToMst?.trackingNumber}}</b></td>
+                    <td style="color: white" colspan="2"><b>{{subtracking.generalInfo.trackingStatus}}</b></td>
+                    <td style="color: white" colspan="1"><b>{{subtracking.generalInfo.financialStatus}}</b></td>
                   </tr>
                   <ng-container *ngFor="let item of subtracking.itemsList">
                     <tr>
@@ -207,7 +208,7 @@
               <thead>
                 <tr>
                   <th>Tracking Number</th>
-                  <th>Paid</th>
+                  <th>Payment</th>
                   <th>Weight</th>
                   <th>Final Charge</th>
                   <th>Status</th>
@@ -219,8 +220,8 @@
                     <td>{{item?.trackingNumber}}</td>
                     <td>
                       <mat-slide-toggle
-                        [checked]="item?.generalInfo.paid == true"
-                        (change)="childTrackingToggle(item, !item?.generalInfo.paid, tracking, i); item.generalInfo.paid = !item?.generalInfo.paid"
+                        [checked]="item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid"
+                        (change)="childTrackingToggle(item, !(item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid), tracking, i);"
                         class="mr-2">
                       </mat-slide-toggle>
                     </td>
@@ -228,7 +229,7 @@
                     <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                     <td>
                       <mat-form-field appearance="standard">
-                        <mat-select [value]="item.generalInfo.status" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i);" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.status)">
+                        <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i);" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
                           <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
                             {{status}}
                           </mat-option>
@@ -257,7 +258,7 @@
               <thead>
                 <tr>
                   <th>Tracking Number</th>
-                  <th>Paid</th>
+                  <th>Payment</th>
                   <th>Weight</th>
                   <th>Final Charge</th>
                   <th>Status</th>
@@ -269,16 +270,15 @@
                     <tr>
                       <td>{{item?.trackingNumber}}</td>
                       <td>
-                        <span class="badge" [style.backgroundColor]="getBadgeColor(item.generalInfo.paid? trackingGlobals.financialStatuses.Paid : trackingGlobals.financialStatuses.Unpaid)" style="color: white;">
-                          <span *ngIf="item.generalInfo.paid">Paid</span>
-                          <span *ngIf="!item.generalInfo.paid">Unpaid</span>
+                        <span class="badge" [style.backgroundColor]="getBadgeColor(item.generalInfo.financialStatus)" style="color: white;">
+                          {{item.generalInfo.financialStatus}}
                         </span>
                       </td>
                       <td>Kg {{item?.generalInfo?.totalWeight}}</td>
                       <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
                       <td>
                         <mat-form-field appearance="standard">
-                          <mat-select [value]="item.generalInfo.status" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i);" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.status)">
+                          <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i);" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
                             <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
                               {{status}}
                             </mat-option>
@@ -509,8 +509,8 @@
             <div class="d-flex">
               <div *ngIf="tracking.generalInfo.type == trackingGlobals.trackingTypes.ONLINE" style="position: relative; bottom: -6px;">
                 <mat-slide-toggle
-                  [checked]="trackingGlobals.postReceivedAtOrigin.includes(tracking.generalInfo.status)"
-                  [disabled]="trackingGlobals.postReadyToFly.includes(tracking.generalInfo.status)"
+                  [checked]="trackingGlobals.postReceivedAtOrigin.includes(tracking.generalInfo.trackingStatus)"
+                  [disabled]="trackingGlobals.postReadyToFly.includes(tracking.generalInfo.trackingStatus)"
                   (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.ReceivedAtOrigin): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.Created)"
                   class="mr-2">
                   Received at Origin
@@ -520,15 +520,15 @@
                 <div class="d-block">
                   <mat-slide-toggle
                     #flying
-                    [checked]="trackingGlobals.postFlying.includes(tracking.generalInfo.status)"
-                    [disabled]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
+                    [checked]="trackingGlobals.postFlying.includes(tracking.generalInfo.trackingStatus)"
+                    [disabled]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.trackingStatus)"
                     (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.Flying): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.ReadyToFly)"
                     class="mr-2">Flying
                   </mat-slide-toggle>
                   <mat-slide-toggle
                     #receivedAtDestination
                     matTooltip="Only manager/admin can switch it back"
-                    [checked]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.status)"
+                    [checked]="trackingGlobals.postReceivedAtDestination.includes(tracking.generalInfo.trackingStatus)"
                     [disabled]="!flying.checked || (receivedAtDestination.checked && !authGlobal.managerAdmins.includes(currentUser.role))"
                     (change)="$event.checked? trackingToggle(tracking, i, trackingGlobals.trackingStatuses.ReceivedAtDestination): trackingToggle(tracking, i, trackingGlobals.trackingStatuses.Flying)"
                     class="mr-2">Received at Destination
