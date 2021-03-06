@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthGlobals } from '../auth-globals';
 import { AuthService } from '../auth.service';
@@ -20,22 +20,30 @@ export class AuthComponent implements OnInit {
   selectedTabIndex = 0;
 
   authGlobals = AuthGlobals;
-  enabled = [true, true, true, true];
+  enabled = [true, true, true, true, true];
 
   ngOnInit() {
     if (this.router.url != "/auth") {
       this.route.paramMap.subscribe((paramMap) => {
-        if (paramMap.has("orgId")) {
+        if (this.router.url === "/auth/orgs/new") {
           this.selectedTabIndex = 2;
-        } else if (paramMap.has("userId")) {
-          this.selectedTabIndex = 1;
+        } else if (paramMap.has("orgId")) {
+          this.selectedTabIndex = 3;
         } else if (this.router.url === "/auth/users/new") {
           this.selectedTabIndex = 0;
+        } else if (paramMap.has("userId")) {
+          this.selectedTabIndex = 1;
+        } else if (this.router.url === ("/auth/users/edit")) {
+          this.selectedTabIndex = 4;
         } else {
           return this.authService.redirect404();
         }
       });
       this.disableTheRest(this.selectedTabIndex);
+    } else {
+      if (this.isAuth()) {
+        return this.authService.redirectToMainPageWithoutMessage();
+      }
     }
 
     this.authService.getAuthStatusListener().subscribe(authenticated => {
@@ -58,7 +66,7 @@ export class AuthComponent implements OnInit {
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser().role);
+    return this.authService.canView(roles);
   }
 
   isAuth() {

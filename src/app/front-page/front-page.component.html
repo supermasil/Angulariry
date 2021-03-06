@@ -1,23 +1,36 @@
-<div class="penguin">
-  <div class="penguin-bottom">
-    <div class="right-hand"></div>
-    <div class="left-hand"></div>
-    <div class="right-feet"></div>
-    <div class="left-feet"></div>
-  </div>
-  <div class="penguin-top">
-    <div class="right-cheek"></div>
-    <div class="left-cheek"></div>
-    <div class="belly"></div>
-    <div class="right-eye">
-      <div class="sparkle"></div>
+<auto-complete-input
+  #companyCode
+  [dataObservable]="companiesSubject.asObservable()"
+  (itemSelected)="companySelected($event)"
+  [matLabel]="'Company Code'">
+</auto-complete-input>
+
+<!-- Button trigger modal -->
+<button id="onboardButton" hidden mat-raised-button color='primary' data-toggle="modal" data-target="#secretCodeModal"></button>
+
+<!-- Modal -->
+<div class="modal fade" id="secretCodeModal" tabindex="-1" role="dialog" aria-labelledby="secretCodeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="secretCodeModalLabel">Enter company's secret code to register</h2>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <mat-form-field appearance="outline">
+          <mat-label>Secret Code</mat-label>
+          <input
+            #secretCode
+            type="text"
+            matInput>
+        </mat-form-field>
+
+      </div>
+      <div class="modal-footer">
+        <button mat-raised-button color='accent' data-dismiss="modal" (click)="secretCodeSubmitted(secretCode.value)">Submit</button>
+      </div>
     </div>
-    <div class="left-eye">
-      <div class="sparkle"></div>
-    </div>
-    <div class="blush-right"></div>
-    <div class="blush-left"></div>
-    <div class="beak-top"></div>
-    <div class="beak-bottom"></div>
   </div>
 </div>

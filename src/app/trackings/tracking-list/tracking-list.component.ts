@@ -74,10 +74,10 @@ export class TrackingListComponent {
         this.isLoading = false;
         this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
       }, error => {
-        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithoutMessage();
       });
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
+      this.authService.redirectToMainPageWithoutMessage();
     });
   }
 
@@ -154,7 +154,7 @@ export class TrackingListComponent {
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser()?.role);
+    return this.authService.canView(roles);
   }
 
   isAuth() {

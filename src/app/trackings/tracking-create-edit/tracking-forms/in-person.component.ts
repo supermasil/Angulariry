@@ -92,7 +92,6 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   ngOnInit() {
     this.trackingNumber = "inp-" + Date.now() + Math.floor(Math.random() * 10000);
     this.trackingNumberSubject.next(this.trackingNumber);
-
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
       this.selectedUserIdSubject.next(user._id);
@@ -125,16 +124,16 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
               this.authService.redirect404();
             });
           }, error => {
-            this.authService.redirectToMainPageWithMessage("Couldn't fetch pricing");
+            this.authService.redirectToMainPageWithoutMessage();
           });
         }, error => {
-          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
+          this.authService.redirectToMainPageWithoutMessage();
         })
       }, error => {
-        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithoutMessage();
       });
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
+      this.authService.redirectToMainPageWithoutMessage();
     });
   }
 
@@ -213,7 +212,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser()?.role);
+    return this.authService.canView(roles);
   }
 
   generalInfoValidity(valid: boolean) {

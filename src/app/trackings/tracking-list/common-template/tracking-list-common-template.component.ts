@@ -121,7 +121,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   canView(roles: string[]) {
-    return roles?.includes(this.authService.getMongoDbUser().role);
+    return this.authService.canView(roles);
   }
 
   canEdit(roles: string[], creatorId: string) {

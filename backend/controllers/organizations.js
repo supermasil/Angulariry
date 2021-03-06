@@ -1,6 +1,7 @@
 const OrganizationModel = require('../models/organization');
 const PricingModel = require('../models/pricing');
 const db = require('mongoose');
+let assert = require('assert');
 
 exports.createUpdateOrganization = async (req, res, next) => {
   try {
@@ -8,7 +9,7 @@ exports.createUpdateOrganization = async (req, res, next) => {
     await session.withTransaction(async () => {
       let org = null;
 
-      if (req.body._id && req.body.userData.uid) { // edit
+      if (req.body._id && req.userData.uid) { // edit
         org = await this.getOrganizationByIdHelper(req.body._id);
       } else { // create
         org = new OrganizationModel();
@@ -16,9 +17,16 @@ exports.createUpdateOrganization = async (req, res, next) => {
 
       org.email = req.body.email;
       org.name =  req.body.name;
-      org.companyCode = req.body.companyCode;
       org.insuranceOptions = req.body.insuranceOptions;
       org.locations = locationsSetupHelper(req.body.locations);
+      let registerCode = randomString(5);
+
+      while ((await getOrganizationByRegisterCodeHelper(registerCode)) != null) {
+        console.log("createUpdateOrganization: registerCode is duplicate")
+        registerCode = randomString(5);
+      }
+
+      org.registerCode = registerCode;
 
       const pricing = await PricingModel.create([{
         organization: org._id,
@@ -37,7 +45,7 @@ exports.createUpdateOrganization = async (req, res, next) => {
       });
     });
   } catch(error) {
-    console.log(`createUpdateOrganization: ${req.body.companyCode}: ${error.message}`);
+    console.log(`createUpdateOrganization: ${req.body.name}: ${error.message}`);
     return res.status(500).json({
       message: "Organization creation/update failed"
     });
@@ -111,17 +119,34 @@ exports.getOrganizations = async (req, res, next) => {
   };
 }
 
+exports.getManyOrganizations = async (req, res, next) => {
+  try {
+    const orgQuery = OrganizationModel.find({ _id: { "$in" : req.body.orgIds} });
+    await orgQuery
+      .then(documents => {
+        return res.status(200).json(documents);
+      })
+  } catch(error) {
+    console.log(`getManyOrganizations: ${error.message}`);
+    return res.status(500).json({
+      message: "Couldn't fetch organizations"
+    });
+  };
+}
+
 exports.getOrganizationByIdHelper = async (orgId) => {
   return await OrganizationModel.findById(orgId).then(foundOrganization => {
     return foundOrganization;
   });
 }
 
-exports.getOrganizationByCodeHelper = async (companyCode) => {
-  return await OrganizationModel.findOne({companyCode: companyCode}). then(foundOrganization => {
+getOrganizationByRegisterCodeHelper = async (code) => {
+  return await OrganizationModel.findOne({registerCode: code}).then(foundOrganization => {
     return foundOrganization;
   });
 }
+
+exports.getOrganizationByRegisterCodeHelper = getOrganizationByRegisterCodeHelper;
 
 exports.deleteOrganization = async (req, res, next) => {
   try {
@@ -140,4 +165,27 @@ exports.deleteOrganization = async (req, res, next) => {
       message: "Couldn't delete organization"
     });
   }
+}
+
+exports.updateSecretCode = async (req, res, next) => {
+  await OrganizationModel.findById(req.params.id).then(async foundOrg => {
+    assert(foundOrg != null, "updateSecretCode: foundOrg is null");
+    foundOrg.secretCode = randomString(8);
+    await foundOrg.save();
+    return res.status(200).json({
+      message: "Secret code updated successfully"
+    });
+  }).catch(error => {
+    console.log(`updateSecretCode: ${req.params.id}: ${error.message}`);
+    return res.status(500).json({
+      message: "Secret code update failed"
+    });
+  })
+}
+
+randomString = (length) => {
+  let chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  let result = '';
+  for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
+  return result.trim();
 }

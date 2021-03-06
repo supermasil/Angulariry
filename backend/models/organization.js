@@ -14,7 +14,7 @@ const locationSchema = mongoose.Schema({
 const organizationSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true}, // unique doesn't not throw error if not unique
   name: {type: String, required: true, unique: true},
-  companyCode: {type: String, required: true, unique: true, index: true},
+  registerCode: {type: String, required: true, unique: true, index: true},
   locations: [locationSchema],
   insuranceOptions: [String],
   pricings: {type: mongoose.Types.ObjectId, ref: "pricing"}, // Not required from the beginning

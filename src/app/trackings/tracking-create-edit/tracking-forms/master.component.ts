@@ -96,13 +96,13 @@ export class MasterFormCreateComponent implements OnInit {
               this.authService.redirect404();
             });
         }, error => {
-          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
+          this.authService.redirectToMainPageWithoutMessage();
         })
       }, error => {
-        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithoutMessage();
       });
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
+      this.authService.redirectToMainPageWithoutMessage();
     });
   }
 

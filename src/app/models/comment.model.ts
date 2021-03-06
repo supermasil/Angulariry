@@ -3,9 +3,9 @@ export interface CommentModel { // From backend
   creatorId: string;
   trackingId: string;
   creatorName: string;
-  imagePaths: [string];
+  imagePaths: string[];
   content: string;
-  attachmentPaths: [string];
+  attachmentPaths: string[];
   organization: string;
   createdAt: Date;
   updatedAt: Date;

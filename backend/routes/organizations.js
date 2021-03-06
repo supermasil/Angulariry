@@ -9,6 +9,8 @@ router.get('/:id', OrganizationController.getOrganization) // Get one
 
 router.get('/', checkAuth.isAuthenticated, OrganizationController.getOrganizations); // Get All
 
+router.post('/getMany', checkAuth.isAuthenticated, OrganizationController.getManyOrganizations); // Get All
+
 router.delete('/:id', checkAuth.isAuthenticated, OrganizationController.deleteOrganization);
 
 router.put('/:id', checkAuth.isAuthenticated, OrganizationController.createUpdateOrganization);

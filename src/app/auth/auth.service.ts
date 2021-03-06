@@ -15,13 +15,13 @@ const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
 
 @Injectable({ providedIn: 'root'})
 export class AuthService {
-  private authStatusListener = new ReplaySubject<boolean>();
+  private authStatusSubject = new ReplaySubject<boolean>();
   private firebaseUserSubject = new ReplaySubject<firebase.User>();
   private mongoDbUserSubject = new ReplaySubject<UserModel>();
   private userOrgSubject = new ReplaySubject<OrganizationModel>();
   private firebaseUser: firebase.User;
   private mongoDbUser: UserModel;
-  private userOrg: OrganizationModel;
+  private userOrg: OrganizationModel = null;
   public redirectUrl: string;
   public redirectData = {};
   private loginMode = false;
@@ -39,19 +39,17 @@ export class AuthService {
 
   async refreshAuthentication(firebaseUser: firebase.User) {
     if (firebaseUser) {
+      this.firebaseUser = firebaseUser;
       await this.setupSessionUToken(firebaseUser); // Has to await here. SET THIS UP RIGHT AWAY to be authenticated in the back end
       this.getUser(firebaseUser.uid).subscribe(async (user: UserModel) => {
-
+        this.mongoDbUser = user;
         if (firebaseUser.uid === user._id) {
-          this.getOrganization(user.organization).subscribe(async (org: OrganizationModel) => {
-            this.firebaseUser = firebaseUser;
-            this.mongoDbUser = user;
-            this.userOrg = org;
-            await this.authenticate();
-          }, error => {
-            console.log(error);
-            this.unAuthenticate();
-          })
+          this.userOrg = user.organization;
+          return await this.authenticate();
+        } else {
+          console.log("Firebase and db users aren't the same")
+          this.unAuthenticate();
+          this.logout();
         }
       }, error => {
         console.log(error);
@@ -86,7 +84,7 @@ export class AuthService {
       const millisecondsUntilExpiration = sessionDuration - (Date.now() - authTime);
       setTimeout(() => {this.logout();}, millisecondsUntilExpiration);
       this.refreshUsers();
-      this.authStatusListener.next(true);
+      this.authStatusSubject.next(true);
       // console.log("User authenticated");
       this.redirecting();
       if (this.loginMode) {
@@ -100,7 +98,7 @@ export class AuthService {
     this.firebaseUser = null;
     this.mongoDbUser = null;
     this.clearSessionStorage();
-    this.authStatusListener.next(false);
+    this.authStatusSubject.next(false);
     // console.log("User unauthenticated");
   }
 
@@ -124,7 +122,6 @@ export class AuthService {
     .catch(error => {
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
-
   }
 
   async logout() {
@@ -135,7 +132,6 @@ export class AuthService {
         this.router.navigate(["/auth"]);
         window.location.reload();
       });
-      this.alertService.success("See you later!", GlobalConstants.flashMessageOptions);
     }).catch(error => {
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
     });
@@ -149,24 +145,58 @@ export class AuthService {
     })
   }
 
-  async createUpdateUser(formData: any) {
+  async createUpdateUser(formData: any, andLogin: boolean) {
     if (!formData._id) { // create case
-      // delete formData["password"]; // Remove password from the object
       this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
         .subscribe((responseData) => {
-          // this.refreshAuthentication(firebase.auth().currentUser); // Only logged in user can create user
-          this.zone.run(() => {
-            this.router.navigate(["/"]);
-          });
+          if (andLogin) {
+            this.login(formData.email, formData.password);
+          } else {
+            this.zone.run(() => {
+              this.router.navigate(["/"]);
+            });
+          }
         });
     } else { // edit case
       this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
         .subscribe((responseData) => {
-          this.zone.run(() => {
-            this.router.navigate(["/"]);
-          });
+          if (andLogin) {
+            this.login(formData.email, formData.password);
+          } else {
+            this.zone.run(() => {
+              this.router.navigate(["/"]);
+            });
+          }
         });
     }
+  }
+
+  onboardNewOrg(code: string) {
+    this.httpClient.post<OrganizationModel>(USER_BACKEND_URL + `onboardToOrg/${this.firebaseUser.uid}`, {code: code})
+      .subscribe(org => {
+        this.userOrg = org;
+        sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
+        this.userOrgSubject.next(this.userOrg);
+        this.zone.run(async () => {
+          await this.refreshAuthentication(this.firebaseUser);
+          this.router.navigate(["/trackings"]);
+          this.alertService.success(`Onboarded to ${org.name}`, GlobalConstants.flashMessageOptions);
+        });
+      });
+  }
+
+  logInToOrg(orgId: string) {
+    this.httpClient.put<OrganizationModel>(USER_BACKEND_URL + `updateOrg/${this.firebaseUser.uid}`, {orgId: orgId})
+      .subscribe(org => {
+        this.userOrg = org;
+        sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
+        this.userOrgSubject.next(this.userOrg);
+        this.zone.run(async () => {
+          await this.refreshAuthentication(this.firebaseUser);
+          this.router.navigate(["/trackings"]);
+          this.alertService.success(`Logged in to ${org.name}`, GlobalConstants.flashMessageOptions);
+        });
+      });
   }
 
   getUser(id: string | UserModel) {
@@ -184,7 +214,11 @@ export class AuthService {
   createUpdateOrganization(formData: any) {
     this.httpClient
       .post<{message: string, organization: OrganizationModel}>(ORGANIZATION_BACKEND_URL, formData)
-      .subscribe((responseData) => {});
+      .subscribe((responseData) => {
+        this.zone.run(() => {
+          this.router.navigate(["/"]);
+        });
+      });
   }
 
   getOrganization(id: string) {
@@ -193,6 +227,10 @@ export class AuthService {
 
   getOrganizations() {
     return this.httpClient.get<{organizations: OrganizationModel[], count: number}>(ORGANIZATION_BACKEND_URL);
+  }
+
+  getManyOrganizations(orgIds: string[]) {
+    return this.httpClient.post<OrganizationModel[]>(ORGANIZATION_BACKEND_URL + `getMany`, {orgIds: orgIds});
   }
 
   deleteOrganization(id: string) {
@@ -205,7 +243,6 @@ export class AuthService {
     }).catch((error) => {
       console.log(error);
     });
-
   }
 
   async setupSessionBackEndInfo() {
@@ -244,7 +281,7 @@ export class AuthService {
   }
 
   getAuthStatusListener() {
-    return this.authStatusListener.asObservable();
+    return this.authStatusSubject.asObservable();
   }
 
   getUserId(){
@@ -262,9 +299,19 @@ export class AuthService {
       });
   }
 
+  redirectToMainPageWithoutMessage() {
+    this.zone.run(() => {
+      this.router.navigate(["/"]);
+    });
+  }
+
   redirect404() {
     this.zone.run(() => {
       this.router.navigate(["/404"]);
     });
+  }
+
+  canView(roles: string[]) {
+    return roles.includes(this.mongoDbUser?.role);
   }
 }

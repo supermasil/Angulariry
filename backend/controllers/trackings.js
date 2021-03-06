@@ -162,7 +162,7 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
   }
 
   if (req.body._id) { //edit case
-    createdTracking = await MODEL.findByIdAndUpdate(req.body._id, updateBody, {new: true}).session(session).then(result => {return result});
+    createdTracking = await MODEL.findByIdAndUpdate(req.body._id, {$set: updateBody}, {new: true}).session(session).then(result => {return result});
   } else {
     tracking = new MODEL(updateBody);
     createdTracking = await MODEL.create([tracking], {session: session}).then(createdTracking => {return createdTracking[0]});
@@ -223,7 +223,7 @@ generalInfoSetupHelper = async req => {
     },
 
     creatorId: req.userData.uid,
-    creatorName: (await UserController.getUserByIdHelper(req.userData.uid)).name
+    creatorName: (await UserController.getUserByIdHelper(req.userData.uid, req.userData.uid, req.userData.orgId)).name
     // comments: req.body.comments? req.body.comments : []
   };
 }
@@ -271,7 +271,7 @@ subTrackingsSetupHelper = async (req, session) => {
       }
       let createdTracking = null;
       if (sub._id) { // old ones
-        createdTracking = await InPersonSubTrackingModel.findByIdAndUpdate(sub._id, data, {new: true}).session(session).then(result => {return result});
+        createdTracking = await InPersonSubTrackingModel.findByIdAndUpdate(sub._id, {$set: data}, {new: true}).session(session).then(result => {return result});
       } else {
         createdTracking = await InPersonSubTrackingModel
           .create([data], {session: session})
@@ -542,7 +542,7 @@ getTrackingHelper = async (type, id, orgId, byId) => {
 populateSenderInfo = async (documents, type) => {
   for (d of documents) {
     assert(d != null, "populateSenderInfo: Document is null");
-    let sender = await UserController.getUserByIdHelper(d.generalInfo.sender);
+    let sender = await UserController.getUserByIdHelper(d.generalInfo.sender, d.generalInfo.sender, null);
     d.generalInfo.sender = sender;
 
     switch (type) {

@@ -105,16 +105,16 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
               this.authService.redirect404();
             });
           }, error => {
-            this.authService.redirectToMainPageWithMessage("Couldn't fetch pricing");
+            this.authService.redirectToMainPageWithoutMessage();
           });
         }, error => {
-          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
+          this.authService.redirectToMainPageWithoutMessage();
         })
       }, error => {
-        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithoutMessage();
       });
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
+      this.authService.redirectToMainPageWithoutMessage();
     });
   }
 
@@ -177,7 +177,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser()?.role);
+    return this.authService.canView(roles);
   }
 
   onSave() {

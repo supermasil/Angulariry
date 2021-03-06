@@ -4,14 +4,13 @@ import { Injectable, NgZone } from '@angular/core';
 import { AuthService } from './auth.service';
 import { AlertService } from '../custom-components/alert-message';
 import { GlobalConstants } from '../global-constants';
-import { UserModel } from '../models/user.model';
-import { auth } from 'firebase';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router, private alertService: AlertService, private zone: NgZone) {}
-
+  route = null;
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | import("@angular/router").UrlTree | Observable<boolean | import("@angular/router").UrlTree> | Promise<boolean | import("@angular/router").UrlTree> {
+    this.route = route;
     let splitUrl = state.url.split(';');
     let url = splitUrl[0];
     let data = {};
@@ -35,18 +34,20 @@ export class AuthGuard implements CanActivate {
     this.authService.redirectData = data;
 
     if(!isAuth) {
-      this.authService.getAuthStatusListener().subscribe(authenticated => {
-        if (!authenticated) {
-          this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
-        }
-      });
       this.zone.run(() => {
         this.router.navigate(["/auth"]);
+        this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
       });
       return false;
-    } else {
-      return true;
+    } else if (isAuth && !this.authService.getUserOrg() && this.route.url.length > 0) {
+        this.zone.run(() => {
+          this.router.navigate(["/"]);
+          this.alertService.warn("You have not logged into any org", GlobalConstants.flashMessageOptions);
+        });
+      return false;
     }
+
+    return true;
   }
 
   checkAuthorization(roles: string[]) {

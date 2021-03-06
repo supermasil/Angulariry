@@ -38,13 +38,13 @@ export class OnboardingFormComponent implements OnInit {
         this.authService.getOrganization(paramMap.get("orgId")).subscribe(organization => {
           this.organizationOnboardingForm = this.createOrganizationOnboardingForm(organization);
         }, error => {
-          this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
+          this.authService.redirectToMainPageWithoutMessage();
         });
       } else {
         this.organizationOnboardingForm = this.createOrganizationOnboardingForm(null);
       }
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch organization id from paramMap");
+      this.authService.redirectToMainPageWithoutMessage();
     });
   }
 
@@ -53,7 +53,6 @@ export class OnboardingFormComponent implements OnInit {
       _id: new FormControl(formData?._id? formData._id : null),
       name: new FormControl(formData?.name? formData.name: "", {validators: [Validators.required]}),
       email: new FormControl(formData?.email? formData.email: "", {validators: [Validators.required, Validators.email]}),
-      companyCode: new FormControl(formData?.companyCode? formData.companyCode: "", {validators: [Validators.required]}),
       locations: new FormArray(formData?.locations && formData.locations.length > 0 ? this.createLocationItems(formData.locations) : this.createLocationItems([null])),
       insuranceOptions: new FormControl(formData?.insuranceOptions? formData.insuranceOptions : [], {validators: [Validators.required]}),
     });

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
 const discountSchema = mongoose.Schema({
-  userId: {type: String, ref: "user", index: true},
+  userId: {type: String},
   perUnitDiscountUnit: {type: String, default: 0},
   perUnitDiscountAmount: {type: Number, default: 0},
   extraChargeDiscountUnit: {type: String, default: 0},
@@ -31,7 +31,7 @@ const itemSchema = mongoose.Schema({
 }, { timestamps: true });
 
 const pricingSchema = mongoose.Schema({
-  organization: {type: mongoose.Types.ObjectId, ref: "organization", required: true, index: true},
+  organization: {type: mongoose.Types.ObjectId, ref: "organization", required: true},
   items: [itemSchema]
 }, { timestamps: true, autoCreate: true });
 

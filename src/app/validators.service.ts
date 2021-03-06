@@ -8,15 +8,6 @@ export class ValidatorsService {
 
   constructor() {}
 
-  // companyCodeValidator(companyCodes: string[]): ValidatorFn {
-  //   return (control: AbstractControl): {[key: string]: any} | null => {
-  //     if (control && control.value && companyCodes.includes(control.value)) {
-  //       return null;
-  //     }
-  //     return {invalidCompanyCode: control.value};
-  //   };
-  // }
-
   addressValidator(): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
       if (control.disabled == true) {

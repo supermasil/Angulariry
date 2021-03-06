@@ -48,49 +48,6 @@
     <mat-error>Invalid phone number</mat-error>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Role</mat-label>
-    <mat-select matInput formControlName="role" required matTooltip="Only admin can edit this">
-      <mat-option *ngFor="let role of roles" [value]="role">
-        {{role}}
-      </mat-option>
-    </mat-select>
-    <mat-error>Please select a role</mat-error>
-  </mat-form-field>
-
-  <auto-complete-input
-    #companyCode
-    [dataObservable]="companyCodesSubject.asObservable()"
-    [selectItemObservable]="companyCodeSubject.asObservable()"
-    (itemSelected)="companyCodeSelected($event)"
-    (inputInvalid)="this.signupForm.controls['companyCode'].setValue('')"
-    [enforeSelection]="true"
-    [lockOption]="lockCustomerCode()"
-    [matLabel]="'Company Code'"
-    [matErrorMessage]="'Please select one from the drowdown only'">
-  </auto-complete-input>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Default Location</mat-label>
-    <mat-select matInput formControlName="defaultLocation" required>
-      <mat-option *ngFor="let location of defaultLocations" [value]="location">
-        {{location}}
-      </mat-option>
-    </mat-select>
-    <mat-error>Please select a role</mat-error>
-  </mat-form-field>
-
-
-  <mat-form-field appearance="outline">
-    <mat-label>User Code</mat-label>
-    <input
-    matInput
-    placeholder='Enter a unique code for your customer'
-    formControlName='userCode'
-    required>
-    <mat-error *ngIf="signupForm.getError('invalidUserCode', 'userCode') as error">{{error}}</mat-error>
-  </mat-form-field>
-
   <h2>Sender's addresses</h2>
   <div formArrayName="addresses" *ngFor="let item of signupForm.get('addresses')['controls']; let i = index;">
     <div [formGroupName]="i">

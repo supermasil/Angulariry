@@ -55,7 +55,7 @@ export class TrackingCreateEditComponent implements OnInit {
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser().role);
+    return this.authService.canView(roles);
   }
 
   isAuth() {

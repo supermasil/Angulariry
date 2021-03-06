@@ -3,13 +3,10 @@ import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Valida
 import { ActivatedRoute } from "@angular/router";
 import { phoneNumberValidator } from "lac-mat-tel-input";
 import { Address } from "ngx-google-places-autocomplete/objects/address";
-import { ReplaySubject } from "rxjs";
 import { UserModel } from "src/app/models/user.model";
-import { AutoCompleteInputComponent } from "src/app/custom-components/auto-complete-input/auto-complete-input.component";
 import { ValidatorsService } from "src/app/validators.service";
 import { AuthService } from "../../auth.service";
 import { AuthGlobals } from "../../auth-globals";
-import { auth } from "firebase";
 
 
 @Component({
@@ -20,22 +17,11 @@ import { auth } from "firebase";
 export class SignUpFormComponent implements OnInit, OnDestroy {
   signupForm: FormGroup;
   isLoading = false;
-
-  roles = [AuthGlobals.roles.Customer];
-
-  defaultLocations = [];
-  userCodes = [];
-  organizations = [];
-  organization = null;
-  companyCodesSubject = new ReplaySubject<string[]>();
-  companyCodeSubject = new ReplaySubject<string>();
   mode = "create";
 
   // mongoDbUserSubscription: Subscription;
   currentUser: UserModel;
   editUser: UserModel;
-
-  @ViewChild("companyCode") companyCode: AutoCompleteInputComponent;
 
   constructor(
     private authService: AuthService,
@@ -45,45 +31,27 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = user;
-      this.authService.getOrganizations().subscribe(orgsData => {
-        this.organizations = orgsData.organizations;
-        this.companyCodesSubject.next(orgsData.organizations.map(item => item.companyCode));
-        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
-          this.userCodes = response.users.map(u => u.userCode.toLowerCase());
-          this.route.paramMap.subscribe((paramMap) => {
-            if (paramMap.has("userId")) { // Edit case
-              this.mode = 'edit';
-              this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
-                this.editUser = user;
-                if (this.checkAuthorization()) {
-                  this.roles = AuthGlobals.everyone; // so that the role can be set and disabled
-                  this.zone.run(() => {
-                    this.createSignUpForm(user);
-                    this.setRoles();
-                  })
-                }
-              }, error => {
-                this.authService.redirectToMainPageWithMessage("Failed to subscribe to paramMap");
-              })
-            } else { // Create case
-              this.zone.run(() => {
-                this.createSignUpForm(null);
-                this.setRoles();
-              })
-            }
-          });
+    this.route.paramMap.subscribe((paramMap) => {
+      if (paramMap.has("userId")) { // Edit case
+        this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+          this.currentUser = user;
+            this.mode = 'edit';
+            this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
+              this.editUser = user;
+              this.checkAuthorization();
+                this.zone.run(() => {
+                  this.createSignUpForm(user);
+                })
+              });
         }, error => {
-          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
+          this.authService.redirectToMainPageWithoutMessage();
         });
-      }, error => {
-        this.authService.redirectToMainPageWithMessage("Couldn't fetch organizations");
-      });
-    }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
+      } else { // Create case
+        this.zone.run(() => {
+          this.createSignUpForm(null);
+        })
+      }
     });
-
   }
 
   ngOnDestroy() {
@@ -123,68 +91,22 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
       email: new FormControl({value: formData?.email? formData.email : "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.email]}),
       password: new FormControl({value: "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.minLength(6)]}),
       phoneNumber: new FormControl(formData?.phoneNumber? formData.phoneNumber : "", {validators: [phoneNumberValidator, Validators.required]}),
-      role: new FormControl({value: formData?.role? formData.role: "", disabled: (this.mode === 'edit' && !AuthGlobals.admins.includes(this.currentUser?.role)) || this.currentUser?._id  == this.editUser?._id}, {validators: [Validators.required]}),
-      defaultLocation: new FormControl(formData?.defaultLocation? formData.defaultLocation : "", {validators: [Validators.required]}),
       addresses: new FormArray(formData?.addresses && formData.addresses.length > 0 ? this.createAddresses(formData.addresses) : this.createAddresses([null])),
       recipients: new FormArray(formData?.recipients && formData.recipients.length > 0 ? this.createRecipients(formData.recipients): this.createRecipients([])),
-      companyCode: new FormControl({value: ""} , {validators: [Validators.required]}),
-      userCode: new FormControl(formData?.userCode? formData.userCode : "", {validators: [Validators.required, this.userCodeValidator()]}),
-      organization: new FormControl(formData?.organization? formData.organization : "", {validators: [Validators.required]}),
     });
   }
 
-  setRoles() {
-    if (this.currentUser.role === AuthGlobals.roles.SuperAdmin) {
-      this.roles = AuthGlobals.everyone;
-    } else if (this.currentUser.role === AuthGlobals.roles.Admin) {
-      this.roles = AuthGlobals.nonAdmin;
-    }
-
-    if (this.mode === 'edit') { // edit case
-      if (this.currentUser._id  == this.editUser._id) { // Edit self
-        this.roles = AuthGlobals.everyone;
-      }
-
-      this.companyCodeSubject.next(this.editUser.companyCode);
-
-      // Disabled user code for Customer, customer can only edit himself
-      if (this.currentUser.role === AuthGlobals.roles.Customer) {
-        this.signupForm.get('userCode').disable();
-      }
-      this.companyCodeSubject.next(this.editUser.companyCode);
-    } else { // create case
-      if (this.currentUser.role !== AuthGlobals.roles.SuperAdmin) {
-        this.companyCodeSubject.next(this.currentUser.companyCode);
-      }
-    }
-    if (this.currentUser.role !== AuthGlobals.roles.SuperAdmin) {
-      this.signupForm.get('companyCode').disable();
-    }
-  }
-
   checkAuthorization() {
-    if (this.currentUser._id !== this.editUser._id) {
-      if (this.currentUser.role === AuthGlobals.roles.Admin && AuthGlobals.admins.includes(this.editUser.role)
-        || AuthGlobals.internalNonAdmin.includes(this.currentUser.role) && this.editUser.role != AuthGlobals.roles.Customer
-        || this.currentUser.role === AuthGlobals.roles.Customer) {
-          this.authService.redirectToMainPageWithMessage("You're not authorized");
-          return false;
+    if (this.currentUser._id == this.editUser._id) {
+      return true;
+    } else {
+      if (this.currentUser.role == AuthGlobals.roles.SuperAdmin || (this.currentUser.role == AuthGlobals.roles.Admin && AuthGlobals.internalNonAdmin.includes(this.editUser.role))) {
+        return true;
       }
-    }
-    return true;
-  }
 
-  userCodeValidator(): ValidatorFn {
-    return (control: AbstractControl): {[key: string]: any} | null => {
-      if (this.mode === 'edit' && control.value === this.editUser?.userCode) {
-        return null;
-      } else if (control && control.value && this.userCodes.includes(control.value.toLowerCase())) {
-        return {invalidUserCode: "Customer code already exists"};
-      } else if (control && !control.value) {
-        return {invalidUserCode: "Customer code is required"};
-      }
-      return null;
-    };
+      this.authService.redirectToMainPageWithMessage("You're not authorized");
+      return false;
+    }
   }
 
   createAddresses(addresses: any) {
@@ -239,7 +161,6 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
     } else if (field === 'recipients') {
       (this.signupForm.get(field) as FormArray).push(this.createRecipients([null])[0]);
     }
-
   }
 
   removeAddressOrRecipient(field: string, i: number) {
@@ -255,33 +176,13 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
     setTimeout(() => this.isLoading = false, 3000);
   }
 
-  companyCodeSelected(code: string) {
-    let selectedOrg = this.organizations.filter(item => item.companyCode == code)[0];
-    if (selectedOrg) {
-      this.zone.run(() => {
-        this.signupForm.controls['companyCode'].setValue(selectedOrg.companyCode);
-        this.signupForm.controls['organization'].setValue(selectedOrg._id);
-        this.defaultLocations = selectedOrg.locations.map(item => item.name);
-        this.signupForm.get('defaultLocation').enable();
-      });
-    }
-  }
-
-  lockCustomerCode() {
-    if (this.mode === 'create' && this.currentUser && this.currentUser.role === AuthGlobals.roles.SuperAdmin
-    || (this.mode === 'edit' && this.currentUser && this.currentUser.role === AuthGlobals.roles.SuperAdmin && this.editUser && this.editUser.role === AuthGlobals.roles.SuperAdmin)) {
-      return false;
-    }
-    return true
-  }
-
   async onSignup() {
-    this.companyCode.getFormValidity();
     this.signupForm.markAllAsTouched(); // deal with phone number validator empty issue
     if (this.signupForm.invalid) {
       return;
     }
     this.setButtonTimeOut();
-    await this.authService.createUpdateUser(this.signupForm.getRawValue());
+    let andLogin = this.currentUser? false : true;
+    await this.authService.createUpdateUser(this.signupForm.getRawValue(), andLogin);
   }
 }

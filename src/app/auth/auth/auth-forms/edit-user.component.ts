@@ -41,10 +41,8 @@ export class EditUserFormComponent implements OnInit{
   }
 
   filterUsers() {
-    if (AuthGlobals.nonAdminOfficers.includes(this.currentUser.role)) {
-      this.users = this.users.filter(u => u.role === AuthGlobals.roles.Customer);
-    } else if (this.currentUser.role === AuthGlobals.roles.Admin) {
-      this.users = this.users.filter(u => !AuthGlobals.admins.includes(u.role));
+    if (this.currentUser.role === AuthGlobals.roles.Admin) {
+      this.users = this.users.filter(u => AuthGlobals.internalNonAdmin.includes(u.role));
     } else if (this.currentUser.role === AuthGlobals.roles.SuperAdmin) {
       this.users = this.users.filter(u => u.role != AuthGlobals.roles.SuperAdmin);
     }

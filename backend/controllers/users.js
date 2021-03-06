@@ -2,6 +2,8 @@ const UserModel = require('../models/user');
 const OrganizationController = require('./organizations');
 const db = require('mongoose');
 const admin = require('firebase-admin');
+let assert = require('assert');
+const user = require('../models/user');
 
 
 // Messy af, can't use await on admin
@@ -14,16 +16,20 @@ exports.createUpdateUser = async (req, res, next) => {
     user.name = req.body.name;
     user.email = req.body.email;
     user.phoneNumber = req.body.phoneNumber;
-    user.role = req.body.role;
     user.addresses = addressesSetupHelper(req.body.addresses);
-    user.companyCode = req.body.companyCode;
-    user.organization = req.body.organization;
-    user.userCode = req.body.userCode;
     user.recipients = recipientsSetupHelper(req.body.recipients);
-    user.defaultLocation = req.body.defaultLocation;
-    user.creatorId = req.userData.uid
-    let org = await OrganizationController.getOrganizationByIdHelper(req.body.organization);
-    user.pricings = org.pricings;
+    if (req.userData) {
+      user.creatorId = req.userData.uid;
+    }
+
+    let userCode = randomString(5);
+    while ((await UserModel.findOne({'userCode': userCode}).then(foundUser => {return foundUser})) != null) {
+      console.log("createUpdateUser: userCode is duplicate")
+      userCode = randomString(5);
+    }
+
+    user.userCode = userCode;
+
     let updatedUser = null;
     if (!req.body._id) {
       await admin
@@ -71,8 +77,9 @@ exports.createUpdateUser = async (req, res, next) => {
           });
         });
       } else {
-        user._id = req.body._id
-        await UserModel.findByIdAndUpdate(req.body._id, user, {new: true}).session(session).then(user => {
+        let userCopy = user.toObject();
+        delete userCopy.organization; delete userCopy.organizations; delete userCopy.pricings;
+        await UserModel.findByIdAndUpdate(req.body._id, {$set: userCopy}, {new: true}).session(session).then(user => {
           updatedUser = user;
         });
         return res.status(201).json({
@@ -138,7 +145,7 @@ recipientsSetupHelper = (recipients) => {
 
 exports.getUser = async (req, res, next) => {
   try {
-    foundUser = await this.getUserByIdHelper(req.params.id);
+    foundUser = await this.getUserByIdHelper(req.userData.uid, req.params.id, req.userData.orgId);
     if (foundUser == null) {
       throw new Error("User is null");
     }
@@ -153,7 +160,7 @@ exports.getUser = async (req, res, next) => {
 
 exports.getUsers = async (req, res, next) => {
   try {
-    const userQuery = UserModel.find({organization: req.userData.orgId});
+    const userQuery = UserModel.find({"organizations.organization": req.userData.orgId}); // if organizations contains org id
     const pageSize = req.query.pageSize? +req.query.pageSize : 5; // Convert to int
     const currentPage = req.query.currentPage? +req.query.currentPage : 0;
 
@@ -165,6 +172,7 @@ exports.getUsers = async (req, res, next) => {
     userQuery.sort({createdAt: -1});
 
     return await userQuery
+      .populate("organization")
       .then(documents => {
         fetchedUsers = documents
         return userQuery.countDocuments();
@@ -213,8 +221,91 @@ exports.getUsers = async (req, res, next) => {
 // }
 
 
-exports.getUserByIdHelper = async (userId) => {  // Can't enfore orgId here since user is enquired at authentication
-  return await UserModel.findById(userId).then(foundUser => {
+getUserByIdHelper = async (uid, userId, orgId) => {  // Can't enfore orgId here since user is enquired at authentication
+  let query = uid != userId ? UserModel.findOne({_id: userId, organization: orgId}).populate("organization") : UserModel.findById(userId).populate("organization");
+  return await query.then(foundUser => {
     return foundUser;
   });
+}
+
+exports.getUserByIdHelper = getUserByIdHelper;
+
+getUserByUserCodeHelper = async (userCode, orgId) => {  // Can't enfore orgId here since user is enquired at authentication
+let query =  UserModel.findOne({userCode: userCode, organization: orgId}).populate("organization");
+  return await query.then(foundUser => {
+    return foundUser;
+  });
+}
+
+exports.getUserByUserCodeHelper = getUserByUserCodeHelper;
+
+exports.updateUserRole = async (req, res, next) => {
+  return await UserModel.findByIdAndUpdate(req.params.id, {$set: {'role': req.body.role}}).then(foundUser => {
+    return foundUser;
+  });
+}
+
+exports.updateUserCurrentOrg = async (req, res, next) => {
+  try {
+    await UserModel.findById(req.params.id).then(async foundUser => {
+      assert(foundUser.organizations.map(o => o.organization).includes(req.body.orgId), "You're not onboarded to this org");
+      let foundOrg = foundUser.organizations.filter(o => o.organization == req.body.orgId)[0];
+      let org = await OrganizationController.getOrganizationByIdHelper(req.body.orgId);
+      assert(org != null, "updateUserCurrentOrg: Org is null");
+      foundUser.organization = org._id
+      foundUser.pricings = org.pricings;
+      foundUser.role = foundOrg.role;
+      foundUser.creatorId = foundOrg.creatorId;
+      foundUser.active = foundOrg.active;
+      await foundUser.save();
+      return res.status(200).json(org)
+    })
+  } catch (error) {
+    console.log(`updateUserCurrentOrg: ${error.message} for code ${req.body.code} and user id ${req.params.id}`)
+    return res.status(500).json({
+      message: "Logged in to org failed"
+    })
+  }
+}
+
+exports.updateUserCredit = async (req, res, next) => {
+  return await UserModel.findByIdAndUpdate(req.params.id, {$set: {'credit': req.body.credit}}).then(foundUser => {
+    return foundUser;
+  });
+}
+
+exports.onBoardUserToOrg = async (req, res, next) => {
+  let errorMessage = "Onboard user to new org failed, check your secret code";
+  try {
+    await UserModel.findById(req.params.id).then(async foundUser => {
+      let org = await OrganizationController.getOrganizationByRegisterCodeHelper(req.body.code);
+      let user = await getUserByUserCodeHelper(req.body.referral);
+      assert(org != null, "onBoardUserToOrg: Org is null");
+      foundUser.organization = org._id;
+      if (foundUser.organizations.map(o => o.organization).includes(org._id)) {
+        errorMessage = "Already onboarded to this org";
+        throw new Error(errorMessage);
+      }
+      foundUser.organizations.push({organization: org._id, role: "Customer", credit: 0, creatorId: user? user._id : null});
+      foundUser.organization = org._id
+      foundUser.pricings = org.pricings;
+      foundUser.role = "Customer"
+      foundUser.creatorId = user? user._id : null;
+      foundUser.active = true;
+      await foundUser.save();
+      return res.status(200).json(org)
+    });
+  } catch (error) {
+    console.log(`onBoardUserToOrg: ${error.message} for code ${req.body.code} and user id ${req.params.id}`)
+    return res.status(500).json({
+      message: errorMessage
+    })
+  };
+}
+
+randomString = (length) => {
+  let chars = '0123456789'
+  let result = '';
+  for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
+  return result.trim();
 }

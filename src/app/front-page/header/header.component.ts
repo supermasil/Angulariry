@@ -5,6 +5,7 @@ import { ChangeDetectorRef } from '@angular/core/';
 import { Router } from '@angular/router';
 import { AuthGlobals } from 'src/app/auth/auth-globals';
 import { UserModel } from 'src/app/models/user.model';
+import { OrganizationModel } from 'src/app/models/organization.model';
 
 @Component({
   selector: 'app-header',
@@ -17,10 +18,15 @@ export class HeaderComponent implements OnInit, OnDestroy{
   private authListenerSub: Subscription;
   authGlobals = AuthGlobals;
   user: UserModel;
+  organization: OrganizationModel;
 
   ngOnInit() {
     this.authService.getMongoDbUserListener().subscribe(user => {
       this.user = user;
+    });
+
+    this.authService.getUserOrgListener().subscribe(organization => {
+      this.organization = organization;
     });
   }
 
@@ -40,7 +46,7 @@ export class HeaderComponent implements OnInit, OnDestroy{
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser().role);
+    return this.authService.canView(roles);
   }
 
   isAuth() {

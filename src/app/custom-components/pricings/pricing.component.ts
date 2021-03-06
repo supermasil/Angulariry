@@ -91,16 +91,16 @@ export class PricingComponent implements OnInit, AfterViewChecked {
             this.itemNames.next(pricing.items.map(i => i.name));
             this.editPricingForm = this.createPricingForm(this.orgDefaultPricing);
           }, error => {
-            this.authService.redirectToMainPageWithMessage("Couldn't fetch pricing");
+            this.authService.redirectToMainPageWithoutMessage();
           });
         }, error => {
-          this.authService.redirectToMainPageWithMessage("Couldn't fetch users");
+          this.authService.redirectToMainPageWithoutMessage();
         })
       }, error => {
-        this.authService.redirectToMainPageWithMessage("Couldn't fetch organization");
+        this.authService.redirectToMainPageWithoutMessage();
       });
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch user");
+      this.authService.redirectToMainPageWithoutMessage();
     });
   }
 
@@ -117,7 +117,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
   }
 
   canView(roles: string[]) {
-    return roles.includes(this.authService.getMongoDbUser().role);
+    return this.authService.canView(roles);
   }
 
   isAuth() {

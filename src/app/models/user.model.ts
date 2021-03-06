@@ -8,12 +8,14 @@ export interface UserModel { // From backend
   email: string; // unique doesn't not throw error if not unique
   phoneNumber: string;
   role: string;
-  defaultLocation: string;// Oregon, California...
-  recipients: [RecipientModel];
-  addresses: [AddressModel];
-  companyCode: string;
+  recipients: RecipientModel[];
+  addresses: AddressModel[];
   userCode: string;
-  organization: string;
+  organization: OrganizationModel;
+  organizations: [{
+    organization: string;
+    role: string;
+  }];
   pricings: string;
   creatorId: string;
   active: boolean;

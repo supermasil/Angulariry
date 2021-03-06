@@ -24,12 +24,12 @@ exports.getCarrierTracking = async (carrierTrackingId) => {
 
 exports.updateCarrierTracking = async (carrierTrackingId, carrierTrackingNumber, status, trackerId, carrier, session) => {
   // console.log(carrierTrackingId, carrierTrackingNumber, status, trackerId, carrier);
-  await CarrierTrackingModel.findByIdAndUpdate(carrierTrackingId, {
+  await CarrierTrackingModel.findByIdAndUpdate(carrierTrackingId, {$set: {
     carrierTrackingNumber: carrierTrackingNumber,
     status: status,
     trackerId: trackerId,
     carrier: carrier,
-  }, {new: true}).session(session).then(result => {return result});
+  }}, {new: true}).session(session).then(result => {return result});
 }
 
 exports.getTrackerHelper = async (trackingNumber, carrier) => {

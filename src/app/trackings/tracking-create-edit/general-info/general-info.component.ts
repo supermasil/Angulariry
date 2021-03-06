@@ -67,10 +67,12 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
     this.usersObservable.subscribe((users: UserModel[]) => {
       this.senders = users;
-      this.sendersSubject.next(users.map(u => u.userCode + ' ' + u.name));
+
       if (this.currentUser.role === AuthGlobals.roles.Customer) {
-        this.selectSenderSubject.next(this.currentUser.userCode + " " + this.currentUser.name);
+        this.senders = this.senders.filter(s => s.userCode == this.currentUser.userCode);
       }
+
+      this.sendersSubject.next(this.senders.map(u => u.userCode + ' ' + u.name));
 
       this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
         this.patchFormValue(generalInfo);

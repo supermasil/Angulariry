@@ -59,7 +59,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
       this.currentValidItemNames = p.items.map(i => i.name);
       this.itemNamesSubject.next(this.itemNames);
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch pricing");
+      this.authService.redirectToMainPageWithoutMessage();
     });
 
     this.itemsForm = new FormGroup({
@@ -69,7 +69,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
     this.userIdObservable.subscribe((u: string) => {
       this.userId = u;
     }, error => {
-      this.authService.redirectToMainPageWithMessage("Couldn't fetch user id");
+      this.authService.redirectToMainPageWithoutMessage();
     });
 
     this.pricingUpdatedObservable.subscribe(changes => {

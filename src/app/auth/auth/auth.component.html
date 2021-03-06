@@ -13,7 +13,13 @@
       </ng-template>
     </mat-tab>
 
-    <mat-tab *ngIf="enabled[0] && isAuth() && canView(authGlobals.internal)" label="Signup">
+    <mat-tab *ngIf="enabled[0] && !isAuth()" label="Signup">
+      <ng-template matTabContent>
+        <signup-form></signup-form>
+      </ng-template>
+    </mat-tab>
+
+    <mat-tab *ngIf="enabled[0] && isAuth() && canView(authGlobals.everyone)" label="New User">
       <ng-template matTabContent>
         <signup-form></signup-form>
       </ng-template>
@@ -25,16 +31,22 @@
       </ng-template>
     </mat-tab>
 
-    <mat-tab *ngIf="enabled[2] && isAuth() && canView(authGlobals.admins)" label="Edit organization">
+    <mat-tab *ngIf="enabled[2] && isAuth() && canView([authGlobals.roles.SuperAdmin])" label="New organization">
       <ng-template matTabContent>
         <onboarding-form></onboarding-form>
       </ng-template>
     </mat-tab>
 
-    <!-- <mat-tab *ngIf="enabled[4] && isAuth() && canView(authGlobals.officers)" label="Select User To Edit">
+    <mat-tab *ngIf="enabled[3] && isAuth() && canView(authGlobals.admins)" label="Edit organization">
+      <ng-template matTabContent>
+        <onboarding-form></onboarding-form>
+      </ng-template>
+    </mat-tab>
+
+    <mat-tab *ngIf="enabled[4] && isAuth() && canView(authGlobals.officers)" label="Select User To Edit">
       <ng-template matTabContent>
         <edit-user-form></edit-user-form>
       </ng-template>
-    </mat-tab> -->
+    </mat-tab>
   </mat-tab-group>
 </div>
