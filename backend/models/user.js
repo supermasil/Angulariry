@@ -23,7 +23,8 @@ const userSchema = mongoose.Schema({
   pricings: {type: mongoose.Types.ObjectId, ref: "pricing", default: null},
   creatorId: {type: String, default: null},
   active: {type: Boolean, required: true, default: true},
-  credit: {type: Number, required: true, default: 0}
+  credit: {type: Number, required: true, default: 0},
+  creditHistory: [{type: mongoose.Types.ObjectId, ref: "history"}]
 }, { timestamps: true, autoCreate: true });
 
 userSchema.plugin(uniqueValidator); // Throw error if not unique

@@ -19,6 +19,8 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   isLoading = false;
   mode = "create";
 
+  roles = AuthGlobals.everyone;
+
   // mongoDbUserSubscription: Subscription;
   currentUser: UserModel;
   editUser: UserModel;
@@ -31,25 +33,21 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.currentUser = this.authService.getMongoDbUser();
     this.route.paramMap.subscribe((paramMap) => {
       if (paramMap.has("userId")) { // Edit case
-        this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-          this.currentUser = user;
-            this.mode = 'edit';
-            this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
-              this.editUser = user;
-              this.checkAuthorization();
-                this.zone.run(() => {
-                  this.createSignUpForm(user);
-                })
-              });
-        }, error => {
-          this.authService.redirectToMainPageWithoutMessage();
-        });
+        this.mode = 'edit';
+        this.authService.getUser(paramMap.get("userId")).subscribe((user: UserModel) => {
+          this.editUser = user;
+          this.checkAuthorization();
+            this.zone.run(() => {
+              this.createSignUpForm(user);
+            })
+          });
       } else { // Create case
         this.zone.run(() => {
           this.createSignUpForm(null);
-        })
+        });
       }
     });
   }
@@ -93,19 +91,32 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
       phoneNumber: new FormControl(formData?.phoneNumber? formData.phoneNumber : "", {validators: [phoneNumberValidator, Validators.required]}),
       addresses: new FormArray(formData?.addresses && formData.addresses.length > 0 ? this.createAddresses(formData.addresses) : this.createAddresses([null])),
       recipients: new FormArray(formData?.recipients && formData.recipients.length > 0 ? this.createRecipients(formData.recipients): this.createRecipients([])),
+      role: new FormControl(formData?.role? formData.role : null),
     });
+    this.validateRoles();
   }
 
   checkAuthorization() {
     if (this.currentUser._id == this.editUser._id) {
       return true;
     } else {
-      if (this.currentUser.role == AuthGlobals.roles.SuperAdmin || (this.currentUser.role == AuthGlobals.roles.Admin && AuthGlobals.internalNonAdmin.includes(this.editUser.role))) {
+      if (this.currentUser.role == AuthGlobals.roles.SuperAdmin
+        || (this.currentUser.role == AuthGlobals.roles.Admin && AuthGlobals.nonAdmin.includes(this.editUser.role))
+        || (AuthGlobals.officers.includes(this.currentUser.role) && this.editUser.role == AuthGlobals.roles.Customer)) {
         return true;
       }
-
       this.authService.redirectToMainPageWithMessage("You're not authorized");
       return false;
+    }
+  }
+
+  validateRoles() {
+    if (this.mode == "create" || AuthGlobals.nonAdmin.includes(this.currentUser.role) || this.currentUser._id == this.editUser._id) {
+      this.signupForm.get("role").disable();
+    } else if (this.currentUser.role == AuthGlobals.roles.Admin) {
+      this.roles = AuthGlobals.nonAdmin;
+    } else {
+      this.roles == [];
     }
   }
 

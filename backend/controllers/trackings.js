@@ -4,9 +4,9 @@ const InPersonTrackingModel = require('../models/tracking-models/in-person-track
 const InPersonSubTrackingModel = require('../models/tracking-models/in-person-tracking-sub');
 const ConsolidatedTrackingModel = require('../models/tracking-models/consolidated-tracking');
 const MasterTrackingModel = require('../models/tracking-models/master-tracking');
-const HistoryModel = require('../models/history');
 const UserController = require("../controllers/users");
 const CarrierTrackingController = require("../controllers/carrier-trackings");
+const HistoryController = require("../controllers/history");
 const CommentModel = require('../models/comment');
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
@@ -85,9 +85,9 @@ exports.createUpdateTracking = async (req, res, next) => {
 
       // Audit
       if (req.body._id) {
-        await createHistoryHelper(req.userData.uid, req.userData.orgId, "Update", req.body.generalInfo.trackingNumber, session);
+        await HistoryController.createHistoryHelper(req.userData.uid, req.userData.orgId, "Update", req.body.generalInfo.trackingNumber, session);
       } else {
-        await createHistoryHelper(req.userData.uid, req.userData.orgId, "Create", req.body.generalInfo.trackingNumber, session);
+        await HistoryController.createHistoryHelper(req.userData.uid, req.userData.orgId, "Create", req.body.generalInfo.trackingNumber, session);
       }
       console.log(`createTracking: Tracking created/updated successfully: ${createdTracking.trackingNumber}`);
       return res.status(201).json({message: "Tracking created/updated successfully", tracking: createdTracking});
@@ -186,16 +186,6 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
   }
 
   return createdTracking;
-}
-
-
-createHistoryHelper = async (userId, orgId, action, postId, session) => {
-  return await HistoryModel.create([{
-    userId: userId,
-    action: action,
-    postId: postId,
-    organization: orgId
-  }], {session: session});
 }
 
 generalInfoSetupHelper = async req => {
@@ -844,7 +834,7 @@ linkUnlinkTrackingHelper = async (userId, orgId, type, itemsList, toTrackingId, 
   await updateManyGeneralHelper(type, queryParams, setParams, session);
 
   let action = toTrackingId? "Link": "Unlink";
-  await createHistoryHelper(userId, orgId, `${action} -> ${toTrackingId}`, itemsList.toString(), session);
+  await HistoryController.createHistoryHelper(userId, orgId, `${action} -> ${toTrackingId}`, itemsList.toString(), session);
   console.log(`linkUnlinkTracking: User id ${userId} ${action} ${itemsList.toString()} -> ${toTrackingType}: ${toTrackingId} `)
 }
 
@@ -873,7 +863,7 @@ changeTrackingStatusHelper = async (userId, orgId, type, status, itemsList, byId
   }
 
   await updateManyGeneralHelper(type, queryParams, setParams, session);
-  await createHistoryHelper(userId, orgId, `Updated status to ${status}`, itemsList.toString(), session);
+  await HistoryController.createHistoryHelper(userId, orgId, `Updated status to ${status}`, itemsList.toString(), session);
   console.log(`changeTrackingStatusHelper: User id ${userId} updated type: ${type} ${itemsList.toString()} -> ${status}`)
 }
 

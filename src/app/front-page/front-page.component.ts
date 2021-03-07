@@ -42,7 +42,7 @@ export class FrontPageComponent implements OnInit{
     }
   }
 
-  secretCodeSubmitted(secretCode: string) {
-    this.authService.onboardNewOrg(secretCode);
+  onboard(registerCode: string, referralCode: string) {
+    this.authService.onboardNewOrg(registerCode, referralCode);
   }
 }

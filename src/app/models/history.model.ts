@@ -3,9 +3,9 @@ export interface HistoryModel { // From backend
   userId: string;
   action: string;
   postId: string;  // sev-123213 mst123452
+  organization: string;
   createdAt: Date;
   updatedAt: Date;
-  organization: string;
 }
 
 

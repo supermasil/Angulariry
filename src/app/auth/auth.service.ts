@@ -88,7 +88,7 @@ export class AuthService {
       // console.log("User authenticated");
       this.redirecting();
       if (this.loginMode) {
-        this.alertService.success("Welcome back", GlobalConstants.flashMessageOptions);
+        this.alertService.success("Welcome!", GlobalConstants.flashMessageOptions);
         this.loginMode = false;
       }
     });
@@ -158,45 +158,49 @@ export class AuthService {
           }
         });
     } else { // edit case
-      this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
+      this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL + "editUser", formData)
         .subscribe((responseData) => {
           if (andLogin) {
             this.login(formData.email, formData.password);
           } else {
-            this.zone.run(() => {
-              this.router.navigate(["/"]);
-            });
+            this.redirectToMainPageWithoutMessage();
           }
         });
     }
   }
 
-  onboardNewOrg(code: string) {
-    this.httpClient.post<OrganizationModel>(USER_BACKEND_URL + `onboardToOrg/${this.firebaseUser.uid}`, {code: code})
-      .subscribe(org => {
-        this.userOrg = org;
+  onboardNewOrg(registerCode: string, referralCode: string) {
+    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `onboardToOrg/${this.firebaseUser.uid}`, {registerCode: registerCode, referralCode: referralCode})
+      .subscribe(response => {
+        this.userOrg = response.organization;
         sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
         this.userOrgSubject.next(this.userOrg);
         this.zone.run(async () => {
           await this.refreshAuthentication(this.firebaseUser);
           this.router.navigate(["/trackings"]);
-          this.alertService.success(`Onboarded to ${org.name}`, GlobalConstants.flashMessageOptions);
+          this.alertService.success(`Onboarded to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
         });
       });
   }
 
   logInToOrg(orgId: string) {
-    this.httpClient.put<OrganizationModel>(USER_BACKEND_URL + `updateOrg/${this.firebaseUser.uid}`, {orgId: orgId})
-      .subscribe(org => {
-        this.userOrg = org;
+    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `updateOrg/${this.firebaseUser.uid}`, {orgId: orgId})
+      .subscribe(response => {
+        this.userOrg = response.organization;
         sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
         this.userOrgSubject.next(this.userOrg);
         this.zone.run(async () => {
           await this.refreshAuthentication(this.firebaseUser);
-          this.router.navigate(["/trackings"]);
-          this.alertService.success(`Logged in to ${org.name}`, GlobalConstants.flashMessageOptions);
+          if (response.user.active) {
+            this.router.navigate(["/trackings"]);
+          }
+          this.alertService.success(`Logged in to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
         });
       });
+  }
+
+  updateCredit(formData: any) {
+    return this.httpClient.put<{message: string}>(USER_BACKEND_URL + `updateCredit/${formData._id}`, formData);
   }
 
   getUser(id: string | UserModel) {
@@ -295,13 +299,13 @@ export class AuthService {
   redirectToMainPageWithMessage(message: string) {
     this.alertService.error(message, GlobalConstants.flashMessageOptions);
       this.zone.run(() => {
-        this.router.navigate(["/"]);
+        this.router.navigate(["/trackings"]);
       });
   }
 
   redirectToMainPageWithoutMessage() {
     this.zone.run(() => {
-      this.router.navigate(["/"]);
+      this.router.navigate(["/trackings"]);
     });
   }
 

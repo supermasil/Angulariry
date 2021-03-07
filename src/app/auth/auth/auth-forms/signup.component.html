@@ -19,6 +19,7 @@
     >
     <mat-error>Please enter a valid email</mat-error>
   </mat-form-field>
+
   <mat-form-field appearance="outline">
     <mat-label>Password</mat-label>
     <input
@@ -46,6 +47,16 @@
     <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
     </lac-mat-tel-input>
     <mat-error>Invalid phone number</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Role</mat-label>
+    <mat-select matInput formControlName="role">
+      <mat-option *ngFor="let role of roles" [value]="role">
+        {{role}}
+      </mat-option>
+    </mat-select>
+    <mat-error>Please select a role</mat-error>
   </mat-form-field>
 
   <h2>Sender's addresses</h2>

@@ -1,4 +1,5 @@
 import { AddressModel } from "./address.model";
+import { HistoryModel } from "./history.model";
 import { OrganizationModel } from "./organization.model";
 import { RecipientModel } from "./recipient.model";
 
@@ -20,6 +21,7 @@ export interface UserModel { // From backend
   creatorId: string;
   active: boolean;
   credit: number;
+  creditHistory: HistoryModel[];
   createdAt: Date;
   updatedAt: Date;
 }

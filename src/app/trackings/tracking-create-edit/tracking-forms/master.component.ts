@@ -172,7 +172,7 @@ export class MasterFormCreateComponent implements OnInit {
 
   fetchTrackings(origin: string, destination: string) {
     this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, null).subscribe((transformedTrackings) => {
-      this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
+      this.allTrackings.push(...transformedTrackings.trackings.filter(i => i.generalInfo.trackingStatus == TrackingGlobals.trackingStatuses.ReceivedAtOrigin));
       this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, null).subscribe((transformedTrackings) => {
         this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
         this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, origin, destination, null).subscribe((transformedTrackings) => {

@@ -48,5 +48,11 @@
         <edit-user-form></edit-user-form>
       </ng-template>
     </mat-tab>
+
+    <mat-tab *ngIf="enabled[5] && isAuth() && (canView(authGlobals.managerAdmins) || canView([authGlobals.roles.Accounting]))" label="Select User To Edit">
+      <ng-template matTabContent>
+        <adjust-credit-form></adjust-credit-form>
+      </ng-template>
+    </mat-tab>
   </mat-tab-group>
 </div>

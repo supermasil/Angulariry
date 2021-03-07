@@ -14,6 +14,8 @@ import { SignUpFormComponent } from './auth/auth-forms/signup.component';
 import { OnboardingFormComponent } from './auth/auth-forms/onboarding.component';
 import { AutoCompleteInputModule } from '../custom-components/auto-complete-input/auto-complete-input.module';
 import { EditUserFormComponent } from './auth/auth-forms/edit-user.component';
+import { AdjustCreditFormComponent } from './auth/auth-forms/adjust-credit.component';
+import { NgxCurrencyModule } from 'ngx-currency';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,8 @@ import { EditUserFormComponent } from './auth/auth-forms/edit-user.component';
     PasswordResetFormComponent,
     SignUpFormComponent,
     OnboardingFormComponent,
-    EditUserFormComponent
+    EditUserFormComponent,
+    AdjustCreditFormComponent
   ],
   imports: [
     CommonModule,
@@ -33,7 +36,8 @@ import { EditUserFormComponent } from './auth/auth-forms/edit-user.component';
     MatButtonModule,
     LacMatTelInputModule,
     GooglePlaceModule,
-    AutoCompleteInputModule
+    AutoCompleteInputModule,
+    NgxCurrencyModule
   ]
 })
 export class AuthModule {}

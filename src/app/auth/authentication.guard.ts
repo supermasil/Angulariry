@@ -40,11 +40,16 @@ export class AuthGuard implements CanActivate {
       });
       return false;
     } else if (isAuth && !this.authService.getUserOrg() && this.route.url.length > 0) {
-        this.zone.run(() => {
-          this.router.navigate(["/"]);
-          this.alertService.warn("You have not logged into any org", GlobalConstants.flashMessageOptions);
-        });
+      this.zone.run(() => {
+        this.router.navigate(["/"]);
+        this.alertService.warn("You have not logged into any organization", GlobalConstants.flashMessageOptions);
+      });
       return false;
+    } else if (!this.authService.getMongoDbUser().active && this.route.url.length > 0) {
+      this.zone.run(() => {
+        this.router.navigate(["/"]);
+        this.alertService.error("Your account is inactive with this organization", GlobalConstants.flashMessageOptions);
+      });
     }
 
     return true;

@@ -20,16 +20,23 @@
       </div>
       <div class="modal-body">
         <mat-form-field appearance="outline">
-          <mat-label>Secret Code</mat-label>
+          <mat-label>Register Code</mat-label>
           <input
-            #secretCode
+            #registerCode
+            type="text"
+            required
+            matInput>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Referral Code</mat-label>
+          <input
+            #referralCode
             type="text"
             matInput>
         </mat-form-field>
-
       </div>
-      <div class="modal-footer">
-        <button mat-raised-button color='accent' data-dismiss="modal" (click)="secretCodeSubmitted(secretCode.value)">Submit</button>
+      <div class="modal-footer" *ngIf="registerCode.value">
+        <button mat-raised-button color='accent' data-dismiss="modal" (click)="onboard(registerCode.value, referralCode.value)">Submit</button>
       </div>
     </div>
   </div>

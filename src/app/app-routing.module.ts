@@ -27,6 +27,8 @@ const routes: Routes = [
     roles: AuthGlobals.everyone}}, // Lazy loading
   { path: "auth/users/edit", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {
     roles: AuthGlobals.internal}}, // Lazy loading
+  { path: "auth/users/adjustCredit", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {
+    roles: [...AuthGlobals.managerAdmins, AuthGlobals.roles.Accounting]}}, // Lazy loading
   { path: "auth/users/new", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {
     roles: AuthGlobals.internal}}, // Lazy loading
   { path: "auth/orgs/edit/:orgId", loadChildren: () => import("./auth/auth.module").then(module => module.AuthModule), canActivate: [AuthGuard], data: {

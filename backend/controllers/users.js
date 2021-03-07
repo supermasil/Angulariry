@@ -3,7 +3,7 @@ const OrganizationController = require('./organizations');
 const db = require('mongoose');
 const admin = require('firebase-admin');
 let assert = require('assert');
-const user = require('../models/user');
+const HistoryController = require("../controllers/history");
 
 
 // Messy af, can't use await on admin
@@ -18,20 +18,16 @@ exports.createUpdateUser = async (req, res, next) => {
     user.phoneNumber = req.body.phoneNumber;
     user.addresses = addressesSetupHelper(req.body.addresses);
     user.recipients = recipientsSetupHelper(req.body.recipients);
-    if (req.userData) {
-      user.creatorId = req.userData.uid;
-    }
-
-    let userCode = randomString(5);
-    while ((await UserModel.findOne({'userCode': userCode}).then(foundUser => {return foundUser})) != null) {
-      console.log("createUpdateUser: userCode is duplicate")
-      userCode = randomString(5);
-    }
-
-    user.userCode = userCode;
 
     let updatedUser = null;
     if (!req.body._id) {
+      let userCode = randomString(5);
+      while ((await UserModel.findOne({'userCode': userCode}).then(foundUser => {return foundUser})) != null) {
+        console.log(`createUpdateUser: userCode ${userCode} is duplicate`)
+        userCode = randomString(5);
+      }
+      user.userCode = userCode;
+
       await admin
         .auth()
         .createUser({
@@ -77,10 +73,18 @@ exports.createUpdateUser = async (req, res, next) => {
           });
         });
       } else {
-        let userCopy = user.toObject();
-        delete userCopy.organization; delete userCopy.organizations; delete userCopy.pricings;
-        await UserModel.findByIdAndUpdate(req.body._id, {$set: userCopy}, {new: true}).session(session).then(user => {
+        await UserModel.findByIdAndUpdate(req.body._id, {$set: {
+          name: user.name,
+          email: user.email,
+          phoneNumber: user.phoneNumber,
+          addresses: user.addresses,
+          recipients: user.recipients
+        }}, {new: true}).session(session).then(async user => {
           updatedUser = user;
+          if (req.body.role) {
+            updatedUser.organizations.filter(o => o.organization == req.userData.orgId)[0].role = req.body.role;
+            await updatedUser.save();
+          }
         });
         return res.status(201).json({
           message: "User updated successfully",
@@ -173,8 +177,11 @@ exports.getUsers = async (req, res, next) => {
 
     return await userQuery
       .populate("organization")
-      .then(documents => {
-        fetchedUsers = documents
+      .then(async users => {
+        for (u of users) {
+          await switchOverFields(u, u.organizations.filter(o => o.organization == req.userData.orgId)[0], true)
+        }
+        fetchedUsers = users
         return userQuery.countDocuments();
       })
       .then(count => {
@@ -192,19 +199,6 @@ exports.getUsers = async (req, res, next) => {
   };
 }
 
-// exports.getUsersByOrgId = async (req, res, next) => {
-//   try {
-//     await UserModel.find({organization: req.params.id})
-//       .then(users => {
-//         return res.status(200).json(users);
-//       });
-//   } catch (error) {
-//     console.log(`getUserByOrgId: ${req.params.id}: ${error.message}`);
-//     return res.status(404).json({
-//       message: "Couldn't find users"
-//     });
-//   }
-// }
 
 // exports.deleteUser = async (req, res, next) => {
 //   try {
@@ -222,46 +216,54 @@ exports.getUsers = async (req, res, next) => {
 
 
 getUserByIdHelper = async (uid, userId, orgId) => {  // Can't enfore orgId here since user is enquired at authentication
-  let query = uid != userId ? UserModel.findOne({_id: userId, organization: orgId}).populate("organization") : UserModel.findById(userId).populate("organization");
-  return await query.then(foundUser => {
+  let query = uid != userId ? UserModel.findOne({_id: userId, "organizations.organization": orgId}).populate("organization").populate("creditHistory") : UserModel.findById(userId).populate("organization").populate("creditHistory");
+  return await query.then(async foundUser => {
+    if (orgId) {
+      let foundOrg = foundUser.organizations.filter(o => o.organization == orgId)[0];
+      await switchOverFields(foundUser, foundOrg, true);
+    }
     return foundUser;
   });
 }
 
 exports.getUserByIdHelper = getUserByIdHelper;
 
-getUserByUserCodeHelper = async (userCode, orgId) => {  // Can't enfore orgId here since user is enquired at authentication
-let query =  UserModel.findOne({userCode: userCode, organization: orgId}).populate("organization");
-  return await query.then(foundUser => {
+getUserByUserCodeHelper = async (userCode, orgId) => {
+  let query = UserModel.findOne({userCode: userCode, "organizations.organization" : orgId}).populate("organization");
+  return await query.then(async foundUser => {
+    await switchOverFields(foundUser, foundUser.organizations.filter(o => o.organization == orgId)[0], true);
     return foundUser;
   });
+}
+
+switchOverFields = async (user, fields, populate) => {
+  user.organization = populate ? (await OrganizationController.getOrganizationByIdHelper(fields.organization)) : fields.organization;
+  user.role = fields.role;
+  user.creatorId = fields.creatorId;
+  user.credit = fields.credit;
+  user.active = fields.active;
 }
 
 exports.getUserByUserCodeHelper = getUserByUserCodeHelper;
-
-exports.updateUserRole = async (req, res, next) => {
-  return await UserModel.findByIdAndUpdate(req.params.id, {$set: {'role': req.body.role}}).then(foundUser => {
-    return foundUser;
-  });
-}
 
 exports.updateUserCurrentOrg = async (req, res, next) => {
   try {
     await UserModel.findById(req.params.id).then(async foundUser => {
       assert(foundUser.organizations.map(o => o.organization).includes(req.body.orgId), "You're not onboarded to this org");
-      let foundOrg = foundUser.organizations.filter(o => o.organization == req.body.orgId)[0];
-      let org = await OrganizationController.getOrganizationByIdHelper(req.body.orgId);
-      assert(org != null, "updateUserCurrentOrg: Org is null");
-      foundUser.organization = org._id
-      foundUser.pricings = org.pricings;
-      foundUser.role = foundOrg.role;
-      foundUser.creatorId = foundOrg.creatorId;
-      foundUser.active = foundOrg.active;
+      let org = foundUser.organizations.filter(o => o.organization == req.body.orgId)[0];
+      let foundOrg = await OrganizationController.getOrganizationByIdHelper(req.body.orgId);
+      assert(foundOrg != null, "updateUserCurrentOrg: Org is null");
+      foundUser.pricings = foundOrg.pricings;
+      await switchOverFields(foundUser, org, false);
       await foundUser.save();
-      return res.status(200).json(org)
+      console.log(`updateUserCurrentOrg: Logged user ${req.userData.uid} to org ${foundUser.name}`);
+      return res.status(200).json({
+        organization: foundOrg,
+        user: foundUser
+      })
     })
   } catch (error) {
-    console.log(`updateUserCurrentOrg: ${error.message} for code ${req.body.code} and user id ${req.params.id}`)
+    console.log(`updateUserCurrentOrg: ${error.message} for org ${req.body.orgId} and user id ${req.params.id}`)
     return res.status(500).json({
       message: "Logged in to org failed"
     })
@@ -269,34 +271,69 @@ exports.updateUserCurrentOrg = async (req, res, next) => {
 }
 
 exports.updateUserCredit = async (req, res, next) => {
-  return await UserModel.findByIdAndUpdate(req.params.id, {$set: {'credit': req.body.credit}}).then(foundUser => {
-    return foundUser;
-  });
+  try {
+    const session = await db.startSession();
+    await session.withTransaction(async () => {
+      let currentUser = await UserModel.findById(req.userData.uid).then(foundUser => {return foundUser});
+      await UserModel.findById(req.params.id).then(async foundUser => {
+        console.log(req.body.content);
+        let history = (await HistoryController.createHistoryHelper(req.userData.uid, req.userData.orgId, `${currentUser.name} updated ${foundUser.name}'s credit to $${req.body.amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} with note: \"${req.body.content}\"`, req.params.id, session));
+        foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].credit = req.body.amount;
+        foundUser.creditHistory.unshift(history._id);
+        await UserModel.findByIdAndUpdate(req.params.id, foundUser).session(session).then();
+        console.log(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.uid}`)
+      });
+
+      return res.status(200).json({
+        message: "Updated credit successfully"
+      })
+    });
+  } catch (error) {
+    console.log(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.uid}`, error.message)
+    return res.status(500).json({
+      message: "Credit update failed"
+    })
+  }
+
 }
 
 exports.onBoardUserToOrg = async (req, res, next) => {
-  let errorMessage = "Onboard user to new org failed, check your secret code";
+  let errorMessage = "Onboard user to new org failed";
   try {
     await UserModel.findById(req.params.id).then(async foundUser => {
-      let org = await OrganizationController.getOrganizationByRegisterCodeHelper(req.body.code);
-      let user = await getUserByUserCodeHelper(req.body.referral);
+      let org = await OrganizationController.getOrganizationByRegisterCodeHelper(req.body.registerCode);
       assert(org != null, "onBoardUserToOrg: Org is null");
+      let referrer = null;
+      if (req.body.referralCode) {
+        referrer = await getUserByUserCodeHelper(req.body.referralCode, org._id);
+        if (referrer == null) {
+          errorMessage = "Couldn't find referrer";
+          throw new Error("onBoardUserToOrg: " + errorMessage);
+        }
+        assert(referrer.userCode != req.userData.uid, "onBoardUserToOrg: Referrer can't be the same as user");
+      }
+
       foundUser.organization = org._id;
       if (foundUser.organizations.map(o => o.organization).includes(org._id)) {
         errorMessage = "Already onboarded to this org";
-        throw new Error(errorMessage);
+        throw new Error("onBoardUserToOrg: " + errorMessage);
       }
-      foundUser.organizations.push({organization: org._id, role: "Customer", credit: 0, creatorId: user? user._id : null});
+
+      foundUser.organizations.push({organization: org._id, role: "Customer", credit: 0, creatorId: referrer? referrer._id : null, active: true});
       foundUser.organization = org._id
       foundUser.pricings = org.pricings;
       foundUser.role = "Customer"
-      foundUser.creatorId = user? user._id : null;
+      foundUser.creatorId = referrer? referrer._id : null;
       foundUser.active = true;
       await foundUser.save();
-      return res.status(200).json(org)
+      console.log(`onBoardUserToOrg: Onboarded user ${req.userData.uid} to org ${org.name} referred by ${foundUser.creatorId}`);
+      return res.status(200).json({
+        organization: org,
+        user: foundUser
+      })
     });
   } catch (error) {
-    console.log(`onBoardUserToOrg: ${error.message} for code ${req.body.code} and user id ${req.params.id}`)
+    console.log(`onBoardUserToOrg: ${error.message} for register code ${req.body.registerCode} and referral code ${req.body.referralCode} and user id ${req.params.id}`)
     return res.status(500).json({
       message: errorMessage
     })

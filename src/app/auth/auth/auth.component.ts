@@ -20,7 +20,7 @@ export class AuthComponent implements OnInit {
   selectedTabIndex = 0;
 
   authGlobals = AuthGlobals;
-  enabled = [true, true, true, true, true];
+  enabled = [true, true, true, true, true, true];
 
   ngOnInit() {
     if (this.router.url != "/auth") {
@@ -35,6 +35,8 @@ export class AuthComponent implements OnInit {
           this.selectedTabIndex = 1;
         } else if (this.router.url === ("/auth/users/edit")) {
           this.selectedTabIndex = 4;
+        } else if (this.router.url === ("/auth/users/adjustCredit")) {
+          this.selectedTabIndex = 5;
         } else {
           return this.authService.redirect404();
         }

@@ -42,10 +42,15 @@ export class EditUserFormComponent implements OnInit{
 
   filterUsers() {
     if (this.currentUser.role === AuthGlobals.roles.Admin) {
-      this.users = this.users.filter(u => AuthGlobals.internalNonAdmin.includes(u.role));
+      this.users = this.users.filter(u => AuthGlobals.nonAdmin.includes(u.role));
     } else if (this.currentUser.role === AuthGlobals.roles.SuperAdmin) {
-      this.users = this.users.filter(u => u.role != AuthGlobals.roles.SuperAdmin);
+      this.users = this.users.filter(u => AuthGlobals.nonSuperAdmin.includes(u.role));
+    } else if (AuthGlobals.internal.includes(this.currentUser.role)) {
+      this.users = this.users.filter(u => u.role == AuthGlobals.roles.Customer);
+    } else {
+      this.users = [];
     }
+
     this.usersSubject.next(this.users.map(u => `${u.name} | ${u.userCode} | ${u.role} | ${u.email} | ${u.addresses[0].address}${u.addresses[0].addressLineTwo? " " + u.addresses[0].addressLineTwo: ""}`));
   }
 
