@@ -4,6 +4,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { AuthService } from './auth.service';
 import { AlertService } from '../custom-components/alert-message';
 import { GlobalConstants } from '../global-constants';
+import { AuthGlobals } from './auth-globals';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -39,7 +40,7 @@ export class AuthGuard implements CanActivate {
         this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
       });
       return false;
-    } else if (isAuth && !this.authService.getUserOrg() && this.route.url.length > 0) {
+    } else if (isAuth && !this.authService.getUserOrg() && this.authService.getMongoDbUser().role != AuthGlobals.roles.SuperAdmin && this.route.url.length > 0) {
       this.zone.run(() => {
         this.router.navigate(["/"]);
         this.alertService.warn("You have not logged into any organization", GlobalConstants.flashMessageOptions);
