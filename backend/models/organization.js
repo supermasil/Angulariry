@@ -8,7 +8,8 @@ const locationSchema = mongoose.Schema({
   faxNumber: { type: String, default: ""},
   address: AddressSchema,
   operatingHours: {type: [String], required: true}, //hh:mm:ss - hh:mm:ss
-  operatingDays: {type: [String], required: true} // Mon, Tues ....
+  operatingDays: {type: [String], required: true}, // Mon, Tues ....
+  active: {type: Boolean, default: true}
 }, {_id: false});
 
 const organizationSchema = mongoose.Schema({

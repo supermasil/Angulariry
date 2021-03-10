@@ -9,7 +9,7 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     const authToken = this.authService.getToken();
     const headers = new HttpHeaders({
-      "Authorization": `Bearer ${authToken} ${this.authService.getUserOrg()?._id}`
+      "Authorization": `Bearer ${authToken} ${this.authService.getUserOrg()?._id} ${this.authService.getMongoDbUser()?._id}`
     });
     const authRequest = req.clone({headers});
 

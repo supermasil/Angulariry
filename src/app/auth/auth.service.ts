@@ -33,28 +33,28 @@ export class AuthService {
     private alertService: AlertService,
     private zone: NgZone) {
     this.firebaseAuth.onAuthStateChanged(async firebaseUser => {
+      this.firebaseUser = firebaseUser;
       await this.refreshAuthentication(firebaseUser);
     });
   }
 
   async refreshAuthentication(firebaseUser: firebase.User) {
     if (firebaseUser) {
-      this.firebaseUser = firebaseUser;
       await this.setupSessionUToken(firebaseUser); // Has to await here. SET THIS UP RIGHT AWAY to be authenticated in the back end
       this.getUser(firebaseUser.uid).subscribe(async (user: UserModel) => {
         this.mongoDbUser = user;
-        if (firebaseUser.uid === user._id) {
+        if (firebaseUser.uid === user.id) {
           this.userOrg = user.organization;
           return await this.authenticate();
         } else {
           console.log("Firebase and db users aren't the same")
           this.unAuthenticate();
-          this.logout();
+          // this.logout();
         }
       }, error => {
         console.log(error);
         this.unAuthenticate();
-        this.logout();
+        // this.logout();
       });
     } else {
       this.unAuthenticate();
@@ -146,19 +146,19 @@ export class AuthService {
   }
 
   async createUpdateUser(formData: any, andLogin: boolean) {
-    if (!formData._id) { // create case
-      this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData)
-        .subscribe((responseData) => {
-          if (andLogin) {
-            this.login(formData.email, formData.password);
-          } else {
-            this.zone.run(() => {
-              this.router.navigate(["/"]);
-            });
-          }
-        });
+    if (!formData.id) { // create case
+      let request = this.getIsAuth() ? this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL + "internal", formData) : this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData);
+      request.subscribe((responseData) => {
+        if (andLogin) {
+          this.login(formData.email, formData.password);
+        } else {
+          this.zone.run(() => {
+            this.router.navigate(["/"]);
+          });
+        }
+      });
     } else { // edit case
-      this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL + "editUser", formData)
+      this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL + "internal", formData)
         .subscribe((responseData) => {
           if (andLogin) {
             this.login(formData.email, formData.password);
@@ -169,8 +169,8 @@ export class AuthService {
     }
   }
 
-  onboardNewOrg(registerCode: string, referralCode: string) {
-    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `onboardToOrg/${this.firebaseUser.uid}`, {registerCode: registerCode, referralCode: referralCode})
+  onboardToNewOrg(registerCode: string, referralCode: string) {
+    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `onboardToOrg/${this.mongoDbUser._id}`, {registerCode: registerCode, referralCode: referralCode})
       .subscribe(response => {
         this.userOrg = response.organization;
         sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
@@ -184,7 +184,7 @@ export class AuthService {
   }
 
   logInToOrg(orgId: string) {
-    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `updateOrg/${this.firebaseUser.uid}`, {orgId: orgId})
+    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `updateOrg/${this.mongoDbUser._id}`, {orgId: orgId})
       .subscribe(response => {
         this.userOrg = response.organization;
         sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
@@ -250,7 +250,7 @@ export class AuthService {
   }
 
   async setupSessionBackEndInfo() {
-    sessionStorage.setItem("uid", this.firebaseUser.uid);
+    sessionStorage.setItem("u_id", this.mongoDbUser._id);
     sessionStorage.setItem("isAuthenticated", "true");
     sessionStorage.setItem("mongoDBUser", JSON.stringify(this.mongoDbUser));
     sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
@@ -289,7 +289,7 @@ export class AuthService {
   }
 
   getUserId(){
-    return sessionStorage.getItem("uid");
+    return sessionStorage.getItem("u_id");
   }
 
   getToken() {

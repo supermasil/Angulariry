@@ -54,6 +54,7 @@ export class MasterFormCreateComponent implements OnInit {
   filteredTrackings: Observable<OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonSubTrackingModel[]> = new Observable();;
   allTrackings = [];
   trackingsReference = [];
+  generalInfoDisabledFields = [true, true, true, false, false, false, false];
 
   trackingCtrl = new FormControl();
   @ViewChild('auto') matAutocomplete: MatAutocomplete;
@@ -126,6 +127,9 @@ export class MasterFormCreateComponent implements OnInit {
   }
 
   emitChanges() {
+    if (this.currentTracking.boxes.length > 0) {
+      this.generalInfoDisabledFields = [true, true, true, true, true, true, true];
+    }
     this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);

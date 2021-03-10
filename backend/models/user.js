@@ -4,7 +4,7 @@ const AddressSchema = require('./address');
 const RecipientSchema = require('./recipient');
 
 const userSchema = mongoose.Schema({
-  _id: {type: String, required: true },
+  id: {type: String, required: true, index: true}, // Firebase id
   name: {type: String, required: true },
   email: { type: String, required: true, unique: true, index: true }, // unique doesn't not throw error if not unique
   phoneNumber: { type: String, required: true},
@@ -25,7 +25,7 @@ const userSchema = mongoose.Schema({
   active: {type: Boolean, required: true, default: true},
   credit: {type: Number, required: true, default: 0},
   creditHistory: [{type: mongoose.Types.ObjectId, ref: "history"}]
-}, { timestamps: true, autoCreate: true });
+}, { timestamps: true, autoCreate: true});
 
 userSchema.plugin(uniqueValidator); // Throw error if not unique
 

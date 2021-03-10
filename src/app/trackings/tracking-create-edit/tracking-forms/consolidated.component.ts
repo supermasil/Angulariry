@@ -85,6 +85,8 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   currentTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel)[] = []; // edit case
   currentTrackingsReference: (OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel)[] = []; // edit case
 
+  generalInfoDisabledFields = [true, true, true, false, false, false, false];
+
   constructor(
     private zone: NgZone,
     private authService: AuthService,
@@ -116,8 +118,8 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
                   this.currentTracking = response;
                   this.mode = "edit"
                   this.consolidatedForm = this.createConcolidatedForm(response);
+                  this.setUpDataSource(); // Has to be before emit changes so that we can disable generalInfo fields
                   this.emitChanges();
-                  this.setUpDataSource();
                 }, error => {
                   this.authService.redirect404();
                 });
@@ -147,6 +149,10 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   emitChanges() {
+    if (this.currentTrackings.length > 0) {
+      console.log("here")
+      this.generalInfoDisabledFields = [true, true, true, true, false, true, true];
+    }
     this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
@@ -201,7 +207,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   setUpDataSource() {
     this.currentTrackings = [...this.currentTracking.onlineTrackings, ...this.currentTracking.servicedTrackings, ...this.currentTracking.inPersonSubTrackings];
     this.currentTrackingsReference = [...this.currentTrackings];
-    // this.combineData();
+    this.combineData();
   }
 
   generalInfoValidity(valid: boolean) {
@@ -218,18 +224,18 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   }
 
   generalInfoUpdated(changes: { sender: string, origin: string, destination: string}) {
-    this.resetSelectedData();
+    // this.resetSelectedData();
     this.fetchTrackings(changes.origin, changes.destination, changes.sender);
   }
 
-  resetSelectedData() {
-    this.tempDataSource = new MatTableDataSource([]);
-    this.finalizingDataSource = new MatTableDataSource([]);
-    this.selectedOnlineTrackings = [];
-    this.selectedServicedTrackings = [];
-    this.selectedInPersonSubTrackings = [];
-    this.combineData();
-  }
+  // resetSelectedData() {
+  //   this.tempDataSource = new MatTableDataSource([]);
+  //   this.finalizingDataSource = new MatTableDataSource([]);
+  //   this.selectedOnlineTrackings = [];
+  //   this.selectedServicedTrackings = [];
+  //   this.selectedInPersonSubTrackings = [];
+  //   this.combineData();
+  // }
 
   getTotalWeight() {
     let totalWeight = 0;
@@ -295,12 +301,8 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
       return;
     }
 
-    let sender = this.users.filter(u => u._id == this.generalInfo.getRawValues().sender)[0];
-    let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
-
     let formData = this.consolidatedForm.getRawValue();
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
-    formData['generalInfo']['recipient'] = recipient;
 
     if (this.mode === "edit") {
       formData['filesToAdd'] = JSON.stringify(this.fileUploader.getFilesToAdd());

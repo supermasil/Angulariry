@@ -9,6 +9,7 @@
       (formValidityStatus)="generalInfoValidity($event)"
       (generalInfoUpdated)="generalInfoUpdated($event)"
       [generalInfoObservable]="generalInfoSubject.asObservable()"
+      [disabledFields]="generalInfoDisabledFields"
       [disableSender]="true"
       [disableRecipient]="true">
     </general-info>

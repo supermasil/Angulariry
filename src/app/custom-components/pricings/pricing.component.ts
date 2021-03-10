@@ -85,7 +85,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
         this.defaultLocations.next(org.locations.map(item => item.name));
         this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
           this.users = response.users.filter(u => u.role === AuthGlobals.roles.Customer);
-          this.userCodes.next(this.users.map(user => user.userCode));
+          this.userCodes.next(this.users.map(user => `${user.userCode} | ${user.name} | ${user.email}`));
           this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
             this.orgDefaultPricing = pricing;
             this.itemNames.next(pricing.items.map(i => i.name));
@@ -131,7 +131,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
   userSelected(user: string) {
     this.isLoading = true;
     this.pricingForm = null;
-    this.selectedUser = this.users.filter(u => u.userCode == user)[0];
+    this.selectedUser = this.users.filter(u => u.userCode == user.split(" ")[0])[0];
     this.pricingForm = this.createPricingForm(this.orgDefaultPricing);
     this.updateData(this.orgDefaultPricing.items);
     this.isLoading = false;
@@ -284,10 +284,10 @@ export class PricingComponent implements OnInit, AfterViewChecked {
       })
     }
 
-    if (this.selectedUser && destination?.discounts?.filter(discount => discount.userId == this.selectedUser._id).length == 0) {
+    if (this.selectedUser && destination?.discounts?.filter(discount => discount.userId == this.selectedUser.id).length == 0) {
       createdDiscounts.push(
         this.createDiscount({
-          userId: this.selectedUser._id,
+          userId: this.selectedUser.id,
           perUnitDiscountUnit: '%',
           perUnitDiscountAmount: 0,
           extraChargeDiscountUnit: '%',
@@ -419,7 +419,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
       let result =  this.pricingForm.getRawValue().items.filter(item => item._id == itemId)[0]
         .routes.filter(route => route._id == routeId)[0]
         .destinations.filter(destination => destination._id == destinationId)[0]
-        .discounts.filter(discount => discount.userId == this.selectedUser._id)[0]
+        .discounts.filter(discount => discount.userId == this.selectedUser.id)[0]
       return result? result: {perUnitDiscountAmount: 0, extraChargeDiscountAmount: 0};
     } catch (error) {
       console.log(error);
@@ -432,7 +432,7 @@ export class PricingComponent implements OnInit, AfterViewChecked {
       let itemIndex = this.pricingForm.getRawValue().items.findIndex(item => item._id == itemId);
       let routeIndex = this.pricingForm.getRawValue().items[itemIndex].routes.findIndex(route => route._id == routeId);
       let destinationIndex = this.pricingForm.getRawValue().items[itemIndex].routes[routeIndex].destinations.findIndex(destination => destination._id == destinationId);
-      let discountIndex = this.pricingForm.getRawValue().items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts.findIndex(discount => discount.userId == this.selectedUser._id);
+      let discountIndex = this.pricingForm.getRawValue().items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts.findIndex(discount => discount.userId == this.selectedUser.id);
       if (perUnitDiscountUnit) {
         this.pricingForm.get('items')['controls'][itemIndex].get('routes')['controls'][routeIndex].get('destinations')['controls'][destinationIndex].get('discounts')['controls'][discountIndex].get('perUnitDiscountUnit').setValue(perUnitDiscountUnit);
       } else if (perUnitDiscountAmount) {

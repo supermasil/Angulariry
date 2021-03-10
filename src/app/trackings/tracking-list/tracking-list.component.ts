@@ -85,7 +85,7 @@ export class TrackingListComponent {
     this.searchMode = false;
     let sender = null
     if (this.currentUser.role === AuthGlobals.roles.Customer) {
-      sender = this.currentUser._id;
+      sender = this.currentUser.id;
     }
     this.trackingService.getTrackings(trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
       this.trackingsSubject.next(transformedTrackings);

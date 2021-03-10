@@ -5,14 +5,21 @@ let assert = require('assert');
 
 exports.createUpdateOrganization = async (req, res, next) => {
   try {
+    let updatedOrg = null;
     const session = await db.startSession();
     await session.withTransaction(async () => {
       let org = null;
 
-      if (req.body._id && req.userData.uid) { // edit
+      if (req.body._id && req.userData.u_id) { // edit
         org = await this.getOrganizationByIdHelper(req.body._id);
       } else { // create
         org = new OrganizationModel();
+        const pricing = await PricingModel.create([{
+          organization: org._id,
+          items: []
+        }], {session: session}).then(response => response[0]);
+
+        org.pricings = pricing._id;
       }
 
       org.email = req.body.email;
@@ -28,20 +35,19 @@ exports.createUpdateOrganization = async (req, res, next) => {
 
       org.registerCode = registerCode;
 
-      const pricing = await PricingModel.create([{
-        organization: org._id,
-        items: []
-      }], {session: session}).then(response => response[0]);
-
-      org.pricings = pricing._id;
-
-      await org.validate();
-
-      await OrganizationModel.create([org], {session: session}).then(response => {
-        return res.status(201).json({
-          message: "Organization created/updated successfully",
-          organization: response[0]
+      if (req.body._id && req.userData.u_id) {
+        updatedOrg = await OrganizationModel.findByIdAndUpdate(org._id, org, {new: true}).session(session).then(response => {
+          return response;
         });
+      } else {
+        updatedOrg = await OrganizationModel.create([org], {session: session}).then(response => {
+          return response[0];
+        });
+      }
+
+      return res.status(201).json({
+        message: "Organization created/updated successfully",
+        organization: updatedOrg
       });
     });
   } catch(error) {

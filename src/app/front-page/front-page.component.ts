@@ -43,6 +43,6 @@ export class FrontPageComponent implements OnInit{
   }
 
   onboard(registerCode: string, referralCode: string) {
-    this.authService.onboardNewOrg(registerCode, referralCode);
+    this.authService.onboardToNewOrg(registerCode, referralCode);
   }
 }

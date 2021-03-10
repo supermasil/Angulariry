@@ -1,6 +1,7 @@
 <form [formGroup]="searchForm">
   <div class="d-flex" (submit)="onSearch()">
     <a
+      *ngIf="!isCustomer()"
       mat-mini-fab
       color='primary'
       class="mt-2 d-inline mr-2"

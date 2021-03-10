@@ -5,7 +5,7 @@ const checkAuth = require("../middleware/check-auth");
 
 router.post('/', UserController.createUpdateUser);
 
-router.post('/editUser', checkAuth.isAuthenticated, UserController.createUpdateUser);
+router.post('/internal', checkAuth.isAuthenticated, UserController.createUpdateUser);
 
 // router.get('/byOrg/:id', checkAuth.isAuthenticated, UserController.getUsersByOrgId) // Get one
 

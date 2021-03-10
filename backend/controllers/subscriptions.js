@@ -31,7 +31,7 @@
 
 //   await session.withTransaction(async () => {
 //     const foundUser = await updateUserHelper(req, subType, session);
-//     await updatePostHelper(req, foundUser._id, subType, session);
+//     await updatePostHelper(req, foundUser.id, subType, session);
 
 //     let message = subType === OPERATIONS.SUBSCRIBE ? globals.subscribePostSuccessMessage : globals.unSubscribePostSuccessMessage;
 //     return res.status(200).json({subscribedPosts: foundUser.subscribedPosts, message: message});

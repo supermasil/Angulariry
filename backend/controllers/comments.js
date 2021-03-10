@@ -17,9 +17,9 @@ const TrackingTypes = Object.freeze({
 
 exports.createComment = async (req, res, next) => {
   try {
-    let user = await UserController.getUserByIdHelper(req.userData.uid, req.userData.uid, req.userData.orgId);
+    let user = await UserController.getUserByIdHelper(req.userData, req.userData.u_id);
     const comment = new CommentModel ({
-      creatorId: req.userData.uid,
+      creatorId: req.userData.u_id,
       trackingId: req.body.trackingId,
       creatorName: user.name,
       filePaths: req.body.imagePaths,

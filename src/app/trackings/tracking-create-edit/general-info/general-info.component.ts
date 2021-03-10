@@ -26,6 +26,7 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   @Input() defaultLocationsObservable = new Observable<string[]>();
   @Input() trackingNumberObservable = new Observable<string>();
   @Input() generalInfoObservable = new Observable<GeneralInfoModel>();
+  @Input() disabledFields = [true, true, true, false, false, false, false]; // True is disabled
   @Input() disableSender = false;
   @Input() disableRecipient = false;
   generalInfo : GeneralInfoModel;
@@ -54,8 +55,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
     this.generalInfoForm = this.createGeneralInfoForm();
 
     this.generalInfoForm.valueChanges.subscribe(result => {
-      this.formValidityStatus.emit(this.generalInfoForm.valid);
-      if (this.generalInfoForm.valid) {
+      this.formValidityStatus.emit(!this.generalInfoForm.invalid); // Has to use invalid for the master edit case in which the whole form is disabled
+      if (!this.generalInfoForm.invalid) {
         this.emitGeneralInfoChanges();
       }
     });
@@ -91,27 +92,25 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   createGeneralInfoForm() {
     let form = new FormGroup({
-      trackingNumber: new FormControl({value: "", disabled: true}, {validators: [Validators.required]}), // Set through subscription
-      // status: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: !AuthGlobals.managerAdmins.includes(this.currentUser.role)}, {validators: [Validators.required]}),
-      trackingStatus: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: true}, {validators: [Validators.required]}),
-      financialStatus: new FormControl({value: TrackingGlobals.financialStatuses.Unpaid, disabled: true}, {validators: [Validators.required]}),
-      origin: new FormControl("", {validators: [Validators.required]}),
-      destination: new FormControl("", {validators: [Validators.required]}),
+      trackingNumber: new FormControl({value: "", disabled: this.disabledFields[0]}, {validators: [Validators.required]}), // Set through subscription
+      trackingStatus: new FormControl({value: TrackingGlobals.trackingStatuses.Created, disabled: this.disabledFields[1]}, {validators: [Validators.required]}),
+      financialStatus: new FormControl({value: TrackingGlobals.financialStatuses.Unpaid, disabled: this.disabledFields[2]}, {validators: [Validators.required]}),
+      origin: new FormControl({value: "", disabled: this.disabledFields[5]}, {validators: [Validators.required]}),
+      destination: new FormControl({value: "", disabled: this.disabledFields[6]}, {validators: [Validators.required]}),
     });
 
+    // Need to create this way so that Master general info validity can be emitted properly
     if (!this.disableSender) {
-      form.addControl('sender', new FormControl("", {validators: [Validators.required]}));
+      form.addControl('sender', new FormControl({value: "", disabled: this.disabledFields[3]}, {validators: [Validators.required]}));
     }
-
     if (!this.disableRecipient) {
-      form.addControl('recipient', new FormControl("", {validators: [Validators.required]}));
+      form.addControl('recipient', new FormControl({value: "", disabled: this.disabledFields[4]}, {validators: [Validators.required]}));
     }
 
     return form;
   }
 
   patchFormValue(formData: GeneralInfoModel) {
-    console.log(formData.trackingStatus)
     this.zone.run(() => {
       this.generalInfoForm.patchValue({
         trackingStatus: formData.trackingStatus? formData.trackingStatus : this.generalInfoForm.get('trackingStatus').value,
@@ -148,16 +147,18 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   recipientSelected(value: string) {
     let splitValue = value.split(' ')[0];
-    this.generalInfoForm.get('recipient').setValue(splitValue);
+    this.generalInfoForm.get('recipient').setValue(this.selectedSender.recipients.filter(r => r.name == splitValue)[0]);
   }
 
   getFormValidity() {
     this.generalInfoForm.markAllAsTouched();
-    if (!this.disableRecipient) {
-      this.recipient.getFormValidity();
-    }
+
     if (!this.disableSender) {
       this.sender.getFormValidity();
+    }
+
+    if (!this.disableRecipient) {
+      this.recipient.getFormValidity();
     }
 
     return this.generalInfoForm.valid;

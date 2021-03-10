@@ -61,6 +61,8 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   scannerOpened = false;
   showFinalizedInfo = false;
 
+  generalInfoDisabledFields = [true, true, true, false, false, false, false];
+
   trackingGlobals = TrackingGlobals;
   authGlobals = AuthGlobals;
 
@@ -78,7 +80,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
 
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
-      this.selectedUserIdSubject.next(user._id);
+      this.selectedUserIdSubject.next(user.id);
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
@@ -119,6 +121,9 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   }
 
   emitChanges() {
+    if (this.currentTracking.linkedToCsl || this.currentTracking.linkedToCsl) {
+      this.generalInfoDisabledFields = [true, true, true, true, false, true, true];
+    }
     this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingItemsSubject.next(this.currentTracking.itemsList);
@@ -189,12 +194,8 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
       return;
     }
 
-    let sender = this.users.filter(u => u._id == this.generalInfo.getRawValues().sender)[0];
-    let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
-
     let formData = this.onlineForm.getRawValue();
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
-    formData['generalInfo']['recipient'] = recipient;
     formData['itemsList'] = this.itemsList?.getRawValues()?.items ? this.itemsList.getRawValues().items : [];
     formData['finalizedInfo'] = this.finalizedInfo?.getRawValues() ? this.finalizedInfo.getRawValues() : [];
     if (this.mode === "edit") {

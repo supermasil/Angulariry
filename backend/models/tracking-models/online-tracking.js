@@ -16,4 +16,5 @@ const onlineTrackingSchema = mongoose.Schema({
 }, {timestamps: true, autoCreate: true });
 
 onlineTrackingSchema.plugin(uniqueValidator); // Throw error if not unique
+
 module.exports = mongoose.model('online-tracking', onlineTrackingSchema);

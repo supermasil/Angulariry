@@ -57,7 +57,7 @@ export class EditUserFormComponent implements OnInit{
   userSelected(value: string) {
     let user: UserModel = this.users.filter(u => u.userCode === value.split(" | ")[1])[0];
     this.zone.run(() => {
-      this.router.navigate([`/auth/users/edit/${user._id}`]);
+      this.router.navigate([`/auth/users/edit/${user.id}`]);
     })
   }
 }

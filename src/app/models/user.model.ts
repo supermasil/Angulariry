@@ -5,6 +5,7 @@ import { RecipientModel } from "./recipient.model";
 
 export interface UserModel { // From backend
   _id: string;
+  id: string; // Firebase uuid
   name: string;
   email: string; // unique doesn't not throw error if not unique
   phoneNumber: string;

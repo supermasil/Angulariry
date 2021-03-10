@@ -71,13 +71,11 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   totalSaving = 0;
   totalFinalCost = 0;
   totalFinalCostVND = 0;
-
   currentTracking: InPersonTrackingModel; // edit case
   mode = "create";
-
   trackingNumber = "";
-
   removedTrackingIds = [];
+  generalInfoDisabledFields = [true, true, true, false, false, false, false];
 
   constructor(
     private trackingService: TrackingService,
@@ -94,7 +92,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     this.trackingNumberSubject.next(this.trackingNumber);
     this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
       this.currentUser = user;
-      this.selectedUserIdSubject.next(user._id);
+      this.selectedUserIdSubject.next(user.id);
       this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
         this.organization = org;
         this.defaultLocationsSubject.next(org.locations.map(item => item.name));
@@ -138,6 +136,9 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   }
 
   emitChanges() {
+    if (this.currentTracking.subTrackings.some(t => t.linkedToCsl != null || t.linkedToMst != null)) {
+      this.generalInfoDisabledFields = [true, true, true, true, false, true, true];
+    }
     this.trackingNumber = this.currentTracking.trackingNumber;
     this.trackingNumberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
@@ -309,12 +310,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
       return;
     }
 
-    let sender = this.users.filter(u => u._id == this.generalInfo.getRawValues().sender)[0];
-    let recipient = sender.recipients.filter(r => r.name == this.generalInfo.getRawValues().recipient)[0];
-
     let formData = this.inPersonForm.getRawValue();
     formData['generalInfo'] = this.generalInfo.getRawValues(); // Must be present
-    formData['generalInfo']['recipient'] = recipient;
     formData['subTrackings'] = subTrackings;
     formData['removedTrackingIds'] = this.removedTrackingIds;
 

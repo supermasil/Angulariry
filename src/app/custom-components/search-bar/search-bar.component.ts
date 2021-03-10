@@ -1,5 +1,7 @@
 import { Component, EventEmitter, NgZone, OnInit, Output } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
+import { AuthGlobals } from "src/app/auth/auth-globals";
+import { AuthService } from "src/app/auth/auth.service";
 import { CodeScannerService } from "../code-scanner/code-scanner.service";
 
 
@@ -16,7 +18,8 @@ export class SearchBarComponent implements OnInit {
 
   constructor(
     private zone: NgZone,
-    private codeScannerService: CodeScannerService) {}
+    private codeScannerService: CodeScannerService,
+    private authService: AuthService) {}
 
   ngOnInit() {
     this.searchForm = new FormGroup({
@@ -45,5 +48,9 @@ export class SearchBarComponent implements OnInit {
     this.zone.run(() => {
       this.scannerOpened = !this.scannerOpened;
     })
+  }
+
+  isCustomer() {
+    return this.authService.getMongoDbUser().role === AuthGlobals.roles.Customer;
   }
 }

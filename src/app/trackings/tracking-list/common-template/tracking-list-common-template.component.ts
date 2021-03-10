@@ -125,7 +125,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   canEdit(roles: string[], creatorId: string) {
-    return roles?.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser._id
+    return roles?.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser.id
   }
 
   isAuth() {

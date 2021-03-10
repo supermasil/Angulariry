@@ -8,7 +8,8 @@
       [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
       (formValidityStatus)="generalInfoValidity($event)"
       (generalInfoUpdated)="generalInfoUpdated($event)"
-      [generalInfoObservable]="generalInfoSubject.asObservable()">
+      [generalInfoObservable]="generalInfoSubject.asObservable()"
+      [disabledFields]="generalInfoDisabledFields">
     </general-info>
 
     <div *ngIf="showTable">

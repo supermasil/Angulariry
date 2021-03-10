@@ -45,7 +45,7 @@
           (itemCancelled)="itemCancelled()"
           (inputInvalid)="generalInfoForm.get('sender').setValue('')"
           [matLabel]="'Sender'"
-          [lockOption]="false"
+          [lockOption]="disabledFields[3]"
           [matErrorMessage]="'Please select one from the drowdown'">
         </auto-complete-input>
       </div>
@@ -58,6 +58,7 @@
           (itemSelected)="recipientSelected($event)"
           (inputInvalid)="generalInfoForm.get('recipient').setValue('')"
           [matLabel]="'Recipient'"
+          [lockOption]="disabledFields[4]"
           [matErrorMessage]="'Please select one from the drowdown or create a recipient'">
         </auto-complete-input>
       </div>

@@ -5,9 +5,10 @@ module.exports = {
     var authorization = req.headers.authorization.split(" ");
     var idToken = authorization[1];
     var orgId = authorization[2] != 'undefined' ? authorization[2] : null;
+    var u_id = authorization[3] != 'undefined' ? authorization[3] : null;
     admin.auth().verifyIdToken(idToken)
     .then(function(decodedToken) {
-      req.userData = {email: decodedToken.email, uid: decodedToken.uid, orgId: orgId};
+      req.userData = {email: decodedToken.email, uid: decodedToken.uid, orgId: orgId, u_id: u_id};
       next();
     }).catch(function(error) {
       console.log("Prevented an unauthorized access");

@@ -84,10 +84,10 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
 
   createSignUpForm(formData: any) {
     this.signupForm =  new FormGroup({
-      _id: new FormControl(formData?._id? formData._id : null),
+      id: new FormControl(formData?.id? formData.id : null),
       name: new FormControl(formData?.name? formData.name : "", {validators: [Validators.required]}),
-      email: new FormControl({value: formData?.email? formData.email : "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.email]}),
-      password: new FormControl({value: "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.minLength(6)]}),
+      email: new FormControl({value: formData?.email? formData.email : "", disabled: formData?.id? true : false}, {validators: [Validators.required, Validators.email]}),
+      password: new FormControl({value: "", disabled: formData?.id? true : false}, {validators: [Validators.required, Validators.minLength(6)]}),
       phoneNumber: new FormControl(formData?.phoneNumber? formData.phoneNumber : "", {validators: [phoneNumberValidator, Validators.required]}),
       addresses: new FormArray(formData?.addresses && formData.addresses.length > 0 ? this.createAddresses(formData.addresses) : this.createAddresses([null])),
       recipients: new FormArray(formData?.recipients && formData.recipients.length > 0 ? this.createRecipients(formData.recipients): this.createRecipients([])),
@@ -97,7 +97,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   }
 
   checkAuthorization() {
-    if (this.currentUser._id == this.editUser._id) {
+    if (this.currentUser.id == this.editUser.id) {
       return true;
     } else {
       if (this.currentUser.role == AuthGlobals.roles.SuperAdmin
@@ -111,7 +111,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   }
 
   validateRoles() {
-    if (this.mode == "create" || AuthGlobals.nonAdmin.includes(this.currentUser.role) || this.currentUser._id == this.editUser._id) {
+    if (this.mode == "create" || AuthGlobals.nonAdmin.includes(this.currentUser.role) || this.currentUser.id == this.editUser.id) {
       this.signupForm.get("role").disable();
     } else if (this.currentUser.role == AuthGlobals.roles.Admin) {
       this.roles = AuthGlobals.nonAdmin;

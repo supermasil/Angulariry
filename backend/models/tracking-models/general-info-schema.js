@@ -8,7 +8,7 @@ const shippingOptionsSchema = mongoose.Schema({
 
 // This is only used at sub-document
 const GeneralInfoSchema = mongoose.Schema({
-  sender: {type: String, index: true}, // user _id
+  sender: {type: mongoose.Types.ObjectId, ref: 'user', index: true}, // user _id
   recipient: RecipientSchema,
   organization: {type: mongoose.Types.ObjectId, ref: "organization", required: true},
   content: {type: String, default: ''}, // Note
@@ -28,7 +28,6 @@ const GeneralInfoSchema = mongoose.Schema({
   shippingOptions: shippingOptionsSchema,
 
   creatorId: {type: String, required: true}, // Google id, has to be string
-  creatorName: {type: String, required: true},
 
   filePaths: [{type: String}],
   comments: [{type: mongoose.Types.ObjectId, ref: "comment"}]
