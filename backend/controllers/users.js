@@ -305,7 +305,7 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
       foundUser.organizations.push({organization: org._id, role: foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer", credit: 0, creatorId: referrer? referrer.id : null, active: true});
       foundUser.organization = org._id
       foundUser.pricings = org.pricings;
-      foundUser.role = "Customer"
+      foundUser.role = foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer";
       foundUser.creatorId = referrer? referrer.id : null;
       foundUser.active = true;
       foundUser = await UserModel.findOneAndUpdate({id: foundUser.id}, foundUser, {new: true}).then(updatedUser => {return updatedUser});
