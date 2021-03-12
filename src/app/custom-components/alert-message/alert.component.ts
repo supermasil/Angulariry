@@ -1,9 +1,10 @@
-﻿import { Component, OnInit, OnDestroy, Input, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { Alert, AlertType } from './alert.model';
 import { AlertService } from './alert.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({ selector: 'alert', templateUrl: 'alert.component.html' })
 export class AlertComponent implements OnInit, OnDestroy {
@@ -14,7 +15,7 @@ export class AlertComponent implements OnInit, OnDestroy {
     alertSubscription: Subscription;
     routeSubscription: Subscription;
 
-    constructor(private router: Router, private alertService: AlertService) { }
+    constructor(private router: Router, private alertService: AlertService, private snackBar: MatSnackBar) { }
 
     ngOnInit() {
         // subscribe to new alert notifications
@@ -32,6 +33,8 @@ export class AlertComponent implements OnInit, OnDestroy {
 
                 // add alert to array
                 this.alerts.push(alert);
+                this.openSnackBar(alert);
+
 
                 // auto close alert if required
                 if (alert.autoClose) {
@@ -46,6 +49,28 @@ export class AlertComponent implements OnInit, OnDestroy {
             }
         });
     }
+
+    openSnackBar(alert: Alert) {
+      this.snackBar.open(alert.message, '', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: [this.snackBarColor(alert)]
+      });
+    }
+
+    snackBarColor(alert: Alert) {
+      if (!alert) return;
+
+      const alertTypeClass = {
+          [AlertType.Success]: 'bg-success',
+          [AlertType.Error]: 'bg-danger',
+          [AlertType.Info]: 'bg-info',
+          [AlertType.Warning]: 'bg-warning'
+      }
+
+      return (alertTypeClass[alert.type]);
+  }
 
     ngOnDestroy() {
         // unsubscribe to avoid memory leaks

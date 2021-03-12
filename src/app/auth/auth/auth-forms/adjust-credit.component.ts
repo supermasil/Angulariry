@@ -31,17 +31,17 @@ export class AdjustCreditFormComponent implements OnInit{
   ) {}
 
   ngOnInit() {
-    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = user;
-      this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.currentOrg = org;
+    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+      this.currentUser = this.authService.getMongoDbUser();
+      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
+        this.currentOrg = this.authService.getUserOrg();
         this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
           this.users = response.users;
           this.users = this.users.filter(u => u.role == AuthGlobals.roles.Customer);
           this.usersSubject.next(this.users.map(u => `${u.name} | ${u.userCode} | ${u.credit} | ${u.role} | ${u.email} | ${u.addresses[0].address}${u.addresses[0].addressLineTwo? " " + u.addresses[0].addressLineTwo: ""}`));
         })
-      });
-    });
+    //   });
+    // });
   }
 
   createForm() {
@@ -54,7 +54,7 @@ export class AdjustCreditFormComponent implements OnInit{
 
   userSelected(value: string) {
     this.editUser = this.users.filter(u => u.userCode === value.split(" | ")[1])[0];
-    this.authService.getUser(this.editUser._id).subscribe(user => {
+    this.authService.getUser(this.editUser._id, this.authService.userTypes.MONGO).subscribe(user => {
       this.editUser = user;
     });
     this.createForm();
@@ -70,7 +70,7 @@ export class AdjustCreditFormComponent implements OnInit{
       return;
     }
     this.authService.updateCredit(this.creditForm.getRawValue()).subscribe(() => {
-      this.authService.getUser(this.editUser._id).subscribe(user => {
+      this.authService.getUser(this.editUser._id, this.authService.userTypes.MONGO).subscribe(user => {
         this.editUser = user;
       });
     });

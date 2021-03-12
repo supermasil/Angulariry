@@ -1,7 +1,5 @@
-import { ThrowStmt } from '@angular/compiler';
-import { AfterContentInit, AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { element } from 'protractor';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { AlertService } from 'src/app/custom-components/alert-message';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -27,9 +25,6 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
   origin: string;
   destination: string;
   @Input() pricingUpdatedObservable: Observable<{sender: string, origin: string, destination: string}> = new Observable();
-
-  @Input() userIdObservable: Observable<string> = new Observable();
-  userId: string;
 
   @Input() updateExistingItemsObservable: Observable<ListItemModel[]> = new Observable(); // Edit case
   totalOldItems = -1;
@@ -64,12 +59,6 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
 
     this.itemsForm = new FormGroup({
       items: new FormArray([])
-    });
-
-    this.userIdObservable.subscribe((u: string) => {
-      this.userId = u;
-    }, error => {
-      this.authService.redirectToMainPageWithoutMessage();
     });
 
     this.pricingUpdatedObservable.subscribe(changes => {

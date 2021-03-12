@@ -27,19 +27,10 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatChipsModule } from '@angular/material/chips';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 
 @NgModule({
-  // imports: [ // Not needed
-  //   MatInputModule,
-  //   MatCardModule,
-  //   MatButtonModule,
-  //   MatToolbarModule,
-  //   MatExpansionModule,
-  //   MatProgressSpinnerModule,
-  //   MatPaginatorModule,
-  //   MatDialogModule
-  // ],
   exports: [
     MatInputModule,
     MatCardModule,
@@ -68,7 +59,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSortModule,
     MatChipsModule,
     ClipboardModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSnackBarModule
   ]
 })
 

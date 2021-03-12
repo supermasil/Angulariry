@@ -77,9 +77,9 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   onDelete(trackingId: string) {
-    this.trackingService.deleteTracking(trackingId).subscribe(() => {
+    // this.trackingService.deleteTracking(trackingId).subscribe(() => {
       // this.trackingService.getTrackings(this.trackingsPerPage, this.currentPage); // refetch after deletion
-    });
+    // });
   }
 
   // Change # of trackings per page
@@ -125,7 +125,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   canEdit(roles: string[], creatorId: string) {
-    return roles?.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser.id
+    return roles?.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser._id
   }
 
   isAuth() {

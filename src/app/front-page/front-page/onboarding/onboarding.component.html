@@ -1,0 +1,51 @@
+<!-- <auto-complete-input
+  #companyCode
+  [dataObservable]="companiesSubject.asObservable()"
+  (itemSelected)="companySelected($event)"
+  [matLabel]="'Company Code'">
+</auto-complete-input> -->
+
+<a mat-button class="nav-link" [matMenuTriggerFor]="createMenu" style="color: white;">{{currentOrg?.name? currentOrg.name : 'Onboard'}}</a>
+<mat-menu #createMenu="matMenu">
+  <a style="color: black;" mat-menu-item class="nav-link" (click)="companySelected(-1)" routerLinkActive="mat-accent">Onboard to new organization</a>
+  <ng-container *ngFor="let org of organizations; let i = index">
+    <a style="color: black;" mat-menu-item class="nav-link" (click)="companySelected(i)" routerLinkActive="mat-accent">{{org.name}} {{org.email}}</a>
+  </ng-container>
+</mat-menu>
+
+<!-- Button trigger modal -->
+<button id="onboardButton" hidden mat-raised-button color='primary' data-toggle="modal" data-target="#registerCodeModal"></button>
+
+<!-- Modal -->
+<div class="modal fade" id="registerCodeModal" tabindex="-1" role="dialog" aria-labelledby="registerCodeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="registerCodeModalLabel">Enter company's register code to register</h2>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <mat-form-field appearance="outline">
+          <mat-label>Register Code</mat-label>
+          <input
+            #registerCode
+            type="text"
+            required
+            matInput>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Referral Code</mat-label>
+          <input
+            #referralCode
+            type="text"
+            matInput>
+        </mat-form-field>
+      </div>
+      <div class="modal-footer" *ngIf="registerCode.value">
+        <button mat-raised-button color='accent' data-dismiss="modal" (click)="onboard(registerCode.value, referralCode.value)">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>

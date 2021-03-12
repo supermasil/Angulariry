@@ -4,9 +4,10 @@ const db = require('mongoose');
 const admin = require('firebase-admin');
 let assert = require('assert');
 const HistoryController = require("../controllers/history");
-const { response } = require('express');
-const { use } = require('../routes/users');
-
+const userTypes = {
+  MONGO: 'mongo',
+  FIREBASE: 'firebase'
+}
 
 // Messy af, can't use await on admin
 exports.createUpdateUser = async (req, res, next) => {
@@ -20,7 +21,7 @@ exports.createUpdateUser = async (req, res, next) => {
   user.recipients = recipientsSetupHelper(req.body.recipients);
 
   let updatedUser = null;
-  if (!req.body.id) {
+  if (!req.body._id) {
     let userCode = randomString(5);
     while ((await UserModel.findOne({'userCode': userCode}).then(foundUser => {return foundUser})) != null) {
       console.log(`createUpdateUser: userCode ${userCode} is duplicate`)
@@ -62,7 +63,7 @@ exports.createUpdateUser = async (req, res, next) => {
           }
         });
 
-        console.log('Successfully created new mongodb user:', createdUser.id);
+        console.log('Successfully created new mongodb user:', createdUser._id);
         return res.status(201).json({
           message: "User created successfully",
           user: createdUser
@@ -75,7 +76,7 @@ exports.createUpdateUser = async (req, res, next) => {
         });
       });
     } else {
-      await UserModel.findOneAndUpdate({id: req.body.id}, {$set: {
+      await UserModel.findOneAndUpdate({_id: req.body._id}, {$set: {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
@@ -187,7 +188,7 @@ exports.getUsers = async (req, res, next) => {
 
 exports.getUser = async (req, res, next) => {
   try {
-    foundUser = await this.getUserByIdHelper(req, req.params.id);
+    foundUser = await this.getUserByIdHelper(req.userData, req.params.id, req.query.type);
     if (foundUser == null) {
       throw new Error("User is null");
     }
@@ -201,9 +202,8 @@ exports.getUser = async (req, res, next) => {
 }
 
 
-getUserByIdHelper = async (userData, userId) => {  // Can't enfore orgId here since user is enquired at authentication
-  let queryParams = (!userData.uid && !userData.u_id && userId)?  {id: userId} : {_id: userId}; // First case is on login
-
+getUserByIdHelper = async (userData, userId, type) => {  // Can't enfore orgId here since user is also enquired at authentication
+  let queryParams = type == userTypes.FIREBASE ? {id: userId} : {_id: userId}; // First case is on login
   if (userData.u_id != userId && userData.orgId) { // User is requested by a different user
     queryParams["organizations.organization"] = userData.orgId;
   }
@@ -251,8 +251,10 @@ exports.updateUserCurrentOrg = async (req, res, next) => {
       let foundOrg = await OrganizationController.getOrganizationByIdHelper(req.body.orgId);
       assert(foundOrg != null, "updateUserCurrentOrg: Org is null");
       foundUser.pricings = foundOrg.pricings;
+      console.log("here", foundUser.pricings)
       await switchOverFields(foundUser, org, false);
       await foundUser.save();
+      console.log(foundUser.pricings, foundUser.organization)
       console.log(`updateUserCurrentOrg: Logged user ${req.userData.u_id} to org ${foundOrg.name}`);
       return res.status(200).json({
         organization: foundOrg,
@@ -302,13 +304,13 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
         throw new Error("onBoardUserToOrgHelper: Already onboarded to this org");
       }
 
-      foundUser.organizations.push({organization: org._id, role: foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer", credit: 0, creatorId: referrer? referrer.id : null, active: true});
+      foundUser.organizations.push({organization: org._id, role: foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer", credit: 0, creatorId: referrer? referrer._id : null, active: true});
       foundUser.organization = org._id
       foundUser.pricings = org.pricings;
       foundUser.role = foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer";
-      foundUser.creatorId = referrer? referrer.id : null;
+      foundUser.creatorId = referrer? referrer._id : null;
       foundUser.active = true;
-      foundUser = await UserModel.findOneAndUpdate({id: foundUser.id}, foundUser, {new: true}).then(updatedUser => {return updatedUser});
+      foundUser = await UserModel.findByIdAndUpdate(foundUser._id, foundUser, {new: true}).then(updatedUser => {return updatedUser});
       console.log(`onBoardUserToOrgHelper: Onboarded user ${u_id} to org ${org.name} referred by ${foundUser.creatorId}`);
       let response =  {
         organization: org,

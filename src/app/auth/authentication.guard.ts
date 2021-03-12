@@ -40,7 +40,7 @@ export class AuthGuard implements CanActivate {
         this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
       });
       return false;
-    } else if (isAuth && !this.authService.getUserOrg() && this.authService.getMongoDbUser().role != AuthGlobals.roles.SuperAdmin && this.route.url.length > 0) {
+    } else if (isAuth && !this.authService.getUserOrg() && this.authService.getMongoDbUser()?.role != AuthGlobals.roles.SuperAdmin && this.route.url.length > 0) {
       this.zone.run(() => {
         this.router.navigate(["/"]);
         this.alertService.warn("You have not logged into any organization", GlobalConstants.flashMessageOptions);
@@ -57,7 +57,7 @@ export class AuthGuard implements CanActivate {
   }
 
   checkAuthorization(roles: string[]) {
-    let result = roles.includes(this.authService.getMongoDbUser().role);
+    let result = roles.includes(this.authService.getMongoDbUser()?.role);
     if (!result) {
       this.authService.redirectToMainPageWithMessage("You're not authorized");
       return false;

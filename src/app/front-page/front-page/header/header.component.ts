@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
-import { AuthService } from '../../auth/auth.service';
+import { AuthService } from '../../../auth/auth.service';
 import { Subscription } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core/';
 import { Router } from '@angular/router';
@@ -12,7 +12,6 @@ import { OrganizationModel } from 'src/app/models/organization.model';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-
 export class HeaderComponent implements OnInit, OnDestroy{
   constructor(private authService: AuthService, private changeDetector: ChangeDetectorRef, private zone: NgZone, private router: Router) {}
   private authListenerSub: Subscription;
@@ -21,13 +20,13 @@ export class HeaderComponent implements OnInit, OnDestroy{
   organization: OrganizationModel;
 
   ngOnInit() {
-    this.authService.getMongoDbUserListener().subscribe(user => {
-      this.user = user;
-    });
+    // this.authService.getMongoDbUserListener().subscribe(user => {
+      this.user = this.authService.getMongoDbUser();
+    // });
 
-    this.authService.getUserOrgListener().subscribe(organization => {
-      this.organization = organization;
-    });
+    // this.authService.getUserOrgListener().subscribe(organization => {
+      this.organization = this.authService.getUserOrg();
+    // });
   }
 
   onLogOut() {

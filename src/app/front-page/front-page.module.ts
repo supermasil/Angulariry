@@ -14,8 +14,6 @@ import { FrontPageComponent } from './front-page.component';
   imports: [
     CommonModule,
     AngularMaterialModule,
-    SearchBarModule,
-    AutoCompleteInputModule,
     FrontPageRoutingModule
   ]
 })

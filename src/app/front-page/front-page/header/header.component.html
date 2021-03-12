@@ -16,8 +16,12 @@
           <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/mst')" routerLinkActive="mat-accent">Master</a>
         </mat-menu>
       </li>
-      <li class="nav-item" *ngIf="isAuth() && canView(authGlobals.internal)">
+      <li class="nav-item" *ngIf="isAuth()">
         <a class="nav-link" (click)="redirect('/trackings/tracking-tool')">Tracking Tool</a>
+      </li>
+
+      <li class="nav-item" *ngIf="isAuth()">
+        <app-onboarding></app-onboarding>
       </li>
     </ul>
 
@@ -55,7 +59,7 @@
       <li class="nav-item" *ngIf="isAuth()">
         <a mat-button [matMenuTriggerFor]="currentUserMenu" style="color: white;">{{user?.name}}</a>
         <mat-menu #currentUserMenu="matMenu">
-          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/auth/users/edit/' + user.id)" routerLinkActive="mat-accent">Profile</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/auth/users/edit/' + user._id)" routerLinkActive="mat-accent">Profile</a>
           <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{user?.role}}</a>
           <a style="color: grey;" *ngIf="user?.organization" mat-menu-item routerLinkActive="mat-accent">{{user?.organization?.name}}</a>
           <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{user?.credit | currency: 'USD'}}</a>

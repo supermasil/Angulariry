@@ -45,7 +45,6 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
   defaultPricingSubject = new ReplaySubject<PricingModel>();
-  selectedUserIdSubject = new ReplaySubject<string>();
 
   usersSubject = new ReplaySubject<UserModel[]>();
   pricingUpdatedSubject = new ReplaySubject<{sender: string, origin: string, destination: string}>();
@@ -90,16 +89,15 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   ngOnInit() {
     this.trackingNumber = "inp-" + Date.now() + Math.floor(Math.random() * 10000);
     this.trackingNumberSubject.next(this.trackingNumber);
-    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = user;
-      this.selectedUserIdSubject.next(user.id);
-      this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = org;
-        this.defaultLocationsSubject.next(org.locations.map(item => item.name));
+    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+      this.currentUser = this.authService.getMongoDbUser();
+      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
+        this.organization = this.authService.getUserOrg();
+        this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
         this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
           this.users = response.users;
           this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
-          this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
+          this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
             this.defaultPricingSubject.next(pricing);
 
@@ -127,12 +125,12 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
         }, error => {
           this.authService.redirectToMainPageWithoutMessage();
         })
-      }, error => {
-        this.authService.redirectToMainPageWithoutMessage();
-      });
-    }, error => {
-      this.authService.redirectToMainPageWithoutMessage();
-    });
+    //   }, error => {
+    //     this.authService.redirectToMainPageWithoutMessage();
+    //   });
+    // }, error => {
+    //   this.authService.redirectToMainPageWithoutMessage();
+    // });
   }
 
   emitChanges() {

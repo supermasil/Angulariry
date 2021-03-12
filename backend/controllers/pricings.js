@@ -1,4 +1,3 @@
-const { assert } = require('console');
 const PricingModel = require('../models/pricing');
 
 exports.addItems = async (req, res, next) => {
@@ -128,8 +127,8 @@ exports.getPricing = async (req, res, next) => {
     }
     return res.status(200).json(foundPricing);
   } catch (error) {
-    console.log(`getPricing: ${req.params.id}: ${error.message}`);
-    return res.status(404).json({
+    console.log(`getPricing: ${req.params.id} for orgId ${req.userData.orgId}: ${error.message}`);
+    return res.status(500).json({
       message: "Couldn't find pricing"
     });
   }

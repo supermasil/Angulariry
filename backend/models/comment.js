@@ -3,7 +3,7 @@ const uniqueValidator = require('mongoose-unique-validator');
 
 const commentSchema = mongoose.Schema({
   trackingId: { type: String, required: true },
-  creatorId: { type: String, required: true }, // google Id, has to be string
+  creatorId: {type: mongoose.Types.ObjectId, ref: "user", required: true},
   creatorName: { type: String, required: true },
   filePaths: [{ type: String }],
   content: { type: String },

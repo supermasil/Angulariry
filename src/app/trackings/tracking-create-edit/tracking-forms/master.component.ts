@@ -69,11 +69,11 @@ export class MasterFormCreateComponent implements OnInit {
 
   ngOnInit() {
     this.trackingNumeberSubject.next("mst-" + Date.now() + Math.floor(Math.random() * 10000));
-    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = user;
-      this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = org;
-        this.defaultLocationsSubject.next(org.locations.map(item => item.name));
+    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+      this.currentUser = this.authService.getMongoDbUser();
+      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
+        this.organization = this.authService.getUserOrg();
+        this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
         this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
           this.users = response.users;
           this.usersSubject.next(response.users);
@@ -99,12 +99,12 @@ export class MasterFormCreateComponent implements OnInit {
         }, error => {
           this.authService.redirectToMainPageWithoutMessage();
         })
-      }, error => {
-        this.authService.redirectToMainPageWithoutMessage();
-      });
-    }, error => {
-      this.authService.redirectToMainPageWithoutMessage();
-    });
+    //   }, error => {
+    //     this.authService.redirectToMainPageWithoutMessage();
+    //   });
+    // }, error => {
+    //   this.authService.redirectToMainPageWithoutMessage();
+    // });
   }
 
   createMasterForm(formData: MasterTrackingModel) {

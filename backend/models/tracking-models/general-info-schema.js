@@ -27,7 +27,7 @@ const GeneralInfoSchema = mongoose.Schema({
   destination: {type: String, required: true},
   shippingOptions: shippingOptionsSchema,
 
-  creatorId: {type: String, required: true}, // Google id, has to be string
+  creatorId: {type: mongoose.Types.ObjectId, ref: "user", required: true},
 
   filePaths: [{type: String}],
   comments: [{type: mongoose.Types.ObjectId, ref: "comment"}]

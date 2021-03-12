@@ -1,8 +1,8 @@
 import { COMMA, ENTER } from "@angular/cdk/keycodes";
-import { Component, NgZone, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { FormArray, FormControl, FormGroup, Validators } from "@angular/forms";
 import { MatChipInputEvent } from "@angular/material/chips";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute } from "@angular/router";
 import { phoneNumberValidator } from "lac-mat-tel-input";
 import { Address } from "ngx-google-places-autocomplete/objects/address";
 import { ValidatorsService } from "src/app/validators.service";
@@ -24,8 +24,6 @@ export class OnboardingFormComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private route: ActivatedRoute,
-    private zone: NgZone,
-    private router: Router,
     private validatorsService: ValidatorsService
   ) {}
 

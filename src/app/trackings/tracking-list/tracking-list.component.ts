@@ -67,25 +67,25 @@ export class TrackingListComponent {
       this.setTab(this.selectedIndex);
     });
 
-    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = user;
-      this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = org;
+    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+      this.currentUser = this.authService.getMongoDbUser();
+      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
+        this.organization = this.authService.getUserOrg();
         this.isLoading = false;
         this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
-      }, error => {
-        this.authService.redirectToMainPageWithoutMessage();
-      });
-    }, error => {
-      this.authService.redirectToMainPageWithoutMessage();
-    });
+    //   }, error => {
+    //     this.authService.redirectToMainPageWithoutMessage();
+    //   });
+    // }, error => {
+    //   this.authService.redirectToMainPageWithoutMessage();
+    // });
   }
 
   fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {
     this.searchMode = false;
     let sender = null
     if (this.currentUser.role === AuthGlobals.roles.Customer) {
-      sender = this.currentUser.id;
+      sender = this.currentUser._id;
     }
     this.trackingService.getTrackings(trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
       this.trackingsSubject.next(transformedTrackings);

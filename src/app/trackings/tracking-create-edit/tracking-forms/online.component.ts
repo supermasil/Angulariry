@@ -42,7 +42,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
   defaultPricingSubject = new ReplaySubject<PricingModel>();
-  selectedUserIdSubject = new ReplaySubject<string>();
 
   usersSubject = new ReplaySubject<UserModel[]>();
   trackingNumeberSubject = new ReplaySubject<string>();
@@ -77,17 +76,18 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
 
   ngOnInit() {
     this.trackingNumeberSubject.next("onl-" + Date.now() + Math.floor(Math.random() * 10000));
+    this.currentUser = this.authService.getMongoDbUser();
 
-    this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = user;
-      this.selectedUserIdSubject.next(user.id);
-      this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = org;
-        this.defaultLocationsSubject.next(org.locations.map(item => item.name));
+    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
+      // this.currentUser = user;
+      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
+        this.organization = this.authService.getUserOrg();;
+        this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
         this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
           this.users = response.users;
           this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
-          this.pricingService.getPricing(org.pricings).subscribe((pricing: PricingModel) => {
+          console.log("here")
+          this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
             this.defaultPricingSubject.next(pricing);
             this.route.paramMap.subscribe((paramMap) => {
@@ -112,12 +112,12 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
         }, error => {
           this.authService.redirectToMainPageWithoutMessage();
         })
-      }, error => {
-        this.authService.redirectToMainPageWithoutMessage();
-      });
-    }, error => {
-      this.authService.redirectToMainPageWithoutMessage();
-    });
+    //   }, error => {
+    //     this.authService.redirectToMainPageWithoutMessage();
+    //   });
+    // }, error => {
+    //   this.authService.redirectToMainPageWithoutMessage();
+    // });
   }
 
   emitChanges() {

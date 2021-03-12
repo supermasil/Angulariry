@@ -173,18 +173,18 @@ exports.deleteOrganization = async (req, res, next) => {
   }
 }
 
-exports.updateSecretCode = async (req, res, next) => {
+exports.updateRegisterCode = async (req, res, next) => {
   await OrganizationModel.findById(req.params.id).then(async foundOrg => {
-    assert(foundOrg != null, "updateSecretCode: foundOrg is null");
-    foundOrg.secretCode = randomString(8);
+    assert(foundOrg != null, "updateRegisterCode: foundOrg is null");
+    foundOrg.registerCode = randomString(8);
     await foundOrg.save();
     return res.status(200).json({
-      message: "Secret code updated successfully"
+      message: "Register code updated successfully"
     });
   }).catch(error => {
-    console.log(`updateSecretCode: ${req.params.id}: ${error.message}`);
+    console.log(`updateRegisterCode: ${req.params.id}: ${error.message}`);
     return res.status(500).json({
-      message: "Secret code update failed"
+      message: "Register code update failed"
     });
   })
 }

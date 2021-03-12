@@ -16,15 +16,19 @@ const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
 @Injectable({ providedIn: 'root'})
 export class AuthService {
   private authStatusSubject = new ReplaySubject<boolean>();
-  private firebaseUserSubject = new ReplaySubject<firebase.User>();
-  private mongoDbUserSubject = new ReplaySubject<UserModel>();
-  private userOrgSubject = new ReplaySubject<OrganizationModel>();
+  // private firebaseUserSubject = new ReplaySubject<firebase.User>();
+  // private mongoDbUserSubject = new ReplaySubject<UserModel>();
+  // private userOrgSubject = new ReplaySubject<OrganizationModel>();
   private firebaseUser: firebase.User;
   private mongoDbUser: UserModel;
   private userOrg: OrganizationModel = null;
   public redirectUrl: string;
   public redirectData = {};
   private loginMode = false;
+  public userTypes = {
+    MONGO: 'mongo',
+    FIREBASE: 'firebase'
+  }
 
   constructor(
     private httpClient: HttpClient,
@@ -41,20 +45,20 @@ export class AuthService {
   async refreshAuthentication(firebaseUser: firebase.User) {
     if (firebaseUser) {
       await this.setupSessionUToken(firebaseUser); // Has to await here. SET THIS UP RIGHT AWAY to be authenticated in the back end
-      this.getUser(firebaseUser.uid).subscribe(async (user: UserModel) => {
+      this.getUser(firebaseUser.uid, this.userTypes.FIREBASE).subscribe(async (user: UserModel) => {
         this.mongoDbUser = user;
-        if (firebaseUser.uid === user.id) {
+        if (firebaseUser.uid == user.id) {
           this.userOrg = user.organization;
           return await this.authenticate();
         } else {
           console.log("Firebase and db users aren't the same")
           this.unAuthenticate();
-          // this.logout();
+          this.logout();
         }
       }, error => {
         console.log(error);
         this.unAuthenticate();
-        // this.logout();
+        this.logout();
       });
     } else {
       this.unAuthenticate();
@@ -75,14 +79,13 @@ export class AuthService {
     }
   }
 
-
   async authenticate() {
     await this.setupSessionBackEndInfo();
     await this.firebaseUser.getIdTokenResult().then(idTokenResult => {
       const authTime = idTokenResult.claims.auth_time * 1000;
       const sessionDuration = 8 * 60 * 60 * 1000; // 8 hours in miliseconds
       const millisecondsUntilExpiration = sessionDuration - (Date.now() - authTime);
-      setTimeout(() => {this.logout();}, millisecondsUntilExpiration);
+      setTimeout(() => {this.unAuthenticate(), this.logout();}, millisecondsUntilExpiration);
       this.refreshUsers();
       this.authStatusSubject.next(true);
       // console.log("User authenticated");
@@ -95,17 +98,17 @@ export class AuthService {
   }
 
   unAuthenticate() {
+    this.authStatusSubject.next(false);
     this.firebaseUser = null;
     this.mongoDbUser = null;
     this.clearSessionStorage();
-    this.authStatusSubject.next(false);
     // console.log("User unauthenticated");
   }
 
   refreshUsers() {
-    this.firebaseUserSubject.next(this.firebaseUser);
-    this.mongoDbUserSubject.next(this.mongoDbUser);
-    this.userOrgSubject.next(this.userOrg);
+    // this.firebaseUserSubject.next(this.firebaseUser);
+    // this.mongoDbUserSubject.next(this.mongoDbUser);
+    // this.userOrgSubject.next(this.userOrg);
   }
 
   async login(email: string, password: string) {
@@ -130,7 +133,6 @@ export class AuthService {
     await this.firebaseAuth.signOut().then(() => {
       this.zone.run(() => {
         this.router.navigate(["/auth"]);
-        window.location.reload();
       });
     }).catch(error => {
       this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
@@ -174,7 +176,7 @@ export class AuthService {
       .subscribe(response => {
         this.userOrg = response.organization;
         sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
-        this.userOrgSubject.next(this.userOrg);
+        // this.userOrgSubject.next(this.userOrg);
         this.zone.run(async () => {
           await this.refreshAuthentication(this.firebaseUser);
           this.router.navigate(["/trackings"]);
@@ -188,7 +190,7 @@ export class AuthService {
       .subscribe(response => {
         this.userOrg = response.organization;
         sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
-        this.userOrgSubject.next(this.userOrg);
+        // this.userOrgSubject.next(this.userOrg);
         this.zone.run(async () => {
           await this.refreshAuthentication(this.firebaseUser);
           if (response.user.active) {
@@ -203,8 +205,8 @@ export class AuthService {
     return this.httpClient.put<{message: string}>(USER_BACKEND_URL + `updateCredit/${formData._id}`, formData);
   }
 
-  getUser(id: string | UserModel) {
-    return this.httpClient.get<UserModel>(USER_BACKEND_URL + id);
+  getUser(id: string | UserModel, type: string) {
+    return this.httpClient.get<UserModel>(USER_BACKEND_URL + id + `?type=${type}`);
   }
 
   getUsers() {
@@ -260,13 +262,13 @@ export class AuthService {
     sessionStorage.clear();
   }
 
-  getFirebaseUserListener() {
-    return this.firebaseUserSubject.asObservable();
-  }
+  // getFirebaseUserListener() {
+  //   return this.firebaseUserSubject.asObservable();
+  // }
 
-  getMongoDbUserListener() {
-    return this.mongoDbUserSubject.asObservable();
-  }
+  // getMongoDbUserListener() {
+  //   return this.mongoDbUserSubject.asObservable();
+  // }
 
   getMongoDbUser() {
     return JSON.parse(sessionStorage.getItem("mongoDBUser")) as UserModel;
@@ -276,9 +278,9 @@ export class AuthService {
     return JSON.parse(sessionStorage.getItem("userOrg")) as OrganizationModel;
   }
 
-  getUserOrgListener() {
-    return this.userOrgSubject.asObservable();
-  }
+  // getUserOrgListener() {
+  //   return this.userOrgSubject.asObservable();
+  // }
 
   getIsAuth() {
     return sessionStorage.getItem("isAuthenticated") == "true" ? true : false;

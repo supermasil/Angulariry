@@ -60,7 +60,6 @@
       <items-list
         #itemsList
         [pricingObservable]="defaultPricingSubject.asObservable()"
-        [userIdObservable]="selectedUserIdSubject.asObservable()"
         [updateExistingItemsObservable]="updateExistingItemsSubject.asObservable()"
         [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
         (formValidity)="itemsListValidity($event)"

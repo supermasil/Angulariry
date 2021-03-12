@@ -1,4 +1,4 @@
-const CarrierTrackingController = require("../controllers/carrier-trackings");
+const CarrierTrackingModel = require('../models/tracking-models/carrier-tracking');
 
 //{"id":"hook_45098b81d06e412ba3f02306cbfedf9b","object":"Webhook","mode":"production","url":"https://weshippee.com/api/easypost","disabled_at":null}
 
@@ -8,7 +8,7 @@ exports.updateTracker = (req, res, next) => {
     return;
   }
 
-  CarrierTrackingController.updateOne({ carrierTrackingNumber: req.body.result.tracking_code}, {status: req.body.result.status })
+  CarrierTrackingModel.updateOne({ carrierTrackingNumber: req.body.result.tracking_code}, {status: req.body.result.status })
     .then(
       console.log(`EasyPostWebhook: Updated tracking ${req.body.result.tracking_code} to status ${req.body.result.status}`)
     )

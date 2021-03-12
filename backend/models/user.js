@@ -16,12 +16,12 @@ const userSchema = mongoose.Schema({
   organizations: [{
     organization: {type: mongoose.Types.ObjectId, ref: "organization"},
     role: {type: String, default: 'Customer'},
-    creatorId: {type: String, default: null},
+    creatorId: {type: mongoose.Types.ObjectId, ref: "user"},
     credit: {type: Number, required: true, default: 0},
     active: {type: Boolean, required: true, default: true},
   }],
   pricings: {type: mongoose.Types.ObjectId, ref: "pricing", default: null},
-  creatorId: {type: String, default: null},
+  creatorId: {type: mongoose.Types.ObjectId, ref: "user"},
   active: {type: Boolean, required: true, default: true},
   credit: {type: Number, required: true, default: 0},
   creditHistory: [{type: mongoose.Types.ObjectId, ref: "history"}]

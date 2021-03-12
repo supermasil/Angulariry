@@ -51,6 +51,6 @@ export class SearchBarComponent implements OnInit {
   }
 
   isCustomer() {
-    return this.authService.getMongoDbUser().role === AuthGlobals.roles.Customer;
+    return this.authService.getMongoDbUser()?.role === AuthGlobals.roles.Customer;
   }
 }
