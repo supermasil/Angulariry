@@ -44,7 +44,7 @@
 
       <div class="finalizing-table" *ngIf="mode==='edit' && tempDataSource.data.length > 0">
         <table mat-table [dataSource]="tempDataSource">
-          <ng-container matColumnDef="trackingNumber">
+          <ng-container matColumnDef="TrackingNumber">
             <th mat-header-cell *matHeaderCellDef> Tracking Number </th>
             <td mat-cell *matCellDef="let item" class="p-0">
               <a
@@ -56,6 +56,20 @@
                 <mat-icon style="color: blue;">add</mat-icon>
               </a>
               {{item.trackingNumber}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="TrackingStatus">
+            <th mat-header-cell *matHeaderCellDef> Tracking Status </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.trackingStatus}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="FinancialStatus">
+            <th mat-header-cell *matHeaderCellDef> Financial Status </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.financialStatus}}
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="Weight">
@@ -79,7 +93,7 @@
 
       <div class="finalizing-table">
         <table mat-table [dataSource]="finalizingDataSource">
-          <ng-container matColumnDef="trackingNumber">
+          <ng-container matColumnDef="TrackingNumber">
             <th mat-header-cell *matHeaderCellDef> Tracking Number </th>
             <td mat-cell *matCellDef="let item" class="p-0">
               <a
@@ -92,6 +106,22 @@
               </a>
               {{item.trackingNumber}} </td>
             <td mat-footer-cell *matFooterCellDef> Total </td>
+          </ng-container>
+
+          <ng-container matColumnDef="TrackingStatus">
+            <th mat-header-cell *matHeaderCellDef> Tracking Status </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.trackingStatus}}
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <ng-container matColumnDef="FinancialStatus">
+            <th mat-header-cell *matHeaderCellDef> Financial Status </th>
+            <td mat-cell *matCellDef="let item">
+              {{item.generalInfo.financialStatus}}
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
           </ng-container>
 
           <ng-container matColumnDef="Weight">

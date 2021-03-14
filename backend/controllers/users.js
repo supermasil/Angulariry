@@ -12,88 +12,83 @@ const userTypes = {
 // Messy af, can't use await on admin
 exports.createUpdateUser = async (req, res, next) => {
   let firebaseUser = null;
-  try {
-  const user = new UserModel();;
-  user.name = req.body.name;
-  user.email = req.body.email;
-  user.phoneNumber = req.body.phoneNumber;
-  user.addresses = addressesSetupHelper(req.body.addresses);
-  user.recipients = recipientsSetupHelper(req.body.recipients);
-
   let updatedUser = null;
-  if (!req.body._id) {
-    let userCode = randomString(5);
-    while ((await UserModel.findOne({'userCode': userCode}).then(foundUser => {return foundUser})) != null) {
-      console.log(`createUpdateUser: userCode ${userCode} is duplicate`)
-      userCode = randomString(5);
+
+  try {
+    const user = {
+      name: req.body.name,
+      email: req.body.email,
+      phoneNumber: req.body.phoneNumber,
+      addresses: addressesSetupHelper(req.body.addresses),
+      recipients: recipientsSetupHelper(req.body.recipients)
     }
-    user.userCode = userCode;
 
-    await admin
-      .auth()
-      .createUser({
-        email: req.body.email,
-        password: req.body.password,
-      })
-      .then(async userRecord => {
-        console.log('Successfully created new firebase user:', userRecord.uid);
-        firebaseUser = userRecord;
-        user.id = userRecord.uid;
-        let createdUser = await UserModel.create(user).then(async user => {
-          return user;
-        }).catch(async error => {
-          console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
-          if (firebaseUser) {
-            await deleteFireBaseUser(firebaseUser.uid).then(() => {
-              console.log('Successfully deleted firebase user');
-              return res.status(500).json({
-                message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
-              });
-            })
-            .catch((error) => {
-              console.log('Error deleting firebase user:', error);
-              return res.status(500).json({
-                message: "User creation/update failed"
-              });
+    if (!req.body._id) {
+      let userCode = randomString(5);
+      while ((await UserModel.findOne({'userCode': userCode}).then(foundUser => {return foundUser})) != null) {
+        console.log(`createUpdateUser: userCode ${userCode} is duplicate`)
+        userCode = randomString(5);
+      }
+      user['userCode'] = userCode;
+      await admin
+        .auth()
+        .createUser({
+          email: req.body.email,
+          password: req.body.password,
+        })
+        .then(async userRecord => {
+          console.log('Successfully created new firebase user:', userRecord.uid);
+          firebaseUser = userRecord;
+          user['id'] = userRecord.uid;
+          let createdUser = await UserModel.create(new UserModel(user)).then(async user => {
+            return user;
+            }).catch(async error => {
+              console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
+              if (firebaseUser) {
+                await deleteFireBaseUser(firebaseUser.uid).then(() => {
+                  console.log('Successfully deleted firebase user');
+                  return res.status(500).json({
+                    message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
+                  });
+                })
+                .catch((error) => {
+                  console.log('Error deleting firebase user:', error);
+                  return res.status(500).json({
+                    message: "User creation/update failed"
+                  });
+                });
+              } else {
+                return res.status(500).json({
+                  message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
+                });
+              }
             });
-          } else {
-            return res.status(500).json({
-              message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
-            });
-          }
-        });
 
-        console.log('Successfully created new mongodb user:', createdUser._id);
-        return res.status(201).json({
-          message: "User created successfully",
-          user: createdUser
-        });;
-      })
+          console.log('Successfully created new mongodb user:', createdUser._id);
+          return res.status(201).json({
+            message: "User created successfully",
+            user: createdUser
+          });;
+        })
       .catch((error) => {
         console.log('Error creating new firebase user:', error.message);
         return res.status(500).json({
           message: error.message
         });
       });
-    } else {
-      await UserModel.findOneAndUpdate({_id: req.body._id}, {$set: {
-        name: user.name,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        addresses: user.addresses,
-        recipients: user.recipients
-      }}, {new: true}).then(async user => {
-        updatedUser = user;
-        if (req.body.role) {
-          updatedUser.organizations.filter(o => o.organization == req.userData.orgId)[0].role = req.body.role;
-          await updatedUser.save();
-        }
-      });
-      return res.status(201).json({
-        message: "User updated successfully",
-        user: updatedUser
-      });
-    }
+      } else {
+        await UserModel.findOneAndUpdate({_id: req.body._id}, {$set: user}, {new: true}).then(async user => {
+          updatedUser = user;
+          if (req.body.role) {
+            updatedUser.organizations.filter(o => o.organization == req.userData.orgId)[0].role = req.body.role;
+            await updatedUser.save();
+          }
+        });
+        return res.status(201).json({
+          message: "User updated successfully",
+          user: updatedUser
+        });
+      }
   } catch(error) {
     console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
     return res.status(500).json({
@@ -251,10 +246,8 @@ exports.updateUserCurrentOrg = async (req, res, next) => {
       let foundOrg = await OrganizationController.getOrganizationByIdHelper(req.body.orgId);
       assert(foundOrg != null, "updateUserCurrentOrg: Org is null");
       foundUser.pricings = foundOrg.pricings;
-      console.log("here", foundUser.pricings)
       await switchOverFields(foundUser, org, false);
       await foundUser.save();
-      console.log(foundUser.pricings, foundUser.organization)
       console.log(`updateUserCurrentOrg: Logged user ${req.userData.u_id} to org ${foundOrg.name}`);
       return res.status(200).json({
         organization: foundOrg,

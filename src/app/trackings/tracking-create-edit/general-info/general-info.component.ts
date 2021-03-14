@@ -161,7 +161,7 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
       this.recipient.getFormValidity();
     }
 
-    return this.generalInfoForm.valid;
+    return !this.generalInfoForm.invalid;
   }
 
   getRawValues() {

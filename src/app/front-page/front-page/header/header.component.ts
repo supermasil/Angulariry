@@ -20,13 +20,13 @@ export class HeaderComponent implements OnInit, OnDestroy{
   organization: OrganizationModel;
 
   ngOnInit() {
-    // this.authService.getMongoDbUserListener().subscribe(user => {
+    this.authService.getMongoDbUserListener().subscribe(user => {
       this.user = this.authService.getMongoDbUser();
-    // });
+    });
 
-    // this.authService.getUserOrgListener().subscribe(organization => {
+    this.authService.getUserOrgListener().subscribe(organization => {
       this.organization = this.authService.getUserOrg();
-    // });
+    });
   }
 
   onLogOut() {

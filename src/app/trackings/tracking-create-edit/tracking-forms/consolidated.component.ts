@@ -67,7 +67,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   showTable = false;
 
   finalizingDataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>;
-  finalizingDefinedColumns: string[] = ['trackingNumber', 'Weight', 'Cost'];
+  finalizingDefinedColumns: string[] = ['TrackingNumber', 'TrackingStatus', 'FinancialStatus', 'Weight', 'Cost'];
   tempDataSource: MatTableDataSource<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>;
 
   onlineTrackingDataSubject = new ReplaySubject<OnlineTrackingModel[]>();

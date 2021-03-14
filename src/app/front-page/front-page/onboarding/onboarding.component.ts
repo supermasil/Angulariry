@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ReplaySubject } from 'rxjs';
+import { AuthGlobals } from 'src/app/auth/auth-globals';
 import { UserModel } from 'src/app/models/user.model';
 import { AuthService } from '../../../auth/auth.service';
 import { OrganizationModel } from '../../../models/organization.model';
@@ -15,9 +17,12 @@ export class OnboardingComponent implements OnInit{
   // companiesSubject = new ReplaySubject<string[]>();
   currentUser: UserModel;
   currentOrg: OrganizationModel;
+  authGlobals = AuthGlobals;
 
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    private zone: NgZone,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -60,5 +65,19 @@ export class OnboardingComponent implements OnInit{
 
   onboard(registerCode: string, referralCode: string) {
     this.authService.onboardToNewOrg(registerCode, referralCode);
+  }
+
+  redirect(route: string) {
+    this.zone.run(() => {
+      this.router.navigate([route]);
+    });
+  }
+
+  canView(roles: string[]) {
+    return this.authService.canView(roles);
+  }
+
+  isAuth() {
+    return this.authService.getIsAuth();
   }
 }

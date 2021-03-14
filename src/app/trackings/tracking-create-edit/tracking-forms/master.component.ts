@@ -55,6 +55,8 @@ export class MasterFormCreateComponent implements OnInit {
   allTrackings = [];
   trackingsReference = [];
   generalInfoDisabledFields = [true, true, true, false, false, false, false];
+  origin = null;
+  destination = null;
 
   trackingCtrl = new FormControl();
   @ViewChild('auto') matAutocomplete: MatAutocomplete;
@@ -149,7 +151,6 @@ export class MasterFormCreateComponent implements OnInit {
         this.currentTrackingNumbers.push(i.trackingNumber);
         this.currentTrackings.push(i);
       });
-
       box.inPersonSubTrackings.forEach(i => {
         this.selectItem(i.trackingNumber, index);
         this.currentTrackingNumbers.push(i.trackingNumber);
@@ -169,9 +170,12 @@ export class MasterFormCreateComponent implements OnInit {
   }
 
   generalInfoUpdated(changes: {origin: string, destination: string}) {
-    this.allTrackings = [];
-    this.trackingsReference = [];
-    this.fetchTrackings(changes.origin, changes.destination);
+    if (origin != this.origin || this.destination != this.destination) {
+      this.origin = origin; this.destination = this.destination;
+      this.allTrackings = [];
+      this.trackingsReference = [];
+      this.fetchTrackings(changes.origin, changes.destination);
+    }
   }
 
   fetchTrackings(origin: string, destination: string) {
@@ -183,6 +187,7 @@ export class MasterFormCreateComponent implements OnInit {
           this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
           this.trackingsReference = [...this.allTrackings];
           this.filteredTrackings = of(this.allTrackings);
+          console.log(this.allTrackings)
         });
       });
     });

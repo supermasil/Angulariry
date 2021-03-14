@@ -23,7 +23,7 @@
             <mat-card>
               <div [formGroupName]="i">
                 <div class="row">
-                  <div class="col-lg-6">
+                  <div class="col-lg-4">
                     <mat-form-field appearance="outline">
                       <mat-label>Tracking Number</mat-label>
                       <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
@@ -45,16 +45,30 @@
                       </a>
                     </mat-form-field>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <mat-form-field appearance="outline">
                       <mat-label>Linked To Consolidated</mat-label>
-                      <input type='text' matInput formControlName="linkedToCsl">
+                      <input type='text' matInput formControlName="linkedToCsl" #linkedToCsl>
+                      <a
+                        matSuffix
+                        mat-mini-fab
+                        color="basic"
+                        [routerLink]="'/trackings/edit/' + linkedToCsl.value">
+                        <mat-icon>open_in_new</mat-icon>
+                      </a>
                     </mat-form-field>
                   </div>
-                  <div class="col-lg-2">
+                  <div class="col-lg-3">
                     <mat-form-field appearance="outline">
                       <mat-label>Linked To Master</mat-label>
-                      <input type='text' matInput formControlName="linkedToMst">
+                      <input type='text' matInput formControlName="linkedToMst" #linkedToMst>
+                      <a
+                        matSuffix
+                        mat-mini-fab
+                        color="basic"
+                        [routerLink]="'/trackings/edit/' + linkedToMst.value">
+                        <mat-icon>open_in_new</mat-icon>
+                      </a>
                     </mat-form-field>
                   </div>
                   <div class="col-lg-2">

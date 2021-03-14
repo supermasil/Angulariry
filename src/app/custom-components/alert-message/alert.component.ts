@@ -51,10 +51,10 @@ export class AlertComponent implements OnInit, OnDestroy {
     }
 
     openSnackBar(alert: Alert) {
-      this.snackBar.open(alert.message, '', {
-        duration: 5000,
+      this.snackBar.open(alert.message, 'Close', {
+        duration: 3000,
         horizontalPosition: 'center',
-        verticalPosition: 'top',
+        verticalPosition: 'bottom',
         panelClass: [this.snackBarColor(alert)]
       });
     }

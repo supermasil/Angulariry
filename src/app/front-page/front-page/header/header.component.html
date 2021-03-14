@@ -16,13 +16,21 @@
           <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/mst')" routerLinkActive="mat-accent">Master</a>
         </mat-menu>
       </li>
-      <li class="nav-item" *ngIf="isAuth()">
-        <a class="nav-link" (click)="redirect('/trackings/tracking-tool')">Tracking Tool</a>
+
+      <li class="nav-item" *ngIf="isAuth() && canView(authGlobals.everyone)">
+        <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Create</a>
+        <mat-menu #createMenu="matMenu">
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/create/onl')" routerLinkActive="mat-accent">Online</a>
+          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/sev')" routerLinkActive="mat-accent">Serviced (Not ready)</a>
+          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/inp')" routerLinkActive="mat-accent">In Person</a>
+          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/csl')" routerLinkActive="mat-accent">Consolidated</a>
+          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/mst')" routerLinkActive="mat-accent">Master</a>
+        </mat-menu>
       </li>
 
-      <li class="nav-item" *ngIf="isAuth()">
-        <app-onboarding></app-onboarding>
-      </li>
+      <!-- <li class="nav-item" *ngIf="isAuth()">
+        <a class="nav-link" (click)="redirect('/trackings/tracking-tool')">Tracking Tool</a>
+      </li> -->
     </ul>
 
     <ul class="navbar-nav ml-auto">
@@ -34,17 +42,7 @@
           <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/pricing/custom')" routerLinkActive="mat-accent">Custom pricing</a>
         </mat-menu>
       </li>
-      <li class="nav-item" *ngIf="isAuth() && canView(authGlobals.everyone)">
-        <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Create</a>
-        <mat-menu #createMenu="matMenu">
-          <a style="color: black;" mat-menu-item class="nav-link" (click)="redirect('/trackings/create/onl')" routerLinkActive="mat-accent">Online</a>
-          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/sev')" routerLinkActive="mat-accent">Serviced (Not ready)</a>
-          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/inp')" routerLinkActive="mat-accent">In Person</a>
-          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/csl')" routerLinkActive="mat-accent">Consolidated</a>
-          <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" (click)="redirect('/trackings/create/mst')" routerLinkActive="mat-accent">Master</a>
-        </mat-menu>
-        <!-- <a class="nav-link" (click)="redirect('/trackings/create')" routerLinkActive="mat-accent">Create</a> -->
-      </li>
+
       <li class="nav-item" *ngIf="isAuth() && canView(authGlobals.internal)">
         <a mat-button [matMenuTriggerFor]="createMenu" style="color: white;">Users</a>
         <mat-menu #createMenu="matMenu">
@@ -66,6 +64,9 @@
           <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{user?.active? "Active": "Inactive"}}</a>
           <a style="color: black;" mat-menu-item class="nav-link" (click)="onLogOut()" routerLinkActive="mat-accent">Logout</a>
         </mat-menu>
+      </li>
+      <li class="nav-item" *ngIf="isAuth()">
+        <app-onboarding></app-onboarding>
       </li>
     </ul>
   </div>

@@ -4,7 +4,6 @@ const InPersonTrackingModel = require('../models/tracking-models/in-person-track
 const InPersonSubTrackingModel = require('../models/tracking-models/in-person-tracking-sub');
 const ConsolidatedTrackingModel = require('../models/tracking-models/consolidated-tracking');
 const MasterTrackingModel = require('../models/tracking-models/master-tracking');
-const UserController = require("../controllers/users");
 const CarrierTrackingController = require("../controllers/carrier-trackings");
 const HistoryController = require("../controllers/history");
 const CommentModel = require('../models/comment');
@@ -111,7 +110,7 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
     assert(tracker !== null, "Tracker is null");
   }
 
-  let generalInfo = await generalInfoSetupHelper(req);
+  let generalInfo = generalInfoSetupHelper(req);
   let createdTracking = null;
   let updateBody = {}
 
@@ -181,14 +180,14 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       for (id of req.body.removedTrackingIds) {
         await InPersonSubTrackingModel.findByIdAndDelete(id).session(session);
       }
-      await populateStatusUpstreamHelper(req.userData.u_id, req.userData.orgId, [[],[],createdTracking.subTrackings], subtrackings, createdTracking._id, TrackingTypes.INPERSON, true, session);
+      await populateStatusUpstreamHelper(req.userData.u_id, req.userData.orgId, null, subtrackings, createdTracking._id, TrackingTypes.INPERSON, true, session);
       break;
   }
 
   return createdTracking;
 }
 
-generalInfoSetupHelper = async req => {
+generalInfoSetupHelper = req => {
   return {
     sender: req.body.generalInfo.sender,
     recipient: req.body.generalInfo.recipient,
@@ -242,7 +241,7 @@ subTrackingsSetupHelper = async (req, session) => {
   let subTrackings = [];
 
   for (sub of req.body.subTrackings) {
-      let generalInfo = await generalInfoSetupHelper(req);
+      let generalInfo = generalInfoSetupHelper(req);
       generalInfo.totalWeight = sub.finalizedInfo.totalWeight;
       generalInfo.finalCost = sub.finalizedInfo.finalCost;
       generalInfo.costAdjustment = sub.finalizedInfo.costAdjustment;
@@ -518,6 +517,7 @@ getTrackingHelper = async (type, id, orgId, byId) => {
         .populate('linkedToMst')
         .lean().then(callbackfunction);
     case TrackingTypes.CONSOLIDATED:
+      console.log(orgId)
       return await ConsolidatedTrackingModel.findOne(queryParams)
         .populate('generalInfo.sender')
         .populate({path: 'onlineTrackings', populate: {path: 'generalInfo.sender'}})
@@ -614,19 +614,15 @@ exports.changeTrackingStatus = async (req, res , next) => {
 
     assert (tracking != null, "changeTrackingStatus: Tracking is null");
 
-
     if (tracking.linkedToCsl) {
       await populateStatusUpstreamHelper(req.userData.u_id, req.userData.orgId, null, [tracking], tracking.linkedToCsl._id, TrackingTypes.CONSOLIDATED, true, session);
     }
     if (tracking.linkedToMst) {
       await populateStatusUpstreamHelper(req.userData.u_id, req.userData.orgId, null, [tracking], tracking.linkedToMst._id, TrackingTypes.MASTER, true, session);
     }
-
     if (TrackingTypes.INPERSONSUB == type) {
       await populateStatusUpstreamHelper(req.userData.u_id, req.userData.orgId, null, [tracking], tracking.trackingNumber.substring(0, tracking.trackingNumber.lastIndexOf('-')), TrackingTypes.INPERSON, false, session);
     }
-
-
     session.endSession();
 
     return res.status(200).json({message: "Status changed successfully", tracking: tracking});
@@ -637,11 +633,9 @@ exports.changeTrackingStatus = async (req, res , next) => {
 }
 
 changeStatusForMasterHelper = async (userId, orgId, currentStatus, masterTrackingId, edit, validTrackingIds, removedTrackingIds, session) => { // When turning the switches
-
   let inPersonTrackingNumbers = [];
   validTrackings = [[],[],[]];
   removedTrackings = [[],[],[]];
-
   if (edit) {
     currentStatus = currentStatus === trackingStatuses.Created ? trackingStatuses.ReadyToFly : currentStatus;
     validTrackings[0] = await OnlineTrackingModel.find({_id: {$in: validTrackingIds[0]}}).lean().then(trackings => {return trackings});
@@ -686,26 +680,18 @@ changeStatusForMasterHelper = async (userId, orgId, currentStatus, masterTrackin
   } else {
     await changeStatusForOnlineServicedInPersonHelper(userId, orgId, [currentStatus, currentStatus, currentStatus], [validTrackingIds[0], validTrackingIds[1], validTrackingIds[2]], true, session);
   }
-
   for (t of inPersonTrackingNumbers) {
     await populateStatusUpstreamHelper(userId, orgId, null, combinedTrackings, t, TrackingTypes.INPERSON, false, session);
   };
-
   for (t of cslIds) {
     await populateStatusUpstreamHelper(userId, orgId, null, combinedTrackings, t, TrackingTypes.CONSOLIDATED, true, session);
   }
-
   await populateStatusUpstreamHelper(userId, orgId, validTrackingIds, [], masterTrackingId, TrackingTypes.MASTER, true, session); // Populate for financialStatus
   currentStatus = edit && (validTrackings.flat().length == 0 || currentStatus === trackingStatuses.ReadyToFly) ? trackingStatuses.Created : currentStatus;
   await changeTrackingStatusHelper(userId, orgId, TrackingTypes.MASTER, currentStatus, [masterTrackingId], true, session);
-
 }
 
 
-/**
- * Just a helper for other methods, or when switches of consolidated trackings are switched
- * consolidatedTrackings: A list of consolidated tracking numbers
- */
 changeStatusForConsolidatedHelper = async (userId, orgId, consolidatedTrackingId, validTrackingIds, removedTrackingIds, edit, session) => {
   if (edit) {
     await linkUnlinkForOnlineServicedInPersonHelper(userId, orgId, validTrackingIds, consolidatedTrackingId, TrackingTypes.CONSOLIDATED, true, session); // Link
@@ -730,7 +716,7 @@ substituteTrackingsInMemory = (trackings, substitutions) => {
 populateStatusUpstreamHelper = async (userId, orgId, validTrackingIds, currentTrackings, trackingId, type, byIds, session) => {
   let onlineTrackings = servicedTrackings = inPersonSubTrackings = [];
 
-  if (validTrackingIds) {
+  if (validTrackingIds) { // Mostly for status changing
     onlineTrackings = substituteTrackingsInMemory(await OnlineTrackingModel.find({_id: {$in: validTrackingIds[0]}}).lean().then(trackings => {return trackings}), currentTrackings);
     servicedTrackings = substituteTrackingsInMemory(await ServicedTrackingModel.find({_id: {$in: validTrackingIds[1]}}).lean().then(trackings => {return trackings}), currentTrackings);
     inPersonSubTrackings = substituteTrackingsInMemory(await InPersonSubTrackingModel.find({_id: {$in: validTrackingIds[2]}}).lean().then(trackings => {return trackings}), currentTrackings);
@@ -747,13 +733,12 @@ populateStatusUpstreamHelper = async (userId, orgId, validTrackingIds, currentTr
       inPersonSubTrackings.push(...substituteTrackingsInMemory(b.inPersonSubTrackings, currentTrackings));
     });
   } else if (type == TrackingTypes.INPERSON) {
-    console.log(trackingId);
-    let tracking = await getTrackingHelper(TrackingTypes.INPERSON, trackingId, orgId, byIds);
-    inPersonSubTrackings = substituteTrackingsInMemory(tracking.subTrackings, currentTrackings);
-  }
-
-  if (type == TrackingTypes.INPERSON && inPersonSubTrackings.length == 0 && currentTrackings.length > 0) { // Inperson create case
-    inPersonSubTrackings = currentTrackings;
+    if (type == TrackingTypes.INPERSON && currentTrackings.length > inPersonSubTrackings.length) { // Inperson case adding another sub tracking, because subtrackings may not be present in the db
+      inPersonSubTrackings = currentTrackings;
+    } else {
+      let tracking = await getTrackingHelper(TrackingTypes.INPERSON, trackingId, orgId, byIds);
+      inPersonSubTrackings = substituteTrackingsInMemory(tracking.subTrackings, currentTrackings);
+    }
   }
 
   let tStatuses = [...onlineTrackings.map(t => t.generalInfo.trackingStatus), ...servicedTrackings.map(t => t.generalInfo.trackingStatus), ...inPersonSubTrackings.map(t => t.generalInfo.trackingStatus)];
@@ -768,7 +753,7 @@ populateStatusUpstreamHelper = async (userId, orgId, validTrackingIds, currentTr
     tStatus = tStatuses[0]
   } else {
     tStatuses.forEach((s) => {
-      currIndex = Object.values(trackingStatuses).indexOf(s);
+      let currIndex = Object.values(trackingStatuses).indexOf(s);
       minIndex = minIndex == -1? currIndex : currIndex < minIndex? currIndex: minIndex;
     });
     assert(minIndex >= 0, "populateStatusUpstreamHelper: minIndex is -1");

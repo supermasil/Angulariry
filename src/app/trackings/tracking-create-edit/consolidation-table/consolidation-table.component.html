@@ -35,10 +35,17 @@
         </ng-container>
       </div>
 
-      <div *ngIf="displayedColumns[i] == 'Status'">
+      <div *ngIf="displayedColumns[i] == 'Tracking Status'">
         <ng-container matColumnDef="{{definedColumns[i]}}" >
           <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="sortClicked();"> {{column}} </th>
           <td mat-cell *matCellDef="let element"> {{ element.generalInfo.trackingStatus }} </td>
+        </ng-container>
+      </div>
+
+      <div *ngIf="displayedColumns[i] == 'Financial Status'">
+        <ng-container matColumnDef="{{definedColumns[i]}}" >
+          <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="sortClicked();"> {{column}} </th>
+          <td mat-cell *matCellDef="let element"> {{ element.generalInfo.financialStatus }} </td>
         </ng-container>
       </div>
 

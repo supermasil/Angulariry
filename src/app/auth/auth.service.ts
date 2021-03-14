@@ -17,8 +17,8 @@ const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
 export class AuthService {
   private authStatusSubject = new ReplaySubject<boolean>();
   // private firebaseUserSubject = new ReplaySubject<firebase.User>();
-  // private mongoDbUserSubject = new ReplaySubject<UserModel>();
-  // private userOrgSubject = new ReplaySubject<OrganizationModel>();
+  private mongoDbUserSubject = new ReplaySubject<UserModel>();
+  private userOrgSubject = new ReplaySubject<OrganizationModel>();
   private firebaseUser: firebase.User;
   private mongoDbUser: UserModel;
   private userOrg: OrganizationModel = null;
@@ -107,8 +107,8 @@ export class AuthService {
 
   refreshUsers() {
     // this.firebaseUserSubject.next(this.firebaseUser);
-    // this.mongoDbUserSubject.next(this.mongoDbUser);
-    // this.userOrgSubject.next(this.userOrg);
+    this.mongoDbUserSubject.next(this.mongoDbUser);
+    this.userOrgSubject.next(this.userOrg);
   }
 
   async login(email: string, password: string) {
@@ -171,36 +171,6 @@ export class AuthService {
     }
   }
 
-  onboardToNewOrg(registerCode: string, referralCode: string) {
-    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `onboardToOrg/${this.mongoDbUser._id}`, {registerCode: registerCode, referralCode: referralCode})
-      .subscribe(response => {
-        this.userOrg = response.organization;
-        sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
-        // this.userOrgSubject.next(this.userOrg);
-        this.zone.run(async () => {
-          await this.refreshAuthentication(this.firebaseUser);
-          this.router.navigate(["/trackings"]);
-          this.alertService.success(`Onboarded to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
-        });
-      });
-  }
-
-  logInToOrg(orgId: string) {
-    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `updateOrg/${this.mongoDbUser._id}`, {orgId: orgId})
-      .subscribe(response => {
-        this.userOrg = response.organization;
-        sessionStorage.setItem("userOrg", JSON.stringify(this.userOrg));
-        // this.userOrgSubject.next(this.userOrg);
-        this.zone.run(async () => {
-          await this.refreshAuthentication(this.firebaseUser);
-          if (response.user.active) {
-            this.router.navigate(["/trackings"]);
-          }
-          this.alertService.success(`Logged in to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
-        });
-      });
-  }
-
   updateCredit(formData: any) {
     return this.httpClient.put<{message: string}>(USER_BACKEND_URL + `updateCredit/${formData._id}`, formData);
   }
@@ -223,6 +193,36 @@ export class AuthService {
       .subscribe((responseData) => {
         this.zone.run(() => {
           this.router.navigate(["/"]);
+        });
+      });
+  }
+
+  onboardToNewOrg(registerCode: string, referralCode: string) {
+    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `onboardToOrg/${this.mongoDbUser._id}`, {registerCode: registerCode, referralCode: referralCode})
+      .subscribe(response => {
+        this.userOrg = response.organization; // This is needed
+        this.mongoDbUser = response.user; // This is needed
+        this.setupSessionBackEndInfo(); // This is needed
+        this.zone.run(async () => {
+          await this.refreshAuthentication(this.firebaseUser);
+          this.router.navigate(["/trackings"]);
+          this.alertService.success(`Onboarded to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
+        });
+      });
+  }
+
+  logInToOrg(orgId: string) {
+    this.httpClient.put<{organization: OrganizationModel, user: UserModel}>(USER_BACKEND_URL + `updateOrg/${this.mongoDbUser._id}`, {orgId: orgId})
+      .subscribe(response => {
+        this.userOrg = response.organization; // This is needed
+        this.mongoDbUser = response.user; // This is needed
+        this.setupSessionBackEndInfo(); // This is needed
+        this.zone.run(async () => {
+          await this.refreshAuthentication(this.firebaseUser);
+          if (response.user.active) {
+            this.router.navigate(["/trackings"]);
+          }
+          this.alertService.success(`Logged in to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
         });
       });
   }
@@ -266,9 +266,14 @@ export class AuthService {
   //   return this.firebaseUserSubject.asObservable();
   // }
 
-  // getMongoDbUserListener() {
-  //   return this.mongoDbUserSubject.asObservable();
-  // }
+  getMongoDbUserListener() {
+    return this.mongoDbUserSubject.asObservable();
+  }
+
+  getUserOrgListener() {
+    return this.userOrgSubject.asObservable();
+  }
+
 
   getMongoDbUser() {
     return JSON.parse(sessionStorage.getItem("mongoDBUser")) as UserModel;
@@ -277,10 +282,6 @@ export class AuthService {
   getUserOrg() {
     return JSON.parse(sessionStorage.getItem("userOrg")) as OrganizationModel;
   }
-
-  // getUserOrgListener() {
-  //   return this.userOrgSubject.asObservable();
-  // }
 
   getIsAuth() {
     return sessionStorage.getItem("isAuthenticated") == "true" ? true : false;
