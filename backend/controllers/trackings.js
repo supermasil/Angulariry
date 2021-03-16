@@ -218,6 +218,10 @@ generalInfoSetupHelper = req => {
 
 itemsListSetupHelper = itemsList => {
   let results = [];
+
+  if (!itemsList || itemsList.length == 0) {
+    return results;
+  }
   itemsList.forEach(item =>{
     results.push({
       name: item.name,
@@ -238,9 +242,10 @@ itemsListSetupHelper = itemsList => {
 }
 
 subTrackingsSetupHelper = async (req, session) => {
-  let subTrackings = [];
+  let results = [];
 
   for (sub of req.body.subTrackings) {
+      console.log("here")
       let generalInfo = generalInfoSetupHelper(req);
       generalInfo.totalWeight = sub.finalizedInfo.totalWeight;
       generalInfo.finalCost = sub.finalizedInfo.finalCost;
@@ -266,16 +271,15 @@ subTrackingsSetupHelper = async (req, session) => {
           .then(createdTracking => {return createdTracking[0]});
       }
       assert(createdTracking != null, "subTrackingsSetupHelper: createdTracking is null");
-      subTrackings.push(createdTracking);
+      results.push(createdTracking);
   };
-  return subTrackings;
+
+  return results;
 }
 
 requestItemsSetupHelper = async req => {
   requestedItemsList = JSON.parse(req.body.requestedItems);
-
   requestedItems = []
-
   await requestedItemsList.forEach(item => {
     carrierTrackingIds = [];
     item.carrierTrackings.forEach(async item => {
@@ -733,11 +737,11 @@ populateStatusUpstreamHelper = async (userId, orgId, validTrackingIds, currentTr
       inPersonSubTrackings.push(...substituteTrackingsInMemory(b.inPersonSubTrackings, currentTrackings));
     });
   } else if (type == TrackingTypes.INPERSON) {
-    if (type == TrackingTypes.INPERSON && currentTrackings.length > inPersonSubTrackings.length) { // Inperson case adding another sub tracking, because subtrackings may not be present in the db
-      inPersonSubTrackings = currentTrackings;
-    } else {
-      let tracking = await getTrackingHelper(TrackingTypes.INPERSON, trackingId, orgId, byIds);
+    let tracking = await getTrackingHelper(TrackingTypes.INPERSON, trackingId, orgId, byIds);
+    if (tracking) {
       inPersonSubTrackings = substituteTrackingsInMemory(tracking.subTrackings, currentTrackings);
+    } else {
+      inPersonSubTrackings = currentTrackings;
     }
   }
 
@@ -840,8 +844,8 @@ updateManyGeneralHelper = async (type, queryParams, setParams, session) => {
       throw new Error("updateManyGeneralHelper: Tracking type doesn't match any");
   }
 
-  if (!res || res.nModified == 0) {
-    throw new Error(`updateManyGeneralHelper: Nothing got modified ${queryParams} ${setParams}`)
-  }
+  // if (!res || res.nModified == 0) {
+  //   throw new Error(`updateManyGeneralHelper: Nothing got modified ${queryParams} ${setParams}`)
+  // }
 }
 

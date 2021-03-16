@@ -1,5 +1,30 @@
 main {
-  margin: 1rem auto;
+  /* margin: 1rem auto; */
   padding-bottom: 2rem;
 }
 
+.side-menu {
+  width: 100%;
+  height: 100%;
+}
+
+.side-menu-content {
+  background-color: white;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.side-menu-nav {
+  padding: 0px;
+}
+
+.is-active {
+  background-color: #673AB7;
+  color: white
+}
+
+.mat-menu-item:hover {
+  background-color: #D1C4E9;
+  color: black;
+}

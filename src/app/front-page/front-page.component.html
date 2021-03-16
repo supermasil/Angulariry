@@ -1,0 +1,12 @@
+<div>
+  <h1>{{ 'demo.title' | translate }}</h1>
+
+  <!-- translation: translation pipe -->
+  <p>{{ 'demo.text' | translate }}</p>
+
+  <!-- translation: directive (key as attribute)-->
+  <p [translate]="'demo.text'"></p>
+
+  <!-- translation: directive (key as content of element) -->
+  <p translate>demo.text</p>
+</div>

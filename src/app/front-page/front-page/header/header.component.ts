@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, Output, EventEmitter } from '@angular/core';
 import { AuthService } from '../../../auth/auth.service';
 import { Subscription } from 'rxjs';
 import { ChangeDetectorRef } from '@angular/core/';
@@ -18,6 +18,7 @@ export class HeaderComponent implements OnInit, OnDestroy{
   authGlobals = AuthGlobals;
   user: UserModel;
   organization: OrganizationModel;
+  @Output() sideMenuClicked = new EventEmitter();
 
   ngOnInit() {
     this.authService.getMongoDbUserListener().subscribe(user => {
@@ -52,4 +53,7 @@ export class HeaderComponent implements OnInit, OnDestroy{
     return this.authService.getIsAuth();
   }
 
+  sideMenuPressed() {
+    this.sideMenuClicked.emit();
+  }
 };

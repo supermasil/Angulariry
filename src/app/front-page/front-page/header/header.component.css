@@ -24,3 +24,7 @@ a {
 .navbar-dark .nav-item:hover .nav-link {
   color: white;
 }
+
+::ng-deep.mat-menu-panel {
+  min-width: 200px !important;
+}

@@ -11,14 +11,14 @@ import { mimeType } from './mime-type.validator';
   styleUrls: ['./file-uploader.component.css']
 })
 export class FileUploaderComponent implements OnInit{
-
   fileUploaderForm: FormGroup;
-
   existingFilePaths: string[] = []; // Edit case
   filesPreview: string[] = [];
   filesToAdd: string[] = [];
   fileNamesToAdd: string[] = [];
   filesToDelete = [];
+  disableUploader = false;
+  limit = 1;
 
   @Input() currentFilePathsObservable: Observable<string[]> = new Observable();
 
@@ -34,12 +34,20 @@ export class FileUploaderComponent implements OnInit{
     this.currentFilePathsObservable.subscribe((files: string[]) => {
       this.existingFilePaths = [...files];
       this.filesPreview = [...files];
-    })
+      this.checkLimit();
+    });
+  }
+
+  checkLimit() {
+    if (this.filesToAdd.length + this.existingFilePaths.length - this.filesToDelete.length >= this.limit) {
+      this.disableUploader = true;
+    } else {
+      this.disableUploader = false;
+    }
   }
 
   onFilePicked(event: Event) {
     const file = (event.target as HTMLInputElement).files[0];
-
     if (!file) {
       return;
     }
@@ -55,8 +63,11 @@ export class FileUploaderComponent implements OnInit{
           return;
         }
         this.filesPreview.push(compressedFile);
+        console.log(this.filesPreview.length)
         this.filesToAdd.push(compressedFile);
         this.fileNamesToAdd.push(file.name);
+        this.checkLimit();
+        (event.target as HTMLInputElement).value = '';
       };
     reader.readAsDataURL(file); // This will kick off onload process
   }
@@ -73,6 +84,8 @@ export class FileUploaderComponent implements OnInit{
     if (this.existingFilePaths.includes(url)) { //edit case
       this.filesToDelete.push(url);
     }
+    console.log(this.filesPreview)
+    this.checkLimit();
   }
 
   async compressFile(file: string) {
