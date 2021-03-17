@@ -1,0 +1,64 @@
+{
+  "general": {
+    "trackings": "Vận đơn",
+    "create": "Khởi tạo",
+    "users": "Người dùng",
+    "origin": "Điểm xuất phát",
+    "destination": "Điểm đến",
+    "sender": "Người gửi",
+    "recipient": "Người nhận",
+    "notes": "Ghi chú",
+    "comment": "Tin nhắn",
+    "tracking-number": "Số vận đơn",
+    "payment": "Thanh toán",
+    "total": "Tổng cộng"
+  },
+  "tracking-types": {
+    "online": "Đơn online",
+    "serviced": "Đơn mua hộ",
+    "in-person": "Đơn gửi tận tay",
+    "consolidated": "Đơn kế toán tổng hợp",
+    "master": "Đơn vận chuyển tổng hợp"
+  },
+  "statuses": {
+    "consolidated": "Đã thêm vào đơn kế toán tổng hợp",
+    "paid": "Đã thanh toán",
+    "unpaid": "Chưa thanh toán",
+    "partially-paid": "Thanh toán một phần",
+    "unknown": "Không xác định",
+    "created": "Khởi tạo",
+    "pending": "Đang chờ xử lý",
+    "being-shipped-to-origin": "Đang vận chuyển tới điểm xuất phát",
+    "received-at-origin": "Nhận hàng tại điểm xuất phát",
+    "ready-to-fly": "Sẵn sàng bay",
+    "flying": "Đang bay",
+    "received-at-destination": "Nhận hàng tại điểm đến",
+    "being-delivered-to-recipient": "Đang vận chuyển tới người nhận",
+    "delivered-to-recipient": "Đã giao hàng"
+  },
+  "side-nav-bar": {
+    "pricing": "Bảng giá",
+    "new-pricing": "Tạo giá mới",
+    "edit-pricing": "Điều chỉnh giá",
+    "custom-pricing": "Giá riêng cho khách",
+    "new-user": "Tạo người dùng mới",
+    "edit-user": "Điều chỉnh thông tin",
+    "adjust-credit": "Điều chỉnh tín dụng"
+  },
+  "tracking-info": {
+    "item-name": "Tên sản phẩm",
+    "declared-value": "Giá trị khai báo",
+    "quantity": "Số lượng",
+    "insurance": "Bảo hiểm",
+    "weight": "Trọng lượng",
+    "weight-unit-charge": "Phí trọng lượng",
+    "extra-charge": "Phụ phí",
+    "final-charge": "Phí tổng cộng",
+    "status": "Tình trạng",
+    "total-weight": "Tổng trọng lượng",
+    "cost-adjustment": "Điều chỉnh phí",
+    "exchange": "Tỷ giá",
+    "final-cost": "Tổng chi phí"
+  }
+}
+

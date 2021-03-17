@@ -22,6 +22,7 @@ import { ConsolidationTableComponent } from './tracking-create-edit/consolidatio
 import { TrackingListCommonTemplateComponent } from './tracking-list/common-template/tracking-list-common-template.component';
 import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
 import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @NgModule({
@@ -51,7 +52,8 @@ import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
     TrackingRoutingModule,
     NgxPrintModule,
     SearchBarModule,
-    NgxQRCodeModule
+    NgxQRCodeModule,
+    TranslateModule.forChild()
   ]
 })
 export class TrackingModule {

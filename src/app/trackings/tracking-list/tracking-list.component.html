@@ -4,8 +4,9 @@
   (onSearchEvent)="onFuzzySearch($event)"
 ></search-bar>
 
-<mat-tab-group (selectedIndexChange)="tabChanged($event)" class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
-  <mat-tab label="Online" *ngIf="enabled[0]">
+<!-- Don't remove the canview in mat-tab-group so that index can work -->
+<mat-tab-group *ngIf="canView(authGlobals.everyone)" (selectedIndexChange)="tabChanged($event)" class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
+  <mat-tab [label]="'tracking-types.online' | translate" *ngIf="enabled[0]">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
@@ -15,7 +16,7 @@
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="Serviced" *ngIf="enabled[1]">
+  <mat-tab [label]="'tracking-types.serviced' | translate" *ngIf="enabled[1] && canView(authGlobals.everyone)">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
@@ -25,7 +26,7 @@
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="In-person" *ngIf="enabled[2]">
+  <mat-tab [label]="'tracking-types.in-person' | translate" *ngIf="enabled[2] && canView(authGlobals.everyone)">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
@@ -35,7 +36,7 @@
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="Consolidated" *ngIf="enabled[3] && canView(authGlobals.internal)">
+  <mat-tab [label]="'tracking-types.consolidated' | translate" *ngIf="enabled[3] && canView(authGlobals.internal)">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
@@ -45,7 +46,7 @@
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="Master" *ngIf="enabled[4] && canView(authGlobals.internal)">
+  <mat-tab [label]="'tracking-types.master' | translate" *ngIf="enabled[4] && canView(authGlobals.internal)">
     <ng-template matTabContent>
       <tracking-list-common-template
         (pageDataChangeEvent)="pageDataChanged($event)"
@@ -56,21 +57,6 @@
   </mat-tab>
 </mat-tab-group>
 </div>
-
-<!-- <p class='info-text mat-body-1' *ngIf="trackings.length == 0 && !trackingForm.controls['searchTerm'].value">No trackings found</p>
-<div *ngIf="trackings.length == 0 && trackingForm.controls['searchTerm'].value && searchClicked">
-  <p class='info-text mat-body-1'>Click to add and receive</p>
-  <div class="d-flex justify-content-center">
-    <a
-      mat-fab
-      color="primary"
-      [routerLink]="['/create', {'searchTerm': trackingForm.controls['searchTerm'].value, 'received': true}]"
-      >
-      <mat-icon>add</mat-icon>
-    </a>
-  </div>
-</div> -->
-
 
 
 

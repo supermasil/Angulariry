@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AngularMaterialModule } from '../../../angular-material.module';
 import { OnboardingModule } from '../onboarding/onboarding.module';
 import { HeaderComponent } from './header.component';
@@ -11,7 +13,9 @@ import { HeaderComponent } from './header.component';
   imports: [
     CommonModule,
     AngularMaterialModule,
-    OnboardingModule
+    OnboardingModule,
+    RouterModule,
+    TranslateModule.forChild()
   ], exports: [
     HeaderComponent
   ]

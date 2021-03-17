@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import bootstrap from "bootstrap";
 import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppComponent } from './app.component';
@@ -30,6 +30,13 @@ const engineLocation = "https://cdn.jsdelivr.net/npm/scandit-sdk@5.x/build/";
     ErrorComponent
   ],
   imports: [
+    TranslateModule.forRoot({
+      loader: {
+          provide: TranslateLoader,
+          useFactory: HttpLoaderFactory,
+          deps: [HttpClient]
+      }
+    }),
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -40,14 +47,7 @@ const engineLocation = "https://cdn.jsdelivr.net/npm/scandit-sdk@5.x/build/";
     FrontPageModule,
     NgxSpinnerModule,
     HeaderModule,
-    ScanditSdkModule.forRoot(licenseKey, { engineLocation, preloadEngine: true, preloadBlurryRecognition: true }),
-    TranslateModule.forRoot({
-      loader: {
-          provide: TranslateLoader,
-          useFactory: HttpLoaderFactory,
-          deps: [HttpClient]
-      }
-    })
+    ScanditSdkModule.forRoot(licenseKey, { engineLocation, preloadEngine: true, preloadBlurryRecognition: true })
   ],
   exports: [
 
@@ -56,6 +56,7 @@ const engineLocation = "https://cdn.jsdelivr.net/npm/scandit-sdk@5.x/build/";
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: SpinnerInterceptor, multi: true},
+    {provide: APP_INITIALIZER, useFactory: appInitializerFactory, deps: [TranslateService], multi: true},
     // {provide: TranslatePipe, useClass: TranslateModule, multi: true},
     NgxImageCompressService
   ], // For services/ Interceptors
@@ -67,4 +68,12 @@ export class AppModule { }
 // required for AOT compilation
 export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
   return new TranslateHttpLoader(http);
+}
+
+export function appInitializerFactory(translate: TranslateService) {
+  return () => {
+    let storedLanguage = localStorage.getItem("language");
+    translate.setDefaultLang(storedLanguage ? storedLanguage : 'en');
+    return translate.use(storedLanguage ? storedLanguage : 'en').toPromise();
+  };
 }

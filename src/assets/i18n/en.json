@@ -1,6 +1,62 @@
 {
-  "demo": {
-      "title": "Translation demo",
-      "text": "This is a simple demonstration app for ngx-translate"
+  "general": {
+    "trackings": "Trackings",
+    "create": "Create",
+    "users": "Users",
+    "origin": "Origin",
+    "destination": "Destination",
+    "sender": "Sender",
+    "recipient": "Recipient",
+    "notes": "Notes",
+    "comment": "Comment",
+    "tracking-number": "Tracking number",
+    "payment": "Payment",
+    "total": "Total"
+  },
+  "tracking-types": {
+    "online": "Online",
+    "serviced": "Serviced",
+    "in-person": "In Person",
+    "consolidated": "Consolidated",
+    "master": "Master"
+  },
+  "statuses": {
+    "consolidated": "Consolidated",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "unknown": "Unknown",
+    "created": "Created",
+    "pending": "Pending",
+    "being-shipped-to-origin": "Being shipped to origin",
+    "received-at-origin": "Received at origin",
+    "ready-to-fly": "Ready to fly",
+    "flying": "Flying",
+    "received-at-destination": "Received at destination",
+    "being-delivered-to-recipient": "Being delivered to recipient",
+    "delivered-to-recipient": "Delivered to recipient"
+  },
+  "side-nav-bar": {
+    "pricing": "Pricing",
+    "new-pricing": "New Pricing",
+    "edit-pricing": "Edit Pricing",
+    "custom-pricing": "Custom Pricing",
+    "new-user": "New User",
+    "edit-user": "Edit User",
+    "adjust-credit": "Adjust Credit"
+  },
+  "tracking-info": {
+    "item-name": "Item name",
+    "declared-value": "Declared value",
+    "quantity": "Quantity",
+    "insurance": "Insurance",
+    "weight": "Weight",
+    "weight-unit-charge": "Weight unit charge",
+    "extra-charge": "Extra charge",
+    "final-charge": "Final charge",
+    "status": "Status",
+    "total-weight": "Total weight",
+    "cost-adjustment": "Cost adjustment",
+    "exchange": "Exchange",
+    "final-cost": "Final Cost"
   }
 }

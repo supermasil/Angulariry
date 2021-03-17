@@ -4,76 +4,77 @@
 
 <mat-drawer-container class="side-menu" autosize>
   <mat-drawer #drawer class="side-menu-nav" mode="side">
-    <div>
-      <button mat-button class="w-100" [routerLink]="'/'">Home</button>
+    <div *ngIf="isAuth()">
+      <a mat-button color="primary" class="w-100" [routerLink]="'/'"><mat-icon>home</mat-icon></a>
+      <mat-divider></mat-divider>
     </div>
-    <div>
-      <button mat-button class="w-50" (click)="accordion.openAll()">Expand All</button>
-      <button mat-button class="w-50" (click)="accordion.closeAll()">Collapse All</button>
+    <div *ngIf="isAuth()">
+      <a mat-button color="primary" class="w-50" (click)="accordion.openAll()"><mat-icon>unfold_more</mat-icon></a>
+      <a mat-button color="primary" class="w-50" (click)="accordion.closeAll()"><mat-icon>unfold_less</mat-icon></a>
     </div>
-    <mat-accordion multi>
-      <mat-expansion-panel *ngIf="isAuth()">
+    <mat-accordion multi *ngIf="isAuth()">
+      <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
-            Trackings
+            <span translate>general.trackings</span>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
             <mat-icon class="ml-auto" color="primary">flight</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true }">Online</a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/sev'" [routerLinkActive]="['is-active']">Serviced (Not ready)</a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/inp'" [routerLinkActive]="['is-active']">In Person</a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/csl'" [routerLinkActive]="['is-active']">Consolidated</a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/mst'" [routerLinkActive]="['is-active']">Master</a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/onl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.online</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/sev'" [routerLinkActive]="['is-active']"><span translate>tracking-types.serviced</span> (not ready)</a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/inp'" [routerLinkActive]="['is-active']"><span translate>tracking-types.in-person</span></a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/csl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.consolidated</span></a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/mst'" [routerLinkActive]="['is-active']"><span translate>tracking-types.master</span></a>
       </mat-expansion-panel>
 
-      <mat-expansion-panel *ngIf="isAuth()">
+      <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
-            Create
+            <span translate>general.create</span>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
-            <mat-icon class="ml-auto" color="primary">add_circle</mat-icon>
+            <mat-icon class="ml-auto" color="primary">new_label</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{exact: true}">Online</a>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']">Serviced (Not ready)</a>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/inp'" [routerLinkActive]="['is-active']">In Person</a>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/csl'" [routerLinkActive]="['is-active']">Consolidated</a>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/mst'" [routerLinkActive]="['is-active']">Master</a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.online</span></a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']"><span translate>tracking-types.serviced</span> (not ready)</a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/inp'" [routerLinkActive]="['is-active']"><span translate>tracking-types.in-person</span></a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/csl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.consolidated</span></a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/mst'" [routerLinkActive]="['is-active']"><span translate>tracking-types.master</span></a>
       </mat-expansion-panel>
 
-      <mat-expansion-panel *ngIf="isAuth() && canView(authGlobals.managerAdmins)">
+      <mat-expansion-panel *ngIf="canView(authGlobals.managerAdmins)">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            Pricings
+            <span translate>side-nav-bar.pricing</span>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
             <mat-icon class="ml-auto" color="primary">price_change</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/new'" [routerLinkActive]="['is-active']">New Pricing</a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/edit'" [routerLinkActive]="['is-active']">Edit Pricing</a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/custom'" [routerLinkActive]="['is-active']">Custom pricing</a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/new'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.new-pricing</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/edit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.edit-pricing</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/custom'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.custom-pricing</span></a>
       </mat-expansion-panel>
 
-      <mat-expansion-panel *ngIf="isAuth()">
+      <mat-expansion-panel *ngIf="canView(authGlobals.internal)">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            Users
+            <span translate>general.users</span>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
             <mat-icon class="ml-auto" color="primary">account_circle</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/auth/users/new'" [routerLinkActive]="['is-active']">New User</a>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/auth/users/edit'" [routerLinkActive]="['is-active']">Edit User</a>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.managerAdmins) || canView([authGlobals.roles.Accounting])" [routerLink]="'/auth/users/adjustCredit'" [routerLinkActive]="['is-active']">Adjust Credit</a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/auth/users/new'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.new-user</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/auth/users/edit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.edit-user</span></a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.managerAdmins) || canView([authGlobals.roles.Accounting])" [routerLink]="'/auth/users/adjustCredit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.adjust-credit</span></a>
       </mat-expansion-panel>
     </mat-accordion>
   </mat-drawer>

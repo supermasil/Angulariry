@@ -113,11 +113,13 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   formatDateTime(date: Date) {
-    return moment(moment.utc(date).toDate()).fromNow(); //.local().format("MM-DD-YY hh:mm:ss")
+    let storedLanguage = localStorage.getItem("language");
+    return moment(moment.utc(date).toDate()).locale(storedLanguage? storedLanguage : "en").fromNow()   ; //.local().format("MM-DD-YY hh:mm:ss")
   }
 
   now() {
-    return moment().format("LLLL");
+    let storedLanguage = localStorage.getItem("language");
+    return moment().locale(storedLanguage? storedLanguage : "en").format("LLLL");
   }
 
   canView(roles: string[]) {
@@ -185,6 +187,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   }
 
   childTrackingToggle(tracking: OnlineTrackingModel | InPersonSubTrackingModel | ServicedTrackingModel, status: string | boolean, parentTracking: ConsolidatedTrackingModel | MasterTrackingModel, index: number) {
+    console.log(status)
     let tempStatus = status == true? this.trackingGlobals.financialStatuses.Paid : status == false? this.trackingGlobals.financialStatuses.Unpaid: status;
     this.trackingService.changeTrackingStatus(tempStatus, tracking._id, tracking.generalInfo.type, parentTracking._id).subscribe(response => {
       this.trackingService.getTracking(parentTracking.trackingNumber, parentTracking.generalInfo.type).subscribe(t => {

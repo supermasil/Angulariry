@@ -22,22 +22,22 @@ const TrackingTypes = Object.freeze({
 });
 
 const trackingStatuses = {
-  Unknown: "Unknown",
-  Created: "Created",
-  Pending: "Pending",
-  BeingShippedToOrigin: "Being shipped to origin",
-  ReceivedAtOrigin: "Received at origin",
-  ReadyToFly: "Ready to fly",
-  Flying: "Flying",
-  ReceivedAtDestination: "Received at destination",
-  BeingDeliveredToRecipient: "Being delivered to recipient",
-  DeliveredToRecipient: "Delivered to recipient",
+  Unknown: "unknown",
+  Created: "created",
+  Pending: "pending",
+  BeingShippedToOrigin: "being-shipped-to-origin",
+  ReceivedAtOrigin: "received-at-origin",
+  ReadyToFly: "ready-to-fly",
+  Flying: "flying",
+  ReceivedAtDestination: "received-at-destination",
+  BeingDeliveredToRecipient: "being-delivered-to-recipient",
+  DeliveredToRecipient: "delivered-to-recipient"
 }
 
 const financialStatuses = {
-  Unpaid: "Unpaid",
-  Paid: "Paid",
-  PartiallyPaid: "Partially paid"
+  Unpaid: "paid",
+  Paid: "unpaid",
+  PartiallyPaid: "partially-paid"
 }
 
 const allEqual = arr => arr.every( v => v === arr[0]);

@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AuthGlobals } from 'src/app/auth/auth-globals';
 import { UserModel } from 'src/app/models/user.model';
 import { OrganizationModel } from 'src/app/models/organization.model';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-header',
@@ -13,12 +14,19 @@ import { OrganizationModel } from 'src/app/models/organization.model';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy{
-  constructor(private authService: AuthService, private changeDetector: ChangeDetectorRef, private zone: NgZone, private router: Router) {}
+
   private authListenerSub: Subscription;
   authGlobals = AuthGlobals;
   user: UserModel;
   organization: OrganizationModel;
   @Output() sideMenuClicked = new EventEmitter();
+
+  constructor(
+    private authService: AuthService,
+    private zone: NgZone,
+    private router: Router,
+    private translateService: TranslateService) {}
+
 
   ngOnInit() {
     this.authService.getMongoDbUserListener().subscribe(user => {
@@ -55,5 +63,11 @@ export class HeaderComponent implements OnInit, OnDestroy{
 
   sideMenuPressed() {
     this.sideMenuClicked.emit();
+  }
+
+  languageChange(language: string) {
+    this.translateService.setDefaultLang(language);
+    this.translateService.use(language);
+    localStorage.setItem("language", language);
   }
 };
