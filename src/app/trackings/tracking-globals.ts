@@ -61,8 +61,8 @@ export class TrackingGlobals {
   }
 
   public static financialStatuses = {
-    Unpaid: "paid",
-    Paid: "unpaid",
+    Unpaid: "unpaid",
+    Paid: "paid",
     PartiallyPaid: "partially-paid"
   }
 
