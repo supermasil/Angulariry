@@ -7,11 +7,24 @@
     "destination": "Điểm đến",
     "sender": "Người gửi",
     "recipient": "Người nhận",
+    "recipients-address": "Địa chỉ người nhận",
     "notes": "Ghi chú",
     "comment": "Tin nhắn",
     "tracking-number": "Số vận đơn",
     "payment": "Thanh toán",
-    "total": "Tổng cộng"
+    "total": "Tổng cộng",
+    "tracking-status": "Tình trạng vận chuyển",
+    "financial-status": "Tình trạng thanh toán",
+    "carrier": "Công ty vận chuyển",
+    "save": "Lưu",
+    "cancel": "Huỷ bỏ",
+    "cost": "Chi phí",
+    "unit": "Đơn vị",
+    "filter": "Lọc dữ liệu",
+    "discount": "Giảm giá",
+    "new-pricing": "Tạo giá mới",
+    "edit-pricing": "Điều chỉnh giá",
+    "custom-pricing": "Giá riêng cho khách"
   },
   "tracking-types": {
     "online": "Đơn online",
@@ -25,6 +38,7 @@
     "paid": "Đã thanh toán",
     "unpaid": "Chưa thanh toán",
     "partially-paid": "Thanh toán một phần",
+    "received": "Đã nhận",
     "unknown": "Không xác định",
     "created": "Khởi tạo",
     "pending": "Đang chờ xử lý",
@@ -53,12 +67,21 @@
     "weight": "Trọng lượng",
     "weight-unit-charge": "Phí trọng lượng",
     "extra-charge": "Phụ phí",
+    "extra-charge-unit": "Đơn vị phụ phí",
     "final-charge": "Phí tổng cộng",
     "status": "Tình trạng",
     "total-weight": "Tổng trọng lượng",
+    "total-extra-charge": "Tổng phụ phí",
+    "total-insurance": "Tổng phí bảo hiểm",
+    "total-weight-charge": "Tổng phí trọng lượng",
+    "total-saving": "Tổng chi phí tiết kiệm",
     "cost-adjustment": "Điều chỉnh phí",
     "exchange": "Tỷ giá",
-    "final-cost": "Tổng chi phí"
+    "final-cost": "Tổng chi phí",
+    "pallet-number": "Số pallet",
+    "box-number": "Số thùng",
+    "add-destination": "Thêm điểm đến",
+    "add-origin": "Thêm điểm xuất phát"
   }
 }
 

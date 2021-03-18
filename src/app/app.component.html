@@ -23,8 +23,8 @@
             <mat-icon class="ml-auto" color="primary">flight</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/onl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.online</span></a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/sev'" [routerLinkActive]="['is-active']"><span translate>tracking-types.serviced</span> (not ready)</a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{exact: false}"><span translate>tracking-types.online</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{exact: false}"><span translate>tracking-types.serviced</span> (not ready)</a>
         <a mat-menu-item class="nav-link" [routerLink]="'/trackings/inp'" [routerLinkActive]="['is-active']"><span translate>tracking-types.in-person</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/csl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.consolidated</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/mst'" [routerLinkActive]="['is-active']"><span translate>tracking-types.master</span></a>

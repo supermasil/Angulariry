@@ -358,7 +358,6 @@ export class PricingComponent implements OnInit, AfterViewChecked {
     // this.editPricingForm.get('items')['controls'].forEach(control => control.get('name').updateValueAndValidity()); // Item names validator
     this.editPricingForm.get('organization').setValue(this.organization._id);
     this.editPricingForm.get('_id').setValue(this.orgDefaultPricing._id);
-    console.log(this.editPricingForm.getRawValue())
     if (!this.editPricingForm.valid) {
       this.alertService.warn("Items have invalid fields", GlobalConstants.flashMessageOptions)
       return

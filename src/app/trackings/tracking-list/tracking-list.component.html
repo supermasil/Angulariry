@@ -1,61 +1,61 @@
 <mat-spinner *ngIf="isLoading"></mat-spinner>
 <div *ngIf="!isLoading">
   <search-bar
-  (onSearchEvent)="onFuzzySearch($event)"
-></search-bar>
+    (onSearchEvent)="onFuzzySearch($event)">
+  </search-bar>
 
-<!-- Don't remove the canview in mat-tab-group so that index can work -->
-<mat-tab-group *ngIf="canView(authGlobals.everyone)" (selectedIndexChange)="tabChanged($event)" class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
-  <mat-tab [label]="'tracking-types.online' | translate" *ngIf="enabled[0]">
-    <ng-template matTabContent>
-      <tracking-list-common-template
-        (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()"
-        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
-      </tracking-list-common-template>
-    </ng-template>
-  </mat-tab>
+  <!-- Don't remove the canview in mat-tab-group so that index can work -->
+  <mat-tab-group *ngIf="canView(authGlobals.everyone)" (selectedIndexChange)="tabChanged($event)" class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
+    <mat-tab [label]="'tracking-types.online' | translate" *ngIf="enabled[0]">
+      <ng-template matTabContent>
+        <tracking-list-common-template
+          (pageDataChangeEvent)="pageDataChanged($event)"
+          [trackingsObservable]="trackingsSubject.asObservable()"
+          [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+        </tracking-list-common-template>
+      </ng-template>
+    </mat-tab>
 
-  <mat-tab [label]="'tracking-types.serviced' | translate" *ngIf="enabled[1] && canView(authGlobals.everyone)">
-    <ng-template matTabContent>
-      <tracking-list-common-template
-        (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()"
-        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
-      </tracking-list-common-template>
-    </ng-template>
-  </mat-tab>
+    <mat-tab [label]="'tracking-types.serviced' | translate" *ngIf="enabled[1] && canView(authGlobals.everyone)">
+      <ng-template matTabContent>
+        <tracking-list-common-template
+          (pageDataChangeEvent)="pageDataChanged($event)"
+          [trackingsObservable]="trackingsSubject.asObservable()"
+          [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+        </tracking-list-common-template>
+      </ng-template>
+    </mat-tab>
 
-  <mat-tab [label]="'tracking-types.in-person' | translate" *ngIf="enabled[2] && canView(authGlobals.everyone)">
-    <ng-template matTabContent>
-      <tracking-list-common-template
-        (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()"
-        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
-      </tracking-list-common-template>
-    </ng-template>
-  </mat-tab>
+    <mat-tab [label]="'tracking-types.in-person' | translate" *ngIf="enabled[2] && canView(authGlobals.everyone)">
+      <ng-template matTabContent>
+        <tracking-list-common-template
+          (pageDataChangeEvent)="pageDataChanged($event)"
+          [trackingsObservable]="trackingsSubject.asObservable()"
+          [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+        </tracking-list-common-template>
+      </ng-template>
+    </mat-tab>
 
-  <mat-tab [label]="'tracking-types.consolidated' | translate" *ngIf="enabled[3] && canView(authGlobals.internal)">
-    <ng-template matTabContent>
-      <tracking-list-common-template
-        (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()"
-        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
-      </tracking-list-common-template>
-    </ng-template>
-  </mat-tab>
+    <mat-tab [label]="'tracking-types.consolidated' | translate" *ngIf="enabled[3] && canView(authGlobals.internal)">
+      <ng-template matTabContent>
+        <tracking-list-common-template
+          (pageDataChangeEvent)="pageDataChanged($event)"
+          [trackingsObservable]="trackingsSubject.asObservable()"
+          [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+        </tracking-list-common-template>
+      </ng-template>
+    </mat-tab>
 
-  <mat-tab [label]="'tracking-types.master' | translate" *ngIf="enabled[4] && canView(authGlobals.internal)">
-    <ng-template matTabContent>
-      <tracking-list-common-template
-        (pageDataChangeEvent)="pageDataChanged($event)"
-        [trackingsObservable]="trackingsSubject.asObservable()"
-        [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
-      </tracking-list-common-template>
-    </ng-template>
-  </mat-tab>
-</mat-tab-group>
+    <mat-tab [label]="'tracking-types.master' | translate" *ngIf="enabled[4] && canView(authGlobals.internal)">
+      <ng-template matTabContent>
+        <tracking-list-common-template
+          (pageDataChangeEvent)="pageDataChanged($event)"
+          [trackingsObservable]="trackingsSubject.asObservable()"
+          [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+        </tracking-list-common-template>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
 </div>
 
 

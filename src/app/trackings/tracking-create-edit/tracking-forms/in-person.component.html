@@ -25,7 +25,7 @@
                 <div class="row">
                   <div class="col-lg-4">
                     <mat-form-field appearance="outline">
-                      <mat-label>Tracking Number</mat-label>
+                      <mat-label translate>general.tracking-number</mat-label>
                       <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
                       <button
                         [disabled]="subTracking.get('linkedToCsl').value || subTracking.get('linkedToMst').value"
@@ -148,32 +148,12 @@
       </mat-card>
     </div>
 
-    <mat-form-field appearance="outline" class="mt-4">
-      <mat-label>Notes</mat-label>
-      <textarea
-      matInput
-      rows='2'
-      cdkTextareaAutosize
-      formControlName='content'
-      ></textarea>
-    </mat-form-field>
+    <notes
+      [defaultContentObservable]="defaultContentSubject.asObservable()"
+      (contentChanged)="inPersonForm?.get('content').setValue($event)">
+    </notes>
 
-    <div class="mt-2">
-      <button
-      mat-raised-button
-      color='primary'
-      type='submit'
-      class="mr-2">
-      Save
-      </button>
-      <button
-        mat-raised-button
-        color='warn'
-        type='button'
-        routerLink="/">
-        Cancel
-      </button>
-    </div>
+    <save-cancel-buttons></save-cancel-buttons>
 
   </form>
 </div>

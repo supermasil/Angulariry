@@ -34,6 +34,7 @@ export class MasterFormCreateComponent implements OnInit {
   users: UserModel[];
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
+  defaultContentSubject = new ReplaySubject<string>();
   usersSubject = new ReplaySubject<UserModel[]>();
   trackingNumeberSubject = new ReplaySubject<string>();
   generalInfoSubject = new ReplaySubject<GeneralInfoModel>();
@@ -135,6 +136,7 @@ export class MasterFormCreateComponent implements OnInit {
     this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
+    this.defaultContentSubject.next(this.masterForm.get("content").value);
   }
 
   setUpData() {
@@ -187,7 +189,6 @@ export class MasterFormCreateComponent implements OnInit {
           this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
           this.trackingsReference = [...this.allTrackings];
           this.filteredTrackings = of(this.allTrackings);
-          console.log(this.allTrackings)
         });
       });
     });

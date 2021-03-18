@@ -7,6 +7,7 @@ import { AutoCompleteInputModule } from '../auto-complete-input/auto-complete-in
 import { PricingComponent } from './pricing.component';
 import { PricingRoutingModule } from './pricing-routing.module';
 import { DirectiveModule } from '../directives/directives.module';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @NgModule({
@@ -21,7 +22,8 @@ import { DirectiveModule } from '../directives/directives.module';
     NgxCurrencyModule,
     AutoCompleteInputModule,
     PricingRoutingModule,
-    DirectiveModule
+    DirectiveModule,
+    TranslateModule.forChild()
   ]
 })
 export class PricingModule {

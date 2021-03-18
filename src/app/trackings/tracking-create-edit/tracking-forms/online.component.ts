@@ -1,8 +1,8 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, ViewChild } from "@angular/core";
+import { AfterViewChecked, ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute } from '@angular/router';
-import { ReplaySubject, Subscription } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { AuthService } from "src/app/auth/auth.service";
 import { FileUploaderComponent } from "src/app/custom-components/file-uploader/file-uploader.component";
 import { OrganizationModel } from "src/app/models/organization.model";
@@ -42,6 +42,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
   defaultPricingSubject = new ReplaySubject<PricingModel>();
+  defaultContentSubject = new ReplaySubject<string>();
 
   usersSubject = new ReplaySubject<UserModel[]>();
   trackingNumeberSubject = new ReplaySubject<string>();
@@ -70,7 +71,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     private route: ActivatedRoute,
     private authService: AuthService,
     private pricingService: PricingService,
-    private zone: NgZone,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -86,7 +86,6 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
         this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
           this.users = response.users;
           this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
-          console.log("here")
           this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
             this.defaultPricing = pricing;
             this.defaultPricingSubject.next(pricing);
@@ -131,6 +130,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
     this.exchangeSubject.next(this.currentTracking.generalInfo.exchange);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
     this.itemsListSubject.next(this.itemsList?.getRawValues()?.items);
+    this.defaultContentSubject.next(this.onlineForm.get("content").value);
   }
 
   createOnlineForm(formData: OnlineTrackingModel) {

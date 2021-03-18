@@ -1,5 +1,5 @@
 <mat-tab-group class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
-  <mat-tab label="New Pricing" *ngIf="enabled[0] && isAuth()">
+  <mat-tab [label]="'general.new-pricing' | translate" *ngIf="enabled[0] && isAuth()">
     <ng-template matTabContent>
       <div *ngIf="newPricingForm">
         <form [formGroup]="newPricingForm" (submit)="onAddNewItems()" (keydown.enter)="$event.preventDefault()" class="my-4">
@@ -9,7 +9,7 @@
                 <div class="row">
                   <div class="col-md-4">
                     <mat-form-field appearance="outline">
-                      <mat-label>Item Name</mat-label>
+                      <mat-label translate>tracking-info.item-name</mat-label>
                       <input matInput type="text" formControlName="name">
                       <a
                         *ngIf="newPricingForm.get('items')['controls'].length > 1"
@@ -25,7 +25,7 @@
 
                   <div class="col-md-4">
                     <mat-form-field appearance="outline">
-                      <mat-label>Unit</mat-label>
+                      <mat-label translate>general.unit</mat-label>
                       <mat-select matInput formControlName="unit" required>
                         <mat-option *ngFor="let unit of units" [value]="unit">
                           {{unit}}
@@ -36,7 +36,7 @@
 
                   <div class="col-md-4">
                     <mat-form-field appearance="outline">
-                      <mat-label>Note</mat-label>
+                      <mat-label translate>general.notes</mat-label>
                       <input matInput type="text" formControlName="content">
                     </mat-form-field>
                   </div>
@@ -54,7 +54,7 @@
                           (itemSelected)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event)"
                           (inputInvalid)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue('')"
                           [enforeSelection]="true"
-                          [matLabel]="'Origin'"
+                          [matLabel]="'general.origin' | translate"
                           [matErrorMessage]="'Please select one from the drowdown only'">
                         </auto-complete-input>
                         <div class="float-right" style="position: relative; bottom: 70px; right: 10px;">
@@ -79,25 +79,25 @@
                                   (itemSelected)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event)"
                                   (inputInvalid)="newPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue('')"
                                   [enforeSelection]="true"
-                                  [matLabel]="'Destination'"
+                                  [matLabel]="'general.destination' | translate"
                                   [matErrorMessage]="'Please select one from the drowdown only'">
                                 </auto-complete-input>
 
                                 <mat-form-field appearance="outline">
-                                  <mat-label>Price Per Unit</mat-label>
+                                  <mat-label translate>tracking-info.weight-unit-charge</mat-label>
                                   <input matInput type="number" formControlName="pricePerUnit">
                                 </mat-form-field>
                                 <div class="row">
                                   <div class="col">
                                     <mat-form-field appearance="outline">
-                                      <mat-label>Extra Charge</mat-label>
+                                      <mat-label translate>tracking-info.extra-charge</mat-label>
                                       <input matInput type="number" formControlName="extraCharge">
                                     </mat-form-field>
                                   </div>
                                   <div class="col">
                                     <mat-form-field appearance="outline">
-                                      <mat-label>Extra Charge Unit</mat-label>
-                                      <mat-select matInput formControlName="extraChargeUnit" required>
+                                      <mat-label translate>tracking-info.extra-charge-unit</mat-label>
+                                      <mat-select matInput formControlName="extraChargeUnit">
                                         <mat-option *ngFor="let unit of extraChargeUnits" [value]="unit">
                                           {{unit}}
                                         </mat-option>
@@ -122,12 +122,12 @@
                       </div>
                     </div>
                     <div class="d-flex justify-content-end">
-                      <button type="button" mat-raised-button color="primary" (click)="addDestination(newPricingForm, i, r)">Add destination</button>
+                      <button type="button" mat-raised-button color="primary" (click)="addDestination(newPricingForm, i, r)">{{'tracking-info.add-destination' | translate}}</button>
                     </div>
                   </div>
                 </div>
                 <div class="d-flex justify-content-end mt-2">
-                  <button type="button" mat-raised-button color="accent"(click)="addRoute(newPricingForm, i)">Add origin</button>
+                  <button type="button" mat-raised-button color="accent"(click)="addRoute(newPricingForm, i)">{{'tracking-info.add-origin' | translate}}</button>
                 </div>
               </mat-card>
             </div>
@@ -154,7 +154,7 @@
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="Edit Pricing" *ngIf="enabled[1] && isAuth()">
+  <mat-tab [label]="'general.edit-pricing' | translate" *ngIf="enabled[1] && isAuth()">
     <ng-template matTabContent>
       <div *ngIf="editPricingForm">
         <form [formGroup]="editPricingForm" (submit)="onEditItem()" (keydown.enter)="$event.preventDefault()" class="my-4">
@@ -164,7 +164,7 @@
               (itemSelected)="itemSelected($event)"
               (inputInvalid)="''"
               [enforeSelection]="true"
-              [matLabel]="'Item Name'"
+              [matLabel]="'tracking-info.item-name' | translate"
               [lockOption]="false"
               [matErrorMessage]="'Please select one from the drowdown only'">
             </auto-complete-input>
@@ -176,7 +176,7 @@
                   <div class="row">
                     <div class="col-md-4">
                       <mat-form-field appearance="outline">
-                        <mat-label>Item Name</mat-label>
+                        <mat-label translate>tracking-info.item-name</mat-label>
                         <input matInput type="text" formControlName="name" required>
                         <!-- <a
                           *ngIf="editPricingForm.get('items')['controls'].length > 1"
@@ -192,7 +192,7 @@
 
                     <div class="col-md-4">
                       <mat-form-field appearance="outline">
-                        <mat-label>Unit</mat-label>
+                        <mat-label translate>general.unit</mat-label>
                         <mat-select matInput formControlName="unit" required>
                           <mat-option *ngFor="let unit of units" [value]="unit">
                             {{unit}}
@@ -203,7 +203,7 @@
 
                     <div class="col-md-4">
                       <mat-form-field appearance="outline">
-                        <mat-label>Note</mat-label>
+                        <mat-label translate>general.notes</mat-label>
                         <input matInput type="text" formControlName="content">
                       </mat-form-field>
                     </div>
@@ -221,7 +221,7 @@
                             (itemSelected)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event)"
                             (inputInvalid)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue('')"
                             [enforeSelection]="true"
-                            [matLabel]="'Origin'"
+                            [matLabel]="'general.origin' | translate"
                             [matErrorMessage]="'Please select one from the drowdown only'">
                           </auto-complete-input>
                           <div class="float-right" style="position: relative; bottom: 70px; right: 10px;">
@@ -246,18 +246,18 @@
                                     (itemSelected)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event)"
                                     (inputInvalid)="editPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue('')"
                                     [enforeSelection]="true"
-                                    [matLabel]="'Destination'"
+                                    [matLabel]="'general.destination' | translate"
                                     [matErrorMessage]="'Please select one from the drowdown only'">
                                   </auto-complete-input>
 
                                   <mat-form-field appearance="outline">
-                                    <mat-label>Price Per Unit</mat-label>
+                                    <mat-label translate>tracking-info.weight-unit-charge</mat-label>
                                     <input matInput type="number" formControlName="pricePerUnit">
                                   </mat-form-field>
                                   <div class="row">
                                     <div class="col">
                                       <mat-form-field appearance="outline">
-                                        <mat-label>Extra Change</mat-label>
+                                        <mat-label translate>tracking-info.extra-charge</mat-label>
                                         <input matInput type="number" formControlName="extraCharge">
                                       </mat-form-field>
                                     </div>
@@ -280,7 +280,7 @@
                                         </a>
                                       </mat-form-field> -->
                                       <mat-form-field appearance="outline">
-                                        <mat-label>Extra Charge Unit</mat-label>
+                                        <mat-label translate>tracking-info.extra-charge-unit</mat-label>
                                         <mat-select matInput formControlName="extraChargeUnit" required>
                                           <mat-option *ngFor="let unit of extraChargeUnits" [value]="unit">
                                             {{unit}}
@@ -305,12 +305,12 @@
                         </div>
                       </div>
                       <div class="d-flex justify-content-end">
-                        <button type="button" mat-raised-button color="primary" (click)="addDestination(editPricingForm, i, r)">Add destination</button>
+                        <button type="button" mat-raised-button color="primary" (click)="addDestination(editPricingForm, i, r)">{{'tracking-info.add-destination' | translate}}</button>
                       </div>
                     </div>
                   </div>
                   <div class="d-flex justify-content-end mt-2">
-                    <button type="button" mat-raised-button color="accent"(click)="addRoute(editPricingForm, i)">Add origin</button>
+                    <button type="button" mat-raised-button color="accent"(click)="addRoute(editPricingForm, i)">{{'tracking-info.add-origin' | translate}}</button>
                   </div>
                 </mat-card>
               </div>
@@ -337,7 +337,7 @@
     </ng-template>
   </mat-tab>
 
-  <mat-tab label="Customer Pricing" *ngIf="enabled[2] && isAuth()">
+  <mat-tab [label]="'general.custom-pricing' | translate" *ngIf="enabled[2] && isAuth()">
     <ng-template matTabContent>
       <div class="mt-4">
         <auto-complete-input
@@ -345,7 +345,7 @@
           (itemSelected)="userSelected($event)"
           (inputInvalid)="''"
           [enforeSelection]="true"
-          [matLabel]="'User'"
+          [matLabel]="'general.users' | translate"
           [lockOption]="false"
           [matErrorMessage]="'Please select one from the drowdown only'">
         </auto-complete-input>
@@ -357,7 +357,7 @@
 
       <div>
         <mat-form-field class="mt-2">
-          <mat-label>Filter</mat-label>
+          <mat-label translate>general.filter</mat-label>
           <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Clothes" #input>
         </mat-form-field>
 
@@ -384,7 +384,7 @@
                     <div class="row">
                       <div class="col-md-3">
                         <mat-form-field appearance="outline">
-                          <mat-label>Origin</mat-label>
+                          <mat-label translate>general.origin</mat-label>
                           <input matInput type="text" value="{{route?.origin}}" readonly="true">
                         </mat-form-field>
                       </div>
@@ -394,21 +394,21 @@
                           <div class="row">
                             <div class="col-4">
                               <mat-form-field appearance="outline">
-                                <mat-label>Destination</mat-label>
+                                <mat-label translate>general.destination</mat-label>
                                 <input matInput type="text" value="{{destination?.name}}" readonly="true">
                               </mat-form-field>
                             </div>
 
                             <div class="col-4">
                               <mat-form-field appearance="outline">
-                                <mat-label>Price per unit</mat-label>
+                                <mat-label translate>tracking-info.weight-unit-charge</mat-label>
                                 <input matInput type="text" value="{{destination?.pricePerUnit}} $" readonly="true">
                               </mat-form-field>
                             </div>
 
                             <div class="col-4">
                               <mat-form-field appearance="outline">
-                                <mat-label>Extra charge</mat-label>
+                                <mat-label translate>tracking-info.extra-charge</mat-label>
                                 <input matInput type="text" value="{{destination?.extraCharge}} {{destination?.extraChargeUnit}}" readonly="true">
                               </mat-form-field>
                             </div>
@@ -416,18 +416,17 @@
 
                           <div class="row">
                             <div class="col-4">
-                              <mat-label>Customer Price Adjustment</mat-label>
                             </div>
 
                             <div class="col-4">
                               <mat-form-field appearance="outline">
-                                <mat-label>Discount amount</mat-label>
+                                <mat-label translate>general.discount</mat-label>
                                 <input matInput type="number" min="-100" max="100" #perUnitDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).perUnitDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, $event.target.value, null, null)">
                                 <!-- <h5 style="color: red;" *ngIf="perUnitDiscountAmount.value > 100 || perUnitDiscountAmount.value < -100">Number must be between -100 and 100</h5> -->
                               </mat-form-field>
 
                               <mat-form-field appearance="outline">
-                                <mat-label>Unit</mat-label>
+                                <mat-label translate>general.unit</mat-label>
                                 <mat-select [value]="getDiscountsForDestination(item._id, route._id, destination._id).perUnitDiscountUnit" (selectionChange)="onDiscountChange(item._id, route._id, destination._id, $event.value, null, null, null)">
                                   <mat-option *ngFor="let unit of discountUnits"  [value]="unit">
                                     {{unit}}
@@ -438,13 +437,13 @@
 
                             <div class="col-4">
                               <mat-form-field appearance="outline">
-                                <mat-label>Discount amount</mat-label>
+                                <mat-label translate>general.discount</mat-label>
                                 <input matInput type="number" min="-100" max="100" #extraChargeDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, null, null, $event.target.value)">
                                 <!-- <h5 style="color: red;" *ngIf="extraChargeDiscountAmount.value > 100 || extraChargeDiscountAmount.value < -100">Number must be between -100 and 100</h5> -->
                               </mat-form-field>
 
                               <mat-form-field appearance="outline">
-                                <mat-label>Unit</mat-label>
+                                <mat-label translate>general.unit</mat-label>
                                 <mat-select [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountUnit" (selectionChange)="onDiscountChange(item._id, route._id, destination._id, null, null, $event.value, null)">
                                   <mat-option *ngFor="let unit of getDiscountUnits(getDestination(item._id, route._id, destination._id).extraChargeUnit)"  [value]="unit">
                                     {{unit}}

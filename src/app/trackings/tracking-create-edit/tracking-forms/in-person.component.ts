@@ -45,6 +45,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
 
   defaultLocationsSubject = new ReplaySubject<string[]>();
   defaultPricingSubject = new ReplaySubject<PricingModel>();
+  defaultContentSubject = new ReplaySubject<string>();
 
   usersSubject = new ReplaySubject<UserModel[]>();
   pricingUpdatedSubject = new ReplaySubject<{sender: string, origin: string, destination: string}>();
@@ -141,6 +142,7 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     this.trackingNumberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
+    this.defaultContentSubject.next(this.inPersonForm.get("content").value);
   }
 
   createInPersonForm (formData: InPersonTrackingModel) {

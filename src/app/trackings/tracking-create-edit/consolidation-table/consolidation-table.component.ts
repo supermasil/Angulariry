@@ -24,8 +24,7 @@ import { ServicedTrackingModel } from 'src/app/models/tracking-models/serviced-t
   ]
 })
 export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
-  definedColumns: string[] = ['select', 'trackingNumber', 'trackingStatus', 'financialStatus', 'recipient'];
-  displayedColumns: string[] = ['select', 'Tracking Number', "Tracking Status", "Financial Status", "Recipient's address"];
+  definedColumns: string[] = ['select', 'trackingNumber', 'trackingStatus', 'financialStatus', 'recipientsaddress'];
 
   expandedElement: OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel | null;
 

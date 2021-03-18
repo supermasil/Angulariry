@@ -1,8 +1,8 @@
 
   <form [formGroup]="generalInfoForm" class="my-4" (keydown.enter)="$event.preventDefault()">
     <div class="row">
-      <mat-form-field appearance="outline" class="col-lg-6 px-2 pl-lg-0">
-        <mat-label>Tracking Number</mat-label>
+      <mat-form-field appearance="outline" class="col-lg-6">
+        <mat-label translate>general.tracking-number</mat-label>
         <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
         <a
           matSuffix
@@ -13,29 +13,27 @@
         </a>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="col-lg-3 px-2 pr-lg-0">
-        <mat-label>Tracking Status</mat-label>
+      <mat-form-field appearance="outline" class="col-lg-3">
+        <mat-label translate>general.tracking-status</mat-label>
         <mat-select formControlName="trackingStatus">
           <mat-option *ngFor="let option of trackingStatuses" [value]="option">
-            {{option}}
+            {{'statuses.' + option | translate}}
           </mat-option>
         </mat-select>
-        <mat-error>Please select a status</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="col-lg-3 px-2 pr-lg-0">
-        <mat-label>Financial Status</mat-label>
+      <mat-form-field appearance="outline" class="col-lg-3">
+        <mat-label translate>general.financial-status</mat-label>
         <mat-select formControlName="financialStatus">
           <mat-option *ngFor="let option of financialStatuses" [value]="option">
-            {{option}}
+            {{'statuses.' + option | translate}}
           </mat-option>
         </mat-select>
-        <mat-error>Please select a status</mat-error>
       </mat-form-field>
     </div>
 
     <div class="row">
-      <div class="col-lg-6 px-2 pl-lg-0" *ngIf="!this.disableSender">
+      <div class="col-lg-6" *ngIf="!this.disableSender">
         <auto-complete-input
           #sender
           [selectItemObservable]="selectSenderSubject.asObservable()"
@@ -44,12 +42,11 @@
           (itemSelected)="senderSelected($event)"
           (itemCancelled)="itemCancelled()"
           (inputInvalid)="generalInfoForm.get('sender').setValue('')"
-          [matLabel]="'Sender'"
-          [lockOption]="disabledFields[3]"
-          [matErrorMessage]="'Please select one from the drowdown'">
+          [matLabel]="'general.sender' | translate"
+          [lockOption]="disabledFields[3]">
         </auto-complete-input>
       </div>
-      <div class="col-lg-6 px-2 pr-lg-0" *ngIf="!this.disableRecipient">
+      <div class="col-lg-6" *ngIf="!this.disableRecipient">
         <auto-complete-input
           #recipient
           [selectItemObservable]="selectRecipientSubject.asObservable()"
@@ -57,34 +54,31 @@
           [enforeSelection]="true"
           (itemSelected)="recipientSelected($event)"
           (inputInvalid)="generalInfoForm.get('recipient').setValue('')"
-          [matLabel]="'Recipient'"
-          [lockOption]="disabledFields[4]"
-          [matErrorMessage]="'Please select one from the drowdown or create a recipient'">
+          [matLabel]="'general.recipient' | translate"
+          [lockOption]="disabledFields[4]">
         </auto-complete-input>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-lg-6 px-2 pl-lg-0">
+      <div class="col-lg-6">
         <mat-form-field appearance="outline">
-          <mat-label>Origin</mat-label>
+          <mat-label translate>general.origin</mat-label>
           <mat-select formControlName="origin">
             <mat-option *ngFor="let option of defaultLocationsObservable | async" [value]="option">
               {{option}}
             </mat-option>
           </mat-select>
-          <mat-error>Please select an origin</mat-error>
         </mat-form-field>
       </div>
-      <div class="col-lg-6 px-2 pr-lg-0">
+      <div class="col-lg-6">
         <mat-form-field appearance="outline">
-          <mat-label>Destination</mat-label>
+          <mat-label translate>general.destination</mat-label>
           <mat-select formControlName="destination">
             <mat-option *ngFor="let option of defaultLocationsObservable | async" [value]="option">
               {{option}}
             </mat-option>
           </mat-select>
-          <mat-error>Please select an destination</mat-error>
         </mat-form-field>
       </div>
     </div>

@@ -3,7 +3,8 @@
     [disabled]="disableUploader"
     mat-mini-fab
     color='primary'
-    (click)='filePicker.click()'>
+    (click)='filePicker.click()'
+    class="mat-elevation-z0">
     <mat-icon style="position: absolute; right: 11px; bottom: 9px; font-size: 20px;" [inline]="true">add_a_photo</mat-icon>
   </a>
   <input type="file" hidden [disabled]="disableUploader" #filePicker (change)='onFilePicked($event)'>

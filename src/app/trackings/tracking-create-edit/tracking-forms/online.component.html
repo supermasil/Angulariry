@@ -1,4 +1,4 @@
-<div *ngIf="onlineForm">
+<div *ngIf="onlineForm" class="form">
   <form [formGroup]='onlineForm' (submit)='onSave()' class="my-4">
     <general-info
       #generalInfo
@@ -13,19 +13,18 @@
 
     <div class="row">
       <mat-form-field appearance="outline" class="col-lg-4">
-        <mat-label>Carrier</mat-label>
+        <mat-label translate>general.carrier</mat-label>
         <mat-select formControlName="carrier">
           <mat-option *ngFor="let carrier of carriers" [value]="carrier">
             {{carrier}}
           </mat-option>
         </mat-select>
-        <mat-error>Please choose a carrier</mat-error>
         <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
       </mat-form-field>
 
       <div class="d-flex col-lg-8">
         <mat-form-field appearance="outline">
-          <mat-label>Carrier Tracking Number</mat-label>
+          <mat-label translate>general.tracking-number</mat-label>
           <input
           matInput
           type='text'
@@ -33,14 +32,13 @@
           <button *ngIf="onlineForm.controls['carrierTrackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['carrierTrackingNumber'].setValue('')">
             <mat-icon>close</mat-icon>
           </button>
-          <mat-error>Please enter a Tracking Number</mat-error>
         </mat-form-field>
         <a
           mat-mini-fab
           color='primary'
-          class="mt-2 d-inline ml-2"
+          class="mt-2 d-inline ml-2 mat-elevation-z0"
           (click)="scannerOpened = !scannerOpened">
-          <mat-icon>qr_code</mat-icon>
+          <mat-icon style="position: relative; top: -2px">qr_code</mat-icon>
         </a>
       </div>
     </div>
@@ -53,7 +51,7 @@
     </div>
 
     <div class="mt-2">
-      <mat-checkbox matInput formControlName="received" (change)="receivedCheckboxChecked($event)">Received</mat-checkbox>
+      <mat-checkbox matInput formControlName="received" (change)="receivedCheckboxChecked($event)"><span translate>statuses.received</span></mat-checkbox>
     </div>
 
     <div class="mt-2">
@@ -62,8 +60,7 @@
         [pricingObservable]="defaultPricingSubject.asObservable()"
         [updateExistingItemsObservable]="updateExistingItemsSubject.asObservable()"
         [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
-        (formValidity)="itemsListValidity($event)"
-        >
+        (formValidity)="itemsListValidity($event)">
       </items-list>
     </div>
 
@@ -76,31 +73,11 @@
       </finalized-info>
     </div>
 
-    <mat-form-field appearance="outline" class="mt-4">
-      <mat-label>Notes</mat-label>
-      <textarea
-      matInput
-      rows='2'
-      cdkTextareaAutosize
-      formControlName='content'
-      ></textarea>
-    </mat-form-field>
+    <notes
+      [defaultContentObservable]="defaultContentSubject.asObservable()"
+      (contentChanged)="onlineForm?.get('content').setValue($event)">
+    </notes>
 
-    <div class="mt-2">
-      <button
-        mat-raised-button
-        color='primary'
-        type='submit'
-        class="mr-2">
-        Save
-      </button>
-      <button
-        mat-raised-button
-        color='warn'
-        type='button'
-        routerLink="/">
-        Cancel
-      </button>
-    </div>
+    <save-cancel-buttons></save-cancel-buttons>
   </form>
 </div>

@@ -63,8 +63,8 @@ mat-spinner {
  }
 
 form {
-  width: 97%;
-  margin: auto;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .centered-of-page {
@@ -74,4 +74,10 @@ form {
   left: 50%;
   /* bring your own prefixes */
   transform: translate(-50%, -50%);
+}
+
+app-root {
+  /* margin: 1rem auto; */
+  padding-bottom: 4rem;
+  background-color: white;
 }

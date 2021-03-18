@@ -1,0 +1,17 @@
+<div>
+  <button
+    mat-raised-button
+    color='primary'
+    (click)="saveButtonPressed()"
+    type="submit"
+    class="mr-2 my-2">
+    Save
+  </button>
+  <button
+    mat-raised-button
+    color="warn"
+    class="mr-2 my-2"
+    [routerLink]="redirectUrl">
+    Cancel
+  </button>
+</div>

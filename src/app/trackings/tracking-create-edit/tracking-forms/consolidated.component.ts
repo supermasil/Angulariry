@@ -52,6 +52,7 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
   usersSubject = new ReplaySubject<UserModel[]>();
   trackingNumeberSubject = new ReplaySubject<string>();
   generalInfoSubject = new ReplaySubject<GeneralInfoModel>();
+  defaultContentSubject = new ReplaySubject<string>();
 
   updateExistingImagesSubject = new ReplaySubject<string[]>();
 
@@ -150,12 +151,12 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   emitChanges() {
     if (this.currentTrackings.length > 0) {
-      console.log("here")
       this.generalInfoDisabledFields = [true, true, true, true, false, true, true];
     }
     this.trackingNumeberSubject.next(this.currentTracking.trackingNumber);
     this.generalInfoSubject.next(this.currentTracking.generalInfo);
     this.updateExistingImagesSubject.next(this.currentTracking.generalInfo.filePaths);
+    this.defaultContentSubject.next(this.consolidatedForm.get("content").value);
   }
 
   fetchTrackings(origin: string, destination: string, sender: string) {
