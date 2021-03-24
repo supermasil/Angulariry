@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from '@angular/router';
+import { ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PricingModel } from '../../models/pricing.model';
 
@@ -8,6 +9,18 @@ const BACKEND_URL = environment.apiURL + "/pricings/";
 
 @Injectable({ providedIn: "root"})
 export class PricingService {
+
+  public units = ["kg"];
+  public extraChargeUnits = ["$", "%"];
+  public discountUnits = ["%", "$", "Fixed"];
+
+  public getDiscountUnits(unit: string) { // limit to % if extra charge unit is %
+    if (unit === "%") {
+      return ["%"];
+    } else if (unit === "$") {
+      return this.discountUnits;
+    }
+  }
 
   constructor(
     private httpClient: HttpClient,
@@ -30,9 +43,19 @@ export class PricingService {
     return this.httpClient.get<PricingModel>(BACKEND_URL + pricingId); // return an observable
   }
 
-  updateItems(formData: any) {
+  updateItem(formData: any) {
     this.httpClient
-      .put<{message: string, tracking: PricingModel}>(BACKEND_URL + formData._id, formData)
+      .put<{message: string, tracking: PricingModel}>(BACKEND_URL + 'updateItem/' + formData._id, formData)
+      .subscribe((responseData) => {
+        this.zone.run(() => {
+          this.router.navigate(["/"]);
+        });
+      });
+  }
+
+  updateCustomPricing(formData: any) {
+    this.httpClient
+      .put<{message: string, tracking: PricingModel}>(BACKEND_URL + 'updateCustomPricing/' + formData._id, formData)
       .subscribe((responseData) => {
         this.zone.run(() => {
           this.router.navigate(["/"]);

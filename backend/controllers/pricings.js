@@ -1,3 +1,4 @@
+let assert = require('assert');
 const PricingModel = require('../models/pricing');
 
 exports.addItems = async (req, res, next) => {
@@ -38,8 +39,28 @@ exports.updateItems = async (req, res, next) => {
   try {
     const pricing = await this.getPricingByIdHelper(req.body._id, req.userData.orgId);
     let items = itemsSetupHelper(req.body.items, false);
-    // console.log(JSON.stringify(items,null,2));
     pricing.items = items;
+
+    return await pricing.save().then(response => {
+      return res.status(201).json({
+        message: "Items updated successfully",
+        pricing: response
+      });
+    })
+  } catch(error) {
+    console.log(`updateItems: ${req.body._id}: ${error.message}`);
+    return res.status(500).json({
+      message: "Couldn't update items"
+    });
+  };
+}
+
+exports.updateItem = async (req, res, next) => {
+  try {
+    const pricing = await this.getPricingByIdHelper(req.body._id, req.userData.orgId);
+    let index = pricing.items.findIndex(item => item._id == req.body.items[0]._id);
+    assert(index > -1, "updateItems: Index not found")
+    pricing.items[index] = req.body.items[0];
 
     return await pricing.save().then(response => {
       return res.status(201).json({

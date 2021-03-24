@@ -1,0 +1,16 @@
+<div class="mt-4">
+  <auto-complete-input
+    [dataObservable]="userCodes.asObservable()"
+    (itemSelected)="userSelected($event)"
+    (inputInvalid)="''"
+    [enforeSelection]="true"
+    [matLabel]="'general.users' | translate"
+    [lockOption]="false"
+    [matErrorMessage]="'Please select one from the drowdown only'">
+  </auto-complete-input>
+</div>
+
+<common-pricing-form
+  [mode]="'custom'"
+  [selectedUserObservable]="selectedUserSubject.asObservable()">
+</common-pricing-form>

@@ -23,8 +23,8 @@ import { TrackingListCommonTemplateComponent } from './tracking-list/common-temp
 import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
 import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
 import { TranslateModule } from '@ngx-translate/core';
-import { SaveCancelButtonsComponent } from '../custom-components/save-cancel-buttons/save-cancel-buttons.component';
 import { NotesComponent } from '../custom-components/notes/notes.component';
+import { SaveCancelButtonsModule } from '../custom-components/save-cancel-buttons/save-cancel-buttons.module';
 
 
 @NgModule({
@@ -42,7 +42,6 @@ import { NotesComponent } from '../custom-components/notes/notes.component';
     FinalizedInfoComponent,
     ConsolidationTableComponent,
     TrackingListCommonTemplateComponent,
-    SaveCancelButtonsComponent,
     NotesComponent
   ],
   imports: [
@@ -57,6 +56,7 @@ import { NotesComponent } from '../custom-components/notes/notes.component';
     NgxPrintModule,
     SearchBarModule,
     NgxQRCodeModule,
+    SaveCancelButtonsModule,
     TranslateModule.forChild()
   ]
 })

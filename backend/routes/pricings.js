@@ -7,7 +7,9 @@ router.post('/', checkAuth.isAuthenticated, PricingController.addItems);
 
 router.get('/:id', checkAuth.isAuthenticated, PricingController.getPricing); // Get one
 
-router.put('/:id', checkAuth.isAuthenticated, PricingController.updateItems);
+router.put('/updateItem/:id', checkAuth.isAuthenticated, PricingController.updateItem);
+
+router.put('/updateCustomPricing/:id', checkAuth.isAuthenticated, PricingController.updateItems);
 
 router.delete('/:pricingId/item/:itemId', checkAuth.isAuthenticated, PricingController.deleteItem);
 
