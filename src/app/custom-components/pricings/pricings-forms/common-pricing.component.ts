@@ -11,6 +11,8 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { trigger, state, style, transition, animate } from "@angular/animations";
+import { AlertService } from "../../alert-message";
+import { GlobalConstants } from "src/app/global-constants";
 
 @Component({
   selector: 'common-pricing-form',
@@ -47,7 +49,8 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
   constructor(
     private authService: AuthService,
     public pricingService: PricingService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private alertService: AlertService
   ) {}
 
   ngOnInit() {
@@ -277,7 +280,38 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
     (form.get('items')['controls'][i].get('routes')['controls'][r].get('destinations') as FormArray).removeAt(d);
   }
 
+  originDestinationValidation() {
+    let valid = true;
+    let rawForm = this.commonPricingForm.getRawValue();
+    for (let item of rawForm.items) {
+      let currentOrigin = null;
+      for (let route of item.routes) {
+        if (route.origin == currentOrigin) {
+          valid = false;
+          break;
+        } else {
+          currentOrigin = route.origin;
+          let currentDestination = null;
+          for (let destination of route.destinations) {
+            if (destination.name == currentDestination || destination.name == currentOrigin) {
+              valid = false;
+              break;
+            } else {
+              currentDestination = destination.name;
+            }
+          }
+        }
+      }
+    }
+    return valid;
+  }
+
+
   onSubmit() {
+    if (!this.originDestinationValidation()) {
+      this.alertService.warn("Duplicate origins or destinations", GlobalConstants.flashMessageOptions);
+      return;
+    }
 
     let originValidity = true;
     let destinationValidity = true;
