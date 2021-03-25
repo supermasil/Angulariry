@@ -53,16 +53,6 @@ export class PricingService {
       });
   }
 
-  updateCustomPricing(formData: any) {
-    this.httpClient
-      .put<{message: string, tracking: PricingModel}>(BACKEND_URL + 'updateCustomPricing/' + formData._id, formData)
-      .subscribe((responseData) => {
-        this.zone.run(() => {
-          this.router.navigate(["/"]);
-        });
-      });
-  }
-
   detetePricing(id: string) {
     return this.httpClient.delete<{message: string}>(BACKEND_URL + id);
   }

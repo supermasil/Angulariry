@@ -1,5 +1,5 @@
 <div *ngIf="commonPricingForm">
-  <div *ngIf="mode != 'custom'">
+  <div>
     <form [formGroup]="commonPricingForm" (submit)="onSubmit()" (keydown.enter)="$event.preventDefault()" class="my-4">
       <div formArrayName="items" *ngFor="let item of commonPricingForm.get('items')['controls']; let i = index;">
         <div [formGroupName]="i" class="d-flex align-items-center justify-content-center">
@@ -90,6 +90,22 @@
                                   <mat-label translate>tracking-info.extra-charge</mat-label>
                                   <input matInput type="number" formControlName="extraCharge">
                                 </mat-form-field>
+
+                                <form *ngIf="mode == 'custom'" [formGroup]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('discounts')['controls'][selectedDiscountIndex]">
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.discount</mat-label>
+                                    <input matInput type="number" formControlName="perUnitDiscountAmount">
+                                  </mat-form-field>
+
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.unit</mat-label>
+                                    <mat-select formControlName="perUnitDiscountUnit">
+                                      <mat-option *ngFor="let unit of pricingService.discountUnits"  [value]="unit">
+                                        {{unit}}
+                                      </mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                                </form>
                               </div>
                               <div class="col">
                                 <mat-form-field appearance="outline">
@@ -99,7 +115,6 @@
                                       {{unit}}
                                     </mat-option>
                                   </mat-select>
-                                  <mat-error>Please select a unit</mat-error>
                                   <a
                                     *ngIf="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'].length > 1"
                                     matSuffix
@@ -109,9 +124,23 @@
                                     <mat-icon>delete</mat-icon>
                                   </a>
                                 </mat-form-field>
+                                <form *ngIf="mode == 'custom'" [formGroup]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('discounts')['controls'][selectedDiscountIndex]">
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.discount</mat-label>
+                                    <input matInput type="number" formControlName="extraChargeDiscountAmount">
+                                  </mat-form-field>
+
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.unit</mat-label>
+                                    <mat-select matInput formControlName="extraChargeDiscountUnit">
+                                      <mat-option *ngFor="let unit of pricingService.getDiscountUnits(commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('extraChargeUnit').value)" [value]="unit">
+                                        {{unit}}
+                                      </mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                                </form>
                               </div>
                             </div>
-
                           </div>
                         </div>
                       </div>
@@ -119,144 +148,18 @@
                   </div>
                 </div>
                 <div class="d-flex justify-content-end">
-                  <button type="button" mat-raised-button color="primary" (click)="addDestination(commonPricingForm, i, r)">{{'tracking-info.add-destination' | translate}}</button>
+                  <button type="button" *ngIf="mode == 'create' || mode == 'edit'" mat-raised-button color="primary" (click)="addDestination(commonPricingForm, i, r)">{{'tracking-info.add-destination' | translate}}</button>
                 </div>
               </div>
             </div>
             <div class="d-flex justify-content-end mt-2">
-              <button type="button" mat-raised-button color="accent"(click)="addRoute(commonPricingForm, i)">{{'tracking-info.add-origin' | translate}}</button>
+              <button type="button" *ngIf="mode == 'create' || mode == 'edit'" mat-raised-button color="accent"(click)="addRoute(commonPricingForm, i)">{{'tracking-info.add-origin' | translate}}</button>
             </div>
           </mat-card>
         </div>
       </div>
-      <a mat-mini-fab color="primary" class="float-right mb-4" (click)="addItem(commonPricingForm)" *ngIf="mode == 'create'"><mat-icon>add</mat-icon></a>
+      <a mat-mini-fab *ngIf="mode == 'create'" color="primary" class="float-right mb-4" (click)="addItem(commonPricingForm)"><mat-icon>add</mat-icon></a>
       <save-cancel-buttons></save-cancel-buttons>
     </form>
-  </div>
-
-  <div *ngIf="mode == 'custom'">
-    <mat-form-field class="mt-2">
-      <mat-label translate>general.filter</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Clothes" #input>
-    </mat-form-field>
-
-    <table mat-table
-          [dataSource]="dataSource" multiTemplateDataRows
-          matSort>
-
-      <!-- Header -->
-      <ng-container matColumnDef="name" >
-        <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="this.expandedElement = null;"><h3>{{'tracking-info.item-name' | translate}}</h3></th>
-        <td mat-cell *matCellDef="let item"><b>{{item.name}}</b></td>
-      </ng-container>
-      <ng-container matColumnDef="unit" >
-        <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="this.expandedElement = null;"><h3>{{'general.unit' | translate}}</h3></th>
-        <td mat-cell *matCellDef="let item"><b>{{item.unit}}</b></td>
-      </ng-container>
-
-      <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
-      <!-- no <th></th> -->
-      <ng-container matColumnDef="expandedDetail">
-        <td mat-cell *matCellDef="let item" [attr.colspan]="definedColumns.length">
-          <div class="item-detail"
-              [@detailExpand]="item == expandedElement ? 'expanded' : 'collapsed'">
-            <div class="mb-4">
-              <ng-container *ngFor="let route of item?.routes">
-                <div class="row">
-                  <div class="col-md-3">
-                    <mat-form-field appearance="outline">
-                      <mat-label translate>general.origin</mat-label>
-                      <input matInput type="text" value="{{route?.origin}}" readonly="true">
-                    </mat-form-field>
-                  </div>
-
-                  <div class="col-md-9">
-                    <ng-container *ngFor="let destination of route?.destinations">
-                      <div class="row">
-                        <div class="col-4">
-                          <mat-form-field appearance="outline">
-                            <mat-label translate>general.destination</mat-label>
-                            <input matInput type="text" value="{{destination?.name}}" readonly="true">
-                          </mat-form-field>
-                        </div>
-
-                        <div class="col-4">
-                          <mat-form-field appearance="outline">
-                            <mat-label translate>tracking-info.weight-unit-charge</mat-label>
-                            <input matInput type="text" value="{{destination?.pricePerUnit}} $" readonly="true">
-                          </mat-form-field>
-                        </div>
-
-                        <div class="col-4">
-                          <mat-form-field appearance="outline">
-                            <mat-label translate>tracking-info.extra-charge</mat-label>
-                            <input matInput type="text" value="{{destination?.extraCharge}} {{destination?.extraChargeUnit}}" readonly="true">
-                          </mat-form-field>
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <div class="col-4">
-                        </div>
-
-                        <div class="col-4">
-                          <mat-form-field appearance="outline">
-                            <mat-label translate>general.discount</mat-label>
-                            <input matInput type="number" min="-100" max="100" #perUnitDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).perUnitDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, $event.target.value, null, null)">
-                            <!-- <h5 style="color: red;" *ngIf="perUnitDiscountAmount.value > 100 || perUnitDiscountAmount.value < -100">Number must be between -100 and 100</h5> -->
-                          </mat-form-field>
-
-                          <mat-form-field appearance="outline">
-                            <mat-label translate>general.unit</mat-label>
-                            <mat-select [value]="getDiscountsForDestination(item._id, route._id, destination._id).perUnitDiscountUnit" (selectionChange)="onDiscountChange(item._id, route._id, destination._id, $event.value, null, null, null)">
-                              <mat-option *ngFor="let unit of pricingService.discountUnits"  [value]="unit">
-                                {{unit}}
-                              </mat-option>
-                            </mat-select>
-                          </mat-form-field>
-                        </div>
-
-                        <div class="col-4">
-                          <mat-form-field appearance="outline">
-                            <mat-label translate>general.discount</mat-label>
-                            <input matInput type="number" min="-100" max="100" #extraChargeDiscountAmount [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountAmount" (input)="onDiscountChange(item._id, route._id, destination._id, null, null, null, $event.target.value)">
-                            <!-- <h5 style="color: red;" *ngIf="extraChargeDiscountAmount.value > 100 || extraChargeDiscountAmount.value < -100">Number must be between -100 and 100</h5> -->
-                          </mat-form-field>
-
-                          <mat-form-field appearance="outline">
-                            <mat-label translate>general.unit</mat-label>
-                            <mat-select [value]="getDiscountsForDestination(item._id, route._id, destination._id).extraChargeDiscountUnit" (selectionChange)="onDiscountChange(item._id, route._id, destination._id, null, null, $event.value, null)">
-                              <mat-option *ngFor="let unit of pricingService.getDiscountUnits(getDestination(item._id, route._id, destination._id).extraChargeUnit)"  [value]="unit">
-                                {{unit}}
-                              </mat-option>
-                            </mat-select>
-                          </mat-form-field>
-                        </div>
-                      </div>
-                      <hr>
-                    </ng-container>
-                  </div>
-                </div>
-              </ng-container>
-            </div>
-          </div>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="definedColumns"></tr>
-      <tr mat-row *matRowDef="let element; columns: definedColumns;"
-          class="element-row"
-          [class.expanded-row]="expandedElement === element"
-          (click)="expandedElement = expandedElement === element ? null : element">
-      </tr>
-      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="4">No data found</td>
-      </tr>
-
-    </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
-    <save-cancel-buttons class="mt-4" (saveButtonClicked)="onUpdateItems()"></save-cancel-buttons>
   </div>
 </div>

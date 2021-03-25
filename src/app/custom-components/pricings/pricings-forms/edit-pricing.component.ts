@@ -14,7 +14,6 @@ export class EditPricingComponent implements OnInit {
   selectedItem: PricingItemModel;
   orgDefaultPricing: PricingModel;
 
-  formDataSubject = new ReplaySubject<PricingModel>();
   selectedItemSubject = new ReplaySubject<PricingItemModel>();
 
   constructor(public pricingService: PricingService, private authService: AuthService) {}
@@ -31,6 +30,5 @@ export class EditPricingComponent implements OnInit {
   itemSelected(itemName: string) {
     this.selectedItem = this.orgDefaultPricing.items.filter(i => i.name == itemName)[0];
     this.selectedItemSubject.next(this.selectedItem);
-    this.formDataSubject.next(this.orgDefaultPricing);
   }
 }

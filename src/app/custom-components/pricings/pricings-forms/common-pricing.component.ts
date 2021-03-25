@@ -33,6 +33,8 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
   selectedUser: UserModel
   users: UserModel[];
 
+  selectedDiscountIndex = 0;
+
   @Input() mode = "create";
   @Input() selectedItemObservable = new Observable<PricingItemModel>();
   @Input() selectedUserObservable = new Observable<UserModel>();
@@ -53,22 +55,19 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
     this.defaultLocations.next(this.organization.locations.map(item => item.name));
     this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
       this.orgDefaultPricing = pricing;
-      if (this.mode == "edit") {
-        this.selectedItemObservable.subscribe((selectedItem: PricingItemModel) => {
-          this.selectedItem = selectedItem;
-          let pricingCopy = Object.create(this.orgDefaultPricing);
-          pricingCopy.items = [selectedItem];
-          this.commonPricingForm = this.createPricingForm(pricingCopy);
-        });
-      } else if (this.mode == "create") {
+
+      this.selectedItemObservable.subscribe((item: PricingItemModel) => {
+        this.selectedItem = item;
+        this.createSingleItemForm();
+      });
+
+      this.selectedUserObservable.subscribe((user: UserModel) => {
+        this.selectedUser = user;
+        this.createSingleItemForm();
+      });
+
+      if (this.mode == "create") {
         this.commonPricingForm = this.createPricingForm(null);
-      } else if (this.mode == "custom") {
-        this.selectedUserObservable.subscribe((user: UserModel) => {
-          this.commonPricingForm = null;
-          this.selectedUser = user;
-          this.commonPricingForm = this.createPricingForm(this.orgDefaultPricing);
-          this.updateData(this.orgDefaultPricing.items);
-        });
       }
     }, error => {
       this.authService.redirectToMainPageWithoutMessage();
@@ -77,6 +76,15 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
 
   ngAfterViewChecked() {
     this.cd.detectChanges();
+  }
+
+  createSingleItemForm() {
+    this.commonPricingForm = null;
+    if ((this.mode == "edit" && this.selectedItem) || (this.mode == "custom" && this.selectedUser && this.selectedItem)) {
+      let pricingCopy = Object.create(this.orgDefaultPricing);
+      pricingCopy.items = [this.selectedItem];
+      this.commonPricingForm = this.createPricingForm(pricingCopy);
+    }
   }
 
   createPricingForm(pricing: PricingModel) {
@@ -114,7 +122,7 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
       if ((control && control.value)) {
         let currentFormItems = form.get('items')['controls'].map(item => item['controls'].name.value.toLowerCase());// Tricky as fuck, can't use .value because the value is not updated
         currentItems = this.orgDefaultPricing.items.map(item => item.name.toLowerCase());
-        if(this.mode == 'edit') {
+        if(this.mode == 'edit' || this.mode == 'custom') {
           currentItems = currentItems.filter(item => item != this.selectedItem.name);
         }
         currentItems = currentItems.concat(currentFormItems);
@@ -196,6 +204,7 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
       origin: new FormControl(route?.origin? route.origin: "", {validators: [Validators.required]}),
       destinations: new FormArray(createdDestinations)
     });
+
     return form;
   }
 
@@ -212,6 +221,7 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
   }
 
   createDestination(destination: PricingDestinationModel, disableExtraChargeUnit: boolean) {
+    // For new custom pricing
     let createdDiscounts = [];
     if (destination?.discounts?.length > 0) {
       destination.discounts.forEach(discount => {
@@ -219,16 +229,17 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
       })
     }
 
-    // For new custom pricing
-    if (this.selectedUser && this.mode == "custom" && destination?.discounts?.filter(discount => discount.userId == this.selectedUser._id).length == 0) {
-      createdDiscounts.push(
-        this.createDiscount({
-          userId: this.selectedUser._id,
-          perUnitDiscountUnit: '%',
-          perUnitDiscountAmount: 0,
-          extraChargeDiscountUnit: '%',
-          extraChargeDiscountAmount: 0,
-        } as PricingDiscountModel))
+    if (this.mode == "custom" && this.selectedUser && destination?.discounts?.filter(discount => discount.userId == this.selectedUser._id).length == 0) {
+      let newDiscount = {
+        userId: this.selectedUser._id,
+        perUnitDiscountUnit: '%',
+        perUnitDiscountAmount: 0,
+        extraChargeDiscountUnit: '%',
+        extraChargeDiscountAmount: 0,
+      }
+      createdDiscounts.push(this.createDiscount(newDiscount as PricingDiscountModel));
+      destination.discounts.push(newDiscount);
+      this.selectedDiscountIndex = destination?.discounts?.findIndex(discount => discount.userId == this.selectedUser._id);
     }
 
     let form = new FormGroup({
@@ -237,9 +248,20 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
       pricePerUnit: new FormControl(destination?.pricePerUnit? destination.pricePerUnit: 0, {validators: [Validators.required]}),
       extraCharge: new FormControl(destination?.extraCharge? destination.extraCharge: 0, {validators: [Validators.required]}),
       extraChargeUnit: new FormControl({value: destination?.extraChargeUnit? destination.extraChargeUnit: "$", disabled: disableExtraChargeUnit}, {validators: [Validators.required]}),
-      discounts: new FormArray(createdDiscounts)
+      discounts: new FormArray(createdDiscounts),
     })
 
+    return form;
+  }
+
+  createDiscount(discount: PricingDiscountModel) {
+    let form = new FormGroup({
+      userId: new FormControl(discount?.userId? discount.userId : null),
+      perUnitDiscountUnit: new FormControl(discount?.perUnitDiscountUnit? discount.perUnitDiscountUnit : "%", {validators: [Validators.required]}),
+      perUnitDiscountAmount: new FormControl(discount?.perUnitDiscountAmount? discount.perUnitDiscountAmount : 0, {validators: [Validators.required]}),
+      extraChargeDiscountUnit: new FormControl(discount?.extraChargeDiscountUnit? discount.extraChargeDiscountUnit : "%", {validators: [Validators.required]}),
+      extraChargeDiscountAmount: new FormControl(discount?.extraChargeDiscountAmount? discount.extraChargeDiscountAmount : 0, {validators: [Validators.required]}),
+    });
     return form;
   }
 
@@ -253,17 +275,6 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
     }
 
     (form.get('items')['controls'][i].get('routes')['controls'][r].get('destinations') as FormArray).removeAt(d);
-  }
-
-  createDiscount(discount: PricingDiscountModel) {
-    let form = new FormGroup({
-      userId: new FormControl(discount?.userId? discount.userId : null),
-      perUnitDiscountUnit: new FormControl(discount?.perUnitDiscountUnit? discount.perUnitDiscountUnit : "%", {validators: [Validators.required]}),
-      perUnitDiscountAmount: new FormControl(discount?.perUnitDiscountAmount? discount.perUnitDiscountAmount : 0, {validators: [Validators.required]}),
-      extraChargeDiscountUnit: new FormControl(discount?.extraChargeDiscountUnit? discount.extraChargeDiscountUnit : "%", {validators: [Validators.required]}),
-      extraChargeDiscountAmount: new FormControl(discount?.extraChargeDiscountAmount? discount.extraChargeDiscountAmount : 0, {validators: [Validators.required]}),
-    });
-    return form;
   }
 
   onSubmit() {
@@ -292,94 +303,6 @@ export class CommonPricingComponent implements OnInit, AfterViewChecked {
       this.pricingService.addItems(this.commonPricingForm.getRawValue());
     } else {
       this.pricingService.updateItem(this.commonPricingForm.getRawValue());
-    }
-  }
-
-  // CUSTOM PRICING STARTS HERE
-  onUpdateItems() {
-    if (!this.commonPricingForm.valid) {
-      return;
-    }
-    this.pricingService.updateCustomPricing(this.commonPricingForm.getRawValue());
-  }
-
-  definedColumns: string[] = ['name', 'unit'];
-  expandedElement: PricingItemModel | null;
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-
-  dataSource: MatTableDataSource<PricingItemModel> = new MatTableDataSource();
-  discountForm: FormGroup;
-
-  discountObject : any = {};
-
-  updateData(data: PricingItemModel[]) {
-    this.dataSource = new MatTableDataSource(data);
-    this.dataSource.filterPredicate = (data: PricingItemModel, filter: string) => {
-      return data.name.includes(filter);
-    };
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
-    this.expandedElement = null;
-    // Sort needs to be set after datasource is set
-    // Don't ever use detectChanges on table, it will delay stuff
-
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
-    this.expandedElement = null;
-  }
-
-  getDestination(itemId: string, routeId: string, destinationId: string) : PricingDestinationModel {
-    try {
-      let result =  this.commonPricingForm.getRawValue().items.filter(item => item._id == itemId)[0]
-        .routes.filter(route => route._id == routeId)[0]
-        .destinations.filter(destination => destination._id == destinationId)[0]
-      return result;
-    } catch (error) {
-      console.log(error);
-      this.authService.redirectToMainPageWithMessage("Couldn't load pricing");
-    }
-  }
-
-  getDiscountsForDestination(itemId: string, routeId: string, destinationId: string) : PricingDiscountModel{
-    try {
-      let result =  this.commonPricingForm.getRawValue().items.filter(item => item._id == itemId)[0]
-        .routes.filter(route => route._id == routeId)[0]
-        .destinations.filter(destination => destination._id == destinationId)[0]
-        .discounts.filter(discount => discount.userId == this.selectedUser._id)[0]
-      return result? result: {perUnitDiscountAmount: 0, extraChargeDiscountAmount: 0};
-    } catch (error) {
-      console.log(error);
-      this.authService.redirectToMainPageWithMessage("Couldn't load pricing");
-    }
-  }
-
-  onDiscountChange(itemId: string, routeId: string, destinationId: string, perUnitDiscountUnit: string, perUnitDiscountAmount: number, extraChargeDiscountUnit: string, extraChargeDiscountAmount: number) {
-    try {
-      let itemIndex = this.commonPricingForm.getRawValue().items.findIndex(item => item._id == itemId);
-      let routeIndex = this.commonPricingForm.getRawValue().items[itemIndex].routes.findIndex(route => route._id == routeId);
-      let destinationIndex = this.commonPricingForm.getRawValue().items[itemIndex].routes[routeIndex].destinations.findIndex(destination => destination._id == destinationId);
-      let discountIndex = this.commonPricingForm.getRawValue().items[itemIndex].routes[routeIndex].destinations[destinationIndex].discounts.findIndex(discount => discount.userId == this.selectedUser._id);
-      if (perUnitDiscountUnit) {
-        this.commonPricingForm.get('items')['controls'][itemIndex].get('routes')['controls'][routeIndex].get('destinations')['controls'][destinationIndex].get('discounts')['controls'][discountIndex].get('perUnitDiscountUnit').setValue(perUnitDiscountUnit);
-      } else if (perUnitDiscountAmount) {
-        this.commonPricingForm.get('items')['controls'][itemIndex].get('routes')['controls'][routeIndex].get('destinations')['controls'][destinationIndex].get('discounts')['controls'][discountIndex].get('perUnitDiscountAmount').setValue(perUnitDiscountAmount);
-      } else if (extraChargeDiscountUnit) {
-        this.commonPricingForm.get('items')['controls'][itemIndex].get('routes')['controls'][routeIndex].get('destinations')['controls'][destinationIndex].get('discounts')['controls'][discountIndex].get('extraChargeDiscountUnit').setValue(extraChargeDiscountUnit);
-      } else if (extraChargeDiscountAmount) {
-        this.commonPricingForm.get('items')['controls'][itemIndex].get('routes')['controls'][routeIndex].get('destinations')['controls'][destinationIndex].get('discounts')['controls'][discountIndex].get('extraChargeDiscountAmount').setValue(extraChargeDiscountAmount);
-      }
-    } catch (error) {
-      console.log(error);
-      this.authService.redirectToMainPageWithMessage("Couldn't load pricing");
     }
   }
 }

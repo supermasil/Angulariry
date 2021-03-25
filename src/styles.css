@@ -2,7 +2,6 @@ html, body { height: 100%}
 body {
   margin: auto;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-
 }
 
 a {
@@ -79,5 +78,4 @@ form {
 app-root {
   /* margin: 1rem auto; */
   padding-bottom: 4rem;
-  background-color: white;
 }

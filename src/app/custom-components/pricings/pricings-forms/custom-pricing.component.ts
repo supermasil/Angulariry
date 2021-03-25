@@ -4,7 +4,7 @@ import { ReplaySubject } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { AuthService } from "src/app/auth/auth.service";
 import { OrganizationModel } from "src/app/models/organization.model";
-import { PricingModel } from "src/app/models/pricing.model";
+import { PricingItemModel, PricingModel } from "src/app/models/pricing.model";
 import { UserModel } from "src/app/models/user.model";
 import { PricingService } from "../pricing.service";
 
@@ -18,12 +18,15 @@ export class CustomPricingComponent implements OnInit {
 
   customPricingForm: FormGroup;
   selectedUser: UserModel;
+  itemNames = new ReplaySubject<string[]>();
+  selectedItem: PricingItemModel;
   orgDefaultPricing: PricingModel;
   organization: OrganizationModel;
   users: UserModel[];
 
   userCodes = new ReplaySubject<string[]>();
   selectedUserSubject = new ReplaySubject<UserModel>();
+  selectedItemSubject = new ReplaySubject<PricingItemModel>();
 
   constructor(
     private authService: AuthService,
@@ -37,7 +40,14 @@ export class CustomPricingComponent implements OnInit {
       this.userCodes.next(this.users.map(user => `${user.userCode} | ${user.name} | ${user.email}`));
     }, error => {
       this.authService.redirectToMainPageWithoutMessage();
-    })
+    });
+
+    this.pricingService.getPricing(this.authService.getUserOrg().pricings).subscribe((pricing: PricingModel) => {
+      this.orgDefaultPricing = pricing;
+      this.itemNames.next(pricing.items.map(i => i.name));
+    }, error => {
+      this.authService.redirectToMainPageWithoutMessage();
+    });
   }
 
   userSelected(user: string) {
@@ -45,4 +55,8 @@ export class CustomPricingComponent implements OnInit {
     this.selectedUserSubject.next(this.selectedUser);
   }
 
+  itemSelected(itemName: string) {
+    this.selectedItem = this.orgDefaultPricing.items.filter(i => i.name == itemName)[0];
+    this.selectedItemSubject.next(this.selectedItem);
+  }
 }
