@@ -9,9 +9,11 @@ import{ GlobalConstants } from '../global-constants';
 import { AlertService } from '../custom-components/alert-message';
 import { UserModel } from '../models/user.model';
 import { OrganizationModel } from '../models/organization.model';
+import { HistoryModel } from '../models/history.model';
 
 const USER_BACKEND_URL = environment.apiURL + "/users/"
 const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
+const HISTORY_BACKEND_URL = environment.apiURL + "/histories/"
 
 @Injectable({ providedIn: 'root'})
 export class AuthService {
@@ -51,6 +53,7 @@ export class AuthService {
           this.userOrg = user.organization;
           return await this.authenticate();
         } else {
+          console.log("here")
           console.log("Firebase and db users aren't the same")
           this.unAuthenticate();
           this.logout();
@@ -173,6 +176,11 @@ export class AuthService {
 
   updateCredit(formData: any) {
     return this.httpClient.put<{message: string}>(USER_BACKEND_URL + `updateCredit/${formData._id}`, formData);
+  }
+
+  getHistories(historyList: string[]) {
+    let historiesString = historyList.join(',');
+    return this.httpClient.get<HistoryModel[]>(HISTORY_BACKEND_URL + historiesString);
   }
 
   getUser(id: string | UserModel, type: string) {

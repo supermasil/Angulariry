@@ -1,27 +1,23 @@
-<form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()' class="m-2">
+<form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()' class="my-4">
   <mat-form-field appearance="outline">
     <mat-label>Email</mat-label>
     <input
     matInput
     placeholder='johndoe@abc.com'
     formControlName='email'
-    required
     >
-    <mat-error>Please enter a valid email</mat-error>
   </mat-form-field>
   <mat-form-field appearance="outline">
-    <mat-label>Password</mat-label>
+    <mat-label translate>auth.password</mat-label>
     <input
     type="password"
     matInput
     placeholder='Password'
     formControlName='password'
     autocomplete="false"
-    required
     >
-    <mat-error>At least 6 characters are required</mat-error>
   </mat-form-field>
   <br>
-  <button *ngIf="!buttonIsLoading" class="mt-2" mat-raised-button color='accent' type='submit'>Login</button>
+  <button *ngIf="!buttonIsLoading" class="m-3" mat-raised-button color='accent' type='submit'>{{'auth.login' | translate}}</button>
   <mat-progress-spinner *ngIf="buttonIsLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
 </form>

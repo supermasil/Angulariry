@@ -8,9 +8,9 @@ const userSchema = mongoose.Schema({
   name: {type: String, required: true },
   email: { type: String, required: true, unique: true, index: true }, // unique doesn't not throw error if not unique
   phoneNumber: { type: String, required: true},
-  role: {type: String, default: 'Customer'},
   addresses: [AddressSchema],
   recipients: [RecipientSchema],
+  pricings: {type: mongoose.Types.ObjectId, ref: "pricing", default: null},
   userCode: {type: String, required: true, index: true}, // Can have duplicates across org
   organization: {type: mongoose.Types.ObjectId, ref: "organization", default: null},
   organizations: [{
@@ -19,8 +19,9 @@ const userSchema = mongoose.Schema({
     creatorId: {type: mongoose.Types.ObjectId, ref: "user"},
     credit: {type: Number, required: true, default: 0},
     active: {type: Boolean, required: true, default: true},
+    creditHistory: [{type: mongoose.Types.ObjectId, ref: "history"}]
   }],
-  pricings: {type: mongoose.Types.ObjectId, ref: "pricing", default: null},
+  role: {type: String, default: 'Customer'},
   creatorId: {type: mongoose.Types.ObjectId, ref: "user"},
   active: {type: Boolean, required: true, default: true},
   credit: {type: Number, required: true, default: 0},

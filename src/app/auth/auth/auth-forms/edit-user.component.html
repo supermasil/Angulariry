@@ -3,7 +3,7 @@
     [dataObservable]="usersSubject.asObservable()"
     [enforeSelection]="true"
     (itemSelected)="userSelected($event)"
-    [matLabel]="'User to edit'"
+    [matLabel]="'general.users' | translate"
     [matErrorMessage]="'Please select one from the drowdown'"
     [lockOption]="true"
     >

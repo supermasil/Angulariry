@@ -1,5 +1,5 @@
 
-  <form [formGroup]="generalInfoForm" class="my-4" (keydown.enter)="$event.preventDefault()">
+  <form [formGroup]="generalInfoForm" (keydown.enter)="$event.preventDefault()">
     <div class="row">
       <mat-form-field appearance="outline" class="col-lg-6">
         <mat-label translate>general.tracking-number</mat-label>

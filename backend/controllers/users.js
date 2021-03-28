@@ -3,7 +3,7 @@ const OrganizationController = require('./organizations');
 const db = require('mongoose');
 const admin = require('firebase-admin');
 let assert = require('assert');
-const HistoryController = require("../controllers/history");
+const HistoryController = require("./histories");
 const userTypes = {
   MONGO: 'mongo',
   FIREBASE: 'firebase'
@@ -184,9 +184,7 @@ exports.getUsers = async (req, res, next) => {
 exports.getUser = async (req, res, next) => {
   try {
     foundUser = await this.getUserByIdHelper(req.userData, req.params.id, req.query.type);
-    if (foundUser == null) {
-      throw new Error("User is null");
-    }
+
     return res.status(200).json(foundUser);
   } catch (error) {
     console.log(`getUser: ${req.params.id}: ${error.message}`);
@@ -206,7 +204,10 @@ getUserByIdHelper = async (userData, userId, type) => {  // Can't enfore orgId h
   let query = UserModel.findOne(queryParams).populate("organization");
 
   return await query.then(async foundUser => {
-    if (foundUser && userData.orgId && foundUser.organization._id != userData.orgId) { // When the user is logged in to another org than the requester
+    if (foundUser == null) {
+      throw new Error("getUserByIdHelper: User is null");
+    }
+    if (foundUser && userData.orgId) {
       let foundOrg = foundUser.organizations.filter(o => o.organization == userData.orgId)[0];
       await switchOverFields(foundUser, foundOrg, true);
     }
@@ -234,6 +235,7 @@ switchOverFields = async (user, fields, populate) => {
   user.creatorId = fields.creatorId;
   user.credit = fields.credit;
   user.active = fields.active;
+  user.creditHistory = fields.creditHistory;
 }
 
 exports.getUserByUserCodeHelper = getUserByUserCodeHelper;
@@ -283,7 +285,6 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
       assert(org != null, "Org is null");
       let referrer = null;
       if (referralCode) {
-        console.log(referralCode)
         referrer = await getUserByUserCodeHelper(referralCode, org._id);
         if (referrer == null) {
           throw new Error("onBoardUserToOrgHelper: Couldn't find referrer");
@@ -297,12 +298,13 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
         throw new Error("onBoardUserToOrgHelper: Already onboarded to this org");
       }
 
-      foundUser.organizations.push({organization: org._id, role: foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer", credit: 0, creatorId: referrer? referrer._id : null, active: true});
+      foundUser.organizations.push({organization: org._id, role: foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer", credit: 0, creatorId: referrer? referrer._id : null, active: true, creditHistory: []});
       foundUser.organization = org._id
       foundUser.pricings = org.pricings;
       foundUser.role = foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer";
       foundUser.creatorId = referrer? referrer._id : null;
       foundUser.active = true;
+      foundUser.creditHistory = [];
       foundUser = await UserModel.findByIdAndUpdate(foundUser._id, foundUser, {new: true}).then(updatedUser => {return updatedUser});
       console.log(`onBoardUserToOrgHelper: Onboarded user ${u_id} to org ${org.name} referred by ${foundUser.creatorId}`);
       let response =  {
@@ -323,10 +325,11 @@ exports.updateUserCredit = async (req, res, next) => {
     await session.withTransaction(async () => {
       let currentUser = await UserModel.findById(req.userData.u_id).then(foundUser => {return foundUser});
       await UserModel.findById(req.params.id).then(async foundUser => {
-        let history = (await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, `${currentUser.name} updated ${foundUser.name}'s credit to $${req.body.amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} with note: \"${req.body.content}\"`, req.params.id, session));
+        console.log(req.body.content)
+        let history = (await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, `${currentUser.name} updated ${foundUser.name}'s credit to $${req.body.amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} with note: "${req.body.content}"`, req.params.id, session));
         foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].credit = req.body.amount;
-        foundUser.creditHistory.unshift(history._id);
-        await UserModel.findOneAndUpdate({id: req.params.id}, foundUser).session(session).then();
+        foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].creditHistory.unshift(history._id);
+        await UserModel.findByIdAndUpdate(req.params.id, foundUser).session(session).then();
         console.log(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.u_id}`)
       });
 

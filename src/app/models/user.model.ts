@@ -9,7 +9,7 @@ export interface UserModel { // From backend
   name: string;
   email: string; // unique doesn't not throw error if not unique
   phoneNumber: string;
-  role: string;
+  pricings: string;
   recipients: RecipientModel[];
   addresses: AddressModel[];
   userCode: string;
@@ -17,12 +17,16 @@ export interface UserModel { // From backend
   organizations: [{
     organization: string;
     role: string;
+    active: boolean;
+    credit: number;
+    creatorId: string;
+    creditHistory: string[];
   }];
-  pricings: string;
+  role: string;
   creatorId: string;
   active: boolean;
   credit: number;
-  creditHistory: HistoryModel[];
+  creditHistory: string[];
   createdAt: Date;
   updatedAt: Date;
 }

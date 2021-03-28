@@ -1,60 +1,68 @@
-<div *ngIf="onlineForm" class="form">
-  <form [formGroup]='onlineForm' (submit)='onSave()' class="my-4">
-    <general-info
-      #generalInfo
-      [usersObservable]="usersSubject.asObservable()"
-      [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
-      [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
-      (formValidityStatus)="generalInfoValidity($event)"
-      [generalInfoObservable]="generalInfoSubject.asObservable()"
-      (generalInfoUpdated)="pricingUpdate($event)"
-      [disabledFields]="generalInfoDisabledFields">
-    </general-info>
+<div *ngIf="onlineForm">
+  <form [formGroup]='onlineForm' (submit)='onSave()'>
+    <mat-card class="m-3 mat-elevation-z4">
+      <general-info
+        #generalInfo
+        [usersObservable]="usersSubject.asObservable()"
+        [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
+        [trackingNumberObservable]="trackingNumeberSubject.asObservable()"
+        (formValidityStatus)="generalInfoValidity($event)"
+        [generalInfoObservable]="generalInfoSubject.asObservable()"
+        (generalInfoUpdated)="pricingUpdate($event)"
+        [disabledFields]="generalInfoDisabledFields">
+      </general-info>
+    </mat-card>
 
-    <div class="row">
-      <mat-form-field appearance="outline" class="col-lg-4">
-        <mat-label translate>general.carrier</mat-label>
-        <mat-select formControlName="carrier">
-          <mat-option *ngFor="let carrier of carriers" [value]="carrier">
-            {{carrier}}
-          </mat-option>
-        </mat-select>
-        <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
-      </mat-form-field>
 
-      <div class="d-flex col-lg-8">
-        <mat-form-field appearance="outline">
-          <mat-label translate>general.tracking-number</mat-label>
-          <input
-          matInput
-          type='text'
-          formControlName='carrierTrackingNumber'>
-          <button *ngIf="onlineForm.controls['carrierTrackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['carrierTrackingNumber'].setValue('')">
-            <mat-icon>close</mat-icon>
-          </button>
+
+    <mat-card class="m-3 mat-elevation-z4">
+      <div class="row">
+        <mat-form-field appearance="outline" class="col-lg-4">
+          <mat-label translate>general.carrier</mat-label>
+          <mat-select formControlName="carrier">
+            <mat-option *ngFor="let carrier of carriers" [value]="carrier">
+              {{carrier}}
+            </mat-option>
+          </mat-select>
+          <!-- <mat-hint>{{form.get('carrier').value?.sound}}</mat-hint> -->
         </mat-form-field>
-        <a
-          mat-mini-fab
-          color='primary'
-          class="mt-2 d-inline ml-2 mat-elevation-z0"
-          (click)="scannerOpened = !scannerOpened">
-          <mat-icon style="position: relative; top: -2px">qr_code</mat-icon>
-        </a>
+
+        <div class="d-flex col-lg-8">
+          <mat-form-field appearance="outline">
+            <mat-label translate>general.tracking-number</mat-label>
+            <input
+            matInput
+            type='text'
+            formControlName='carrierTrackingNumber'>
+            <button *ngIf="onlineForm.controls['carrierTrackingNumber'].value" matSuffix mat-icon-button (click)="onlineForm.controls['carrierTrackingNumber'].setValue('')">
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-form-field>
+          <a
+            mat-mini-fab
+            color='primary'
+            class="mt-2 d-inline ml-3"
+            (click)="scannerOpened = !scannerOpened">
+            <mat-icon style="position: relative; top: -2px">qr_code</mat-icon>
+          </a>
+        </div>
       </div>
-    </div>
+    </mat-card>
 
-    <div class="mt-2">
-      <file-uploader
-      #fileUploader
-      [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()">
-      </file-uploader>
-    </div>
+    <mat-card class="m-3 mat-elevation-z4">
+      <div class="mt-2">
+        <file-uploader
+        #fileUploader
+        [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()">
+        </file-uploader>
+      </div>
 
-    <div class="mt-2">
-      <mat-checkbox matInput formControlName="received" (change)="receivedCheckboxChecked($event)"><span translate>statuses.received</span></mat-checkbox>
-    </div>
+      <div class="mt-2">
+        <mat-checkbox matInput formControlName="received" (change)="receivedCheckboxChecked($event)"><span translate>statuses.received</span></mat-checkbox>
+      </div>
+    </mat-card>
 
-    <div class="mt-2">
+    <mat-card class="m-3 mat-elevation-z4">
       <items-list
         #itemsList
         [pricingObservable]="defaultPricingSubject.asObservable()"
@@ -62,16 +70,16 @@
         [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
         (formValidity)="itemsListValidity($event)">
       </items-list>
-    </div>
+    </mat-card>
 
-    <div *ngIf="showFinalizedInfo">
+    <mat-card *ngIf="showFinalizedInfo" class="m-3 mat-elevation-z4">
       <finalized-info
         #finalizedInfo
         [itemsListObservable]="itemsListSubject.asObservable()"
         [costAdjustmentObservable]="costAdjustmentSubject.asObservable()"
         [exchangeObservable]="exchangeSubject.asObservable()">
       </finalized-info>
-    </div>
+    </mat-card>
 
     <notes
       [defaultContentObservable]="defaultContentSubject.asObservable()"

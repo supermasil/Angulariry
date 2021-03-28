@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import * as moment from "moment";
 import { ReplaySubject } from "rxjs";
+import { HistoryModel } from "src/app/models/history.model";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { UserModel } from "src/app/models/user.model";
 import { AuthGlobals } from "../../auth-globals";
@@ -22,6 +23,7 @@ export class AdjustCreditFormComponent implements OnInit{
   currentUser: UserModel;
   editUser: UserModel;
   creditForm: FormGroup;
+  creditHistory: HistoryModel[];
 
   constructor(
     private authService: AuthService,
@@ -31,17 +33,13 @@ export class AdjustCreditFormComponent implements OnInit{
   ) {}
 
   ngOnInit() {
-    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = this.authService.getMongoDbUser();
-      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.currentOrg = this.authService.getUserOrg();
-        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
-          this.users = response.users;
-          this.users = this.users.filter(u => u.role == AuthGlobals.roles.Customer);
-          this.usersSubject.next(this.users.map(u => `${u.name} | ${u.userCode} | ${u.credit} | ${u.role} | ${u.email} | ${u.addresses[0].address}${u.addresses[0].addressLineTwo? " " + u.addresses[0].addressLineTwo: ""}`));
-        })
-    //   });
-    // });
+    this.currentUser = this.authService.getMongoDbUser();
+      this.currentOrg = this.authService.getUserOrg();
+      this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+        this.users = response.users;
+        this.users = this.users.filter(u => u.role == AuthGlobals.roles.Customer);
+        this.usersSubject.next(this.users.map(u => `${u.name} | ${u.userCode} | ${u.credit} | ${u.role} | ${u.email} | ${u.addresses[0].address}${u.addresses[0].addressLineTwo? " " + u.addresses[0].addressLineTwo: ""}`));
+      });
   }
 
   createForm() {
@@ -55,7 +53,10 @@ export class AdjustCreditFormComponent implements OnInit{
   userSelected(value: string) {
     this.editUser = this.users.filter(u => u.userCode === value.split(" | ")[1])[0];
     this.authService.getUser(this.editUser._id, this.authService.userTypes.MONGO).subscribe(user => {
-      this.editUser = user;
+      this.authService.getHistories(user.creditHistory).subscribe(histories => {
+        this.creditHistory = histories;
+        this.editUser = user;
+      })
     });
     this.createForm();
     this.creditForm.get('_id').setValue(this.editUser._id);

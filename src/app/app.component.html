@@ -12,7 +12,7 @@
       <a mat-button color="primary" class="w-50" (click)="accordion.openAll()"><mat-icon>unfold_more</mat-icon></a>
       <a mat-button color="primary" class="w-50" (click)="accordion.closeAll()"><mat-icon>unfold_less</mat-icon></a>
     </div>
-    <mat-accordion multi *ngIf="isAuth()">
+    <mat-accordion multi *ngIf="isAuth()" style="margin-bottom: 100px;">
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
@@ -33,7 +33,7 @@
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
-            <span translate>general.create</span>
+            <span translate>side-nav-bar.new-tracking</span>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
@@ -76,6 +76,12 @@
         <a mat-menu-item class="nav-link" [routerLink]="'/auth/users/edit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.edit-user</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.managerAdmins) || canView([authGlobals.roles.Accounting])" [routerLink]="'/auth/users/adjustCredit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.adjust-credit</span></a>
       </mat-expansion-panel>
+      <div class="text-center my-4 text-muted">
+        <div>Weshippee 2021</div>
+        <div>By Khoa Hoang</div>
+        <div>khoa.hoang@outlook.com</div>
+      </div>
+
     </mat-accordion>
   </mat-drawer>
 

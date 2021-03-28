@@ -18,7 +18,7 @@ export class FileUploaderComponent implements OnInit{
   fileNamesToAdd: string[] = [];
   filesToDelete = [];
   disableUploader = false;
-  limit = 1;
+  limit = 5;
 
   @Input() currentFilePathsObservable: Observable<string[]> = new Observable();
 

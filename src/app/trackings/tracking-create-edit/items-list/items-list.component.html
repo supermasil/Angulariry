@@ -64,8 +64,7 @@
                 matSuffix
                 mat-mini-fab
                 color="warn"
-                (click)="removeItem(i)"
-                class="mat-elevation-z0">
+                (click)="removeItem(i)">
                 <mat-icon>delete</mat-icon>
               </a>
             </mat-form-field>
@@ -79,6 +78,7 @@
       </div>
     </div>
   </div>
-  <a mat-mini-fab color="primary" class="float-right mat-elevation-z0 my-2" #addItemButton (click)="addItem(null)" ><mat-icon>add</mat-icon></a>
 </form>
+
+<a mat-mini-fab color="primary" #addItemButton (click)="addItem(null)"><mat-icon [inline]="true">add</mat-icon></a>
 

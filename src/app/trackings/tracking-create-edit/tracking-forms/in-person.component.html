@@ -1,6 +1,7 @@
 <div *ngIf="inPersonForm">
-  <form [formGroup]="inPersonForm" (submit)="onSave()" class="my-4">
-    <general-info
+  <form [formGroup]="inPersonForm" (submit)="onSave()">
+    <mat-card class="m-3 mat-elevation-z4">
+      <general-info
       #generalInfo
       [usersObservable]="usersSubject.asObservable()"
       [defaultLocationsObservable]="defaultLocationsSubject.asObservable()"
@@ -10,17 +11,21 @@
       [disabledFields]="generalInfoDisabledFields"
       (generalInfoUpdated)="pricingUpdate($event)">
     </general-info>
+    </mat-card>
 
-    <div class="my-2">
-      <file-uploader #fileUploader
-      [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
-    </div>
+    <mat-card class="m-3 mat-elevation-z4">
+      <div>
+        <file-uploader #fileUploader
+        [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
+      </div>
 
-    <div class="mt-2">
+    </mat-card>
+
+    <mat-card class="m-3 mat-elevation-z4">
       <form [formGroup]="subTrackingsForm">
         <div formArrayName="subTrackings" *ngFor="let subTracking of subTrackingsForm.get('subTrackings')['controls']; let i = index;">
-          <div style="margin-bottom: 50px;">
-            <mat-card>
+          <div>
+            <mat-card class="m-3 mat-elevation-z4">
               <div [formGroupName]="i">
                 <div class="row">
                   <div class="col-lg-4">
@@ -101,10 +106,10 @@
         </div>
       </form>
       <a mat-mini-fab color="accent" #addItemButton (click)="addSubTracking(null)"><mat-icon>add</mat-icon></a>
-    </div>
+    </mat-card>
 
     <div *ngIf="showTotalFinalizedInfo">
-      <mat-card style="background-color: #673AB7; color: white" class="mt-4">
+      <mat-card style="background-color: #673AB7; color: white" class="m-3 mat-elevation-z4">
         <div class="row">
           <div class="col-lg-4">
             <span class="d-block mat-h3"><b>Total weight charge</b></span>

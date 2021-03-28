@@ -37,7 +37,7 @@ export class AuthGuard implements CanActivate {
     if(!isAuth) {
       this.zone.run(() => {
         this.router.navigate(["/auth"]);
-        this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
+        // this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
       });
       return false;
     } else if (isAuth && !this.authService.getUserOrg() && this.authService.getMongoDbUser()?.role != AuthGlobals.roles.SuperAdmin && this.route.url.length > 0) {

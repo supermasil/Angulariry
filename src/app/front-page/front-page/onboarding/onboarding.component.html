@@ -7,9 +7,10 @@
 
 <a mat-button class="nav-link" [matMenuTriggerFor]="createMenu" style="color: white;">{{currentOrg?.name? currentOrg.name : 'Onboard'}}</a>
 <mat-menu #createMenu="matMenu">
-  <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.admins)" (click)="redirect('/auth/orgs/edit/' + currentUser?.organization._id)" routerLinkActive="mat-accent">Edit Organization</a>
-  <a style="color: black;" mat-menu-item class="nav-link" (click)="companySelected(-1)" routerLinkActive="mat-accent">Onboard to new organization</a>
-  <mat-divider></mat-divider>
+  <a style="color: black; font-size: 2em;" mat-menu-item class="nav-link" [cdkCopyToClipboard]="currentOrg.registerCode" *ngIf="currentOrg">{{currentOrg?.registerCode}}</a>
+  <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.admins)" (click)="redirect('/auth/orgs/edit/' + currentUser?.organization._id)" routerLinkActive="mat-accent">{{'auth.edit-organization' | translate}}</a>
+  <a style="color: black;" mat-menu-item class="nav-link" (click)="companySelected(-1)" routerLinkActive="mat-accent">{{'auth.onboard-to-new-organization' | translate}}</a>
+  <mat-divider *ngIf="currentOrg"></mat-divider>
   <ng-container *ngFor="let org of organizations; let i = index">
     <a style="color: black;" mat-menu-item class="nav-link" (click)="companySelected(i)" routerLinkActive="mat-accent">{{org.name}} {{org.email}}</a>
   </ng-container>
@@ -19,18 +20,12 @@
 <button id="onboardButton" hidden mat-raised-button color='primary' data-toggle="modal" data-target="#registerCodeModal"></button>
 
 <!-- Modal -->
-<div class="modal fade" id="registerCodeModal" tabindex="-1" role="dialog" aria-labelledby="registerCodeModalLabel" aria-hidden="true">
+<div class="modal fade" id="registerCodeModal" tabindex="-1" role="dialog" aria-labelledby="registerCodeModalLabel" aria-hidden="true" data-backdrop="false">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title" id="registerCodeModalLabel">Enter company's register code to register</h2>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
       <div class="modal-body">
         <mat-form-field appearance="outline">
-          <mat-label>Register Code</mat-label>
+          <mat-label translate>auth.register-code</mat-label>
           <input
             #registerCode
             type="text"
@@ -38,15 +33,16 @@
             matInput>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Referral Code</mat-label>
+          <mat-label translate>auth.referral-code</mat-label>
           <input
             #referralCode
             type="text"
             matInput>
         </mat-form-field>
       </div>
-      <div class="modal-footer" *ngIf="registerCode.value">
-        <button mat-raised-button color='accent' data-dismiss="modal" (click)="onboard(registerCode.value, referralCode.value)">Submit</button>
+      <div class="modal-footer">
+        <button mat-raised-button *ngIf="registerCode.value" class="mr-3" color='accent' data-dismiss="modal" (click)="onboard(registerCode.value, referralCode.value)">{{'general.update' | translate}}</button>
+        <button mat-raised-button color='basic' data-dismiss="modal">{{'general.close' | translate}}</button>
       </div>
     </div>
   </div>

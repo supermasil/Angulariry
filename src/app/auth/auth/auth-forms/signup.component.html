@@ -1,70 +1,68 @@
-<form *ngIf="signupForm" [formGroup]="signupForm" (submit)='onSignup()' (keydown.enter)="$event.preventDefault()"  class="m-2">
-  <mat-form-field appearance="outline">
-    <mat-label>Full name</mat-label>
-    <input
-    matInput
-    placeholder='John Doe'
-    formControlName='name'
-    required
-    >
-    <mat-error>Please enter your name</mat-error>
-  </mat-form-field>
-  <mat-form-field appearance="outline">
-    <mat-label>Email</mat-label>
-    <input
-    matInput
-    placeholder='johndoe@abc.com'
-    formControlName='email'
-    required
-    >
-    <mat-error>Please enter a valid email</mat-error>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <mat-label>Password</mat-label>
-    <input
-    type="password"
-    matInput
-    placeholder='Password'
-    formControlName='password'
-    autocomplete="false"
-    required
-    >
-    <mat-error>At least 6 characters are required</mat-error>
-  </mat-form-field>
-
-  <mat-form-field appearance="outline">
-    <!-- [preferredCountries]="['us', 'vn']" -->
-    <lac-mat-country-selector matPrefix [selectorFor]="phoneNumber"
-      [onlyCountries]="['us', 'vn']"
-      [showDialCode]="false"
-      [disableSearch]="false"
-      searchPlaceholder="Search..."
-      style="position: relative; bottom: 6px;"
+<form *ngIf="signupForm" [formGroup]="signupForm" (submit)='onSignup()' (keydown.enter)="$event.preventDefault()"  class="my-4">
+  <mat-card class="m-3 mat-elevation-z4">
+    <mat-form-field appearance="outline">
+      <mat-label translate>auth.full-name</mat-label>
+      <input
+      matInput
+      placeholder='John Doe'
+      formControlName='name'
+      required
       >
-    </lac-mat-country-selector>
-    <mat-label>Phone Number</mat-label>
-    <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
-    </lac-mat-tel-input>
-    <mat-error>Invalid phone number</mat-error>
-  </mat-form-field>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input
+      matInput
+      placeholder='johndoe@abc.com'
+      formControlName='email'
+      required
+      >
+    </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Role</mat-label>
-    <mat-select matInput formControlName="role">
-      <mat-option *ngFor="let role of roles" [value]="role">
-        {{role}}
-      </mat-option>
-    </mat-select>
-    <mat-error>Please select a role</mat-error>
-  </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label translate>auth.password</mat-label>
+      <input
+      type="password"
+      matInput
+      placeholder='Password'
+      formControlName='password'
+      autocomplete="false"
+      required
+      >
+      <mat-error translate>auth.at-least-6-chars</mat-error>
+    </mat-form-field>
 
-  <h2>Sender's addresses</h2>
+    <mat-form-field appearance="outline">
+      <!-- [preferredCountries]="['us', 'vn']" -->
+      <lac-mat-country-selector matPrefix [selectorFor]="phoneNumber"
+        [onlyCountries]="['us', 'vn']"
+        [showDialCode]="false"
+        [disableSearch]="false"
+        searchPlaceholder="Search..."
+        style="position: relative; bottom: 6px;"
+        >
+      </lac-mat-country-selector>
+      <mat-label translate>auth.phone-number</mat-label>
+      <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
+      </lac-mat-tel-input>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label translate>auth.role</mat-label>
+      <mat-select matInput formControlName="role">
+        <mat-option *ngFor="let role of roles" [value]="role">
+          {{'roles.' + role | translate}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </mat-card>
+
+  <h2 translate>auth.sender-addresses</h2>
   <div formArrayName="addresses" *ngFor="let item of signupForm.get('addresses')['controls']; let i = index;">
     <div [formGroupName]="i">
-      <mat-card class="mb-4 mat-elevation-z4">
+      <mat-card class="m-3 mat-elevation-z4">
         <mat-form-field appearance="outline">
-          <mat-label>Address</mat-label>
+          <mat-label translate>auth.address</mat-label>
           <input
           type="text"
           matInput
@@ -76,10 +74,10 @@
           <button mat-button *ngIf="signupForm.get('addresses')['controls'][i].controls['address'].value" matSuffix mat-icon-button aria-label="Clear" (click)="onAddressCancel('addresses', i);">
             <mat-icon>close</mat-icon>
           </button>
-          <mat-error>Please select a suggested address</mat-error>
+          <mat-error translate>auth.select-only-suggested-address</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Address Line 2</mat-label>
+          <mat-label translate>auth.address-line-2</mat-label>
           <input
           type="text"
           matInput
@@ -99,12 +97,12 @@
   <!-- <div class="mb-4 d-flex justify-content-end">
     <a mat-mini-fab color="primary" (click)="addAddressOrRecipient('addresses')"><mat-icon>add</mat-icon></a>
   </div> -->
-  <h2>Recipient's addresses</h2>
+  <h2 translate>auth.recipient-addresses</h2>
   <div formArrayName="recipients" *ngFor="let item of signupForm.get('recipients')['controls']; let i = index;">
     <div [formGroupName]="i">
-      <mat-card class="mb-4 mat-elevation-z4">
+      <mat-card class="m-3 mat-elevation-z4">
         <mat-form-field appearance="outline">
-          <mat-label>Full name</mat-label>
+          <mat-label translate>auth.full-name</mat-label>
           <input
           matInput
           placeholder='John Doe'
@@ -121,7 +119,6 @@
           formControlName='email'
           required
           >
-          <mat-error>Please enter a valid email</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <!-- [preferredCountries]="['us', 'vn']" -->
@@ -133,13 +130,12 @@
             style="position: relative; bottom: 6px;"
             >
           </lac-mat-country-selector>
-          <mat-label>Phone Number</mat-label>
+          <mat-label translate>auth.phone-number</mat-label>
           <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
           </lac-mat-tel-input>
-          <mat-error>Invalid phone number</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Address</mat-label>
+          <mat-label translate>auth.address</mat-label>
           <input
           type="text"
           matInput
@@ -151,10 +147,10 @@
           <button mat-button *ngIf="signupForm.get('recipients')['controls'][i].controls['address'].value" matSuffix mat-icon-button aria-label="Clear" (click)="onAddressCancel('recipients', i);">
             <mat-icon>close</mat-icon>
           </button>
-          <mat-error>Please select a suggested address</mat-error>
+          <mat-error translate>auth.select-only-suggested-address</mat-error>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Address Line 2</mat-label>
+          <mat-label translate>auth.address-line-2</mat-label>
           <input
           type="text"
           matInput
@@ -171,11 +167,9 @@
       </mat-card>
     </div>
   </div>
-  <div class="mb-4 d-flex justify-content-end">
-    <a mat-mini-fab color="primary" (click)="addAddressOrRecipient('recipients')"><mat-icon>add</mat-icon></a>
-  </div>
 
-  <button *ngIf="!isLoading && mode === 'create'" class="mt-2" mat-raised-button color='accent' type='submit'>Sign up</button>
-  <button *ngIf="!isLoading && mode === 'edit'" class="mt-2" mat-raised-button color='accent' type='submit'>Update</button>
+  <a mat-mini-fab color="primary" (click)="addAddressOrRecipient('recipients')" class="m-3 float-right"><mat-icon>add</mat-icon></a>
+  <button *ngIf="!isLoading && mode === 'create'" class="m-3" mat-raised-button color='accent' type='submit'>{{'auth.signup' | translate}}</button>
+  <button *ngIf="!isLoading && mode === 'edit'" class="m-3" mat-raised-button color='accent' type='submit'>{{'general.update' | translate}}</button>
   <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
 </form>

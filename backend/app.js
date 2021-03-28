@@ -9,8 +9,9 @@ const usersRoutes = require('./routes/users');
 const trackingsRoutes = require('./routes/trackings');
 const commentsRoutes = require('./routes/comments');
 const easyPostRoutes = require('./routes/easypost-webhook');
-const organizationstRoutes = require('./routes/organizations');
-const pricingstRoutes = require('./routes/pricings');
+const organizationsRoutes = require('./routes/organizations');
+const pricingsRoutes = require('./routes/pricings');
+const historiesRoutes = require('./routes/histories');
 
 // Firebase App (the core Firebase SDK) is always required and
 // must be listed before other Firebase SDKs
@@ -73,8 +74,9 @@ app.use('/api/users', usersRoutes); // this route is reserved for backend
 app.use('/api/trackings', trackingsRoutes); // this route is reserved for backend
 app.use('/api/comments', commentsRoutes); // this route is reserved for backend
 app.use('/api/easypost', easyPostRoutes); // this route is reserved for backend
-app.use('/api/organizations', organizationstRoutes); // this route is reserved for backend
-app.use('/api/pricings', pricingstRoutes); // this route is reserved for backend
+app.use('/api/organizations', organizationsRoutes); // this route is reserved for backend
+app.use('/api/pricings', pricingsRoutes); // this route is reserved for backend
+app.use('/api/histories', historiesRoutes); // this route is reserved for backend
 app.use((req, res, next) => {
   // if (err.status === 404) {
   //   return res.sendFile(path.join(__dirname, "angular", "index.html"));

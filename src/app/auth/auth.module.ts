@@ -16,6 +16,7 @@ import { AutoCompleteInputModule } from '../custom-components/auto-complete-inpu
 import { EditUserFormComponent } from './auth/auth-forms/edit-user.component';
 import { AdjustCreditFormComponent } from './auth/auth-forms/adjust-credit.component';
 import { NgxCurrencyModule } from 'ngx-currency';
+import { TranslateModule } from '@ngx-translate/core';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { NgxCurrencyModule } from 'ngx-currency';
     LacMatTelInputModule,
     GooglePlaceModule,
     AutoCompleteInputModule,
-    NgxCurrencyModule
+    NgxCurrencyModule,
+    TranslateModule.forChild()
   ]
 })
 export class AuthModule {}

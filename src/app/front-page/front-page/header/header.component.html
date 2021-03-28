@@ -15,19 +15,20 @@
       <li class="nav-item">
         <a mat-button color="primary" [matMenuTriggerFor]="createMenu" style="color: white;" class="mr-2"><mat-icon>language</mat-icon></a>
         <mat-menu #createMenu="matMenu">
-          <a style="color: black;" mat-menu-item class="nav-link" (click)="languageChange('vi')">Vietnamese</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="languageChange('vi')">Tiếng Việt</a>
           <a style="color: black;" mat-menu-item class="nav-link" (click)="languageChange('en')">English</a>
         </mat-menu>
       </li>
       <li class="nav-item" *ngIf="isAuth()">
         <a mat-button [matMenuTriggerFor]="currentUserMenu" style="color: white;">{{user?.name}}</a>
         <mat-menu #currentUserMenu="matMenu">
-          <a style="color: black;" *ngIf="user" mat-menu-item class="nav-link" [routerLink]="'/auth/users/edit/' + user._id">Profile</a>
-          <a style="color: black;" mat-menu-item class="nav-link" (click)="onLogOut()">Logout</a>
+          <a style="color: black; font-size: 2em;" *ngIf="user" mat-menu-item class="nav-link">{{user.userCode}}</a>
+          <a style="color: black;" *ngIf="user" mat-menu-item class="nav-link" [routerLink]="'/auth/users/edit/' + user._id">{{'auth.profile' | translate}}</a>
+          <a style="color: black;" mat-menu-item class="nav-link" (click)="onLogOut()">{{'auth.logout' | translate}}</a>
           <mat-divider></mat-divider>
-          <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{user?.role}}</a>
+          <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{'roles.' + user?.role | translate}}</a>
           <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{user?.credit | currency: 'USD'}}</a>
-          <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{user?.active? "Active": "Inactive"}}</a>
+          <a style="color: grey;" mat-menu-item routerLinkActive="mat-accent">{{(user?.active? 'auth.active' : 'auth.inactive') | translate}}</a>
         </mat-menu>
       </li>
       <li class="nav-item" *ngIf="isAuth()">
@@ -36,3 +37,4 @@
     </ul>
   </div>
 </nav>
+
