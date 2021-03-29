@@ -78,7 +78,7 @@ export class TrackingGlobals {
   public static internalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(3);
   public static externalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(0, 3);
 
-  public static defaultPageSizes = [10, 20, 50, 100];
+  public static defaultPageSizes = [1, 20, 50, 100];
 
   public static getBadgeColor = (status: string) => {
     switch (status) {

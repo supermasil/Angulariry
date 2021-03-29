@@ -319,53 +319,6 @@ updateImages = async (req, currentFilesPath) => {
   return tempFilePaths;
 }
 
-exports.fuzzySearch = async (req, res, next) => {
-  try {
-    response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
-    response.trackings = response.trackings.filter((doc) => {
-      let result = false;
-
-      result = result || doc.trackingNumber.match(new RegExp(req.query.searchTerm, 'i')) ||
-            doc.generalInfo.trackingStatus.match(new RegExp(req.query.searchTerm, 'i'))
-
-      if (!result && req.query.type !== TrackingTypes.MASTER) { // Master doesn't have sender
-        result = result || doc.generalInfo.sender.name.match(new RegExp(req.query.searchTerm, 'i'))
-            || doc.generalInfo.sender.userCode.match(new RegExp(req.query.searchTerm, 'i'))
-      }
-
-      if (!result && req.query.type === TrackingTypes.ONLINE) {
-        result = result || doc.carrierTracking.carrierTrackingNumber.match(new RegExp(req.query.searchTerm, 'i')) ||
-        doc.carrierTracking.status.match(new RegExp(req.query.searchTerm, 'i')) ||
-        doc.carrierTracking.carrier.match(new RegExp(req.query.searchTerm, 'i'))
-      }
-
-      if (!result && req.query.type === TrackingTypes.CONSOLIDATED) {
-          doc.onlineTrackings.forEach(t => {if (t.trackingNumber.match(new RegExp(req.query.searchTerm, 'i'))) {result = true; return}});
-          if (!result) doc.servicedTrackings.forEach(t => {if (t.trackingNumber.match(new RegExp(req.query.searchTerm, 'i'))) {result =  true; return}});
-          if (!result) doc.inPersonSubTrackings.forEach(t => {if (t.trackingNumber.match(new RegExp(req.query.searchTerm, 'i'))) {result = true; return}});
-      }
-
-      if (!result && req.query.type === TrackingTypes.MASTER) {
-        doc.boxes.forEach(b => {
-          b.onlineTrackings.forEach(t => {if (t.trackingNumber.match(new RegExp(req.query.searchTerm, 'i'))) {result = true; return}});
-          if (!result) b.servicedTrackings.forEach(t => {if (t.trackingNumber.match(new RegExp(req.query.searchTerm, 'i'))) {result =  true; return}});
-          if (!result) b.inPersonTrackings.forEach(t => {if (t.trackingNumber.match(new RegExp(req.query.searchTerm, 'i'))) {result = true; return}});
-        })
-      }
-
-      return result;
-    });
-
-    return res.status(200).json({
-      trackings: response.trackings,
-      count: response.trackings.length
-    })
-  } catch (error) {
-    console.log("trackingFuzzySearch: " + error.message);
-    return res.status(500).json({message: "Couldn't search for this term"});
-  }
-}
-
 exports.getTrackings = async (req, res, next) => {
   try {
     let response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
@@ -379,6 +332,20 @@ exports.getTrackings = async (req, res, next) => {
     return res.status(500).json({message: "Couldn't fetch trackings"});
   };
 }
+
+// exports.fuzzySearch = async (req, res, next) => {
+//   try {
+//     let response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
+
+//     return res.status(200).json({
+//       trackings: response.trackings,
+//       count: response.trackings.length
+//     })
+//   } catch (error) {
+//     console.log("trackingFuzzySearch: " + error.message);
+//     return res.status(500).json({message: "Couldn't search for this term"});
+//   }
+// }
 
 getTrackingsHelper = async (type, orgId, query) => {
   assert(type != undefined, "Query type is undefined");
@@ -400,6 +367,11 @@ getTrackingsHelper = async (type, orgId, query) => {
     queryBody['generalInfo.sender'] = query.sender;
   }
 
+  if (query.searchTerm) {
+    // https://stackoverflow.com/questions/26699885/how-can-i-use-a-regex-variable-in-a-query-for-mongodb
+    queryBody["trackingNumber"] = new RegExp(query.searchTerm, 'i');
+  }
+
   let callbackfunction = async documents => {
     return {
       // No error message needed
@@ -413,7 +385,7 @@ getTrackingsHelper = async (type, orgId, query) => {
   switch (type) {
     case TrackingTypes.ONLINE:
       let trackingQuery1 = OnlineTrackingModel.find(queryBody);
-      totalCount = await OnlineTrackingModel.countDocuments().then(count => {return count});
+      totalCount = await OnlineTrackingModel.countDocuments(queryBody).then(count => {return count});
       return await paginationHelper(+query.pageSize, +query.currentPage, trackingQuery1)
         .populate('generalInfo.sender')
         .populate('generalInfo.comments')
@@ -429,7 +401,7 @@ getTrackingsHelper = async (type, orgId, query) => {
       };
     case TrackingTypes.INPERSON:
       let trackingQuery3 = InPersonTrackingModel.find(queryBody);
-      totalCount = await InPersonTrackingModel.countDocuments().then(count => {return count});
+      totalCount = await InPersonTrackingModel.countDocuments(queryBody).then(count => {return count});
       return await paginationHelper(+query.pageSize, +query.currentPage, trackingQuery3)
         .populate('generalInfo.sender')
         .populate('generalInfo.comments')
@@ -438,7 +410,7 @@ getTrackingsHelper = async (type, orgId, query) => {
         .lean().exec().then(callbackfunction);
     case TrackingTypes.INPERSONSUB:
       let trackingQuery4 = InPersonSubTrackingModel.find(queryBody);
-      totalCount = await InPersonSubTrackingModel.countDocuments().then(count => {return count});
+      totalCount = await InPersonSubTrackingModel.countDocuments(queryBody).then(count => {return count});
       return await paginationHelper(+query.pageSize, +query.currentPage, trackingQuery4)
         .populate('generalInfo.sender')
         .populate('generalInfo.comments')
@@ -447,7 +419,7 @@ getTrackingsHelper = async (type, orgId, query) => {
         .lean().exec().then(callbackfunction);
     case TrackingTypes.CONSOLIDATED:
       let trackingQuery5 = ConsolidatedTrackingModel.find(queryBody);
-      totalCount = await ConsolidatedTrackingModel.countDocuments().then(count => {return count});
+      totalCount = await ConsolidatedTrackingModel.countDocuments(queryBody).then(count => {return count});
       return await paginationHelper(+query.pageSize, +query.currentPage, trackingQuery5)
         .populate('generalInfo.sender')
         .populate('generalInfo.comments')
@@ -457,7 +429,7 @@ getTrackingsHelper = async (type, orgId, query) => {
         .lean().exec().then(callbackfunction);
     case TrackingTypes.MASTER:
       let trackingQuery6 = MasterTrackingModel.find(queryBody);
-      totalCount = await MasterTrackingModel.countDocuments().then(count => {return count});
+      totalCount = await MasterTrackingModel.countDocuments(queryBody).then(count => {return count});
       return await paginationHelper(+query.pageSize, +query.currentPage, trackingQuery6)
         .populate('generalInfo.sender')
         .populate("generalInfo.comments")

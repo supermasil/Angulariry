@@ -28,3 +28,7 @@ a {
 ::ng-deep.mat-menu-panel {
   min-width: 200px !important;
 }
+
+.navbar {
+  z-index: 999;
+}

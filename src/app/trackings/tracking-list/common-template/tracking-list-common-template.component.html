@@ -550,6 +550,6 @@
   </mat-accordion>
   <mat-paginator #paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [(pageSize)]='currentPageSize' [pageSizeOptions]='pageSizeOptions' (page)='pageDataChange($event)'></mat-paginator>
   <div *ngIf='trackings.length == 0' class="text-center">
-    No data found
+    <!-- No data found -->
   </div>
 </div>

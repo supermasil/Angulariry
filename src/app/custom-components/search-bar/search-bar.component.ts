@@ -36,6 +36,7 @@ export class SearchBarComponent implements OnInit {
     // if (!this.searchForm.get('searchTerm').value) {
     //   return;
     // }
+    console.log("here")
     this.onSearchEvent.emit(this.searchForm.get('searchTerm').value);
   }
 

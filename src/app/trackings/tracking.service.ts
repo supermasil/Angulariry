@@ -9,6 +9,7 @@ import { ServicedTrackingModel } from '../models/tracking-models/serviced-tracki
 import { InPersonTrackingModel } from '../models/tracking-models/in-person-tracking.model';
 import { ConsolidatedTrackingModel } from '../models/tracking-models/consolidated-tracking.model';
 import { MasterTrackingModel } from '../models/tracking-models/master-tracking.model';
+import { TrackingGlobals } from './tracking-globals';
 
 const BACKEND_URL = environment.apiURL + "/trackings/";
 
@@ -52,19 +53,6 @@ export class TrackingService{
     return this.httpClient.get<Object>(BACKEND_URL + queryParams);
   }
 
-  fuzzySearch(searchTerm: string, type: string) {
-    const queryParams = `search?searchTerm=${searchTerm}&type=${type}`;
-    return this.httpClient
-      .get<{trackings: any, count: number}>(BACKEND_URL + queryParams)
-      .pipe(map((trackingData) => {
-        return {
-          trackings: trackingData.trackings.map(tracking => {return tracking as OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel}),
-          count: trackingData.count
-        };
-      })
-    );
-  }
-
   createUpdateTracking(formData: any) {
     this.httpClient
       .post<{message: string, tracking: any}>(BACKEND_URL, formData)
@@ -79,7 +67,7 @@ export class TrackingService{
     return this.httpClient.get<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel |ConsolidatedTrackingModel | MasterTrackingModel>(BACKEND_URL + "/" + trackingNumber + `?type=${type}`); // return an observable
   }
 
-  getTrackings(trackingsPerPage: number, currentPage: number, type: string, origin: string, destination: string, sender: string) {
+  getTrackings(searchTerm: string, trackingsPerPage: number, currentPage: number, type: string, origin: string, destination: string, sender: string) {
     let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&type=${type}`;
     if (origin) {
       queryParams = queryParams.concat(`&origin=${origin}`);
@@ -87,8 +75,11 @@ export class TrackingService{
     if (destination) {
       queryParams = queryParams.concat(`&destination=${destination}`);
     }
-    if(sender) {
+    if (sender) {
       queryParams = queryParams.concat(`&sender=${sender}`);
+    }
+    if (searchTerm) {
+      queryParams = queryParams.concat(`&searchTerm=${searchTerm}`);
     }
 
     return this.httpClient
@@ -114,5 +105,22 @@ export class TrackingService{
     }
     return this.httpClient
       .post<{message: string, tracking: any}>(BACKEND_URL + "changeStatus", formData);
+  }
+
+  getTrackingTypeFromString(term: string) {
+    switch (term.substring(0,3).toLowerCase()) {
+      case 'onl':
+        return TrackingGlobals.trackingTypes.ONLINE;
+      case 'sev':
+        return TrackingGlobals.trackingTypes.SERVICED;
+      case 'inp':
+        return TrackingGlobals.trackingTypes.INPERSON;
+      case 'csl':
+        return TrackingGlobals.trackingTypes.CONSOLIDATED;
+      case 'mst':
+        return TrackingGlobals.trackingTypes.MASTER;
+      default:
+        return null;
+    }
   }
 }

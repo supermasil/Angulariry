@@ -5,8 +5,6 @@ const TrackingController = require("../controllers/trackings");
 
 router.get('/tracking-tool', checkAuth.isAuthenticated, TrackingController.getTrackingTool);
 
-router.get('/search', checkAuth.isAuthenticated, TrackingController.fuzzySearch); // Has to be before get /:id
-
 router.get('/:id', checkAuth.isAuthenticated, TrackingController.getTracking) // Get one
 
 router.get('/', checkAuth.isAuthenticated, TrackingController.getTrackings); // Get all

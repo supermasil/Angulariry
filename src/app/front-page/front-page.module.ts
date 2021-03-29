@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { AngularMaterialModule } from '../angular-material.module';
+import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
+import { TrackingListCommonTemplateModule } from '../trackings/tracking-list/common-template/tracking-list-common-template.module';
 import { FrontPageRoutingModule } from './front-page-routing.module';
 import { FrontPageComponent } from './front-page.component';
 
@@ -13,7 +15,9 @@ import { FrontPageComponent } from './front-page.component';
     CommonModule,
     AngularMaterialModule,
     FrontPageRoutingModule,
-    TranslateModule.forChild()
+    TranslateModule.forChild(),
+    SearchBarModule,
+    TrackingListCommonTemplateModule
   ]
 })
 export class FrontPageModule {

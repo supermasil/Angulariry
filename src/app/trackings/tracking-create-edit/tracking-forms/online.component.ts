@@ -58,7 +58,7 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   currentTracking: OnlineTrackingModel; // edit case
   mode = "create";
 
-  scannerOpened = false;
+scannerOpened = false;
   showFinalizedInfo = false;
 
   generalInfoDisabledFields = [true, true, true, false, false, false, false];

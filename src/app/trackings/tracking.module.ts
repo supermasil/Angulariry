@@ -17,14 +17,13 @@ import { TrackingRoutingModule } from './tracking-routing.module';
 import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-create-edit.component';
 import { GeneralInfoComponent } from './tracking-create-edit/general-info/general-info.component';
 import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/finalized-info.component';
-import { NgxPrintModule } from 'ngx-print';
 import { ConsolidationTableComponent } from './tracking-create-edit/consolidation-table/consolidation-table.component';
-import { TrackingListCommonTemplateComponent } from './tracking-list/common-template/tracking-list-common-template.component';
-import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
 import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
 import { TranslateModule } from '@ngx-translate/core';
 import { NotesComponent } from '../custom-components/notes/notes.component';
 import { SaveCancelButtonsModule } from '../custom-components/save-cancel-buttons/save-cancel-buttons.module';
+import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
+import { TrackingListCommonTemplateModule } from './tracking-list/common-template/tracking-list-common-template.module';
 
 
 @NgModule({
@@ -41,7 +40,6 @@ import { SaveCancelButtonsModule } from '../custom-components/save-cancel-button
     GeneralInfoComponent,
     FinalizedInfoComponent,
     ConsolidationTableComponent,
-    TrackingListCommonTemplateComponent,
     NotesComponent
   ],
   imports: [
@@ -53,11 +51,11 @@ import { SaveCancelButtonsModule } from '../custom-components/save-cancel-button
     FileUploaderModule,
     AutoCompleteInputModule,
     TrackingRoutingModule,
-    NgxPrintModule,
-    SearchBarModule,
     NgxQRCodeModule,
     SaveCancelButtonsModule,
-    TranslateModule.forChild()
+    TranslateModule.forChild(),
+    SearchBarModule,
+    TrackingListCommonTemplateModule
   ]
 })
 export class TrackingModule {

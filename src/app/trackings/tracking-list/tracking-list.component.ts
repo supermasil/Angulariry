@@ -32,11 +32,12 @@ export class TrackingListComponent {
   authGlobals = AuthGlobals;
 
   isLoading = true;
-  searchMode = false;
+  searchTerm = "";
 
   trackingsSubject: ReplaySubject<{trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}> = new ReplaySubject();
   resetPaginatorSubject = new Subject();
   searchedTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
+  pageData: PageEvent;
 
   constructor(
     private trackingService: TrackingService,
@@ -69,42 +70,12 @@ export class TrackingListComponent {
       this.setTab(this.selectedIndex);
     });
 
-    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = this.authService.getMongoDbUser();
-      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = this.authService.getUserOrg();
-        this.isLoading = false;
-        this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
-    //   }, error => {
-    //     this.authService.redirectToMainPageWithoutMessage();
-    //   });
-    // }, error => {
-    //   this.authService.redirectToMainPageWithoutMessage();
-    // });
+    this.currentUser = this.authService.getMongoDbUser();
+    this.organization = this.authService.getUserOrg();
+    this.isLoading = false;
+    this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
   }
 
-  fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {
-    this.searchMode = false;
-    let sender = null
-    if (this.currentUser.role === AuthGlobals.roles.Customer) {
-      sender = this.currentUser._id;
-    }
-    this.trackingService.getTrackings(trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
-      this.trackingsSubject.next(transformedTrackings);
-    });
-  }
-
-  pageDataChanged (pageData: PageEvent) {
-    if (this.searchMode) {
-      this.trackingsSubject.next({trackings: this.searchedTrackings.slice(pageData.pageIndex * pageData.pageSize, pageData.pageIndex * pageData.pageSize + pageData.pageSize) , count: this.searchedTrackings.length});
-    } else {
-      this.fetchTrackings(pageData.pageSize, pageData.pageIndex + 1, this.currentTrackingType);
-    }
-  }
-
-  resetPaginator() {
-    this.resetPaginatorSubject.next();
-  }
 
   setTab(index: Number) {
     switch (index) {
@@ -132,23 +103,36 @@ export class TrackingListComponent {
   }
 
   tabChanged(index: Number) {
-    this.searchMode = false;
+    this.searchTerm = "";
     this.setTab(index);
     this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
   }
 
+  fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {
+    let sender = this.currentUser.role === AuthGlobals.roles.Customer? this.currentUser._id: null;
+
+    this.trackingService.getTrackings(this.searchTerm, trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
+      this.trackingsSubject.next(transformedTrackings);
+    });
+  }
+
+  pageDataChanged (pageData: PageEvent) {
+    this.pageData = pageData;
+    this.fetchTrackings(pageData.pageSize, pageData.pageIndex + 1, this.currentTrackingType);
+  }
+
+  resetPaginator() {
+    this.resetPaginatorSubject.next();
+  }
+
   onFuzzySearch(searchTerm: string) {
+    this.resetPaginator();
+    this.searchTerm = searchTerm;
     if (!searchTerm) {
       this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
+      return;
     }
-
-    this.resetPaginator();
-
-    this.searchMode = true;
-    this.trackingService.fuzzySearch(searchTerm, this.currentTrackingType).subscribe(trackingData => {
-      this.searchedTrackings = trackingData.trackings;
-      this.trackingsSubject.next({trackings: this.searchedTrackings.slice(0, TrackingGlobals.defaultPageSizes[0]) , count: this.searchedTrackings.length});
-    });
+    this.fetchTrackings(this.pageData? this.pageData?.pageSize : TrackingGlobals.defaultPageSizes[0], this.pageData? this.pageData.pageIndex + 1: 0 , this.currentTrackingType);
   }
 
   ngOnDestroy() {

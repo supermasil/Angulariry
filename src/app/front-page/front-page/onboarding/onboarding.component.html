@@ -4,8 +4,7 @@
   (itemSelected)="companySelected($event)"
   [matLabel]="'Company Code'">
 </auto-complete-input> -->
-
-<a mat-button class="nav-link" [matMenuTriggerFor]="createMenu" style="color: white;">{{currentOrg?.name? currentOrg.name : 'Onboard'}}</a>
+<a mat-button [matMenuTriggerFor]="createMenu" style="color: white; padding: 0; text-decoration: none;" class="mx-2">{{currentOrg?.name? currentOrg.name : 'Onboard'}}</a>
 <mat-menu #createMenu="matMenu">
   <a style="color: black; font-size: 2em;" mat-menu-item class="nav-link" [cdkCopyToClipboard]="currentOrg.registerCode" *ngIf="currentOrg">{{currentOrg?.registerCode}}</a>
   <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.admins)" (click)="redirect('/auth/orgs/edit/' + currentUser?.organization._id)" routerLinkActive="mat-accent">{{'auth.edit-organization' | translate}}</a>

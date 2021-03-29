@@ -1,23 +1,28 @@
-<form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()' class="my-4">
-  <mat-form-field appearance="outline">
-    <mat-label>Email</mat-label>
-    <input
-    matInput
-    placeholder='johndoe@abc.com'
-    formControlName='email'
-    >
-  </mat-form-field>
-  <mat-form-field appearance="outline">
-    <mat-label translate>auth.password</mat-label>
-    <input
-    type="password"
-    matInput
-    placeholder='Password'
-    formControlName='password'
-    autocomplete="false"
-    >
-  </mat-form-field>
-  <br>
-  <button *ngIf="!buttonIsLoading" class="m-3" mat-raised-button color='accent' type='submit'>{{'auth.login' | translate}}</button>
-  <mat-progress-spinner *ngIf="buttonIsLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+
+<form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()'>
+  <mat-card class="m-3 mat-elevation-z2">
+    <mat-form-field appearance="outline">
+      <mat-label>Email</mat-label>
+      <input
+      matInput
+      placeholder='johndoe@abc.com'
+      formControlName='email'
+      >
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label translate>auth.password</mat-label>
+      <input
+      type="password"
+      matInput
+      placeholder='Password'
+      formControlName='password'
+      autocomplete="false"
+      >
+    </mat-form-field>
+    <button *ngIf="!buttonIsLoading" mat-raised-button color='accent' type='submit'>{{'auth.login' | translate}}</button>
+    <mat-progress-spinner *ngIf="buttonIsLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+  </mat-card>
 </form>
+
+
+

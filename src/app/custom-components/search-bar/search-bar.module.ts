@@ -20,8 +20,4 @@ import { SearchBarComponent } from "./search-bar.component";
     SearchBarComponent
   ]
 })
-export class SearchBarModule {
-
-  constructor() {}
-
-}
+export class SearchBarModule {}

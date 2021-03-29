@@ -3,6 +3,10 @@
   height: 100%;
 }
 
+main {
+  min-height: 100vh;
+}
+
 .side-menu-content {
   background-color: white;
   align-items: center;

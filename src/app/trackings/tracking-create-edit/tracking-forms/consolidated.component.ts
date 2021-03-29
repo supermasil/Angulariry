@@ -161,13 +161,13 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   fetchTrackings(origin: string, destination: string, sender: string) {
     // 0 per page to find all
-    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
+    this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
       this.onlineTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
-      this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
+      this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
         this.serviceTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
         this.servicedTrackingDataSubject.next(this.serviceTrackings);
-        this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, origin, destination, sender).subscribe((transformedTrackings) => {
+        this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, origin, destination, sender).subscribe((transformedTrackings) => {
           this.inPersonSubTrackings = transformedTrackings.trackings.filter(t => !t.linkedToCsl);
           this.inPersonSubTrackingDataSubject.next(this.inPersonSubTrackings);
           this.showTable = true;

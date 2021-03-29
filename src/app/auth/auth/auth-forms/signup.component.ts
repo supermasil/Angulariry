@@ -188,6 +188,7 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   }
 
   async onSignup() {
+    console.log("here")
     this.signupForm.markAllAsTouched(); // deal with phone number validator empty issue
     if (this.signupForm.invalid) {
       return;
