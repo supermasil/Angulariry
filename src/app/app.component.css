@@ -5,15 +5,16 @@
 
 main {
   min-height: 100vh;
+  background-color: rgb(249, 249, 249);
 }
 
 .side-menu-content {
-  background-color: white;
   align-items: center;
   justify-content: center;
 }
 
 .side-menu-nav {
+  background-color: rgb(249, 249, 249);
   padding: 0px;
 }
 

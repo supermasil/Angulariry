@@ -12,10 +12,30 @@ const easyPostRoutes = require('./routes/easypost-webhook');
 const organizationsRoutes = require('./routes/organizations');
 const pricingsRoutes = require('./routes/pricings');
 const historiesRoutes = require('./routes/histories');
+const rTracer = require('cls-rtracer');
+const { createLogger, format, transports } = require('winston')
+const { combine, timestamp, printf } = format
 
 // Firebase App (the core Firebase SDK) is always required and
 // must be listed before other Firebase SDKs
 const admin = require('firebase-admin');
+
+// a custom format that outputs request id
+const rTracerFormat = printf((info) => {
+  const rid = rTracer.id()
+  return rid
+    ? `${info.timestamp} [request-id:${rid}]: ${info.message}`
+    : `${info.timestamp}: ${info.message}`
+});
+
+// https://itnext.io/request-id-tracing-in-node-js-applications-c517c7dab62d
+const logger = createLogger({
+  format: combine(
+    timestamp(),
+    rTracerFormat
+  ),
+  transports: [new transports.Console()]
+});
 
 // Connected to dev config in nodemon but prod config in Elastic Beanstalk
 var serviceAccount = {
@@ -64,6 +84,7 @@ app.use((req, res, next) => {
 }); // this is used to allow angular to access backend, it's not needed if using integrated approach
 
 // ORDER MATTERS
+app.use(rTracer.expressMiddleware());
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use('/tmp', express.static(path.join(__dirname, "tmp"))); // Allow access to images folder
@@ -96,4 +117,7 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something broke!')
 });
 
-module.exports = app;
+
+exports.app = app;
+exports.logger = logger;
+

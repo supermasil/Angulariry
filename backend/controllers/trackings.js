@@ -11,6 +11,7 @@ const db = require('mongoose');
 const S3 = require('../shared/upload-files');
 let assert = require('assert');
 const onlineTracking = require('../models/tracking-models/online-tracking');
+const app = require("../app");
 
 const TrackingTypes = Object.freeze({
   ONLINE: "onl",
@@ -50,6 +51,7 @@ exports.getTrackingTool = async (req, res, next) => {
   } catch (error) {
     console.log("getTrackingTool: " + error.message)
     return res.status(500).json({message: "Something went wrong while looking for this tracking"})
+
   }
 };
 
@@ -320,6 +322,7 @@ updateImages = async (req, currentFilesPath) => {
 }
 
 exports.getTrackings = async (req, res, next) => {
+  app.logger.info("123");
   try {
     let response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
     return res.status(200).json({
@@ -369,6 +372,7 @@ getTrackingsHelper = async (type, orgId, query) => {
 
   if (query.searchTerm) {
     // https://stackoverflow.com/questions/26699885/how-can-i-use-a-regex-variable-in-a-query-for-mongodb
+    // https://docs.mongodb.com/manual/reference/operator/query/regex/
     queryBody["trackingNumber"] = new RegExp(query.searchTerm, 'i');
   }
 
