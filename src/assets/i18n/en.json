@@ -127,5 +127,9 @@
     "box-number": "Box number",
     "add-destination": "Add destination",
     "add-origin": "Add origin"
+  }, "error-messages":{
+    "something-went-wrong": "Something went wrong"
+  }, "success-messages": {
+    "success": "Success"
   }
 }

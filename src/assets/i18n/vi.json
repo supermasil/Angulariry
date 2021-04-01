@@ -127,6 +127,10 @@
     "box-number": "Số thùng",
     "add-destination": "Thêm điểm đến",
     "add-origin": "Thêm điểm xuất phát"
+  }, "error-messages": {
+    "something-went-wrong": "Sự cố đã xảy ra"
+  }, "success-messages": {
+    "success": "Thành công"
   }
 }
 

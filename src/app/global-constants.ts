@@ -3,8 +3,11 @@ export class GlobalConstants {
 
   }
   // Alert Service
-  public static flashMessageOptions = {
-    autoClose: true,
-    keepAfterRouteChange: true
+public static flashMessageOptions = {
+    timeOut: 10000,
+    closeButton: true,
+    enableHtml: true,
+    progressBar: true,
+    tapToDismiss: false
   };
 }

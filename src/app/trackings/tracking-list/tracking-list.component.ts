@@ -105,7 +105,7 @@ export class TrackingListComponent {
   tabChanged(index: Number) {
     this.searchTerm = "";
     this.setTab(index);
-    this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
+
   }
 
   fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {

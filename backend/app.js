@@ -12,6 +12,7 @@ const easyPostRoutes = require('./routes/easypost-webhook');
 const organizationsRoutes = require('./routes/organizations');
 const pricingsRoutes = require('./routes/pricings');
 const historiesRoutes = require('./routes/histories');
+const mung = require('express-mung');
 const rTracer = require('cls-rtracer');
 const { createLogger, format, transports } = require('winston')
 const { combine, timestamp, printf } = format
@@ -22,9 +23,9 @@ const admin = require('firebase-admin');
 
 // a custom format that outputs request id
 const rTracerFormat = printf((info) => {
-  const rid = rTracer.id()
+  const rid = rTracer.id();
   return rid
-    ? `${info.timestamp} [request-id:${rid}]: ${info.message}`
+    ? `${info.timestamp} ${rid}: ${info.message}`
     : `${info.timestamp}: ${info.message}`
 });
 
@@ -64,8 +65,6 @@ const options = {
   useCreateIndex: true,
 };
 
-console.log(process.env.dbName)
-
 mongoose.connect(`mongodb+srv://supermasil:${process.env.MONGO_ATLAS_PW}@cluster0-8khn5.mongodb.net/${process.env.dbName}?retryWrites=true&w=majority`, options)
   .then(() => {
     console.log('Connected to database');
@@ -84,20 +83,40 @@ app.use((req, res, next) => {
 }); // this is used to allow angular to access backend, it's not needed if using integrated approach
 
 // ORDER MATTERS
-app.use(rTracer.expressMiddleware());
+app.use(rTracer.expressMiddleware()); // Has to be before all the routes
+app.use(mung.json((body, req, res) => {
+  body.requestId = rTracer.id();
+  res.requestId = rTracer.id();
+  return body;
+}));
+
+const beforeHandler = (req, res, next) => {
+  logger.info(req.method + " " + req.originalUrl);
+  next();
+}
+
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use('/tmp', express.static(path.join(__dirname, "tmp"))); // Allow access to images folder
 app.use('/', express.static(path.join(__dirname, "angular"))); // Allow access to angular folder (integrated approach)
 
-app.use('/api/users', usersRoutes); // this route is reserved for backend
+app.use('/api/users', beforeHandler, usersRoutes); // this route is reserved for backend
 // app.use('/api/subscriptions', subscriptionsRoutes); // this route is reserved for backend
-app.use('/api/trackings', trackingsRoutes); // this route is reserved for backend
-app.use('/api/comments', commentsRoutes); // this route is reserved for backend
-app.use('/api/easypost', easyPostRoutes); // this route is reserved for backend
-app.use('/api/organizations', organizationsRoutes); // this route is reserved for backend
-app.use('/api/pricings', pricingsRoutes); // this route is reserved for backend
-app.use('/api/histories', historiesRoutes); // this route is reserved for backend
+app.use('/api/trackings', beforeHandler, trackingsRoutes); // this route is reserved for backend
+app.use('/api/comments', beforeHandler, commentsRoutes); // this route is reserved for backend
+app.use('/api/easypost', beforeHandler, easyPostRoutes); // this route is reserved for backend
+app.use('/api/organizations', beforeHandler, organizationsRoutes); // this route is reserved for backend
+app.use('/api/pricings', beforeHandler, pricingsRoutes); // this route is reserved for backend
+app.use('/api/histories', beforeHandler, historiesRoutes); // this route is reserved for backend
+
+// Error handler
+app.use((err, req, res, next) => { // Handle errors
+  console.log("\n");
+  logger.error(err.stack)
+  return res.status(500).json({message: err.message, requestId: rTracer.id()});
+});
+
+
 app.use((req, res, next) => {
   // if (err.status === 404) {
   //   return res.sendFile(path.join(__dirname, "angular", "index.html"));
@@ -110,11 +129,6 @@ app.use((req, res, next) => {
    * We will handle 404 cases in app-routing.module.ts
    */
   res.sendFile(path.join(__dirname, "angular", "index.html"));
-});
-
-app.use((err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).send('Something broke!')
 });
 
 

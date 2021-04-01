@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 
 import { Alert, AlertType } from './alert.model';
 import { AlertService } from './alert.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({ selector: 'alert', templateUrl: 'alert.component.html' })
 export class AlertComponent implements OnInit, OnDestroy {
@@ -15,11 +15,11 @@ export class AlertComponent implements OnInit, OnDestroy {
     alertSubscription: Subscription;
     routeSubscription: Subscription;
 
-    constructor(private router: Router, private alertService: AlertService, private snackBar: MatSnackBar) { }
+    constructor(private router: Router, private alertService: AlertService, private translateService: TranslateService) { }
 
     ngOnInit() {
         // subscribe to new alert notifications
-        this.alertSubscription = this.alertService.onAlert(this.id)
+        this.alertSubscription = this.alertService.onAlert()
             .subscribe(alert => {
                 // clear alerts when an empty alert is received
                 if (!alert.message) {
@@ -51,12 +51,11 @@ export class AlertComponent implements OnInit, OnDestroy {
     }
 
     openSnackBar(alert: Alert) {
-      this.snackBar.open(alert.message, 'Close', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom',
-        panelClass: [this.snackBarColor(alert)]
-      });
+      this.translateService.get(alert.message).subscribe(translatedMessage => {
+        console.log(alert)
+        translatedMessage = alert.id? translatedMessage + ` ${alert.id}` : translatedMessage;
+
+      })
     }
 
     snackBarColor(alert: Alert) {

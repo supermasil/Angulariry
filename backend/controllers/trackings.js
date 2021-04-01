@@ -322,17 +322,16 @@ updateImages = async (req, currentFilesPath) => {
 }
 
 exports.getTrackings = async (req, res, next) => {
-  app.logger.info("123");
   try {
     let response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
     return res.status(200).json({
       // No error message needed
       trackings: response.trackings,
-      count: response.count
+      count: response.count,
+      message: "success"
     });
   } catch(error) {
-    console.log("getTrackings: " + error.message);
-    return res.status(500).json({message: "Couldn't fetch trackings"});
+    next(error);
   };
 }
 

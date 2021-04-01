@@ -38,6 +38,7 @@
     "ngx-image-compress": "^11.0.3",
     "ngx-print": "^1.2.0-beta.5",
     "ngx-spinner": "^10.0.1",
+    "ngx-toastr": "^13.2.1",
     "popper.js": "^1.16.1",
     "quagga": "^0.12.1",
     "rxjs": "^6.5.5",
