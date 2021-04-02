@@ -1,5 +1,6 @@
 let assert = require('assert');
 const PricingModel = require('../models/pricing');
+const app = require("../app");
 
 exports.addItems = async (req, res, next) => {
   try {
@@ -22,15 +23,17 @@ exports.addItems = async (req, res, next) => {
           {$each: toBeaddedItems}
         }
       }, {new: true}).then(response => {
-      return res.status(201).json({
-        message: "Item added successfully",
-        pricing: response
-      });
-    })
+        return next({
+          resCode: 200,
+          resBody: {
+            message: "creation-success",
+            pricing: response
+          }
+        });
+    });
   } catch(error) {
-    console.log(`addItems: ${req.body._id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't add item"
+    return next({
+      error: error
     });
   };
 }
@@ -43,16 +46,18 @@ exports.updateItem = async (req, res, next) => {
     pricing.items[index] = req.body.items[0];
 
     return await pricing.save().then(response => {
-      return res.status(201).json({
-        message: "Items updated successfully",
-        pricing: response
+      return next({
+        resCode: 200,
+        resBody: {
+          message: "update-success",
+          pricing: response
+          }
       });
     })
   } catch(error) {
-    console.log(`updateItems: ${req.body._id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't update items"
-    });
+    return next({
+      error: error
+    })
   };
 }
 
@@ -126,12 +131,14 @@ exports.getPricing = async (req, res, next) => {
     if (foundPricing == null) {
       throw new Error("Pricing is null");
     }
-    return res.status(200).json(foundPricing);
-  } catch (error) {
-    console.log(`getPricing: ${req.params.id} for orgId ${req.userData.orgId}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't find pricing"
+    return next({
+      resCode: 200,
+      resBody: foundPricing
     });
+  } catch (error) {
+    return next({
+      error: error
+    })
   }
 }
 
@@ -189,28 +196,32 @@ exports.deleteItem = async (req, res, next) => {
     pricing.items = tempItems;
 
     await pricing.save().then(response => {});
-    return res.status(201).json({
-      message: "Item deleted successfully"
+    return next({
+      resCode: 200,
+      resBody: {
+        message: "deletion-success"
+      }
     });
   } catch (error) {
-    console.log(`deleteItem: ${req.body._id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't delete item"
-    });
+    return next({
+      error: error
+    })
   }
 }
 
 exports.deletePricing = async (req, res, next) => {
   try {
     await PricingModel.findByIdAndDelete(req._id).then(response => {});
-    return res.status(201).json({
-      message: "Pricing deleted successfully"
+    return next({
+      resCode: 200,
+      resBody: {
+        message: "deletion-success"
+      }
     });
   } catch (error) {
-    console.log(`deletePricing: ${req.body._id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't delete pricing"
-    });
+    return next({
+      error: error
+    })
   }
 }
 
@@ -220,14 +231,16 @@ exports.cleanUpPricing = async (req, res, next) => {
     pricing.items = [];
 
     await pricing.save().then(response => {});
-    return res.status(201).json({
-      message: "Pricing cleaned up successfully"
+    return next({
+      resCode: 200,
+      resBody: {
+        message: "deletion-success"
+      }
     });
   } catch (error) {
-    console.log(`cleanUpPricing: ${req.body._id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't clean up pricing"
-    });
+    return next({
+      error: error
+    })
   }
 }
 

@@ -110,10 +110,19 @@ app.use('/api/pricings', beforeHandler, pricingsRoutes); // this route is reserv
 app.use('/api/histories', beforeHandler, historiesRoutes); // this route is reserved for backend
 
 // Error handler
-app.use((err, req, res, next) => { // Handle errors
-  console.log("\n");
-  logger.error(err.stack)
-  return res.status(500).json({message: err.message, requestId: rTracer.id()});
+// https://stackoverflow.com/questions/13133071/express-next-function-what-is-it-really-for
+app.use((resInfo, req, res, next) => { // Handle errors
+  if (resInfo.resCode == 200) {
+    logger.info("Execution succeeded");
+    return res.status(resInfo.resCode).json(resInfo.resBody);
+  } else if (resInfo.resCode == 400 || resInfo.resCode == 500) {
+    logger.error(resInfo.error.stack);
+    resInfo.requestId = rTracer.id();
+    return res.status(resInfo.resCode).json(resInfo.resBody);
+  } else { // just error itself
+    logger.error(resInfo.error.stack);
+    return res.status(500).json({message: "something-went-wrong", requestId: rTracer.id()});
+  }
 });
 
 

@@ -4,6 +4,7 @@ const db = require('mongoose');
 const admin = require('firebase-admin');
 let assert = require('assert');
 const HistoryController = require("./histories");
+const app = require("../app");
 const userTypes = {
   MONGO: 'mongo',
   FIREBASE: 'firebase'
@@ -26,7 +27,7 @@ exports.createUpdateUser = async (req, res, next) => {
     if (!req.body._id) {
       let userCode = randomString(5);
       while ((await UserModel.findOne({'userCode': userCode}).then(foundUser => {return foundUser})) != null) {
-        console.log(`createUpdateUser: userCode ${userCode} is duplicate`)
+        app.logger.warn(`createUpdateUser: userCode ${userCode} is duplicate`)
         userCode = randomString(5);
       }
       user['userCode'] = userCode;
@@ -37,44 +38,50 @@ exports.createUpdateUser = async (req, res, next) => {
           password: req.body.password,
         })
         .then(async userRecord => {
-          console.log('Successfully created new firebase user:', userRecord.uid);
+          app.logger.info('Successfully created new firebase user:', userRecord.uid);
           firebaseUser = userRecord;
           user['id'] = userRecord.uid;
           let createdUser = await UserModel.create(new UserModel(user)).then(async user => {
             return user;
             }).catch(async error => {
-              console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
+              app.logger.info(`createUpdateUser: ${req.body.email}: ${error.message}`);
               if (firebaseUser) {
                 await deleteFireBaseUser(firebaseUser.uid).then(() => {
-                  console.log('Successfully deleted firebase user');
-                  return res.status(500).json({
-                    message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
+                  app.logger.info('Successfully deleted firebase user');
+                  return next({
+                    error: new Error(error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"),
+                    resCode: 500,
+                    resBody: {message: error.message.includes("`userCode`") ? "customer-code-existed" : "something-went-wrong"}
                   });
                 })
                 .catch((error) => {
-                  console.log('Error deleting firebase user:', error);
-                  return res.status(500).json({
-                    message: "User creation/update failed"
+                  app.logger.error('Error deleting firebase user:', error);
+                  return next({
+                    error: error
                   });
                 });
               } else {
-                return res.status(500).json({
-                  message: error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"
+                return next({
+                  error: new Error(error.message.includes("`userCode`") ? "Customer code already exists" : "User creation/update failed"),
+                  resCode: 500,
+                  resBody: {message: error.message.includes("`userCode`") ? "customer-code-existed" : "something-went-wrong"}
                 });
               }
             });
 
-          console.log('Successfully created new mongodb user:', createdUser._id);
-          return res.status(201).json({
-            message: "User created successfully",
-            user: createdUser
-          });;
+          app.logger.info('Successfully created new mongodb user:', createdUser._id);
+          return next({
+            resCode: 200,
+            resBody: {
+              message: "creation-success",
+              user: createdUser
+            }
+          });
         })
       .catch((error) => {
-        console.log('Error creating new firebase user:', error.message);
-        return res.status(500).json({
-          message: error.message
-        });
+        return next({
+          error: error
+        })
       });
       } else {
         await UserModel.findOneAndUpdate({_id: req.body._id}, {$set: user}, {new: true}).then(async user => {
@@ -84,16 +91,20 @@ exports.createUpdateUser = async (req, res, next) => {
             await updatedUser.save();
           }
         });
-        return res.status(201).json({
-          message: "User updated successfully",
-          user: updatedUser
+
+        return next({
+          resCode: 200,
+          resBody: {
+            message: "update-success",
+            user: updatedUser
+          }
         });
       }
   } catch(error) {
-    console.log(`createUpdateUser: ${req.body.email}: ${error.message}`);
-    return res.status(500).json({
-      message: "User creation/update failed"
-    });
+    app.logger.error(`createUpdateUser: ${req.body.email}: ${error.message}`);
+    return next({
+      error: error
+    })
   };
 }
 
@@ -101,11 +112,9 @@ getFireBaseUser = async (uid) => {
   return admin
   .auth()
   .getUser(uid)
-  .then((userRecord) => {
-    console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
-  })
+  .then((userRecord) => {})
   .catch((error) => {
-    console.log('Error fetching user data:', error);
+    app.logger.error('Error fetching user data:', error);
   });
 }
 
@@ -167,16 +176,18 @@ exports.getUsers = async (req, res, next) => {
         return userQuery.countDocuments();
       })
       .then(count => {
-        return res.status(200).json({
-          // No error message needed
-          users: fetchedUsers,
-          count: count
+        return next({
+          resCode: 200,
+          resBody: {
+            // No error message needed
+            users: fetchedUsers,
+            count: count
+          }
         });
       })
   } catch(error) {
-    console.log(`getUsers: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't fetch users"
+    return next({
+      error: error
     });
   };
 }
@@ -184,12 +195,14 @@ exports.getUsers = async (req, res, next) => {
 exports.getUser = async (req, res, next) => {
   try {
     foundUser = await this.getUserByIdHelper(req.userData, req.params.id, req.query.type);
-
-    return res.status(200).json(foundUser);
+    return next({
+      resCode: 200,
+      resBody: foundUser
+    });
   } catch (error) {
-    console.log(`getUser: ${req.params.id}: ${error.message}`);
-    return res.status(404).json({
-      message: "Couldn't find user"
+    app.logger.error(`getUser: ${req.params.id}: ${error.message}`);
+    return next({
+      error: error
     });
   }
 }
@@ -250,31 +263,39 @@ exports.updateUserCurrentOrg = async (req, res, next) => {
       foundUser.pricings = foundOrg.pricings;
       await switchOverFields(foundUser, org, false);
       await foundUser.save();
-      console.log(`updateUserCurrentOrg: Logged user ${req.userData.u_id} to org ${foundOrg.name}`);
-      return res.status(200).json({
-        organization: foundOrg,
-        user: foundUser
-      })
+      app.logger.info(`updateUserCurrentOrg: Logged user ${req.userData.u_id} to org ${foundOrg.name}`);
+      return next({
+        resCode: 200,
+        resBody: {
+          organization: foundOrg,
+          user: foundUser
+        }
+      });
     })
   } catch (error) {
-    console.log(`updateUserCurrentOrg: ${error.message} for org ${req.body.orgId} and user id ${req.params.id}`)
-    return res.status(500).json({
-      message: "Logged in to org failed"
-    })
+    app.logger.info(`updateUserCurrentOrg: ${error.message} for org ${req.body.orgId} and user id ${req.params.id}`)
+    return next({
+      error: error
+    });
   }
 }
 exports.onBoardUserToOrg = async (req, res, next) => {
   let errorMessage = "Onboarding user to new org failed";
   try {
     let response = await onBoardUserToOrgHelper(req.params.id, req.body.registerCode, req.body.referralCode);
-    return res.status(200).json({
-      organization: response.organization,
-      user: response.user
-    })
+    return next({
+      resCode: 200,
+      resBody: {
+        organization: response.organization,
+        user: response.user
+      }
+    });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message.includes("onBoardUserToOrgHelper") ? error.message.split(':')[2] : errorMessage
-    })
+    return next({
+      error: error,
+      resCode: 500,
+      resBody: {message: error.message.includes("onBoardUserToOrgHelper") ? error.message.split(':')[2] : "something-went-wrong"}
+    });
   }
 }
 
@@ -287,15 +308,15 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
       if (referralCode) {
         referrer = await getUserByUserCodeHelper(referralCode, org._id);
         if (referrer == null) {
-          throw new Error("onBoardUserToOrgHelper: Couldn't find referrer");
+          throw new Error("onBoardUserToOrgHelper: referrer-not-found");
         }
-        assert(referrer.userCode != u_id, "onBoardUserToOrgHelper: Referrer can't be the same as user");
+        assert(referrer.userCode != u_id, "onBoardUserToOrgHelper: referrer-same-as-user");
       }
 
       foundUser.organization = org._id;
 
       if (foundUser.organizations.map(o => o.organization).includes(org._id)) {
-        throw new Error("onBoardUserToOrgHelper: Already onboarded to this org");
+        throw new Error("onBoardUserToOrgHelper: already-onboarded");
       }
 
       foundUser.organizations.push({organization: org._id, role: foundUser.role === "SuperAdmin"? "SuperAdmin" : "Customer", credit: 0, creatorId: referrer? referrer._id : null, active: true, creditHistory: []});
@@ -306,7 +327,7 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
       foundUser.active = true;
       foundUser.creditHistory = [];
       foundUser = await UserModel.findByIdAndUpdate(foundUser._id, foundUser, {new: true}).then(updatedUser => {return updatedUser});
-      console.log(`onBoardUserToOrgHelper: Onboarded user ${u_id} to org ${org.name} referred by ${foundUser.creatorId}`);
+      app.logger.info(`onBoardUserToOrgHelper: Onboarded user ${u_id} to org ${org.name} referred by ${foundUser.creatorId}`);
       let response =  {
         organization: org,
         user: foundUser
@@ -314,7 +335,7 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
       return response;
     });
   } catch (error) {
-    console.log(`onBoardUserToOrgHelper: ${error.message} for register code ${registerCode} and referral code ${referralCode} and user id ${u_id}`);
+    app.logger.info(`onBoardUserToOrgHelper: ${error.message} for register code ${registerCode} and referral code ${referralCode} and user id ${u_id}`);
     throw new Error(error);
   }
 }
@@ -325,22 +346,22 @@ exports.updateUserCredit = async (req, res, next) => {
     await session.withTransaction(async () => {
       let currentUser = await UserModel.findById(req.userData.u_id).then(foundUser => {return foundUser});
       await UserModel.findById(req.params.id).then(async foundUser => {
-        console.log(req.body.content)
         let history = (await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, `${currentUser.name} updated ${foundUser.name}'s credit to $${req.body.amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} with note: "${req.body.content}"`, req.params.id, session));
         foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].credit = req.body.amount;
         foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].creditHistory.unshift(history._id);
         await UserModel.findByIdAndUpdate(req.params.id, foundUser).session(session).then();
-        console.log(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.u_id}`)
+        app.logger.info(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.u_id}`)
       });
 
-      return res.status(200).json({
-        message: "Updated credit successfully"
-      })
+      return next({
+        resCode: 200,
+        message: "update-success"
+      });
     });
   } catch (error) {
-    console.log(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.u_id}`, error.message)
-    return res.status(500).json({
-      message: "Credit update failed"
+    app.logger.error(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.u_id}`, error.message)
+    return next({
+      error: error
     })
   }
 
@@ -352,17 +373,3 @@ randomString = (length) => {
   for (var i = length; i > 0; --i) result += chars[Math.round(Math.random() * (chars.length - 1))];
   return result.trim();
 }
-
-// exports.deleteUser = async (req, res, next) => {
-//   try {
-//     await UserModel.findOneAndDelete({id: req.params.id});
-//     return res.status(200).json({
-//       message: "User deleted successfully"
-//     });
-//   } catch (error) {
-//     console.log(`deleteUser: ${req.params.id}: ${error.message}`);
-//     return res.status(500).json({
-//       message: "Couldn't delete user"
-//     });
-//   }
-// }

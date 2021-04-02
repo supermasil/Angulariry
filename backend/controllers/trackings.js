@@ -47,11 +47,12 @@ const allEqual = arr => arr.every( v => v === arr[0]);
 exports.getTrackingTool = async (req, res, next) => {
   try {
     let tracker = await CarrierTrackingController.getTrackerHelper(req.query.trackingNumber, req.query.carrier);
-    return res.status(200).json(tracker);
+    return next({
+      resCode: 200,
+      resBody: tracker
+    });
   } catch (error) {
-    console.log("getTrackingTool: " + error.message)
-    return res.status(500).json({message: "Something went wrong while looking for this tracking"})
-
+    return next(error);
   }
 };
 
@@ -81,26 +82,36 @@ exports.createUpdateTracking = async (req, res, next) => {
           createdTracking = await createUpdateTrackingHelper(req, session, TrackingTypes.MASTER, MasterTrackingModel);
           break;
         default:
-          return res.status(500).json({message: "Tracking type doesn't match any"});
-      }
-
+          return next({
+            error: new Error("Tracking doesn't match any"),
+            resCode: 500,
+            resBody: {message: "something-went-wrong"}
+          });
+        }
       // Audit
       if (req.body._id) {
         await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, "Update", req.body.generalInfo.trackingNumber, session);
       } else {
         await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, "Create", req.body.generalInfo.trackingNumber, session);
       }
-      console.log(`createTracking: Tracking created/updated successfully: ${createdTracking.trackingNumber}`);
-      return res.status(201).json({message: "Tracking created/updated successfully", tracking: createdTracking});
+      return next({
+        resCode: 200,
+        resBody: {message: "creation-success", tracking: createdTracking}
+      });
     });
     session.endSession();
   } catch (error) {
-    console.error(`createUpdateTracking: ${req.body.generalInfo.trackingNumber}: ${error}`);
-    console.error(`createUpdateTracking: ${req.body.generalInfo.trackingNumber}: ${JSON.stringify(error, null, 2)}`);
     if (error.message.includes("`carrierTrackingNumber` to be unique")) {
-      return res.status(500).json({message: `Carrier tracking number ${req.body.carrierTrackingNumber} already existed`});
+      return next({
+        error: new Error("Tracking number existed"),
+        resCode: 500,
+        resBody: {message: "tracking-number-existed"}
+      });
     }
-    return res.status(500).json({message: `Tracking creation/update failed, please check your info or contact Admin with tracking number ${req.body.generalInfo.trackingNumber}. If this is an online order, check if your carrier/ carrier tracking number is correct`});
+
+    return next({
+      error: error
+    });
   }
 };
 
@@ -247,7 +258,6 @@ subTrackingsSetupHelper = async (req, session) => {
   let results = [];
 
   for (sub of req.body.subTrackings) {
-      console.log("here")
       let generalInfo = generalInfoSetupHelper(req);
       generalInfo.totalWeight = sub.finalizedInfo.totalWeight;
       generalInfo.finalCost = sub.finalizedInfo.finalCost;
@@ -324,30 +334,18 @@ updateImages = async (req, currentFilesPath) => {
 exports.getTrackings = async (req, res, next) => {
   try {
     let response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
-    return res.status(200).json({
-      // No error message needed
-      trackings: response.trackings,
-      count: response.count,
-      message: "success"
+    return next({
+      resCode: 200,
+      resBody: {
+        trackings: response.trackings,
+        count: response.count
+      }
     });
   } catch(error) {
     next(error);
   };
 }
 
-// exports.fuzzySearch = async (req, res, next) => {
-//   try {
-//     let response = await getTrackingsHelper(req.query.type, req.userData.orgId, req.query);
-
-//     return res.status(200).json({
-//       trackings: response.trackings,
-//       count: response.trackings.length
-//     })
-//   } catch (error) {
-//     console.log("trackingFuzzySearch: " + error.message);
-//     return res.status(500).json({message: "Couldn't search for this term"});
-//   }
-// }
 
 getTrackingsHelper = async (type, orgId, query) => {
   assert(type != undefined, "Query type is undefined");
@@ -449,11 +447,15 @@ exports.getTracking = async (req, res, next) => {
   try {
     let tracking = await getTrackingHelper(req.query.type, req.params.id, req.userData.orgId, false);
     assert(tracking != null);
-    return res.status(200).json(tracking);
+    return next({
+      resCode: 200,
+      resBody: tracking
+    });
 
   } catch(error) {
-    console.log(`getTracking: ${req.params.id} ${error.message}`);
-    return res.status(500).json({message: "Couldn't fetch tracking"});
+    return next({
+      error: error
+    });
   };
 }
 
@@ -496,7 +498,6 @@ getTrackingHelper = async (type, id, orgId, byId) => {
         .populate('linkedToMst')
         .lean().then(callbackfunction);
     case TrackingTypes.CONSOLIDATED:
-      console.log(orgId)
       return await ConsolidatedTrackingModel.findOne(queryParams)
         .populate('generalInfo.sender')
         .populate({path: 'onlineTrackings', populate: {path: 'generalInfo.sender'}})
@@ -543,11 +544,15 @@ exports.deleteTracking = async (req, res, next) => {
 
       await S3.deleteFiles(foundTracking.filePaths);
 
-      return res.status(200).json({message: "Tracking deleted successfully"});
+      return next({
+        resCode: 200,
+        resBody: {message: "deletion-success"}
+      });
     })
   } catch(error) {
-    console.log("deleteTracking: " + error.message);
-    return res.status(500).json({message: "Tracking deletion failed"});
+    return next({
+      error: error
+    });
   }
 }
 
@@ -604,10 +609,15 @@ exports.changeTrackingStatus = async (req, res , next) => {
     }
     session.endSession();
 
-    return res.status(200).json({message: "Status changed successfully", tracking: tracking});
+    return next({
+      resCode: 200,
+      resBody: {message: "success", tracking: tracking}
+    });
+
   } catch (error) {
-    console.log(`changeTrackingStatus: ${error}`);
-    return res.status(500).json({message: "Status change failed"});
+    return next({
+      error: error
+    })
   }
 }
 
@@ -762,7 +772,7 @@ linkUnlinkTrackingHelper = async (userId, orgId, type, itemsList, toTrackingId, 
 
   let action = toTrackingId? "Link": "Unlink";
   await HistoryController.createHistoryHelper(userId, orgId, `${action} -> ${toTrackingId}`, itemsList.toString(), session);
-  console.log(`linkUnlinkTracking: User id ${userId} ${action} ${itemsList.toString()} -> ${toTrackingType}: ${toTrackingId} `)
+  app.logger.info(`linkUnlinkTracking: User id ${userId} ${action} ${itemsList.toString()} -> ${toTrackingType}: ${toTrackingId} `)
 }
 
 changeStatusForOnlineServicedInPersonHelper = async (userId, orgId, statuses, trackings, byIds, session) => {
@@ -791,7 +801,7 @@ changeTrackingStatusHelper = async (userId, orgId, type, status, itemsList, byId
 
   await updateManyGeneralHelper(type, queryParams, setParams, session);
   await HistoryController.createHistoryHelper(userId, orgId, `Updated status to ${status}`, itemsList.toString(), session);
-  console.log(`changeTrackingStatusHelper: User id ${userId} updated type: ${type} ${itemsList.toString()} -> ${status}`)
+  app.logger.info(`changeTrackingStatusHelper: User id ${userId} updated type: ${type} ${itemsList.toString()} -> ${status}`)
 }
 
 updateManyGeneralHelper = async (type, queryParams, setParams, session) => {

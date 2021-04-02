@@ -1,4 +1,5 @@
 const HistoryModel = require('../models/history');
+const app = require("../app");
 
 exports.createHistoryHelper = async (userId, orgId, action, postId, session) => {
   return await HistoryModel.create([{
@@ -13,13 +14,15 @@ exports.getHistories = async (req, res, next) => {
   try {
     historyList = req.params.ids.split(",");
     return await HistoryModel.find({_id: {$in: historyList}, organization: req.userData.orgId}).sort({createdAt: -1}).then(histories => {
-      res.status(200).json(histories);
+      return next({
+        resCode: 200,
+        resBody: histories
+      });
     });
   } catch (error) {
-    console.log(`getHistories: ${error.message}`)
-    return res.status(500).json({
-      message: "Couldn't fetch histories"
-    });
+    return next({
+      error: error
+    })
   }
 
 }

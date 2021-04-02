@@ -128,9 +128,17 @@
     "add-destination": "Thêm điểm đến",
     "add-origin": "Thêm điểm xuất phát"
   }, "error-messages": {
-    "something-went-wrong": "Sự cố đã xảy ra"
+    "something-went-wrong": "Sự cố đã xảy ra",
+    "tracking-number-existed": "Số vận đơn trùng lặp",
+    "customer-code-existed": "Mã người sử dụng trùng lặp",
+    "referrer-not-found": "Không tìm thấy người giới thiệu",
+    "referrer-same-as-user": "Người giới thiệu và người sử dụng phải khác nhau",
+    "already-onboarded": "Đã đăng ký doanh nghiệp này từ trước"
   }, "success-messages": {
-    "success": "Thành công"
+    "success": "Thành công",
+    "creation-success": "Khởi tạo thành công",
+    "deletion-success": "Xoá thành công",
+    "update-success": "Cập nhât thành công"
   }
 }
 

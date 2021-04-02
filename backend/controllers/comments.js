@@ -6,6 +6,7 @@ const InPersonTrackingModel = require('../models/tracking-models/in-person-track
 const ConsolidatedTrackingModel = require('../models/tracking-models/consolidated-tracking');
 const MasterTrackingModel = require('../models/tracking-models/master-tracking');
 const db = require('mongoose');
+const app = require("../app");
 
 const TrackingTypes = Object.freeze({
   ONLINE: "onl",
@@ -61,12 +62,15 @@ exports.createComment = async (req, res, next) => {
           await foundTracking.save();
         });
 
-      console.log("createComment: Comment created successfully for tracking number " + req.body.trackingNumber);
-      return res.status(200).json(createdComment);
+      return next({
+        resCode: 200,
+        resBody: createdComment
+      });
     })
   } catch(error) {
-    console.log("createComment: " + error);
-    return res.status(500).json({message: "Comment creation failed"});
+    return next({
+      error: error
+    });
   }
 }
 
@@ -74,14 +78,20 @@ exports.deleteComment = async (req, res, next) => {
   return await CommentModel.deleteOne({ _id: req.body._id, organization: req.userData.orgId })
   .then(deletedCommentData => {
     if (deletedCommentData.deletedCount > 0) {
-      return res.status(201).json({message: "Comment deleted sucessfully"});
+      return next({
+        resCode: 200,
+        resBody: {message: "deletion-success"}
+      })
     } else {
-      return res.status(404).json({message: "No comment was deleted"});
+      return next({
+        error: new Error("No comment was deleted")
+      });
     }
   })
   .catch(error => {
-    console.log(error.message);
-    return res.status(500).json({message: "Comment deletion failed"});
+    return next({
+      error: error
+    });
   });
 }
 
@@ -94,13 +104,19 @@ exports.updateComment = async (req, res, next) => {
   return await CommentModel.updateOne({ _id: req.body._id, organization: req.userData.orgId }, comment)
     .then(updatedComment => {
       if (updatedComment.nModified > 0) {
-        return res.status(201).json({message: "Comment updated sucessfully"});
+        return next({
+          resCode: 200,
+          resBody: {message: "update-success"}
+        });
       } else {
-        return res.status(404).json({message: "No comment was updated"});
+        return next({
+          error: new Error("No comment was updated")
+        });
       }
     })
     .catch(error => {
-      console.log(error.message);
-      return res.status(500).json({message: "Comment update failed"});
+      return next({
+        error: error
+      });
     });
 }

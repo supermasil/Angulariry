@@ -1,6 +1,7 @@
 const EasyPost = require('@easypost/api');
 const api = new EasyPost(process.env.easyPostApiKey);
 const CarrierTrackingModel = require('../models/tracking-models/carrier-tracking');
+const app = require("../app");
 
 
 exports.createCarrierTracking = async (carrierTrackingNumber, status, trackerId, carrier, trackingNumber, session) => {

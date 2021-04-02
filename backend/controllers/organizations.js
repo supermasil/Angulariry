@@ -2,6 +2,7 @@ const OrganizationModel = require('../models/organization');
 const PricingModel = require('../models/pricing');
 const db = require('mongoose');
 let assert = require('assert');
+const app = require("../app");
 
 exports.createUpdateOrganization = async (req, res, next) => {
   try {
@@ -29,7 +30,7 @@ exports.createUpdateOrganization = async (req, res, next) => {
       let registerCode = randomString(5);
 
       while ((await getOrganizationByRegisterCodeHelper(registerCode)) != null) {
-        console.log("createUpdateOrganization: registerCode is duplicate")
+        app.logger.error("createUpdateOrganization: registerCode is duplicate")
         registerCode = randomString(5);
       }
 
@@ -44,17 +45,19 @@ exports.createUpdateOrganization = async (req, res, next) => {
           return response[0];
         });
       }
-
-      return res.status(201).json({
-        message: "Organization created/updated successfully",
-        organization: updatedOrg
+      return next({
+        resCode: 200,
+        resBody: {
+          message: "creation-success",
+          organization: updatedOrg
+        }
       });
     });
   } catch(error) {
-    console.log(`createUpdateOrganization: ${req.body.name}: ${error.message}`);
-    return res.status(500).json({
-      message: "Organization creation/update failed"
-    });
+    app.logger.error(`createUpdateOrganization: ${req.body.name}: ${error.message}`);
+    return next({
+      error: error
+    })
   };
 }
 
@@ -84,12 +87,14 @@ exports.getOrganization = async (req, res, next) => {
     if (foundOrganization == null) {
       throw new Error("Organization is null");
     }
-    return res.status(200).json(foundOrganization);
-  } catch (error) {
-    console.log(`getOrganization: ${req.params.id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't find organization"
+    return next({
+      resCode: 200,
+      resBody: foundOrganization
     });
+  } catch (error) {
+    return next({
+      error: error
+    })
   }
 }
 
@@ -111,16 +116,17 @@ exports.getOrganizations = async (req, res, next) => {
         return orgQuery.countDocuments();
       })
       .then(count => {
-        return res.status(200).json({
-          // No error message needed
-          organizations: fetchedOrgs,
-          count: count
+        return next({
+          resCode: 200,
+          resBody: {
+            organizations: fetchedOrgs,
+            count: count
+          }
         });
-      })
+      });
   } catch(error) {
-    console.log(`getOrganizations: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't fetch organizations"
+    return next({
+      error: error
     });
   };
 }
@@ -130,12 +136,14 @@ exports.getManyOrganizations = async (req, res, next) => {
     const orgQuery = OrganizationModel.find({ _id: { "$in" : req.body.orgIds} });
     await orgQuery
       .then(documents => {
-        return res.status(200).json(documents);
-      })
+        return next({
+          resCode: 200,
+          resBody: documents
+        });
+      });
   } catch(error) {
-    console.log(`getManyOrganizations: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't fetch organizations"
+    return next({
+      error: error
     });
   };
 }
@@ -160,15 +168,14 @@ exports.deleteOrganization = async (req, res, next) => {
     await session.withTransaction(async () => {
       await PricingModel.findByIdAndDelete(req, req.params.pricingId).then(response => {});
       await OrganizationModel.findByIdAndDelete(req.params.orgId).then(response => {});
-
-      return res.status(200).json({
-        message: "Oganization deleted successfully"
+      return next({
+        resCode: 200,
+        resBody: {message: "deletion-success"}
       });
     });
   } catch (error) {
-    console.log(`deleteOrganization: ${req.params.id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Couldn't delete organization"
+    return next({
+      error: error
     });
   }
 }
@@ -178,14 +185,14 @@ exports.updateRegisterCode = async (req, res, next) => {
     assert(foundOrg != null, "updateRegisterCode: foundOrg is null");
     foundOrg.registerCode = randomString(8);
     await foundOrg.save();
-    return res.status(200).json({
-      message: "Register code updated successfully"
+    return next({
+      resCode: 200,
+      resBody: {message: "update-success"}
     });
   }).catch(error => {
-    console.log(`updateRegisterCode: ${req.params.id}: ${error.message}`);
-    return res.status(500).json({
-      message: "Register code update failed"
-    });
+    return next({
+      error: error
+    })
   })
 }
 

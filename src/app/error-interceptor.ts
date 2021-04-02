@@ -31,9 +31,9 @@ export class ErrorInterceptor implements HttpInterceptor {
         }
         this.translateService.get(`error-messages.${errorMessage}`).subscribe(translatedMessage => {
           if (error.status == 400) {
-            this.toastr.warning('<div translate>error-messages.<div>');
+            this.toastr.warning(error.error.requestId, translatedMessage);
           } else if (error.status == 500) {
-            this.toastr.error(error.error.message);
+            this.toastr.error(error.error.requestId, translatedMessage);
           }
         });
 

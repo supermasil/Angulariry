@@ -128,8 +128,16 @@
     "add-destination": "Add destination",
     "add-origin": "Add origin"
   }, "error-messages":{
-    "something-went-wrong": "Something went wrong"
+    "something-went-wrong": "Something went wrong",
+    "tracking-number-existed": "Tracking number existed",
+    "customer-code-existed": "Customer code already existed",
+    "referrer-not-found": "Referrer not found",
+    "referrer-same-as-user": "Referer can't be the same as user",
+    "already-onboarded": "Already onboarded to this org"
   }, "success-messages": {
-    "success": "Success"
+    "success": "Success",
+    "creation-success": "Created successfully",
+    "deletion-success": "Deleted successfully",
+    "update-success": "Updated successfully"
   }
 }
