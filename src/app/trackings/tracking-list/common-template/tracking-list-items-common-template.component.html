@@ -1,0 +1,184 @@
+<div class="row mt-4" *ngIf="(tracking.generalInfo.type === trackingGlobals.trackingTypes.ONLINE || tracking.generalInfo.type === trackingGlobals.trackingTypes.SERVICED) && tracking.itemsList.length > 0">
+  <div class="col">
+    <div class="row font-weight-bold rounded bg-info text-white">
+      <div class="col" translate>tracking-info.item-name</div>
+      <div class="col" translate>tracking-info.declared-value</div>
+      <div class="col" translate>tracking-info.quantity</div>
+      <div class="col" translate>tracking-info.insurance</div>
+      <div class="col" translate>tracking-info.weight</div>
+      <div class="col" translate>tracking-info.weight-unit-charge</div>
+      <div class="col" translate>tracking-info.extra-charge</div>
+      <div class="col" translate>tracking-info.final-charge</div>
+      <div class="col" translate>tracking-info.status</div>
+    </div>
+
+    <ng-container *ngFor="let item of tracking.itemsList">
+      <div class="row">
+        <div class="col">{{item.name}}</div>
+        <div class="col">{{item.declaredValue | currency: 'USD'}}</div>
+        <div class="col">{{item.quantity}}</div>
+        <div class="col">% {{item.insurance}}</div>
+        <div class="col">Kg {{item.weight}}</div>
+        <div class="col">{{item.unitCharge | currency: 'USD'}}</div>
+        <div class="col">{{item.extraChargeUnit}} {{item.extraCharge}}</div>
+        <div class="col">{{getItemCharge(item) | currency: 'USD'}}</div>
+        <div class="col">{{item.status}}</div>
+      </div>
+    </ng-container>
+
+    <div class="row" class="row font-weight-bold rounded bg-warning">
+      <div class="col" translate>tracking-info.total-weight</div>
+      <div class="col">Kg {{tracking.generalInfo.totalWeight}}</div>
+      <div class="col" translate>tracking-info.cost-adjustment</div>
+      <div class="col">{{tracking.generalInfo.costAdjustment | currency: 'USD'}}</div>
+      <div class="col" translate>tracking-info.exchange</div>
+      <div class="col">{{tracking.generalInfo.exchange | currency: 'VND'}}</div>
+      <div class="col" translate>tracking-info.final-cost</div>
+      <div class="col">{{tracking.generalInfo.finalCost | currency: 'USD'}}</div>
+      <div class="col">{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange | currency: 'VND'}}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4" *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.INPERSON && tracking.subTrackings.length > 0">
+  <div class="col">
+    <div class="row font-weight-bold rounded bg-info text-white">
+      <div class="col" translate>tracking-info.item-name</div>
+      <div class="col" translate>tracking-info.declared-value</div>
+      <div class="col" translate>tracking-info.quantity</div>
+      <div class="col" translate>tracking-info.insurance</div>
+      <div class="col" translate>tracking-info.weight</div>
+      <div class="col" translate>tracking-info.weight-unit-charge</div>
+      <div class="col" translate>tracking-info.extra-charge</div>
+      <div class="col" translate>tracking-info.final-charge</div>
+      <div class="col" translate>tracking-info.status</div>
+    </div>
+    <hr class="my-2">
+    <ng-container *ngFor="let subtracking of tracking.subTrackings">
+      <div class="row bg-secondary rounded text-white">
+        <div class="col">{{subtracking.trackingNumber}}</div>
+        <div class="col">{{subtracking.linkedToCsl?.trackingNumber}}</div>
+        <div class="col">{{subtracking.linkedToMst?.trackingNumber}}</div>
+        <div class="col">{{'statuses.' + subtracking.generalInfo.trackingStatus | translate}}</div>
+        <div class="col">{{'statuses.' + subtracking.generalInfo.financialStatus | translate}}</div>
+      </div>
+      <ng-container *ngFor="let item of subtracking.itemsList">
+        <div class="row">
+          <div class="col">{{item.name}}</div>
+          <div class="col">{{item.declaredValue | currency: 'USD'}}</div>
+          <div class="col">{{item.quantity}}</div>
+          <div class="col">% {{item.insurance}}</div>
+          <div class="col">Kg {{item.weight}}</div>
+          <div class="col">{{item.unitCharge | currency: 'USD'}}</div>
+          <div class="col">{{item.extraChargeUnit}} {{item.extraCharge}}</div>
+          <div class="col">{{getItemCharge(item) | currency: 'USD'}}</div>
+          <div class="col">{{item.status}}</div>
+        </div>
+      </ng-container>
+      <div class="row" class="row font-weight-bold rounded bg-warning">
+        <div class="col" translate>tracking-info.total-weight</div>
+        <div class="col">Kg {{tracking.generalInfo.totalWeight}}</div>
+        <div class="col" translate>tracking-info.cost-adjustment</div>
+        <div class="col">{{tracking.generalInfo.costAdjustment | currency: 'USD'}}</div>
+        <div class="col" translate>tracking-info.exchange</div>
+        <div class="col">{{tracking.generalInfo.exchange | currency: 'VND'}}</div>
+        <div class="col" translate>tracking-info.final-cost</div>
+        <div class="col">{{tracking.generalInfo.finalCost | currency: 'USD'}}</div>
+        <div class="col">{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange | currency: 'VND'}}</div>
+      </div>
+      <hr class="my-2">
+    </ng-container>
+    <div class="row font-weight-bold">
+      <div class="col" translate>tracking-info.total-weight</div>
+      <div class="col">Kg {{tracking.generalInfo.totalWeight}}</div>
+      <div class="col" translate>tracking-info.final-cost</div>
+      <div class="col">{{tracking.generalInfo.finalCost | currency: 'USD'}}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4" *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.CONSOLIDATED && (tracking.onlineTrackings.length > 0 || tracking.servicedTrackings.length > 0 || tracking.inPersonSubTrackings.length > 0)">
+  <div class="col">
+    <div class="row font-weight-bold rounded bg-info text-white">
+      <div class="col" translate>general.tracking-number</div>
+      <div class="col" translate>general.payment</div>
+      <div class="col" translate>tracking-info.weight</div>
+      <div class="col" translate>tracking-info.final-charge</div>
+      <div class="col" translate>tracking-info.status</div>
+    </div>
+    <ng-container *ngFor="let item of combineTrackings(tracking.onlineTrackings, tracking.servicedTrackings, tracking.inPersonSubTrackings); let l = index">
+      <div class="row">
+        <div class="col">{{item?.trackingNumber}}</div>
+        <div class="col">
+          <mat-slide-toggle
+            [checked]="item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid"
+            (change)="childTrackingToggle(item, !(item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid), tracking, i);"
+            class="mr-2">
+          </mat-slide-toggle>
+        </div>
+        <div class="col">Kg {{item?.generalInfo?.totalWeight}}</div>
+        <div class="col">{{item?.generalInfo?.finalCost | currency: 'USD'}}</div>
+        <div class="col">
+          <!-- <mat-form-field appearance="fill"> -->
+            <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i)" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
+              <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
+                {{'statuses.' + status | translate}}
+              </mat-option>
+            </mat-select>
+          <!-- </mat-form-field> -->
+        </div>
+      </div>
+    </ng-container>
+    <div class="row" class="row font-weight-bold rounded bg-warning">
+      <div class="col" translate>general.total</div>
+      <div class="col">Kg {{getConsolidatedTotalWeightCost(tracking).weight}}</div>
+      <div class="col">{{getConsolidatedTotalWeightCost(tracking).cost | currency: 'USD'}}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4" *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.MASTER && tracking.boxes.length > 0">
+  <div class="col">
+    <div class="row font-weight-bold rounded bg-info text-white">
+      <div class="col-2" translate>general.tracking-number</div>
+      <div class="col-2" translate>general.payment</div>
+      <div class="col-2" translate>tracking-info.weight</div>
+      <div class="col-2" translate>tracking-info.final-charge</div>
+      <div class="col-1" translate>tracking-info.pallet</div>
+      <div class="col-1" translate>tracking-info.box</div>
+      <div class="col-2" translate>tracking-info.status</div>
+    </div>
+
+    <ng-container *ngFor="let box of tracking.boxes">
+      <ng-container *ngFor="let item of combineTrackings(box.onlineTrackings, box.servicedTrackings, box.inPersonSubTrackings)">
+        <div class="row">
+          <div class="col-2">{{item?.trackingNumber}}</div>
+          <div class="col-2">
+            <span class="badge" [ngClass]="getBadgeColor(item.generalInfo.financialStatus)" style="color: white;">
+              {{item.generalInfo.financialStatus}}
+            </span>
+          </div>
+          <div class="col-2">Kg {{item?.generalInfo?.totalWeight}}</div>
+          <div class="col-2">{{item?.generalInfo?.finalCost | currency: 'USD'}}</div>
+          <div class="col-1">{{box.palletNumber}}</div>
+          <div class="col-1">{{box.boxNumber}}</div>
+          <div class="col-2">
+            <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i)" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
+              <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
+                {{'statuses.' + status | translate}}
+              </mat-option>
+            </mat-select>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <div class="row" class="row font-weight-bold rounded bg-warning">
+      <div class="col" translate>general.total</div>
+      <div class="col">Kg {{getMasterTotalWeightCost(tracking.boxes).weight}}</div>
+      <div class="col">{{getMasterTotalWeightCost(tracking.boxes).cost | currency: 'USD'}}</div>
+      <div class="col">{{getMasterTotalWeightCost(tracking.boxes).costVND | currency: 'VND'}}</div>
+    </div>
+  </div>
+</div>
+

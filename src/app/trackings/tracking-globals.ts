@@ -78,38 +78,38 @@ export class TrackingGlobals {
   public static internalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(3);
   public static externalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(0, 3);
 
-  public static defaultPageSizes = [1, 20, 50, 100];
+  public static defaultPageSizes = [5, 20, 50, 100];
 
   public static getBadgeColor = (status: string) => {
     switch (status) {
       case TrackingGlobals.trackingStatuses.Unknown:
-        return "#f44336"
+        return "bg-danger"
       case TrackingGlobals.trackingStatuses.Created:
-        return "#ff5722"
+        return "bg-secondary"
       case TrackingGlobals.trackingStatuses.Pending:
-        return "#607d8b"
+        return "bg-secondary"
       case TrackingGlobals.trackingStatuses.BeingShippedToOrigin:
-        return "#e91e63"
+        return "bg-secondary"
       case TrackingGlobals.trackingStatuses.ReceivedAtOrigin:
-        return "#9c27b0"
+        return "bg-primary"
       case TrackingGlobals.trackingStatuses.ReadyToFly:
-        return "#03a9f4"
+        return "bg-primary"
       case TrackingGlobals.trackingStatuses.Flying:
-        return "#ffeb3b"
+        return "bg-primary"
       case TrackingGlobals.trackingStatuses.ReceivedAtDestination:
-        return "#8bc34a"
+        return "bg-warning"
       case TrackingGlobals.trackingStatuses.BeingDeliveredToRecipient:
-        return "#ccff90"
+        return "bg-warning"
       case TrackingGlobals.trackingStatuses.DeliveredToRecipient:
-        return "#76ff03"
+        return "bg-success"
       case TrackingGlobals.financialStatuses.Unpaid:
-        return "#e040fb"
+        return "bg-danger"
       case TrackingGlobals.financialStatuses.Paid:
-        return "#c060ff"
+        return "bg-success"
       case TrackingGlobals.financialStatuses.PartiallyPaid:
-        return "#d35000"
+        return "bg-warning"
       case 'Consolidated':
-        return "#e040ff"
+        return "bg-dark"
     }
   }
 

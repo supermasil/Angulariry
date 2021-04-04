@@ -26,7 +26,8 @@
     "edit-pricing": "Điều chỉnh giá",
     "custom-pricing": "Giá riêng cho khách",
     "update": "Cập nhật",
-    "close": "Đóng"
+    "close": "Đóng",
+    "date-time": "Thời gian"
   },
   "auth": {
     "password": "Mật khẩu",
@@ -126,7 +127,9 @@
     "pallet-number": "Số pallet",
     "box-number": "Số thùng",
     "add-destination": "Thêm điểm đến",
-    "add-origin": "Thêm điểm xuất phát"
+    "add-origin": "Thêm điểm xuất phát",
+    "pallet": "Pallet",
+    "box": "Thùng"
   }, "error-messages": {
     "something-went-wrong": "Sự cố đã xảy ra",
     "tracking-number-existed": "Số vận đơn trùng lặp",

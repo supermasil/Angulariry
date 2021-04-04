@@ -33,6 +33,7 @@
     "lac-mat-tel-input": "^2.0.0-alpha.1",
     "libphonenumber-js": "^1.9.4",
     "moment": "^2.29.1",
+    "ngx-barcode": "^0.3.0",
     "ngx-currency": "^2.5.2",
     "ngx-google-places-autocomplete": "^2.0.5",
     "ngx-image-compress": "^11.0.3",

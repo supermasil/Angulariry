@@ -7,13 +7,13 @@
           <div>
             <span><b class="mr-1">{{tracking.trackingNumber}}</b></span>
             <span style="position: relative; bottom: 2px;">
-              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.trackingStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.trackingStatus | translate}}</span>
-              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor(tracking.generalInfo.financialStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.financialStatus | translate}}</span>
-              <span class="badge mr-1" [style.backgroundColor]="getBadgeColor('Consolidated')" style="color: white;" *ngIf="tracking.linkedToCsl?.trackingNumber">{{'statuses.consolidated' | translate}}</span>
+              <span class="badge mr-1" [ngClass]="getBadgeColor(tracking.generalInfo.trackingStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.trackingStatus | translate}}</span>
+              <span class="badge mr-1" [ngClass]="getBadgeColor(tracking.generalInfo.financialStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.financialStatus | translate}}</span>
+              <span class="badge mr-1" [ngClass]="getBadgeColor('Consolidated')" style="color: white;" *ngIf="tracking.linkedToCsl?.trackingNumber">{{'statuses.consolidated' | translate}}</span>
             </span>
             <span>{{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}</span>
           </div>
-          <div class="ml-auto">{{formatDateTime(tracking.updatedAt)}}</div>
+          <div class="ml-auto">{{globalConstants.formatDateTime(tracking.updatedAt)}}</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
 
@@ -50,13 +50,30 @@
                 matInput
                 ></textarea>
             </mat-form-field>
-            <span class="d-block mat-h4"><b translate>general.origin</b> {{tracking.generalInfo.origin}}</span>
-            <span class="d-block mat-h4"><b translate>general.destination</b> {{tracking.generalInfo.destination}}</span>
-            <span class="d-block mat-h4" *ngIf="tracking.generalInfo.sender"><b translate>general.sender</b> {{tracking.generalInfo.sender.name}} | {{tracking.generalInfo.sender.userCode}} | {{tracking.generalInfo.sender.phoneNumber}}</span>
-            <span class="d-block mat-h4" *ngIf="tracking.generalInfo.recipient"><b translate>general.recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</span>
-            <span class="d-block mat-h4" *ngIf="tracking.linkedToCsl"><b translate>tracking-types.consolidated</b> {{tracking.linkedToCsl.trackingNumber}}</span>
-            <span class="d-block mat-h4" *ngIf="tracking.linkedToMst"><b translate>tracking-types.master</b> {{tracking.linkedToMst.trackingNumber}}</span>
 
+            <div class="mat-h4"><b translate>general.date-time</b> {{globalConstants.now()}}</div>
+            <div class="mat-h4"><b translate>general.origin</b> {{tracking.generalInfo.origin}}</div>
+            <div class="mat-h4"><b translate>general.destination</b> {{tracking.generalInfo.destination}}</div>
+            <div class="mat-h4" *ngIf="tracking.generalInfo.sender"><b translate>general.sender</b> {{tracking.generalInfo.sender.name}} | <b>{{tracking.generalInfo.sender.userCode}}</b> | {{tracking.generalInfo.sender.phoneNumber}}</div>
+            <div class="mat-h4" *ngIf="tracking.generalInfo.recipient"><b translate>general.recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</div>
+            <div class="mat-h4" *ngIf="tracking.linkedToCsl"><b translate>tracking-types.consolidated</b> {{tracking.linkedToCsl.trackingNumber}}</div>
+            <div class="mat-h4" *ngIf="tracking.linkedToMst"><b translate>tracking-types.master</b> {{tracking.linkedToMst.trackingNumber}}</div>
+
+            <div class="row d-flex justify-content-start align-items-center">
+              <ngx-qrcode
+                [elementType]="'url'"
+                [value]="tracking.trackingNumber"
+                cssClass="aclass"
+                errorCorrectionLevel="L">
+              </ngx-qrcode>
+              <div class="mx-4"></div>
+              <ngx-barcode
+                [bc-value]="tracking.trackingNumber"
+                [bc-element-type]="'url'"
+                [bc-height]="50"
+                [bc-width]="1">
+              </ngx-barcode>
+            </div>
           </div>
           <div class="col-lg-6 mt-xs-2 mt-md-0">
             <form class="ml-0" (submit)="onCommentSubmit(tracking._id, tracking.trackingNumber, comment.value); comment.value = ''" (keydown.meta.enter)="onCommentSubmit(tracking._id, tracking.trackingNumber, comment.value); comment.value = ''">
@@ -80,7 +97,7 @@
             </form>
             <div class="scroll-box">
               <ng-container *ngFor="let comment of tracking.generalInfo.comments">
-                <div class="mat-body-strong">{{comment?.creatorName}}   <span class="dimmed-text">{{formatDateTime(comment?.updatedAt)}}</span></div>
+                <div class="mat-body-strong">{{comment?.creatorName}}   <span class="dimmed-text">{{globalConstants.formatDateTime(comment?.updatedAt)}}</span></div>
 
                 <div>{{comment?.content}}</div>
                 <hr>
@@ -89,418 +106,27 @@
           </div>
         </div>
 
-        <div class="row mt-4" *ngIf="(tracking.generalInfo.type === trackingGlobals.trackingTypes.ONLINE || tracking.generalInfo.type === trackingGlobals.trackingTypes.SERVICED) && tracking.itemsList.length > 0">
-          <div class="col scroll-box w-100">
-            <table style="width: 100%;">
-              <thead>
-                <tr>
-                  <th translate>tracking-info.item-name</th>
-                  <th translate>tracking-info.declared-value</th>
-                  <th translate>tracking-info.quantity</th>
-                  <th translate>tracking-info.insurance</th>
-                  <th translate>tracking-info.weight</th>
-                  <th translate>tracking-info.weight-unit-charge</th>
-                  <th translate>tracking-info.extra-charge</th>
-                  <th translate>tracking-info.final-charge</th>
-                  <th translate>tracking-info.status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <ng-container *ngFor="let item of tracking.itemsList">
-                  <tr>
-                    <td>{{item.name}}</td>
-                    <td>{{item.declaredValue | currency: 'USD'}}</td>
-                    <td>{{item.quantity}}</td>
-                    <td>% {{item.insurance}}</td>
-                    <td>Kg {{item.weight}}</td>
-                    <td>{{item.unitCharge | currency: 'USD'}}</td>
-                    <td>{{item.extraChargeUnit}} {{item.extraCharge}}</td>
-                    <td>{{getItemCharge(item) | currency: 'USD'}}</td>
-                    <td>{{item.status}}</td>
-                  </tr>
-                </ng-container>
-              </tbody>
-              <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
-                  <th translate>tracking-info.total-weight</th>
-                  <th>Kg {{tracking.generalInfo.totalWeight}}</th>
-                  <th translate>tracking-info.cost-adjustment</th>
-                  <th>{{tracking.generalInfo.costAdjustment | currency: 'USD'}}</th>
-                  <th translate>tracking-info.exchange</th>
-                  <th>{{tracking.generalInfo.exchange | currency: 'VND'}}</th>
-                  <th translate>tracking-info.final-cost</th>
-                  <th>{{tracking.generalInfo.finalCost | currency: 'USD'}}</th>
-                  <th>{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange | currency: 'VND'}}</th>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <div class="row mt-4" *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.INPERSON && tracking.subTrackings.length > 0">
-          <div class="col scroll-box w-100">
-            <table style="width: 100%;">
-              <thead>
-                <tr>
-                  <th translate>tracking-info.item-name</th>
-                  <th translate>tracking-info.declared-value</th>
-                  <th translate>tracking-info.quantity</th>
-                  <th translate>tracking-info.insurance</th>
-                  <th translate>tracking-info.weight</th>
-                  <th translate>tracking-info.weight-unit-charge</th>
-                  <th translate>tracking-info.extra-charge</th>
-                  <th translate>tracking-info.final-charge</th>
-                  <th translate>tracking-info.status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <ng-container *ngFor="let subtracking of tracking.subTrackings">
-                  <tr style="background-color: #9C27B0;">
-                    <td style="color: white" colspan="2"><b>{{subtracking.trackingNumber}}</b></td>
-                    <td style="color: white" colspan="2"><b>{{subtracking.linkedToCsl?.trackingNumber}}</b></td>
-                    <td style="color: white" colspan="2"><b>{{subtracking.linkedToMst?.trackingNumber}}</b></td>
-                    <td style="color: white" colspan="2"><b>{{subtracking.generalInfo.trackingStatus}}</b></td>
-                    <td style="color: white" colspan="1"><b>{{subtracking.generalInfo.financialStatus}}</b></td>
-                  </tr>
-                  <ng-container *ngFor="let item of subtracking.itemsList">
-                    <tr>
-                      <td>{{item.name}}</td>
-                      <td>{{item.declaredValue | currency: 'USD'}}</td>
-                      <td>{{item.quantity}}</td>
-                      <td>% {{item.insurance}}</td>
-                      <td>Kg {{item.weight}}</td>
-                      <td>{{item.unitCharge | currency: 'USD'}}</td>
-                      <td>{{item.extraChargeUnit}} {{item.extraCharge}}</td>
-                      <td>{{getItemCharge(item) | currency: 'USD'}}</td>
-                      <td>{{item.status}}</td>
-                    </tr>
-                  </ng-container>
-                  <tr style="background-color: #E1BEE7;">
-                    <th translate>tracking-info.total-weight</th>
-                    <th>Kg {{tracking.generalInfo.totalWeight}}</th>
-                    <th translate>tracking-info.cost-adjustment</th>
-                    <th>{{tracking.generalInfo.costAdjustment | currency: 'USD'}}</th>
-                    <th translate>tracking-info.exchange</th>
-                    <th>{{tracking.generalInfo.exchange | currency: 'VND'}}</th>
-                    <th translate>tracking-info.final-cost</th>
-                    <th>{{tracking.generalInfo.finalCost | currency: 'USD'}}</th>
-                    <th>{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange | currency: 'VND'}}</th>
-                  </tr>
-                </ng-container>
-
-              </tbody>
-              <tfoot style="background-color: #FFC107; color: white;">
-                  <th></th>
-                  <th></th>
-                  <th></th>
-                  <th translate>tracking-info.total-weight</th>
-                  <th>Kg {{tracking.generalInfo.totalWeight}}</th>
-                  <th></th>
-                  <th translate>tracking-info.final-cost</th>
-                  <th>{{tracking.generalInfo.finalCost | currency: 'USD'}}</th>
-                  <th></th>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <div class="row mt-4" *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.CONSOLIDATED && (tracking.onlineTrackings.length > 0 || tracking.servicedTrackings.length > 0 || tracking.inPersonSubTrackings.length > 0)">
-          <div class="col scroll-box w-100">
-            <table style="width: 100%;">
-              <thead>
-                <tr>
-                  <th translate>general.tracking-number</th>
-                  <th translate>general.payment</th>
-                  <th translate>tracking-info.weight</th>
-                  <th translate>tracking-info.final-charge</th>
-                  <th translate>tracking-info.status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <ng-container *ngFor="let item of combineTrackings(tracking.onlineTrackings, tracking.servicedTrackings, tracking.inPersonSubTrackings); let l = index">
-                  <tr>
-                    <td>{{item?.trackingNumber}}</td>
-                    <td>
-                      <mat-slide-toggle
-                        [checked]="item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid"
-                        (change)="childTrackingToggle(item, !(item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid), tracking, i);"
-                        class="mr-2">
-                      </mat-slide-toggle>
-                    </td>
-                    <td>Kg {{item?.generalInfo?.totalWeight}}</td>
-                    <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
-                    <td>
-                      <mat-form-field appearance="standard">
-                        <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i)" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
-                          <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
-                            {{'statuses.' + status | translate}}
-                          </mat-option>
-                        </mat-select>
-                      </mat-form-field>
-                    </td>
-                  </tr>
-                </ng-container>
-              </tbody>
-              <tfoot class="mt-4">
-                <th translate>general.total</th>
-                <th></th>
-                <th>Kg {{getConsolidatedTotalWeightCost(tracking).weight}}</th>
-                <th>{{getConsolidatedTotalWeightCost(tracking).cost | currency: 'USD'}}</th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <div class="row mt-4" *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.MASTER">
-          <div class="col scroll-box w-100">
-            <table style="width: 100%;">
-              <thead>
-                <tr>
-                  <th translate>general.tracking-number</th>
-                  <th translate>general.payment</th>
-                  <th translate>tracking-info.weight</th>
-                  <th translate>tracking-info.final-charge</th>
-                  <th translate>tracking-info.status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <ng-container *ngFor="let box of tracking.boxes">
-                  <ng-container *ngFor="let item of combineTrackings(box.onlineTrackings, box.servicedTrackings, box.inPersonSubTrackings)">
-                    <tr>
-                      <td>{{item?.trackingNumber}}</td>
-                      <td>
-                        <span class="badge" [style.backgroundColor]="getBadgeColor(item.generalInfo.financialStatus)" style="color: white;">
-                          {{item.generalInfo.financialStatus}}
-                        </span>
-                      </td>
-                      <td>Kg {{item?.generalInfo?.totalWeight}}</td>
-                      <td>{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
-                      <td>
-                        <mat-form-field appearance="standard">
-                          <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i)" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
-                            <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
-                              {{'statuses.' + status | translate}}
-                            </mat-option>
-                          </mat-select>
-                        </mat-form-field>
-                      </td>
-                    </tr>
-                  </ng-container>
-                </ng-container>
-              </tbody>
-              <tfoot class="mt-4" style="border-top: 1px solid black; border-bottom: 1px solid black;">
-                <th translate>general.total</th>
-                <th></th>
-                <th>Kg {{getMasterTotalWeightCost(tracking.boxes).weight}}</th>
-                <th>{{getMasterTotalWeightCost(tracking.boxes).cost | currency: 'USD'}}</th>
-                <th></th>
-            </tfoot>
-            </table>
-          </div>
-        </div>
+        <tracking-list-items-common-template
+          [trackings]="trackings"
+          [tracking]="tracking"
+          [i]="i">
+        </tracking-list-items-common-template>
 
         <!-- Printing section -->
+        <div hidden id="print-section{{i}}">
+            <general-info-print
+              [currentOrg]="currentOrg"
+              [trackingNumber]="tracking.trackingNumber"
+              [sender]="tracking.generalInfo.sender"
+              [recipient]="tracking.generalInfo.recipient">
+            </general-info-print>
 
-        <!-- <div hidden id="print-section{{i}}">
-            <table>
-              <tbody>
-                <h1>{{currentOrg.name}}</h1>
-              </tbody>
-            </table>
-            <table style="width: 100%;">
-              <tbody>
-                <tr>
-                  <div *ngFor="let location of currentOrg.locations">
-                    <td><b>{{location.name}}</b></td>
-                  </div>
-                </tr>
-                <tr>
-                  <div *ngFor="let location of currentOrg.locations">
-                    <td>{{location.phoneNumber}}</td>
-                  </div>
-                </tr>
-                <tr>
-                  <div *ngFor="let location of currentOrg.locations">
-                    <td>{{location.address.address}} {{location.address.addressLineTwo}}</td>
-                  </div>
-                </tr>
-              </tbody>
-            </table>
-            <table>
-              <td><ngx-qrcode
-                [elementType]="'url'"
-                [value]="tracking.trackingNumber"
-                cssClass="aclass"
-                errorCorrectionLevel="L">
-              </ngx-qrcode></td>
-            </table>
-
-            <table style="width: 100%; margin-top: 1rem;">
-              <tbody>
-                <tr>
-                  <td><b>Tracking Number</b></td>
-                  <td><b>Invoice timestamp</b></td>
-                </tr>
-                <tr>
-                  <td>{{tracking.trackingNumber}}</td>
-                  <td>{{now()}}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div *ngIf="tracking.generalInfo.type != trackingGlobals.trackingTypes.MASTER">
-              <table style="width: 100%; margin-top: 1rem;">
-                <tbody>
-                  <tr>
-                    <td><b>Sender</b></td>
-                    <td><b>Recipient</b></td>
-                  </tr>
-                  <tr>
-                    <td>{{tracking.generalInfo.sender.name}} {{tracking.generalInfo.sender.userCode}}</td>
-                    <td>{{tracking.generalInfo.recipient.name}}</td>
-                  </tr>
-                  <tr>
-                    <td>{{tracking.generalInfo.sender.phoneNumber}}</td>
-                    <td>{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</td>
-                  </tr>
-                  <tr>
-                    <td>{{tracking.generalInfo.sender.email}}</td>
-                    <td>{{tracking.generalInfo.recipient.email}} {{tracking.generalInfo.recipient.phoneNumber}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div *ngIf="trackingGlobals.externalTrackingTypes.includes(tracking.generalInfo.type)">
-              <table style="width: 100%; margin-top: 1rem;">
-                <thead>
-                  <tr>
-                    <td><b>Item Name</b></td>
-                    <td><b>Declared Value</b></td>
-                    <td><b>Quantity</b></td>
-                    <td><b>Insurance</b></td>
-                    <td><b>Weight</b></td>
-                    <td><b>Weight Charge</b></td>
-                    <td><b>Extra Charge</b></td>
-                    <td><b>Final Charge</b></td>
-                  </tr>
-                </thead>
-                <tbody>
-                  <ng-container *ngFor="let item of tracking.itemsList">
-                    <tr>
-                      <td>{{item.name}}</td>
-                      <td>{{item.declaredValue | currency: 'USD'}}</td>
-                      <td>{{item.quantity}}</td>
-                      <td>% {{item.insurance}}</td>
-                      <td>Kg {{item.weight}}</td>
-                      <td>{{item.unitCharge | currency: 'USD'}}</td>
-                      <td>{{item.extraChargeUnit}} {{item.extraCharge}}</td>
-                      <td>{{getItemCharge(item) | currency: 'USD'}}</td>
-
-                    </tr>
-                  </ng-container>
-                </tbody>
-              </table>
-
-              <table style="width: 100%; margin-top: 1rem;">
-                <tr>
-                  <td><b>Total weight</b></td>
-                  <td><b>Cost adjustment</b></td>
-                  <td><b>Exchange</b></td>
-                  <td><b>Final cost</b></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>Kg {{tracking.generalInfo.totalWeight}}</td>
-                  <td>{{tracking.generalInfo.costAdjustment  | currency: 'USD'}}</td>
-                  <td>{{tracking.generalInfo.exchange | currency: 'VND'}}</td>
-                  <td>{{tracking.generalInfo.finalCost  | currency: 'USD'}}</td>
-                  <td><b>{{tracking.generalInfo.finalCost * tracking.generalInfo.exchange  | currency: 'VND'}}</b></td>
-                </tr>
-              </table>
-            </div>
-
-            <div *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.CONSOLIDATED">
-              <table style="width: 100%; margin-top: 1rem;">
-                <thead>
-                  <tr>
-                    <td><b>Tracking</b></td>
-                    <td><b>Weight</b></td>
-                    <td><b>Final Charge</b></td>
-                  </tr>
-                </thead>
-                <tbody>
-                  <div *ngFor="let tracking of tracking.onlineTrackings">
-                    <tr>
-                      <td>
-                        {{tracking.trackingNumber}}
-                      </td>
-                      <td>
-                        {{tracking.generalInfo.totalWeight}}
-                      </td>
-                      <td>
-                        {{tracking.generalInfo.finalCost | currency: "USD"}}
-                      </td>
-                    </tr>
-                  </div>
-                  <tr></tr>
-                  <div *ngFor="let tracking of tracking.servicedTrackings">
-                    <tr>
-                      <td>
-                        {{tracking.trackingNumber}}
-                      </td>
-                      <td>
-                        {{tracking.generalInfo.totalWeight}}
-                      </td>
-                      <td>
-                        {{tracking.generalInfo.finalCost | currency: "USD"}}
-                      </td>
-                    </tr>
-                  </div>
-                  <tr></tr>
-                  <div *ngFor="let tracking of tracking.inPersonSubTrackings">
-                    <tr>
-                      <td>
-                        {{tracking.trackingNumber}}
-                      </td>
-                      <td>
-                        {{tracking.generalInfo.totalWeight}}
-                      </td>
-                      <td>
-                        {{tracking.generalInfo.finalCost | currency: "USD"}}
-                      </td>
-                    </tr>
-                  </div>
-                </tbody>
-              </table>
-            </div>
-
-            <div *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.MASTER">
-              <table style="width: 100%; margin-top: 1rem;">
-                <tr>
-                  <td><b>Consolidated Trackings</b></td>
-                  <td><b>Sender's info</b></td>
-                  <td><b>Recipient's info</b></td>
-                </tr>
-                <ng-container *ngFor="let box of tracking.boxes">
-                  <ng-container *ngFor="let item of box.items">
-                    <tr>
-                      <td>{{item?.trackingNumber}}</td>
-                      <td>{{item?.generalInfo?.sender?.name}} {{item?.generalInfo?.sender?.userCode}}</td>
-                      <td>{{item?.generalInfo?.recipient.name}} <a href="{{item?.generalInfo?.recipient.address.addressUrl}}" target="_blank" rel="noopener noreferrer">{{item?.generalInfo?.recipient.address.address}} {{item?.generalInfo?.recipient.address.addressLineTwo}}</a></td>
-                    </tr>
-                  </ng-container>
-                </ng-container>
-              </table>
-            </div>
-
-            <table style="width: 100%; margin-top: 1rem;">
-              <tr>
-                <td><h3>Signature</h3></td>
-              </tr>
-            </table>
-        </div> -->
+            <tracking-list-items-common-template
+              [trackings]="trackings"
+              [tracking]="tracking"
+              [i]="i">
+            </tracking-list-items-common-template>
+        </div>
       </ng-template>
 
       <mat-action-row>

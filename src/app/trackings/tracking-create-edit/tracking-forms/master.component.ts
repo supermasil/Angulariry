@@ -72,42 +72,35 @@ export class MasterFormCreateComponent implements OnInit {
 
   ngOnInit() {
     this.trackingNumeberSubject.next("mst-" + Date.now() + Math.floor(Math.random() * 10000));
-    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = this.authService.getMongoDbUser();
-      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = this.authService.getUserOrg();
-        this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
-        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
-          this.users = response.users;
-          this.usersSubject.next(response.users);
-            this.route.paramMap.subscribe((paramMap) => {
-              if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.MASTER).subscribe((response: MasterTrackingModel) => {
-                  this.currentTracking = response;
-                  this.mode = "edit"
-                  this.masterForm = this.createMasterForm(response);
-                  this.setFilter();
-                  this.emitChanges();
-                  this.setUpData();
-                }, error => {
-                  this.authService.redirect404();
-                });
-              } else {
-                this.masterForm = this.createMasterForm(null);
-                this.setFilter();
-              }
+    this.currentUser = this.authService.getMongoDbUser();
+    this.organization = this.authService.getUserOrg();
+    this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
+    this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+      this.users = response.users;
+      this.usersSubject.next(response.users);
+        this.route.paramMap.subscribe((paramMap) => {
+          if (paramMap.has('trackingId')) {
+            this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.MASTER).subscribe((response: MasterTrackingModel) => {
+              this.currentTracking = response;
+              this.mode = "edit"
+              this.masterForm = this.createMasterForm(response);
+              this.setFilter();
+              this.emitChanges();
+              this.fetchTrackings(response.generalInfo.origin, response.generalInfo.destination);
+              this.setUpData();
             }, error => {
               this.authService.redirect404();
             });
+          } else {
+            this.masterForm = this.createMasterForm(null);
+            this.setFilter();
+          }
         }, error => {
-          this.authService.redirectToMainPageWithoutMessage();
-        })
-    //   }, error => {
-    //     this.authService.redirectToMainPageWithoutMessage();
-    //   });
-    // }, error => {
-    //   this.authService.redirectToMainPageWithoutMessage();
-    // });
+          this.authService.redirect404();
+        });
+    }, error => {
+      this.authService.redirectToMainPageWithoutMessage();
+    });
   }
 
   createMasterForm(formData: MasterTrackingModel) {
@@ -172,15 +165,19 @@ export class MasterFormCreateComponent implements OnInit {
   }
 
   generalInfoUpdated(changes: {origin: string, destination: string}) {
-    if (origin != this.origin || this.destination != this.destination) {
-      this.origin = origin; this.destination = this.destination;
-      this.allTrackings = [];
-      this.trackingsReference = [];
+    if ((changes.origin != this.origin || changes.destination != this.destination) && this.mode == 'create') {
+      this.origin = changes.origin; this.destination = changes.destination;
+      let numBoxes = this.masterForm.get('boxes')['controls'].length;
+      for (let index = 0; index < numBoxes; index++) {
+        this.removeBox(0, this.masterForm);
+      }
       this.fetchTrackings(changes.origin, changes.destination);
     }
   }
 
   fetchTrackings(origin: string, destination: string) {
+    this.allTrackings = [];
+    this.trackingsReference = [];
     this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, null).subscribe((transformedTrackings) => {
       this.allTrackings.push(...transformedTrackings.trackings.filter(i => i.generalInfo.trackingStatus == TrackingGlobals.trackingStatuses.ReceivedAtOrigin));
       this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, null).subscribe((transformedTrackings) => {

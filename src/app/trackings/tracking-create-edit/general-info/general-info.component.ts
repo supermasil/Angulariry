@@ -130,7 +130,6 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
     if (!this.disableSender) {
       emitData['sender'] = this.generalInfoForm.get('sender').value;
     }
-
     this.generalInfoUpdated.emit(emitData)
   }
 

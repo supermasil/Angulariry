@@ -39,10 +39,17 @@
         <mat-form-field appearance="outline">
           <mat-label translate>auth.location-name</mat-label>
           <input type="text"
+            #name
             matInput
             formControlName="name"
-            required
-          >
+            required>
+          <a *ngIf="i > 0 && !name.disabled"
+            matSuffix
+            mat-mini-fab
+            color="warn"
+            (click)="removeLocation(i)">
+            <mat-icon>delete</mat-icon>
+          </a>
         </mat-form-field>
 
         <mat-form-field appearance="outline">

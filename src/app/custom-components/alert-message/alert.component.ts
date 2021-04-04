@@ -52,9 +52,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
     openSnackBar(alert: Alert) {
       this.translateService.get(alert.message).subscribe(translatedMessage => {
-        console.log(alert)
         translatedMessage = alert.id? translatedMessage + ` ${alert.id}` : translatedMessage;
-
       })
     }
 

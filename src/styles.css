@@ -9,7 +9,7 @@ body {
 }
 
 a {
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 p {
@@ -84,5 +84,11 @@ app-root {
   padding-bottom: 4rem;
 }
 
-
+/* for printing */
+table { page-break-inside:auto }
+div   { page-break-inside:avoid; } /* This is the key */
+thead { display:table-header-group;}
+tfoot { display:table-footer-group; border-top: 1px solid black; border-bottom: 1px solid black;}
+th {padding: 0 10px}
+td {padding: 0 10px;}
 

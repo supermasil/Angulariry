@@ -26,7 +26,8 @@
     "edit-pricing": "Edit pricing",
     "custom-pricing": "Custom pricing",
     "update": "Update",
-    "close": "Close"
+    "close": "Close",
+    "date-time": "Datetime"
   },
   "auth": {
     "password": "Password",
@@ -126,7 +127,9 @@
     "pallet-number": "Pallet number",
     "box-number": "Box number",
     "add-destination": "Add destination",
-    "add-origin": "Add origin"
+    "add-origin": "Add origin",
+    "pallet": "Pallet",
+    "box": "Box"
   }, "error-messages":{
     "something-went-wrong": "Something went wrong",
     "tracking-number-existed": "Tracking number existed",

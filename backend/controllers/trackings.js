@@ -96,7 +96,7 @@ exports.createUpdateTracking = async (req, res, next) => {
       }
       return next({
         resCode: 200,
-        resBody: {message: "creation-success", tracking: createdTracking}
+        resBody: {message: req.body._id? "update-success": "creation-success", tracking: createdTracking}
       });
     });
     session.endSession();

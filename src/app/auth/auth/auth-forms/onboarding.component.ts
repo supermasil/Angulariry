@@ -51,16 +51,16 @@ export class OnboardingFormComponent implements OnInit {
       _id: new FormControl(formData?._id? formData._id : null),
       name: new FormControl(formData?.name? formData.name: "", {validators: [Validators.required]}),
       email: new FormControl(formData?.email? formData.email: "", {validators: [Validators.required, Validators.email]}),
-      locations: new FormArray(formData?.locations && formData.locations.length > 0 ? this.createLocationItems(formData.locations) : this.createLocationItems([null])),
+      locations: new FormArray(formData?.locations && formData.locations.length > 0 ? this.createLocationItems(formData.locations, true) : this.createLocationItems([null], false)),
       insuranceOptions: new FormControl(formData?.insuranceOptions? formData.insuranceOptions : [], {validators: [Validators.required]}),
     });
   }
 
-  createLocationItems(locations: any): FormGroup[] {
+  createLocationItems(locations: any, disableName?: boolean): FormGroup[] {
     let results: FormGroup[] = [];
     locations.forEach(location => {
       let form = new FormGroup({
-        name: new FormControl({value: location?.name? location.name : "", disabled: this.mode === 'edit'}, {validators: [Validators.required]}),
+        name: new FormControl({value: location?.name? location.name : "", disabled: disableName == true}, {validators: [Validators.required]}),
         phoneNumber: new FormControl(location?.phoneNumber? location.phoneNumber : "", {validators: [phoneNumberValidator, Validators.minLength(1)]}),
         faxNumber: new FormControl(location?.faxNumber? location.faxNumber : ""),
         address: new FormControl({value: location?.address?.address? location.address.address : "", disabled: location?.address?.address? true : false}, {validators: [Validators.required, this.validatorsService.addressValidator()]}),
@@ -142,7 +142,7 @@ export class OnboardingFormComponent implements OnInit {
   }
 
   addLocation(form: FormGroup) {
-    (form.get('locations') as FormArray).push(this.createLocationItems([null])[0]);
+    (form.get('locations') as FormArray).push(this.createLocationItems([null], false)[0]);
   }
 
   removeLocation(i: number) {

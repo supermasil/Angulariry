@@ -1,6 +1,5 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ReplaySubject } from 'rxjs';
 import { AuthGlobals } from 'src/app/auth/auth-globals';
 import { UserModel } from 'src/app/models/user.model';
 import { AuthService } from '../../../auth/auth.service';

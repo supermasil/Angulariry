@@ -18,7 +18,6 @@ import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-cre
 import { GeneralInfoComponent } from './tracking-create-edit/general-info/general-info.component';
 import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/finalized-info.component';
 import { ConsolidationTableComponent } from './tracking-create-edit/consolidation-table/consolidation-table.component';
-import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
 import { TranslateModule } from '@ngx-translate/core';
 import { NotesComponent } from '../custom-components/notes/notes.component';
 import { SaveCancelButtonsModule } from '../custom-components/save-cancel-buttons/save-cancel-buttons.module';
@@ -51,7 +50,6 @@ import { TrackingListCommonTemplateModule } from './tracking-list/common-templat
     FileUploaderModule,
     AutoCompleteInputModule,
     TrackingRoutingModule,
-    NgxQRCodeModule,
     SaveCancelButtonsModule,
     TranslateModule.forChild(),
     SearchBarModule,

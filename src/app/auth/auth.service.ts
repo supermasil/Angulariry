@@ -39,6 +39,7 @@ export class AuthService {
     private alertService: AlertService,
     private zone: NgZone) {
     this.firebaseAuth.onAuthStateChanged(async firebaseUser => {
+      this.clearSessionStorage();
       this.firebaseUser = firebaseUser;
       await this.refreshAuthentication(firebaseUser);
     });

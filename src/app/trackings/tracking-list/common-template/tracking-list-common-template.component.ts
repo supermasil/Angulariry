@@ -1,15 +1,14 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild } from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
-import * as moment from "moment";
 import { Observable } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { AuthService } from "src/app/auth/auth.service";
 import { CommentService } from "src/app/custom-components/comments/comment.service";
+import { GlobalConstants } from "src/app/global-constants";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { ConsolidatedTrackingModel } from "src/app/models/tracking-models/consolidated-tracking.model";
-import { InPersonSubTrackingModel, InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
-import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
-import { MasterTrackingBox, MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
+import {InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
+import { MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
 import { UserModel } from "src/app/models/user.model";
@@ -20,7 +19,7 @@ import { TrackingService } from "../../tracking.service";
 @Component({
   selector: 'tracking-list-common-template',
   templateUrl: './tracking-list-common-template.component.html',
-  styleUrls: ['./tracking-list-common-template.component.css', "../tracking-list.component.css"]
+  styleUrls: ['../tracking-list.component.css']
 })
 export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChecked {
   trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
@@ -42,6 +41,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   inTransitCodes = TrackingGlobals.inTransitCodes
   deliveryCodes = TrackingGlobals.deliveryCodes
   failureCodes = TrackingGlobals.failureCodes;
+  globalConstants = GlobalConstants;
 
   @Input() trackingsObservable: Observable<{trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}> = new Observable();
   @Input() resetPaginatorObservable = new Observable()
@@ -112,15 +112,7 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
     }
   }
 
-  formatDateTime(date: Date) {
-    let storedLanguage = localStorage.getItem("language");
-    return moment(moment.utc(date).toDate()).locale(storedLanguage? storedLanguage : "en").fromNow()   ; //.local().format("MM-DD-YY hh:mm:ss")
-  }
 
-  now() {
-    let storedLanguage = localStorage.getItem("language");
-    return moment().locale(storedLanguage? storedLanguage : "en").format("LLLL");
-  }
 
   canView(roles: string[]) {
     return this.authService.canView(roles);
@@ -134,67 +126,11 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
     return this.authService.getIsAuth();
   }
 
-  getItemCharge(item: ListItemModel) {
-    return item.extraChargeUnit === '%'? item.declaredValue * item.quantity * (item.extraCharge / 100) + item.weight * item.unitCharge + item.declaredValue * item.quantity * (item.insurance / 100) :
-                            item.extraCharge * item.quantity + item.weight * item.unitCharge + item.declaredValue * item.quantity * (item.insurance/ 100)
-
-  }
-
-  getConsolidatedTotalWeightCost(tracking: ConsolidatedTrackingModel) {
-    return this.getTotalWeightCostHelper(tracking);
-  }
-
-  getMasterTotalWeightCost(boxes: MasterTrackingBox[]) {
-    let totalWeight = 0;
-    let totalCost = 0;
-    boxes.forEach(b => {
-      let response = this.getTotalWeightCostHelper(b);
-      totalWeight += response.weight;
-      totalCost += response.cost;
-    })
-    return {weight: totalWeight, cost: totalCost};
-  }
-
-  getTotalWeightCostHelper(item: ConsolidatedTrackingModel | MasterTrackingBox) {
-    let totalWeight = 0;
-    let totalCost = 0;
-    item.onlineTrackings.forEach(t => {
-      totalWeight += t.generalInfo.totalWeight;
-      totalCost += t.generalInfo.finalCost;
-    });
-    item.servicedTrackings.forEach(t => {
-      totalWeight += t.generalInfo.totalWeight;
-      totalCost += t.generalInfo.finalCost;
-    });
-    item.inPersonSubTrackings.forEach(t => {
-      totalWeight += t.generalInfo.totalWeight;
-      totalCost += t.generalInfo.finalCost;
-    });
-
-    return {weight: totalWeight, cost: totalCost};
-  }
-
-  combineTrackings(arr1: any[], arr2: any[], arr3: any[]) {
-    return [...arr1, ...arr2, ...arr3];
-  }
-
   trackingToggle(tracking: OnlineTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {
     this.trackingService.changeTrackingStatus(status, tracking._id, tracking.generalInfo.type, null).subscribe(response => {
       this.zone.run(() => {
         this.trackings[index] = response.tracking;
       });
-    });
-  }
-
-  childTrackingToggle(tracking: OnlineTrackingModel | InPersonSubTrackingModel | ServicedTrackingModel, status: string | boolean, parentTracking: ConsolidatedTrackingModel | MasterTrackingModel, index: number) {
-    console.log(status)
-    let tempStatus = status == true? this.trackingGlobals.financialStatuses.Paid : status == false? this.trackingGlobals.financialStatuses.Unpaid: status;
-    this.trackingService.changeTrackingStatus(tempStatus, tracking._id, tracking.generalInfo.type, parentTracking._id).subscribe(response => {
-      this.trackingService.getTracking(parentTracking.trackingNumber, parentTracking.generalInfo.type).subscribe(t => {
-        this.zone.run(() => {
-          this.trackings[index] = t;
-        })
-      })
     });
   }
 }
