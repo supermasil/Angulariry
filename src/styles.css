@@ -92,3 +92,16 @@ tfoot { display:table-footer-group; border-top: 1px solid black; border-bottom: 
 th {padding: 0 10px}
 td {padding: 0 10px;}
 
+mat-form-field {
+  width: 100%;
+}
+
+.is-active {
+  background-color: #673AB7 !important;
+  color: white !important;
+}
+
+.mat-menu-item:hover {
+  background-color: #D1C4E9 !important;
+  color: black !important;
+}

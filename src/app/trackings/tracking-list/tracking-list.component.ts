@@ -38,6 +38,8 @@ export class TrackingListComponent {
   resetPaginatorSubject = new Subject();
   searchedTrackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
   pageData: PageEvent;
+  canView = this.authService.canView;
+  isAuth = this.authService.isAuth;
 
   constructor(
     private trackingService: TrackingService,
@@ -137,13 +139,5 @@ export class TrackingListComponent {
 
   ngOnDestroy() {
 
-  }
-
-  canView(roles: string[]) {
-    return this.authService.canView(roles);
-  }
-
-  isAuth() {
-    return this.authService.getIsAuth();
   }
 }

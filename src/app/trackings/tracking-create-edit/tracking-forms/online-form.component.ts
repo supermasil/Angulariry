@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
+import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit, ViewChild } from "@angular/core";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute } from '@angular/router';
@@ -21,11 +21,11 @@ import { AuthGlobals } from "src/app/auth/auth-globals";
 
 
 @Component({
-  selector: 'online-form-create',
-  templateUrl: './online.component.html',
-  styleUrls: ['./online.component.css', '../tracking-create-edit.component.css']
+  selector: 'online-tracking-form',
+  templateUrl: './online-form.component.html',
+  styleUrls: ['./online-form.component.css', '../tracking-create-edit.component.css']
 })
-export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
+export class OnlineTrackingFormComponent implements OnInit, AfterViewChecked{
   onlineForm: FormGroup;
   carriers = TrackingGlobals.carriers;
 
@@ -58,6 +58,9 @@ export class OnlineFormCreateComponent implements OnInit, AfterViewChecked{
   currentTracking: OnlineTrackingModel; // edit case
   mode = "create";
 
+  canView = this.authService.canView;
+  isAuth = this.authService.isAuth;
+
 scannerOpened = false;
   showFinalizedInfo = false;
 
@@ -78,45 +81,36 @@ scannerOpened = false;
     this.trackingNumeberSubject.next("onl-" + Date.now() + Math.floor(Math.random() * 10000));
     this.currentUser = this.authService.getMongoDbUser();
 
-    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      // this.currentUser = user;
-      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = this.authService.getUserOrg();;
-        this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
-        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
-          this.users = response.users;
-          this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
-          this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
-            this.defaultPricing = pricing;
-            this.defaultPricingSubject.next(pricing);
-            this.route.paramMap.subscribe((paramMap) => {
-              if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.ONLINE).subscribe((response: OnlineTrackingModel) => {
-                  this.currentTracking = response;
-                  this.mode = "edit"
-                  this.onlineForm = this.createOnlineForm(response);
-                  this.emitChanges();
-                }, error => {
-                  this.authService.redirect404();
-                });
-              } else {
-                this.onlineForm = this.createOnlineForm(null);
-              }
+    this.organization = this.authService.getUserOrg();;
+    this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
+    this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+      this.users = response.users;
+      this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
+      this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
+        this.defaultPricing = pricing;
+        this.defaultPricingSubject.next(pricing);
+        this.route.paramMap.subscribe((paramMap) => {
+          if (paramMap.has('trackingId')) {
+            this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.ONLINE).subscribe((response: OnlineTrackingModel) => {
+              this.currentTracking = response;
+              this.mode = "edit"
+              this.onlineForm = this.createOnlineForm(response);
+              this.emitChanges();
             }, error => {
               this.authService.redirect404();
             });
-          }, error => {
-            this.authService.redirectToMainPageWithoutMessage();
-          });
+          } else {
+            this.onlineForm = this.createOnlineForm(null);
+          }
         }, error => {
-          this.authService.redirectToMainPageWithoutMessage();
-        })
-    //   }, error => {
-    //     this.authService.redirectToMainPageWithoutMessage();
-    //   });
-    // }, error => {
-    //   this.authService.redirectToMainPageWithoutMessage();
-    // });
+          this.authService.redirect404();
+        });
+      }, error => {
+        this.authService.redirectToMainPageWithoutMessage();
+      });
+    }, error => {
+      this.authService.redirectToMainPageWithoutMessage();
+    });
   }
 
   emitChanges() {
@@ -138,7 +132,7 @@ scannerOpened = false;
       _id: new FormControl(formData?._id? formData._id :null),
       carrierTrackingNumber: new FormControl(formData?.carrierTracking?.carrierTrackingNumber? formData.carrierTracking.carrierTrackingNumber: "", {validators: [Validators.required]}),
       carrier: new FormControl(formData?.carrierTracking?.carrier? formData.carrierTracking.carrier: "", {validators: [Validators.required]}),
-      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.trackingStatus)? true : false, disabled: !this.canView(this.authGlobals.internal) || this.trackingGlobals.postReadyToFly.includes(formData?.generalInfo?.trackingStatus)}, {validators: [Validators.required]}),
+      received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.trackingStatus)? true : false, disabled: (!this.canView(this.authGlobals.internal) || this.trackingGlobals.postReadyToFly.includes(formData?.generalInfo?.trackingStatus))}, {validators: [Validators.required]}),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content: ""),
     });
 
@@ -179,10 +173,6 @@ scannerOpened = false;
     }
     this.generalInfoSubject.next(generalInfo as GeneralInfoModel);
     // this.onlineForm.get('received').disable();
-  }
-
-  canView(roles: string[]) {
-    return this.authService.canView(roles);
   }
 
   onSave() {

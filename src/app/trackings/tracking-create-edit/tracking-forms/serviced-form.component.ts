@@ -6,11 +6,11 @@ import { CarrierTrackingModel } from "../../../models/tracking-models/carrier-tr
 
 
 @Component({
-  selector: 'serviced-form-create',
-  templateUrl: './serviced.component.html',
-  styleUrls: ['./serviced.component.css', '../tracking-create-edit.component.css']
+  selector: 'serviced-tracking-form',
+  templateUrl: './serviced-form.component.html',
+  styleUrls: ['./serviced-form.component.css', '../tracking-create-edit.component.css']
 })
-export class ServicedFormCreateComponent implements OnInit {
+export class ServicedTrackingFormComponent implements OnInit {
   servicedForm: FormGroup;
   userCodes = ["Alex", "John", "Kay"];
   internalStatus = ["Received at US WH", "Consolidated"];

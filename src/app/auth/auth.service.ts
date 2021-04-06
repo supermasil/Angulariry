@@ -39,7 +39,6 @@ export class AuthService {
     private alertService: AlertService,
     private zone: NgZone) {
     this.firebaseAuth.onAuthStateChanged(async firebaseUser => {
-      this.clearSessionStorage();
       this.firebaseUser = firebaseUser;
       await this.refreshAuthentication(firebaseUser);
     });
@@ -153,7 +152,7 @@ export class AuthService {
 
   async createUpdateUser(formData: any, andLogin: boolean) {
     if (!formData.id) { // create case
-      let request = this.getIsAuth() ? this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL + "internal", formData) : this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData);
+      let request = this.isAuth() ? this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL + "internal", formData) : this.httpClient.post<{message: string, user: UserModel}>(USER_BACKEND_URL, formData);
       request.subscribe((responseData) => {
         if (andLogin) {
           this.login(formData.email, formData.password);
@@ -292,8 +291,12 @@ export class AuthService {
     return JSON.parse(sessionStorage.getItem("userOrg")) as OrganizationModel;
   }
 
-  getIsAuth() {
+  isAuth() {
     return sessionStorage.getItem("isAuthenticated") == "true" ? true : false;
+  }
+
+  canView(roles: string[]) {
+    return roles.includes((JSON.parse(sessionStorage.getItem("mongoDBUser")) as UserModel)?.role);
   }
 
   getAuthStatusListener() {
@@ -325,9 +328,5 @@ export class AuthService {
     this.zone.run(() => {
       this.router.navigate(["/404"]);
     });
-  }
-
-  canView(roles: string[]) {
-    return roles.includes(this.mongoDbUser?.role);
   }
 }

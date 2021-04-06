@@ -6,15 +6,15 @@ import { ActivatedRoute } from "@angular/router";
 import { phoneNumberValidator } from "lac-mat-tel-input";
 import { Address } from "ngx-google-places-autocomplete/objects/address";
 import { ValidatorsService } from "src/app/validators.service";
-import { AuthService } from "../../auth.service";
+import { AuthService } from "../auth.service";
 
 
 @Component({
   selector: 'onboarding-form',
   templateUrl: './onboarding.component.html',
-  styleUrls: ['./onboarding.component.css', '../auth.component.css']
+  styleUrls: ['./onboarding.component.css']
 })
-export class OnboardingFormComponent implements OnInit {
+export class OnboardingFormComponentForm implements OnInit {
   organizationOnboardingForm: FormGroup;
   readonly separatorKeysCodes: number[] = [ENTER, COMMA];
   operatingDays = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];

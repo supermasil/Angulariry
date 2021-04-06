@@ -17,6 +17,8 @@ export class OnboardingComponent implements OnInit{
   currentUser: UserModel;
   currentOrg: OrganizationModel;
   authGlobals = AuthGlobals;
+  canView = this.authService.canView;
+  isAuth = this.authService.isAuth;
 
   constructor(
     private authService: AuthService,
@@ -25,31 +27,18 @@ export class OnboardingComponent implements OnInit{
   ) {}
 
   ngOnInit() {
-    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = this.authService.getMongoDbUser();
-      this.currentOrg = this.authService.getUserOrg();
-      this.authService.getManyOrganizations(this.currentUser.organizations.map(o => o.organization)).subscribe((orgs: OrganizationModel[]) => {
-        this.organizations = orgs;
-        // let filteredNames = this.organizations.map(o => `${o.name} | ${o.email}`);
-        // filteredNames.unshift("Onboard to new organization");
-        // this.companiesSubject.next(filteredNames);
-      }, error => {
-        console.log("FrontPageComponent: Couldn't get organizations", error.message);
-      })
-    // }, error => {
-    //   console.log("FrontPageComponent: Couldn't get user");
-    // })
+    this.currentUser = this.authService.getMongoDbUser();
+    this.currentOrg = this.authService.getUserOrg();
+    this.authService.getManyOrganizations(this.currentUser.organizations.map(o => o.organization)).subscribe((orgs: OrganizationModel[]) => {
+      this.organizations = orgs;
+      // let filteredNames = this.organizations.map(o => `${o.name} | ${o.email}`);
+      // filteredNames.unshift("Onboard to new organization");
+      // this.companiesSubject.next(filteredNames);
+    }, error => {
+      console.log("FrontPageComponent: Couldn't get organizations", error.message);
+    });
   }
 
-  // companySelected(selectedItem: string) {
-  //   if (selectedItem === "Onboard to new organization") {
-  //     let el: HTMLElement = document.getElementById("onboardButton");
-  //     el.click();
-  //   } else {
-  //     let selectedOrg = this.organizations.filter(o => o.name === selectedItem.split(" | ")[0])[0];
-  //     this.authService.logInToOrg(selectedOrg._id);
-  //   }
-  // }
 
   companySelected(index: number) {
     if (index == -1) {
@@ -70,13 +59,5 @@ export class OnboardingComponent implements OnInit{
     this.zone.run(() => {
       this.router.navigate([route]);
     });
-  }
-
-  canView(roles: string[]) {
-    return this.authService.canView(roles);
-  }
-
-  isAuth() {
-    return this.authService.getIsAuth();
   }
 }

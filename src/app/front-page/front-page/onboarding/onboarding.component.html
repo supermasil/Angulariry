@@ -6,12 +6,12 @@
 </auto-complete-input> -->
 <a mat-button [matMenuTriggerFor]="createMenu" style="color: white; padding: 0; text-decoration: none;" class="mx-2">{{currentOrg?.name? currentOrg.name : 'Onboard'}}</a>
 <mat-menu #createMenu="matMenu">
-  <a style="color: black; font-size: 2em;" mat-menu-item class="nav-link" [cdkCopyToClipboard]="currentOrg.registerCode" *ngIf="currentOrg">{{currentOrg?.registerCode}}</a>
-  <a style="color: black;" mat-menu-item class="nav-link" *ngIf="canView(authGlobals.admins)" (click)="redirect('/auth/orgs/edit/' + currentUser?.organization._id)" routerLinkActive="mat-accent">{{'auth.edit-organization' | translate}}</a>
-  <a style="color: black;" mat-menu-item class="nav-link" (click)="companySelected(-1)" routerLinkActive="mat-accent">{{'auth.onboard-to-new-organization' | translate}}</a>
+  <a mat-menu-item class="nav-link" style="font-size: 2em;" [cdkCopyToClipboard]="currentOrg.registerCode" *ngIf="currentOrg">{{currentOrg?.registerCode}}</a>
+  <a mat-menu-item class="nav-link" [routerLinkActive]="['is-active']" *ngIf="canView(authGlobals.admins)" [routerLink]="'/auth/orgs/edit/' + currentUser?.organization._id">{{'auth.edit-organization' | translate}}</a>
+  <a mat-menu-item class="nav-link" (click)="companySelected(-1)">{{'auth.onboard-to-new-organization' | translate}}</a>
   <mat-divider *ngIf="currentOrg"></mat-divider>
   <ng-container *ngFor="let org of organizations; let i = index">
-    <a style="color: black;" mat-menu-item class="nav-link" (click)="companySelected(i)" routerLinkActive="mat-accent">{{org.name}} {{org.email}}</a>
+    <a mat-menu-item class="nav-link" (click)="companySelected(i)" routerLinkActive="mat-accent">{{org.name}} {{org.email}}</a>
   </ng-container>
 </mat-menu>
 

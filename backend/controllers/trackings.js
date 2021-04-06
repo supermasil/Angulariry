@@ -327,6 +327,7 @@ updateImages = async (req, currentFilesPath) => {
   tempFilePaths = tempFilePaths.filter(item => !filesToDelete.includes(item));
   let fileNames = JSON.parse(req.body.fileNamesToAdd);
   let newFilePaths = await S3.uploadFiles(JSON.parse(req.body.filesToAdd), fileNames);
+  console.log(newFilePaths)
   tempFilePaths = [...tempFilePaths, ...newFilePaths];
   return tempFilePaths;
 }

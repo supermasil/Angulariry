@@ -5,14 +5,14 @@ import { phoneNumberValidator } from "lac-mat-tel-input";
 import { Address } from "ngx-google-places-autocomplete/objects/address";
 import { UserModel } from "src/app/models/user.model";
 import { ValidatorsService } from "src/app/validators.service";
-import { AuthService } from "../../auth.service";
-import { AuthGlobals } from "../../auth-globals";
+import { AuthService } from "../auth.service";
+import { AuthGlobals } from "../auth-globals";
 
 
 @Component({
   selector: 'signup-form',
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css', '../auth.component.css']
+  styleUrls: ['./signup.component.css']
 })
 export class SignUpFormComponent implements OnInit, OnDestroy {
   signupForm: FormGroup;

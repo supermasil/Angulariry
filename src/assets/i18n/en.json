@@ -103,7 +103,8 @@
     "new-user": "New user",
     "edit-user": "Edit user",
     "adjust-credit": "Adjust credit",
-    "new-tracking": "New tracking"
+    "new-tracking": "New tracking",
+    "reports": "Reports"
   },
   "tracking-info": {
     "item-name": "Item name",

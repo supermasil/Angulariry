@@ -1,17 +1,29 @@
 
-<div class="mx-auto" style="width: 99%;">
+<div class="mx-auto">
   <mat-accordion *ngIf='trackings.length > 0'>
     <mat-expansion-panel [(expanded)]="expanded[i]" *ngFor='let tracking of trackings, let i = index'>
       <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.trackingStatus)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
         <mat-panel-title>
-          <div>
-            <span><b class="mr-1">{{tracking.trackingNumber}}</b></span>
-            <span style="position: relative; bottom: 2px;">
+          <div class="col">
+            <div>
+              <span>
+                <a
+                mat-icon-button
+                color="basic"
+                matPrefix
+                [cdkCopyToClipboard]="tracking.trackingNumber">
+                <mat-icon>content_copy</mat-icon>
+              </a> <b class="mr-1">{{tracking.trackingNumber}}</b>
+              </span>
               <span class="badge mr-1" [ngClass]="getBadgeColor(tracking.generalInfo.trackingStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.trackingStatus | translate}}</span>
               <span class="badge mr-1" [ngClass]="getBadgeColor(tracking.generalInfo.financialStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.financialStatus | translate}}</span>
               <span class="badge mr-1" [ngClass]="getBadgeColor('Consolidated')" style="color: white;" *ngIf="tracking.linkedToCsl?.trackingNumber">{{'statuses.consolidated' | translate}}</span>
-            </span>
-            <span>{{tracking.carrierTracking?.carrierTrackingNumber}}  {{tracking.carrierTracking?.carrier}} {{tracking.carrierTracking?.status}}</span>
+            </div>
+            <div>
+              <span class="badge border rounded border-primary m-1">{{tracking.carrierTracking?.carrierTrackingNumber}}</span>
+              <span class="badge border rounded border-warning m-1">{{tracking.carrierTracking?.carrier}}</span>
+              <span class="badge border rounded border-success m-1">{{tracking.carrierTracking?.status}}</span>
+            </div>
           </div>
           <div class="ml-auto">{{globalConstants.formatDateTime(tracking.updatedAt)}}</div>
         </mat-panel-title>
@@ -56,8 +68,8 @@
             <div class="mat-h4"><b translate>general.destination</b> {{tracking.generalInfo.destination}}</div>
             <div class="mat-h4" *ngIf="tracking.generalInfo.sender"><b translate>general.sender</b> {{tracking.generalInfo.sender.name}} | <b>{{tracking.generalInfo.sender.userCode}}</b> | {{tracking.generalInfo.sender.phoneNumber}}</div>
             <div class="mat-h4" *ngIf="tracking.generalInfo.recipient"><b translate>general.recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</div>
-            <div class="mat-h4" *ngIf="tracking.linkedToCsl"><b translate>tracking-types.consolidated</b> {{tracking.linkedToCsl.trackingNumber}}</div>
-            <div class="mat-h4" *ngIf="tracking.linkedToMst"><b translate>tracking-types.master</b> {{tracking.linkedToMst.trackingNumber}}</div>
+            <div class="mat-h4" *ngIf="tracking.linkedToCsl"><b translate>tracking-types.consolidated</b> <a [routerLink]="'/trackings/view/' + tracking.linkedToCsl.trackingNumber"> {{tracking.linkedToCsl.trackingNumber}}</a></div>
+            <div class="mat-h4" *ngIf="tracking.linkedToMst"><b translate>tracking-types.master</b> <a [routerLink]="'/trackings/view/' + tracking.linkedToMst.trackingNumber"> {{tracking.linkedToMst.trackingNumber}}</a></div>
 
             <div class="row d-flex justify-content-start align-items-center">
               <ngx-qrcode
@@ -165,7 +177,7 @@
           </div>
           <div class="col-lg mt-4 mt-lg-0">
             <div class="d-flex justify-content-end">
-              <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit', tracking.trackingNumber]" >Edit</a>
+              <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit/' + tracking.trackingNumber.substring(0,3), tracking.trackingNumber]" >Edit</a>
               <!-- <a class="mr-2" mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</a> -->
               <button mat-mini-fab color="primary" class="mr-4" type="button" ngxPrint printSectionId="print-section{{i}}" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
             </div>

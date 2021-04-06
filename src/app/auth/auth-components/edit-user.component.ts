@@ -3,14 +3,14 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { ReplaySubject } from "rxjs";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { UserModel } from "src/app/models/user.model";
-import { AuthGlobals } from "../../auth-globals";
-import { AuthService } from "../../auth.service";
+import { AuthGlobals } from "../auth-globals";
+import { AuthService } from "../auth.service";
 
 
 @Component({
   selector: 'edit-user-form',
   templateUrl: './edit-user.component.html',
-  styleUrls: ['./edit-user.component.css', '../auth.component.css']
+  styleUrls: ['./edit-user.component.css']
 })
 export class EditUserFormComponent implements OnInit{
 

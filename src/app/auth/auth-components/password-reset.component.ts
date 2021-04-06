@@ -2,13 +2,13 @@ import { Component, NgZone, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AlertService } from "src/app/custom-components/alert-message";
-import { AuthService } from "../../auth.service";
+import { AuthService } from "../auth.service";
 
 
 @Component({
   selector: 'password-reset-form',
   templateUrl: './password-reset.component.html',
-  styleUrls: ['./password-reset.component.css', '../auth.component.css']
+  styleUrls: ['./password-reset.component.css']
 })
 export class PasswordResetFormComponent implements OnInit {
   passwordResetForm: FormGroup;

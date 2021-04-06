@@ -18,11 +18,11 @@ import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-t
 import { InPersonSubTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
 
 @Component({
-  selector: 'master-form-create',
-  templateUrl: './master.component.html',
-  styleUrls: ['./master.component.css', '../tracking-create-edit.component.css']
+  selector: 'master-tracking-form',
+  templateUrl: './master-form.component.html',
+  styleUrls: ['./master-form.component.css', '../tracking-create-edit.component.css']
 })
-export class MasterFormCreateComponent implements OnInit {
+export class MasterTrackingFormComponent implements OnInit {
   masterForm: FormGroup;
 
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;

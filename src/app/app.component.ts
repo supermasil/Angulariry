@@ -15,13 +15,8 @@ export class AppComponent implements OnInit {
 
   constructor(private authService: AuthService) {}
 
+  canView = this.authService.canView;
+  isAuth = this.authService.isAuth;
+
   ngOnInit() {}
-
-  canView(roles: string[]) {
-    return this.authService.canView(roles);
-  }
-
-  isAuth() {
-    return this.authService.getIsAuth();
-  }
 }

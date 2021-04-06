@@ -22,11 +22,11 @@ import { GlobalConstants } from "src/app/global-constants";
 
 
 @Component({
-  selector: 'in-person-form-create',
-  templateUrl: './in-person.component.html',
-  styleUrls: ['./in-person.component.css', '../tracking-create-edit.component.css']
+  selector: 'in-person-tracking-form',
+  templateUrl: './in-person-form.component.html',
+  styleUrls: ['./in-person-form.component.css', '../tracking-create-edit.component.css']
 })
-export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
+export class InPersonTrackingFormComponent implements OnInit, AfterViewChecked {
   inPersonForm: FormGroup;
   subTrackingsForm: FormGroup;
 
@@ -76,6 +76,8 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   trackingNumber = "";
   removedTrackingIds = [];
   generalInfoDisabledFields = [true, true, true, false, false, false, false];
+  canView = this.authService.canView;
+  isAuth = this.authService.isAuth;
 
   constructor(
     private trackingService: TrackingService,
@@ -90,48 +92,40 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
   ngOnInit() {
     this.trackingNumber = "inp-" + Date.now() + Math.floor(Math.random() * 10000);
     this.trackingNumberSubject.next(this.trackingNumber);
-    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = this.authService.getMongoDbUser();
-      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.organization = this.authService.getUserOrg();
-        this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
-        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
-          this.users = response.users;
-          this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
-          this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
-            this.defaultPricing = pricing;
-            this.defaultPricingSubject.next(pricing);
+    this.currentUser = this.authService.getMongoDbUser();
+      this.organization = this.authService.getUserOrg();
+      this.defaultLocationsSubject.next(this.organization.locations.map(item => item.name));
+      this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+        this.users = response.users;
+        this.usersSubject.next(response.users.filter(u => u.role === AuthGlobals.roles.Customer));
+        this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
+          this.defaultPricing = pricing;
+          this.defaultPricingSubject.next(pricing);
 
-            this.route.paramMap.subscribe((paramMap) => {
-              if (paramMap.has('trackingId')) {
-                this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.INPERSON).subscribe((response: InPersonTrackingModel) => {
-                  this.currentTracking = response;
-                  this.mode = "edit"
-                  this.createInPersonForm(response);
-                  this.createSubTrackingsForm(response);
-                  this.emitChanges();
-                }, error => {
-                  this.authService.redirect404();
-                });
-              } else {
-                this.createInPersonForm(null);
-                this.createSubTrackingsForm(null);
-              }
-            }, error => {
-              this.authService.redirect404();
-            });
+          this.route.paramMap.subscribe((paramMap) => {
+            if (paramMap.has('trackingId')) {
+              this.trackingService.getTracking(paramMap.get('trackingId'), TrackingGlobals.trackingTypes.INPERSON).subscribe((response: InPersonTrackingModel) => {
+                this.currentTracking = response;
+                this.mode = "edit"
+                this.createInPersonForm(response);
+                this.createSubTrackingsForm(response);
+                this.emitChanges();
+              }, error => {
+                this.authService.redirect404();
+              });
+            } else {
+              this.createInPersonForm(null);
+              this.createSubTrackingsForm(null);
+            }
           }, error => {
-            this.authService.redirectToMainPageWithoutMessage();
+            this.authService.redirect404();
           });
         }, error => {
           this.authService.redirectToMainPageWithoutMessage();
-        })
-    //   }, error => {
-    //     this.authService.redirectToMainPageWithoutMessage();
-    //   });
-    // }, error => {
-    //   this.authService.redirectToMainPageWithoutMessage();
-    // });
+        });
+      }, error => {
+        this.authService.redirectToMainPageWithoutMessage();
+      });
   }
 
   emitChanges() {
@@ -210,10 +204,6 @@ export class InPersonFormCreateComponent implements OnInit, AfterViewChecked {
     if (trackingId) {
       this.removedTrackingIds.push(trackingId)
     }
-  }
-
-  canView(roles: string[]) {
-    return this.authService.canView(roles);
   }
 
   generalInfoValidity(valid: boolean) {

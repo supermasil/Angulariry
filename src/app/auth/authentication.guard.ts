@@ -30,14 +30,13 @@ export class AuthGuard implements CanActivate {
   }
 
   checkAuthentication(url: string, data: {}) {
-    const isAuth = this.authService.getIsAuth();
+    const isAuth = this.authService.isAuth();
     this.authService.redirectUrl = url;
     this.authService.redirectData = data;
 
     if(!isAuth) {
       this.zone.run(() => {
         this.router.navigate(["/auth"]);
-        // this.alertService.warn("Please log in to proceed", GlobalConstants.flashMessageOptions);
       });
       return false;
     } else if (isAuth && !this.authService.getUserOrg() && this.authService.getMongoDbUser()?.role != AuthGlobals.roles.SuperAdmin && this.route.url.length > 0) {
@@ -51,6 +50,7 @@ export class AuthGuard implements CanActivate {
         this.router.navigate(["/"]);
         this.alertService.error("Your account is inactive with this organization", GlobalConstants.flashMessageOptions);
       });
+      return false;
     }
 
     return true;

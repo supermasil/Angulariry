@@ -12,9 +12,9 @@ import { AlertService } from "../../alert-message";
 import { GlobalConstants } from "src/app/global-constants";
 
 @Component({
-  selector: 'common-pricing-form',
-  templateUrl: './common-pricing.component.html',
-  styleUrls: ['./common-pricing.component.css', '../pricing.component.css'],
+  selector: 'pricing-common-form',
+  templateUrl: './pricing-common.component.html',
+  styleUrls: ['./pricing-common.component.css', '../pricing.component.css'],
   animations: [
     trigger('detailExpand', [
       state('collapsed, void', style({height: '0px', minHeight: '0'})), // After sort is clicked, the state is void
@@ -24,7 +24,7 @@ import { GlobalConstants } from "src/app/global-constants";
     ])
   ]
 })
-export class CommonPricingComponent implements OnInit, AfterViewChecked {
+export class PricingCommonComponent implements OnInit, AfterViewChecked {
   commonPricingForm: FormGroup;
   organization: OrganizationModel;
   orgDefaultPricing: PricingModel;

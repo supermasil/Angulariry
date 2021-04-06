@@ -103,7 +103,8 @@
     "new-user": "Tạo người dùng mới",
     "edit-user": "Điều chỉnh thông tin người dùng",
     "adjust-credit": "Điều chỉnh tín dụng",
-    "new-tracking": "Tạo vận đơn mới"
+    "new-tracking": "Tạo vận đơn mới",
+    "reports": "Báo cáo"
   },
   "tracking-info": {
     "item-name": "Tên sản phẩm",

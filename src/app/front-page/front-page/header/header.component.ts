@@ -21,6 +21,9 @@ export class HeaderComponent implements OnInit, OnDestroy{
   organization: OrganizationModel;
   @Output() sideMenuClicked = new EventEmitter();
 
+  canView = this.authService.canView;
+  isAuth = this.authService.isAuth;
+
   constructor(
     private authService: AuthService,
     private zone: NgZone,
@@ -51,14 +54,6 @@ export class HeaderComponent implements OnInit, OnDestroy{
     this.zone.run(() => {
       this.router.navigate([route]);
     });
-  }
-
-  canView(roles: string[]) {
-    return this.authService.canView(roles);
-  }
-
-  isAuth() {
-    return this.authService.getIsAuth();
   }
 
   sideMenuPressed() {

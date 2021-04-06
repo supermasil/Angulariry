@@ -6,14 +6,14 @@ import { ReplaySubject } from "rxjs";
 import { HistoryModel } from "src/app/models/history.model";
 import { OrganizationModel } from "src/app/models/organization.model";
 import { UserModel } from "src/app/models/user.model";
-import { AuthGlobals } from "../../auth-globals";
-import { AuthService } from "../../auth.service";
+import { AuthGlobals } from "../auth-globals";
+import { AuthService } from "../auth.service";
 
 
 @Component({
   selector: 'adjust-credit-form',
   templateUrl: './adjust-credit.component.html',
-  styleUrls: ['./adjust-credit.component.css', '../auth.component.css']
+  styleUrls: ['./adjust-credit.component.css']
 })
 export class AdjustCreditFormComponent implements OnInit{
 

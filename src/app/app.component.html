@@ -40,7 +40,7 @@
             <mat-icon class="ml-auto" color="primary">new_label</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.online</span></a>
+        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.everyone)" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.online</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']"><span translate>tracking-types.serviced</span> (not ready)</a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/inp'" [routerLinkActive]="['is-active']"><span translate>tracking-types.in-person</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/csl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.consolidated</span></a>
@@ -57,9 +57,9 @@
             <mat-icon class="ml-auto" color="primary">price_change</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/new'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.new-pricing</span></a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/edit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.edit-pricing</span></a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/pricing/custom'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.custom-pricing</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/pricings/new'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.new-pricing</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/pricings/edit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.edit-pricing</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/pricings/custom'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.custom-pricing</span></a>
       </mat-expansion-panel>
 
       <mat-expansion-panel *ngIf="canView(authGlobals.internal)">
@@ -75,6 +75,19 @@
         <a mat-menu-item class="nav-link" [routerLink]="'/auth/users/new'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.new-user</span></a>
         <a mat-menu-item class="nav-link" [routerLink]="'/auth/users/edit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.edit-user</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.managerAdmins) || canView([authGlobals.roles.Accounting])" [routerLink]="'/auth/users/adjustCredit'" [routerLinkActive]="['is-active']"><span translate>side-nav-bar.adjust-credit</span></a>
+      </mat-expansion-panel>
+      <mat-expansion-panel *ngIf="canView(authGlobals.internal)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <span translate>side-nav-bar.reports</span>
+          </mat-panel-title>
+          <mat-panel-description>
+            <!-- Type your name and age -->
+            <mat-icon class="ml-auto" color="primary">account_circle</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <a mat-menu-item class="nav-link" [routerLink]="'/reports/trackings'" [routerLinkActive]="['is-active']"><span translate>general.trackings</span></a>
+        <a mat-menu-item class="nav-link" [routerLink]="'/reports/users'" [routerLinkActive]="['is-active']"><span translate>general.users</span></a>
       </mat-expansion-panel>
       <div class="text-center my-4 text-muted">
         <div>Weshippee 2021</div>
@@ -98,4 +111,14 @@
       </div>
     </main>
   </div>
+  <a mat-fab color="primary" [matMenuTriggerFor]="aboveMenu" style="position: fixed; bottom: 2em; right: 2em">
+    <mat-icon>add</mat-icon>
+  </a>
+  <mat-menu #aboveMenu="matMenu" yPosition="above">
+    <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.everyone)" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.online</span></a>
+    <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']"><span translate>tracking-types.serviced</span> (not ready)</a>
+    <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/inp'" [routerLinkActive]="['is-active']"><span translate>tracking-types.in-person</span></a>
+    <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/csl'" [routerLinkActive]="['is-active']"><span translate>tracking-types.consolidated</span></a>
+    <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/mst'" [routerLinkActive]="['is-active']"><span translate>tracking-types.master</span></a>
+  </mat-menu>
 </mat-drawer-container>

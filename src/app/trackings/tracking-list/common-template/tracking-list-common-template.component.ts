@@ -33,6 +33,9 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
   trackingGlobals = TrackingGlobals;
   expanded = [];
 
+  canView = this.authService.canView;
+  isAuth = this.authService.isAuth;
+
   getBadgeColor = TrackingGlobals.getBadgeColor;
 
   @ViewChild('paginator') paginator: MatPaginator;
@@ -112,18 +115,8 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
     }
   }
 
-
-
-  canView(roles: string[]) {
-    return this.authService.canView(roles);
-  }
-
   canEdit(roles: string[], creatorId: string) {
     return roles?.includes(this.authService.getMongoDbUser()?.role) || creatorId === this.currentUser._id
-  }
-
-  isAuth() {
-    return this.authService.getIsAuth();
   }
 
   trackingToggle(tracking: OnlineTrackingModel | ServicedTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel, index: number, status: string) {

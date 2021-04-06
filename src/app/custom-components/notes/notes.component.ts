@@ -17,7 +17,7 @@ export class NotesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.notesForm = new FormGroup({
-      content: new FormControl(""),
+      content: new FormControl("")
     });
 
     this.defaultContentObservable.subscribe((content: string) => {

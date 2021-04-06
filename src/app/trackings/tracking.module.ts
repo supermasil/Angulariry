@@ -5,16 +5,10 @@ import { AngularMaterialModule } from '../angular-material.module';
 import { TrackingListComponent } from './tracking-list/tracking-list.component';
 import { TrackingToolComponent } from './tracking-tool/tracking-tool.component';
 import { NgxCurrencyModule } from 'ngx-currency';
-import { OnlineFormCreateComponent } from './tracking-create-edit/tracking-forms/online.component';
-import { ServicedFormCreateComponent } from './tracking-create-edit/tracking-forms/serviced.component';
-import { InPersonFormCreateComponent } from './tracking-create-edit/tracking-forms/in-person.component';
-import { ConsolidatedFormCreateComponent } from './tracking-create-edit/tracking-forms/consolidated.component';
-import { MasterFormCreateComponent } from './tracking-create-edit/tracking-forms/master.component';
 import { ItemsListComponent } from './tracking-create-edit/items-list/items-list.component';
 import { FileUploaderModule } from '../custom-components/file-uploader/file-uploader.module';
 import { AutoCompleteInputModule } from '../custom-components/auto-complete-input/auto-complete-input.module';
 import { TrackingRoutingModule } from './tracking-routing.module';
-import { TrackingCreateEditComponent } from './tracking-create-edit/tracking-create-edit.component';
 import { GeneralInfoComponent } from './tracking-create-edit/general-info/general-info.component';
 import { FinalizedInfoComponent } from './tracking-create-edit/finalized-info/finalized-info.component';
 import { ConsolidationTableComponent } from './tracking-create-edit/consolidation-table/consolidation-table.component';
@@ -23,18 +17,22 @@ import { NotesComponent } from '../custom-components/notes/notes.component';
 import { SaveCancelButtonsModule } from '../custom-components/save-cancel-buttons/save-cancel-buttons.module';
 import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
 import { TrackingListCommonTemplateModule } from './tracking-list/common-template/tracking-list-common-template.module';
+import { OnlineTrackingFormComponent } from './tracking-create-edit/tracking-forms/online-form.component';
+import { ServicedTrackingFormComponent } from './tracking-create-edit/tracking-forms/serviced-form.component';
+import { InPersonTrackingFormComponent } from './tracking-create-edit/tracking-forms/in-person-form.component';
+import { ConsolidatedTrackingFormComponent } from './tracking-create-edit/tracking-forms/consolidated-form.component';
+import { MasterTrackingFormComponent } from './tracking-create-edit/tracking-forms/master-form.component';
 
 
 @NgModule({
   declarations: [
     TrackingToolComponent,
     TrackingListComponent,
-    TrackingCreateEditComponent,
-    OnlineFormCreateComponent,
-    ServicedFormCreateComponent,
-    InPersonFormCreateComponent,
-    ConsolidatedFormCreateComponent,
-    MasterFormCreateComponent,
+    OnlineTrackingFormComponent,
+    ServicedTrackingFormComponent,
+    InPersonTrackingFormComponent,
+    ConsolidatedTrackingFormComponent,
+    MasterTrackingFormComponent,
     ItemsListComponent,
     GeneralInfoComponent,
     FinalizedInfoComponent,

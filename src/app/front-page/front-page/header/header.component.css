@@ -7,6 +7,9 @@ ul {
 
 a {
   text-decoration: none;
+}
+
+mat-button {
   color: white;
 }
 

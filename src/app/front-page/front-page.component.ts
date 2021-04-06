@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AuthGlobals } from '../auth/auth-globals';
 import { AuthService } from '../auth/auth.service';
@@ -28,19 +29,26 @@ export class FrontPageComponent implements OnInit{
   currentTrackingType = null;
   pageData: PageEvent;
   searchTerm = "";
+  showingResults = false;
 
   constructor(
     private authService: AuthService,
-    private trackingService: TrackingService
+    private trackingService: TrackingService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.currentUser = this.authService.getMongoDbUser();
+    this.route.paramMap.subscribe((paramMap) => {
+      if (this.router.url.includes("/trackings/view/")) {
+        this.onFuzzySearch(paramMap.get('trackingId'));
+      }
+    });
   }
 
   fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {
     let sender = this.currentUser.role === AuthGlobals.roles.Customer? this.currentUser._id: null;
-
     this.trackingService.getTrackings(this.searchTerm, trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
       this.trackingsSubject.next(transformedTrackings);
     });
@@ -60,9 +68,11 @@ export class FrontPageComponent implements OnInit{
     this.resetPaginator();
     this.searchTerm = searchTerm;
     if (!searchTerm || !this.currentTrackingType) {
+      this.showingResults = false;
       this.trackingsSubject.next({trackings:[], count: 0});
       return;
     }
     this.fetchTrackings(this.pageData? this.pageData?.pageSize : TrackingGlobals.defaultPageSizes[0], this.pageData? this.pageData.pageIndex + 1: 0 , this.currentTrackingType);
+    this.showingResults = true;
   }
 }

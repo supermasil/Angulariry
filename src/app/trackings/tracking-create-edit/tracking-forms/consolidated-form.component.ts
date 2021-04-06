@@ -21,9 +21,9 @@ import { GeneralInfoComponent } from '../general-info/general-info.component';
 
 
 @Component({
-  selector: 'consolidated-form-create',
-  templateUrl: './consolidated.component.html',
-  styleUrls: ['./consolidated.component.css', '../tracking-create-edit.component.css'],
+  selector: 'consolidated-tracking-form',
+  templateUrl: './consolidated-form.component.html',
+  styleUrls: ['./consolidated-form.component.css', '../tracking-create-edit.component.css'],
   animations: [
     trigger('detailExpand', [
       state('collapsed, void', style({height: '0px', minHeight: '0'})), // After sort is clicked, the state is void
@@ -33,7 +33,7 @@ import { GeneralInfoComponent } from '../general-info/general-info.component';
     ])
   ]
 })
-export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked {
+export class ConsolidatedTrackingFormComponent implements OnInit, AfterViewChecked {
   consolidatedForm: FormGroup;
 
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
@@ -197,12 +197,6 @@ export class ConsolidatedFormCreateComponent implements OnInit, AfterViewChecked
 
   combineData() {
     this.finalizingDataSource.data = [...this.currentTrackings, ...this.selectedOnlineTrackings, ...this.selectedServicedTrackings, ...this.selectedInPersonSubTrackings];
-  }
-
-  redirectOnEdit(trackingNumber: string) {
-    this.zone.run(() => {
-      this.router.navigate([`/trackings/edit/${trackingNumber}`]);
-    });
   }
 
   setUpDataSource() {
