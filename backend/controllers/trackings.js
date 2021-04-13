@@ -7,7 +7,6 @@ const MasterTrackingModel = require('../models/tracking-models/master-tracking')
 const CarrierTrackingController = require("../controllers/carrier-trackings");
 const HistoryController = require("../controllers/histories");
 const CommentModel = require('../models/comment');
-const moment = require('moment')
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
 let assert = require('assert');
