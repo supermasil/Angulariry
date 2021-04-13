@@ -7,15 +7,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { GooglePlaceModule } from "ngx-google-places-autocomplete";
-import { LoginFormComponent } from './auth-components/login.component';
-import { PasswordResetFormComponent } from './auth-components/password-reset.component';
-import { SignUpFormComponent } from './auth-components/signup.component';
-import { OnboardingFormComponentForm } from './auth-components/onboarding.component';
+import { LoginFormComponent } from './auth-forms/login.component';
+import { PasswordResetFormComponent } from './auth-forms/password-reset.component';
+import { SignUpFormComponent } from './auth-forms/signup.component';
+import { OnboardingFormComponentForm } from './auth-forms/onboarding.component';
 import { AutoCompleteInputModule } from '../custom-components/auto-complete-input/auto-complete-input.module';
-import { EditUserFormComponent } from './auth-components/edit-user.component';
-import { AdjustCreditFormComponent } from './auth-components/adjust-credit.component';
+import { EditUserFormComponent } from './auth-forms/edit-user.component';
+import { AdjustCreditFormComponent } from './auth-forms/adjust-credit.component';
 import { NgxCurrencyModule } from 'ngx-currency';
 import { TranslateModule } from '@ngx-translate/core';
+import { UserListCommonModule } from './user-list-common/user-list-common.module';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { TranslateModule } from '@ngx-translate/core';
     GooglePlaceModule,
     AutoCompleteInputModule,
     NgxCurrencyModule,
-    TranslateModule.forChild()
+    TranslateModule.forChild(),
+    UserListCommonModule
   ]
 })
 export class AuthModule {}

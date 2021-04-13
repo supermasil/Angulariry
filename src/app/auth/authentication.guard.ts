@@ -2,13 +2,12 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from
 import { Observable } from 'rxjs';
 import { Injectable, NgZone } from '@angular/core';
 import { AuthService } from './auth.service';
-import { AlertService } from '../custom-components/alert-message';
-import { GlobalConstants } from '../global-constants';
 import { AuthGlobals } from './auth-globals';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router, private alertService: AlertService, private zone: NgZone) {}
+  constructor(private authService: AuthService, private router: Router, private zone: NgZone, private toastr: ToastrService) {}
   route = null;
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | import("@angular/router").UrlTree | Observable<boolean | import("@angular/router").UrlTree> | Promise<boolean | import("@angular/router").UrlTree> {
     this.route = route;
@@ -21,12 +20,12 @@ export class AuthGuard implements CanActivate {
         data[split[0]] = split[1];
       });
     }
+
     if (route.url.length === 0) { // path /
       return this.checkAuthentication(url, data);
     } else {
       return this.checkAuthentication(url, data) &&  this.checkAuthorization(route.data.roles);
     }
-
   }
 
   checkAuthentication(url: string, data: {}) {
@@ -42,13 +41,13 @@ export class AuthGuard implements CanActivate {
     } else if (isAuth && !this.authService.getUserOrg() && this.authService.getMongoDbUser()?.role != AuthGlobals.roles.SuperAdmin && this.route.url.length > 0) {
       this.zone.run(() => {
         this.router.navigate(["/"]);
-        this.alertService.warn("You have not logged into any organization", GlobalConstants.flashMessageOptions);
+        this.toastr.warning("You have not logged into any organization");
       });
       return false;
     } else if (!this.authService.getMongoDbUser().active && this.route.url.length > 0) {
       this.zone.run(() => {
         this.router.navigate(["/"]);
-        this.alertService.error("Your account is inactive with this organization", GlobalConstants.flashMessageOptions);
+        this.toastr.error("Your account is inactive with this organization");
       });
       return false;
     }

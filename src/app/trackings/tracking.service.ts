@@ -67,19 +67,15 @@ export class TrackingService{
     return this.httpClient.get<OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel |ConsolidatedTrackingModel | MasterTrackingModel>(BACKEND_URL + "/" + trackingNumber + `?type=${type}`); // return an observable
   }
 
-  getTrackings(searchTerm: string, trackingsPerPage: number, currentPage: number, type: string, origin: string, destination: string, sender: string) {
+  getTrackings(trackingsPerPage: number, currentPage: number, type: string, additionalParams?: any) {
     let queryParams = `?pageSize=${trackingsPerPage}&currentPage=${currentPage}&type=${type}`;
-    if (origin) {
-      queryParams = queryParams.concat(`&origin=${origin}`);
-    }
-    if (destination) {
-      queryParams = queryParams.concat(`&destination=${destination}`);
-    }
-    if (sender) {
-      queryParams = queryParams.concat(`&sender=${sender}`);
-    }
-    if (searchTerm) {
-      queryParams = queryParams.concat(`&searchTerm=${searchTerm}`);
+
+    if (additionalParams) {
+      for (const [key, value] of Object.entries(additionalParams)) {
+        if (value != null) {
+          queryParams = queryParams.concat(`&${key}=${value}`);
+        }
+      }
     }
 
     return this.httpClient

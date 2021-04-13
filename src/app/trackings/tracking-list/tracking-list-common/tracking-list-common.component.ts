@@ -17,21 +17,20 @@ import { TrackingService } from "../../tracking.service";
 
 
 @Component({
-  selector: 'tracking-list-common-template',
-  templateUrl: './tracking-list-common-template.component.html',
+  selector: 'tracking-list-common',
+  templateUrl: './tracking-list-common.component.html',
   styleUrls: ['../tracking-list.component.css']
 })
-export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChecked {
+export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
 
   totalTrackings = 0;
-  pageSizeOptions = TrackingGlobals.defaultPageSizes;
+  pageSizeOptions = GlobalConstants.defaultPageSizes;
   currentPageSize = this.pageSizeOptions[0];
   currentUser: UserModel;
   currentOrg: OrganizationModel;
   authGlobal = AuthGlobals;
   trackingGlobals = TrackingGlobals;
-  expanded = [];
 
   canView = this.authService.canView;
   isAuth = this.authService.isAuth;
@@ -65,9 +64,6 @@ export class TrackingListCommonTemplateComponent implements OnInit, AfterViewChe
     this.trackingsObservable.subscribe((data: {trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}) => {
       this.trackings = data.trackings;
       this.totalTrackings = data.count;
-      this.trackings.forEach(t => {
-        this.expanded.push(false);
-      })
     });
 
     this.resetPaginatorObservable.subscribe(() =>{

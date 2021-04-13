@@ -121,7 +121,7 @@
         <div class="col">
           <!-- <mat-form-field appearance="fill"> -->
             <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i)" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
-              <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
+              <mat-option *ngFor="let status of trackingGlobals.allTrackingStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
                 {{'statuses.' + status | translate}}
               </mat-option>
             </mat-select>
@@ -164,7 +164,7 @@
           <div class="col-1">{{box.boxNumber}}</div>
           <div class="col-2">
             <mat-select [value]="item.generalInfo.trackingStatus" (selectionChange)="childTrackingToggle(item, $event.value, tracking, i)" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(item.generalInfo.trackingStatus)">
-              <mat-option *ngFor="let status of trackingGlobals.allStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
+              <mat-option *ngFor="let status of trackingGlobals.allTrackingStatuses" [value]="status" [disabled]="!trackingGlobals.postReceivedAtDestination.includes(status)">
                 {{'statuses.' + status | translate}}
               </mat-option>
             </mat-select>

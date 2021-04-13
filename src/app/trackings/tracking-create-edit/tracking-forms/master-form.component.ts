@@ -178,11 +178,15 @@ export class MasterTrackingFormComponent implements OnInit {
   fetchTrackings(origin: string, destination: string) {
     this.allTrackings = [];
     this.trackingsReference = [];
-    this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, null).subscribe((transformedTrackings) => {
+    let additionalParams = {
+      origin: origin,
+      destination: destination
+    }
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, additionalParams).subscribe((transformedTrackings) => {
       this.allTrackings.push(...transformedTrackings.trackings.filter(i => i.generalInfo.trackingStatus == TrackingGlobals.trackingStatuses.ReceivedAtOrigin));
-      this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, null).subscribe((transformedTrackings) => {
+      this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, additionalParams).subscribe((transformedTrackings) => {
         this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
-        this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, origin, destination, null).subscribe((transformedTrackings) => {
+        this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, additionalParams).subscribe((transformedTrackings) => {
           this.allTrackings.push(...transformedTrackings.trackings.filter(i => !TrackingGlobals.postReadyToFly.includes(i.generalInfo.trackingStatus)));
           this.trackingsReference = [...this.allTrackings];
           this.filteredTrackings = of(this.allTrackings);

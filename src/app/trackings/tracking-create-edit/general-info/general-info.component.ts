@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { AuthGlobals } from 'src/app/auth/auth-globals';
 import { AuthService } from 'src/app/auth/auth.service';
 import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
+import { RecipientModel } from 'src/app/models/recipient.model';
 import { GeneralInfoModel } from 'src/app/models/tracking-models/general-info.model';
 import { UserModel } from 'src/app/models/user.model';
 import { TrackingGlobals } from '../../tracking-globals';
@@ -18,10 +19,8 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   generalInfoForm: FormGroup;
 
   senders: UserModel[] = [];
-  sendersSubject = new BehaviorSubject<string[]>([]);
-
-
-  recipientsSubject = new BehaviorSubject<string[]>([]);
+  sendersSubject = new BehaviorSubject<UserModel[]>([]);
+  recipientsSubject = new BehaviorSubject<RecipientModel[]>([]);
   @Input() usersObservable = new Observable<UserModel[]>();
   @Input() defaultLocationsObservable = new Observable<string[]>();
   @Input() trackingNumberObservable = new Observable<string>();
@@ -36,11 +35,14 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   @Output() formValidityStatus = new EventEmitter<boolean>();
   @Output() generalInfoUpdated = new EventEmitter<any>();
-  selectSenderSubject = new ReplaySubject<string>();
-  selectRecipientSubject = new ReplaySubject<string>();
+  selectSenderSubject = new ReplaySubject<UserModel>();
+  selectRecipientSubject = new ReplaySubject<RecipientModel>();
 
   @ViewChild('sender') sender: AutoCompleteInputComponent;
   @ViewChild('recipient') recipient: AutoCompleteInputComponent;
+
+  senderFields = ["name", "userCode"];
+  recipientFields = ["name", "email", "phoneNumber"];
 
   selectedSender: UserModel;
   currentUser: UserModel;
@@ -73,16 +75,16 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
         this.senders = this.senders.filter(s => s.userCode == this.currentUser.userCode);
       }
 
-      this.sendersSubject.next(this.senders.map(u => u.userCode + ' ' + u.name));
+      this.sendersSubject.next(this.senders);
 
       this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
         this.patchFormValue(generalInfo);
         if (!this.disableSender && generalInfo.sender) {
-            this.selectSenderSubject.next(generalInfo.sender.userCode + " " + generalInfo.sender.name)
+            this.selectSenderSubject.next(generalInfo.sender)
         }
 
         if (!this.disableRecipient && generalInfo.recipient) {
-          this.selectRecipientSubject.next(generalInfo.recipient.name + " " + generalInfo.recipient.address.address);
+          this.selectRecipientSubject.next(generalInfo.recipient);
         }
         this.formValidityStatus.emit(this.generalInfoForm.valid);
       });
@@ -136,17 +138,15 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   ngAfterViewInit() {
   }
 
-  senderSelected(value: string) {
-    let splitValue = value.split(' ')[0];
+  senderSelected(sender: UserModel) {
     this.recipient?.resetForm();
-    this.selectedSender = this.senders.filter(s => s.userCode == splitValue)[0];
-    this.recipientsSubject.next(this.selectedSender.recipients.map(r => r.name + ' ' + r.address.address));
+    this.selectedSender = sender;
+    this.recipientsSubject.next(this.selectedSender.recipients);
     this.generalInfoForm.get('sender').setValue(this.selectedSender._id);
   }
 
-  recipientSelected(value: string) {
-    let splitValue = value.split(' ')[0];
-    this.generalInfoForm.get('recipient').setValue(this.selectedSender.recipients.filter(r => r.name == splitValue)[0]);
+  recipientSelected(recipient: RecipientModel) {
+    this.generalInfoForm.get('recipient').setValue(recipient);
   }
 
   getFormValidity() {

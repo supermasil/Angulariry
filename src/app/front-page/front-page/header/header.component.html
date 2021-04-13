@@ -23,7 +23,7 @@
         <a mat-button [matMenuTriggerFor]="currentUserMenu" style="padding: 0; color: white;" class="mx-2">{{user?.name}}</a>
         <mat-menu #currentUserMenu="matMenu">
           <a mat-menu-item class="nav-link" style="font-size: 2em;" *ngIf="user">{{user.userCode}}</a>
-          <a mat-menu-item class="nav-link" [routerLinkActive]="['is-active']" *ngIf="user" [routerLink]="'/auth/users/edit/' + user._id">{{'auth.profile' | translate}}</a>
+          <a mat-menu-item class="nav-link" [routerLinkActive]="['is-active']" *ngIf="user" [routerLink]="'/auth/users/edit/' + user._id" [routerLinkActiveOptions]="{ exact: true}">{{'auth.profile' | translate}}</a>
           <a mat-menu-item class="nav-link" (click)="onLogOut()">{{'auth.logout' | translate}}</a>
           <mat-divider></mat-divider>
           <a mat-menu-item class="nav-link" style="color: grey;">{{'roles.' + user?.role | translate}}</a>

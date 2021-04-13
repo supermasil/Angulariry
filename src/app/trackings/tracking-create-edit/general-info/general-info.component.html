@@ -38,10 +38,10 @@
           #sender
           [selectItemObservable]="selectSenderSubject.asObservable()"
           [dataObservable]="sendersSubject.asObservable()"
-          [enforeSelection]="true"
           (itemSelected)="senderSelected($event)"
           (itemCancelled)="itemCancelled()"
           (inputInvalid)="generalInfoForm.get('sender').setValue('')"
+          [fields]="senderFields"
           [matLabel]="'general.sender' | translate"
           [lockOption]="disabledFields[3]">
         </auto-complete-input>
@@ -51,9 +51,9 @@
           #recipient
           [selectItemObservable]="selectRecipientSubject.asObservable()"
           [dataObservable]="recipientsSubject.asObservable()"
-          [enforeSelection]="true"
           (itemSelected)="recipientSelected($event)"
           (inputInvalid)="generalInfoForm.get('recipient').setValue('')"
+          [fields]="recipientFields"
           [matLabel]="'general.recipient' | translate"
           [lockOption]="disabledFields[4]">
         </auto-complete-input>

@@ -1,9 +1,8 @@
 <div class="mt-4">
   <auto-complete-input
-    [dataObservable]="itemNames.asObservable()"
+    [dataObservable]="items.asObservable()"
     (itemSelected)="itemSelected($event)"
-    (inputInvalid)="''"
-    [enforeSelection]="true"
+    [fields]="itemFields"
     [matLabel]="'tracking-info.item-name' | translate"
     [lockOption]="false"
     [matErrorMessage]="'Please select one from the drowdown only'">

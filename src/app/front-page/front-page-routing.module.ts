@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGlobals } from '../auth/auth-globals';
+import { AuthGuard } from '../auth/authentication.guard';
 import { FrontPageComponent } from './front-page.component';
 
 
 
 const routes: Routes = [
-  { path: '', component: FrontPageComponent}
+  { path: '', component: FrontPageComponent, canActivate: [AuthGuard], data: {roles: AuthGlobals.everyone}}
 ]
 
 @NgModule({

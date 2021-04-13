@@ -9,7 +9,7 @@
   </a>
   <form [formGroup]="searchForm" (submit)="onSearch()" class="w-100">
     <mat-form-field appearance="outline">
-      <mat-label>Search here</mat-label>
+      <mat-label>{{description}}</mat-label>
       <input
         matInput
         formControlName='searchTerm'

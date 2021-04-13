@@ -10,25 +10,26 @@ import { PricingService } from "../pricing.service";
   styleUrls: ['./edit-pricing.component.css', '../pricing.component.css']
 })
 export class EditPricingComponent implements OnInit {
-  itemNames = new ReplaySubject<string[]>();
+  items = new ReplaySubject<PricingItemModel[]>();
   selectedItem: PricingItemModel;
   orgDefaultPricing: PricingModel;
 
   selectedItemSubject = new ReplaySubject<PricingItemModel>();
+  itemFields = ["name"];
 
   constructor(public pricingService: PricingService, private authService: AuthService) {}
 
   ngOnInit() {
     this.pricingService.getPricing(this.authService.getUserOrg().pricings).subscribe((pricing: PricingModel) => {
       this.orgDefaultPricing = pricing;
-      this.itemNames.next(pricing.items.map(i => i.name));
+      this.items.next(pricing.items);
     }, error => {
       this.authService.redirectToMainPageWithoutMessage();
     });
   }
 
-  itemSelected(itemName: string) {
-    this.selectedItem = this.orgDefaultPricing.items.filter(i => i.name == itemName)[0];
+  itemSelected(item: PricingItemModel) {
+    this.selectedItem = item;
     this.selectedItemSubject.next(this.selectedItem);
   }
 }

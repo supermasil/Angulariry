@@ -9,10 +9,6 @@ a {
   text-decoration: none;
 }
 
-mat-button {
-  color: white;
-}
-
 .spacer {
   flex: 1 1 auto;
 }

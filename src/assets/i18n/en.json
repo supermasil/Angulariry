@@ -27,7 +27,14 @@
     "custom-pricing": "Custom pricing",
     "update": "Update",
     "close": "Close",
-    "date-time": "Datetime"
+    "date-time": "Datetime",
+    "tracking-types": "Tracking types",
+    "creator": "Creator",
+    "true": "Yes",
+    "false": "No",
+    "active": "Active",
+    "inactive": "Inactive",
+    "credit": "Credit"
   },
   "auth": {
     "password": "Password",
@@ -72,14 +79,15 @@
     "Customer": "Customer"
   },
   "tracking-types": {
-    "online": "Online",
-    "serviced": "Serviced",
-    "in-person": "In Person",
-    "consolidated": "Consolidated",
-    "master": "Master"
+    "onl": "Online",
+    "sev": "Serviced",
+    "inp": "In Person",
+    "csl": "Consolidated",
+    "mst": "Master"
   },
   "statuses": {
     "consolidated": "Consolidated",
+    "mastered": "Mastered",
     "paid": "Paid",
     "unpaid": "Unpaid",
     "partially-paid": "Parially paid",

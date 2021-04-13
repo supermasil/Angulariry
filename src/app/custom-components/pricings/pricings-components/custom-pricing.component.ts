@@ -18,15 +18,17 @@ export class CustomPricingComponent implements OnInit {
 
   customPricingForm: FormGroup;
   selectedUser: UserModel;
-  itemNames = new ReplaySubject<string[]>();
+  items = new ReplaySubject<PricingItemModel[]>();
   selectedItem: PricingItemModel;
   orgDefaultPricing: PricingModel;
   organization: OrganizationModel;
   users: UserModel[];
 
-  userCodes = new ReplaySubject<string[]>();
+  usersSubject = new ReplaySubject<UserModel[]>();
   selectedUserSubject = new ReplaySubject<UserModel>();
   selectedItemSubject = new ReplaySubject<PricingItemModel>();
+  userFields = ["name", "userCode", "role", "email"];
+  itemFields = ["name"];
 
   constructor(
     private authService: AuthService,
@@ -37,26 +39,26 @@ export class CustomPricingComponent implements OnInit {
   ngOnInit() {
     this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
       this.users = response.users.filter(u => u.role === AuthGlobals.roles.Customer);
-      this.userCodes.next(this.users.map(user => `${user.userCode} | ${user.name} | ${user.email}`));
+      this.usersSubject.next(this.users);
     }, error => {
       this.authService.redirectToMainPageWithoutMessage();
     });
 
     this.pricingService.getPricing(this.authService.getUserOrg().pricings).subscribe((pricing: PricingModel) => {
       this.orgDefaultPricing = pricing;
-      this.itemNames.next(pricing.items.map(i => i.name));
+      this.items.next(pricing.items);
     }, error => {
       this.authService.redirectToMainPageWithoutMessage();
     });
   }
 
-  userSelected(user: string) {
-    this.selectedUser = this.users.filter(u => u.userCode == user.split(" ")[0])[0];
+  userSelected(user: UserModel) {
+    this.selectedUser = user;
     this.selectedUserSubject.next(this.selectedUser);
   }
 
-  itemSelected(itemName: string) {
-    this.selectedItem = this.orgDefaultPricing.items.filter(i => i.name == itemName)[0];
+  itemSelected(item: PricingItemModel) {
+    this.selectedItem = item;
     this.selectedItemSubject.next(this.selectedItem);
   }
 }

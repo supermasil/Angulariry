@@ -6,10 +6,10 @@
           <div >
             <auto-complete-input
               #itemName
-              [dataObservable]="itemNamesSubject.asObservable()"
+              [dataObservable]="items.asObservable()"
+              [fields]="itemFields"
               (itemSelected)="itemSelected($event, i)"
               (inputInvalid)="itemInvalid($event, i)"
-              [enforeSelection]="true"
               [defaultValue]="getDefaultValue(i)"
               [lockOption]="getLockOption(i)"
               [matLabel]="'tracking-info.item-name' | translate"

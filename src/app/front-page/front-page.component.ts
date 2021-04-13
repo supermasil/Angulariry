@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AuthGlobals } from '../auth/auth-globals';
 import { AuthService } from '../auth/auth.service';
+import { GlobalConstants } from '../global-constants';
 import { OrganizationModel } from '../models/organization.model';
 import { ConsolidatedTrackingModel } from '../models/tracking-models/consolidated-tracking.model';
 import { InPersonTrackingModel } from '../models/tracking-models/in-person-tracking.model';
@@ -11,7 +12,6 @@ import { MasterTrackingModel } from '../models/tracking-models/master-tracking.m
 import { OnlineTrackingModel } from '../models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from '../models/tracking-models/serviced-tracking.model';
 import { UserModel } from '../models/user.model';
-import { TrackingGlobals } from '../trackings/tracking-globals';
 import { TrackingService } from '../trackings/tracking.service';
 
 @Component({
@@ -47,9 +47,13 @@ export class FrontPageComponent implements OnInit{
     });
   }
 
-  fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {
+  fetchTrackings(trackingsPerPage: number, currentPage: number, type: string) {
     let sender = this.currentUser.role === AuthGlobals.roles.Customer? this.currentUser._id: null;
-    this.trackingService.getTrackings(this.searchTerm, trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
+    let additionalParams = {
+      searchTerm: this.searchTerm,
+      sender: sender
+    }
+    this.trackingService.getTrackings(trackingsPerPage, currentPage, type, additionalParams).subscribe((transformedTrackings) => {
       this.trackingsSubject.next(transformedTrackings);
     });
   }
@@ -72,7 +76,7 @@ export class FrontPageComponent implements OnInit{
       this.trackingsSubject.next({trackings:[], count: 0});
       return;
     }
-    this.fetchTrackings(this.pageData? this.pageData?.pageSize : TrackingGlobals.defaultPageSizes[0], this.pageData? this.pageData.pageIndex + 1: 0 , this.currentTrackingType);
+    this.fetchTrackings(this.pageData? this.pageData?.pageSize : GlobalConstants.defaultPageSizes[0], this.pageData? this.pageData.pageIndex + 1: 1 , this.currentTrackingType);
     this.showingResults = true;
   }
 }

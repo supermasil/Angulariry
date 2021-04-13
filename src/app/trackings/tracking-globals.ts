@@ -1,5 +1,5 @@
 export class TrackingGlobals {
-  // Alert Service
+
   public static carriers = [
     "UPS",
     "Fedex",
@@ -42,9 +42,9 @@ export class TrackingGlobals {
     ONLINE: "onl",
     SERVICED: "sev",
     INPERSON: "inp",
-    INPERSONSUB: "inpsub",
     CONSOLIDATED: "csl",
-    MASTER: "mst"
+    MASTER: "mst",
+    INPERSONSUB: "inpsub"
   }
 
   public static trackingStatuses = {
@@ -66,7 +66,7 @@ export class TrackingGlobals {
     PartiallyPaid: "partially-paid"
   }
 
-  public static allStatuses = Object.values(TrackingGlobals.trackingStatuses);
+  public static allTrackingStatuses = Object.values(TrackingGlobals.trackingStatuses);
   public static allFinancialStatuses = Object.values(TrackingGlobals.financialStatuses);
   public static postReceivedAtOrigin = Object.values(TrackingGlobals.trackingStatuses).slice(4);
   public static postReadyToFly = Object.values(TrackingGlobals.trackingStatuses).slice(5);
@@ -75,10 +75,9 @@ export class TrackingGlobals {
   public static postDelivering = Object.values(TrackingGlobals.trackingStatuses).slice(8);
   public static postDelivered = Object.values(TrackingGlobals.trackingStatuses).slice(9);
 
-  public static internalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(3);
+  public static internalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(3, 5);
   public static externalTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(0, 3);
-
-  public static defaultPageSizes = [5, 20, 50, 100];
+  public static allTrackingTypes = Object.values(TrackingGlobals.trackingTypes).slice(0, 5);
 
   public static getBadgeColor = (status: string) => {
     switch (status) {

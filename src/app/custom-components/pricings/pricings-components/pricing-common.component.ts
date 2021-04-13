@@ -3,13 +3,12 @@ import { AuthService } from "src/app/auth/auth.service";
 import { PricingService } from "../pricing.service";
 import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 import { Observable, ReplaySubject } from "rxjs";
-import { OrganizationModel } from "src/app/models/organization.model";
+import { OrganizationLocationModel, OrganizationModel } from "src/app/models/organization.model";
 import { PricingModel, PricingItemModel, PricingRouteModel, PricingDestinationModel, PricingDiscountModel } from "src/app/models/pricing.model";
 import { UserModel } from "src/app/models/user.model";
 import { AutoCompleteInputComponent } from "../../auto-complete-input/auto-complete-input.component";
 import { trigger, state, style, transition, animate } from "@angular/animations";
-import { AlertService } from "../../alert-message";
-import { GlobalConstants } from "src/app/global-constants";
+import { ToastrService } from "ngx-toastr";
 
 @Component({
   selector: 'pricing-common-form',
@@ -37,8 +36,11 @@ export class PricingCommonComponent implements OnInit, AfterViewChecked {
   @Input() mode = "create";
   @Input() selectedItemObservable = new Observable<PricingItemModel>();
   @Input() selectedUserObservable = new Observable<UserModel>();
-  defaultLocations = new ReplaySubject<string[]>();
+  defaultLocations = new ReplaySubject<OrganizationLocationModel[]>();
   userCodes = new ReplaySubject<string[]>();
+
+  locationFields = ["name"];
+  destinationFields = ["name"];
 
   @ViewChildren('origin') originRef: QueryList<AutoCompleteInputComponent>;
   @ViewChildren('destination') destinationRef: QueryList<AutoCompleteInputComponent>;
@@ -47,12 +49,12 @@ export class PricingCommonComponent implements OnInit, AfterViewChecked {
     private authService: AuthService,
     public pricingService: PricingService,
     private cd: ChangeDetectorRef,
-    private alertService: AlertService
+    private toastr: ToastrService,
   ) {}
 
   ngOnInit() {
     this.organization = this.authService.getUserOrg();
-    this.defaultLocations.next(this.organization.locations.map(item => item.name));
+    this.defaultLocations.next(this.organization.locations);
     this.pricingService.getPricing(this.organization.pricings).subscribe((pricing: PricingModel) => {
       this.orgDefaultPricing = pricing;
 
@@ -306,7 +308,7 @@ export class PricingCommonComponent implements OnInit, AfterViewChecked {
 
   onSubmit() {
     if (!this.originDestinationValidation()) {
-      this.alertService.warn("Duplicate origins or destinations", GlobalConstants.flashMessageOptions);
+      this.toastr.warning("Duplicate origins or destinations");
       return;
     }
 

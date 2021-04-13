@@ -161,13 +161,18 @@ export class ConsolidatedTrackingFormComponent implements OnInit, AfterViewCheck
 
   fetchTrackings(origin: string, destination: string, sender: string) {
     // 0 per page to find all
-    this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.ONLINE, origin, destination, sender).subscribe((transformedTrackings) => {
+    let additionalParams = {
+      origin: origin,
+      destination: destination,
+      sender: sender
+    }
+    this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.ONLINE, additionalParams).subscribe((transformedTrackings) => {
       this.onlineTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
       this.onlineTrackingDataSubject.next(this.onlineTrackings);
-      this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.SERVICED, origin, destination, sender).subscribe((transformedTrackings) => {
+      this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.SERVICED, additionalParams).subscribe((transformedTrackings) => {
         this.serviceTrackings = transformedTrackings.trackings.filter(i => !i.linkedToCsl);
         this.servicedTrackingDataSubject.next(this.serviceTrackings);
-        this.trackingService.getTrackings(null, 0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, origin, destination, sender).subscribe((transformedTrackings) => {
+        this.trackingService.getTrackings(0, 1, TrackingGlobals.trackingTypes.INPERSONSUB, additionalParams).subscribe((transformedTrackings) => {
           this.inPersonSubTrackings = transformedTrackings.trackings.filter(t => !t.linkedToCsl);
           this.inPersonSubTrackingDataSubject.next(this.inPersonSubTrackings);
           this.showTable = true;

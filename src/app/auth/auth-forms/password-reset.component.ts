@@ -1,7 +1,6 @@
 import { Component, NgZone, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { AlertService } from "src/app/custom-components/alert-message";
 import { AuthService } from "../auth.service";
 
 
@@ -18,8 +17,7 @@ export class PasswordResetFormComponent implements OnInit {
     private authService: AuthService,
     public route: ActivatedRoute,
     private zone: NgZone,
-    public router: Router,
-    private alertService: AlertService
+    public router: Router
   ) {}
 
   ngOnInit() {

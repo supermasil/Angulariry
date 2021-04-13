@@ -180,6 +180,10 @@ scannerOpened = false;
     this.itemsList?.getFormValidity();
     this.finalizedInfo?.getFormValidity();
 
+    console.log(this.onlineForm.valid)
+    console.log(this.generalInfo.getFormValidity())
+    console.log(this.itemsList.getFormValidity())
+    console.log(this.finalizedInfo.getFormValidity())
     if (!this.onlineForm.valid || !this.generalInfo.getFormValidity() || (this.itemsList && !this.itemsList.getFormValidity()) || (this.finalizedInfo && !this.finalizedInfo.getFormValidity())) {
       return;
     }

@@ -47,9 +47,9 @@
                       #origin
                       [dataObservable]="defaultLocations.asObservable()"
                       [defaultValue]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').value"
-                      (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event)"
+                      (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event.name)"
                       (inputInvalid)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue('')"
-                      [enforeSelection]="true"
+                      [fields]="locationFields"
                       [matLabel]="'general.origin' | translate"
                       [matErrorMessage]="'Please select one from the drowdown only'">
                     </auto-complete-input>
@@ -75,7 +75,7 @@
                               [defaultValue]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').value"
                               (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event)"
                               (inputInvalid)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue('')"
-                              [enforeSelection]="true"
+                              [fields]="destinationFields"
                               [matLabel]="'general.destination' | translate"
                               [matErrorMessage]="'Please select one from the drowdown only'">
                             </auto-complete-input>

@@ -1,8 +1,9 @@
 <div class="mt-4">
   <auto-complete-input
     [dataObservable]="usersSubject.asObservable()"
-    [enforeSelection]="true"
     (itemSelected)="userSelected($event)"
+    (itemCancelled)="userCancelled()"
+    [fields]="userFields"
     [matLabel]="'general.users' | translate"
     [matErrorMessage]="'Please select one from the drowdown'"
     [lockOption]="false">

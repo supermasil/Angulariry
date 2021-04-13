@@ -1,7 +1,6 @@
 import { Component, NgZone, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
-import { AlertService } from "src/app/custom-components/alert-message";
 import { AuthService } from "../auth.service";
 
 
@@ -16,19 +15,25 @@ export class LoginFormComponent implements OnInit{
   buttonIsLoading = false;
 
   constructor(
-    private authService: AuthService,
+    public authService: AuthService,
     public route: ActivatedRoute,
     public router: Router,
-
+    private zone: NgZone
   ) {}
 
   ngOnInit() {
-    if (this.authService.isAuth() && this.router.url == "/auth") {
-      this.router.navigate(["/"]);
-    }
-    this.loginForm = new FormGroup({
-      email: new FormControl(null, {validators: [Validators.required, Validators.email]}),
-      password: new FormControl(null, {validators: [Validators.required, Validators.minLength(6)]})
+    this.authService.getIsAuthLoading().subscribe(loading => {
+      if (!loading) {
+        if (this.authService.isAuth() && this.router.url == "/auth") {
+          this.router.navigate(["/"]);
+        }
+        this.zone.run(() => {
+          this.loginForm = new FormGroup({
+            email: new FormControl(null, {validators: [Validators.required, Validators.email]}),
+            password: new FormControl(null, {validators: [Validators.required, Validators.minLength(6)]})
+          });
+        })
+      }
     });
   }
 

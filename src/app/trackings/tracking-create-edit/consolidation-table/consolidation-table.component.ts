@@ -5,6 +5,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Observable } from 'rxjs';
+import { GlobalConstants } from 'src/app/global-constants';
 import { InPersonSubTrackingModel } from 'src/app/models/tracking-models/in-person-tracking.model';
 import { OnlineTrackingModel } from 'src/app/models/tracking-models/online-tracking.model';
 import { ServicedTrackingModel } from 'src/app/models/tracking-models/serviced-tracking.model';
@@ -36,6 +37,7 @@ export class ConsolidationTableComponent implements OnInit, AfterViewChecked {
   selection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>(true, []);
   filterselection = new SelectionModel<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel>(true, []);
   isAllSelected = false;
+  globalConstants = GlobalConstants;
 
   @Input() tableDataObservable: Observable<OnlineTrackingModel[] | ServicedTrackingModel[] | InPersonSubTrackingModel[]> = new Observable();
   @Input() deselectItemObservable: Observable<OnlineTrackingModel | ServicedTrackingModel | InPersonSubTrackingModel> = new Observable();

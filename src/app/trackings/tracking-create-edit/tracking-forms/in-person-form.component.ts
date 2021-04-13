@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, NgZone, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
+import { AfterViewChecked, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from "@angular/router";
 import { ReplaySubject } from 'rxjs';
@@ -17,8 +17,7 @@ import { GeneralInfoComponent } from "../general-info/general-info.component";
 import { ItemsListComponent } from "../items-list/items-list.component";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { TrackingGlobals } from "../../tracking-globals";
-import { AlertService } from "src/app/custom-components/alert-message";
-import { GlobalConstants } from "src/app/global-constants";
+import { ToastrService } from "ngx-toastr";
 
 
 @Component({
@@ -83,10 +82,9 @@ export class InPersonTrackingFormComponent implements OnInit, AfterViewChecked {
     private trackingService: TrackingService,
     private route: ActivatedRoute,
     private authService: AuthService,
-    private zone: NgZone,
     private pricingService: PricingService,
     private cd: ChangeDetectorRef,
-    private alertService: AlertService
+    private toastr: ToastrService,
   ) {}
 
   ngOnInit() {
@@ -290,7 +288,7 @@ export class InPersonTrackingFormComponent implements OnInit, AfterViewChecked {
       i.getFormValidity()
       itemsListsValidity = i.getFormValidity() && itemsListsValidity;
       if (i.getRawValues().items.length == 0) {
-        this.alertService.warn("Subtracking with empty items list is not allowed", GlobalConstants.flashMessageOptions);
+        this.toastr.warning("Subtracking with empty items list is not allowed");
         return;
       }
       subTrackings[index]['itemsList'] = i.getRawValues().items;

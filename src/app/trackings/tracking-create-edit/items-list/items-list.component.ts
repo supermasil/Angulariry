@@ -1,13 +1,12 @@
 import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AlertService } from 'src/app/custom-components/alert-message';
 import { AuthService } from 'src/app/auth/auth.service';
 import { AutoCompleteInputComponent } from 'src/app/custom-components/auto-complete-input/auto-complete-input.component';
-import { GlobalConstants } from 'src/app/global-constants';
-import { PricingModel } from 'src/app/models/pricing.model';
+import { PricingItemModel, PricingModel } from 'src/app/models/pricing.model';
 import { ListItemModel } from 'src/app/models/tracking-models/list-item.model';
 import { TrackingGlobals } from '../../tracking-globals';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'items-list',
@@ -29,13 +28,14 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
   @Input() updateExistingItemsObservable: Observable<ListItemModel[]> = new Observable(); // Edit case
   totalOldItems = -1;
 
-  currentValidItemNames = [] // For when edit item is not avaiable anymore
-  itemNames = [];
-  itemNamesSubject = new BehaviorSubject<string[]>([]); // Subject won't work for some reason
+  currentValidItems = [] // For when edit item is not avaiable anymore
+
+  items = new BehaviorSubject<PricingItemModel[]>([]); // Subject won't work for some reason
+  itemFields = ["name"];
 
   insurance = ["5 %", "2 %"];
-
   increment = 0; // for items order
+
 
   @ViewChildren('itemName') itemNamesRef: QueryList<AutoCompleteInputComponent>;
 
@@ -43,16 +43,15 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
 
   constructor(
     private authService: AuthService,
-    private alertService: AlertService,
-    private cd: ChangeDetectorRef) {
+    private cd: ChangeDetectorRef,
+    private toastr: ToastrService) {
   }
 
   ngOnInit() {
     this.pricingObservable.subscribe((p: PricingModel) => {
       this.pricing = p;
-      this.itemNames = p.items.map(i => i.name);
-      this.currentValidItemNames = p.items.map(i => i.name);
-      this.itemNamesSubject.next(this.itemNames);
+      this.currentValidItems = p.items;
+      this.items.next(p.items);
     }, error => {
       this.authService.redirectToMainPageWithoutMessage();
     });
@@ -77,6 +76,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
       if (this.itemsForm.get('items')['controls'].length == 0) {
         validity = false;
       }
+      console.log(this.itemsForm)
       this.formValidity.emit({valid: validity, data: this.itemsForm.getRawValue()});
     });
 
@@ -145,7 +145,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
           }
 
         } catch (error) {
-          this.alertService.warn(`Probably this route is not set up for item ${itemName}`, GlobalConstants.flashMessageOptions);
+          this.toastr.warning(`Probably this route is not set up for item ${itemName}`);
           this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(null);
           this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(null);
         }
@@ -154,7 +154,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
   }
 
   ngAfterViewInit() {
-    this.itemNamesSubject.next(this.itemNames);
+    this.items.next(this.pricing.items);
   }
 
   createItem(formData: ListItemModel): FormGroup {
@@ -185,7 +185,7 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
 
   addItem(formData: ListItemModel) {
     (this.itemsForm.get('items') as FormArray).push(this.createItem(formData));
-    this.itemNamesSubject.next(this.itemNames);
+    this.items.next(this.pricing.items);
   }
 
   removeItem(i: number) {
@@ -200,29 +200,29 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
     (this.itemsForm.get('items') as FormArray).removeAt(i);
   }
 
-  itemSelected(value: string, index: number) {
+  itemSelected(item: PricingItemModel, index: number) {
     // let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
     // if (previousValue) {
     //   this.addItemName(previousValue);
     // }
-    this.itemsForm.get('items')['controls'][index].get('name').setValue(value);
+    this.itemsForm.get('items')['controls'][index].get('name').setValue(item.name);
     // this.subtractItemName(value);
   }
 
-  subtractItemName(value: string) {
-    this.itemNames = this.itemNames.filter(i => i !== value);
-    this.itemNamesSubject.next(this.itemNames);
-  }
+  // subtractItemName(value: string) {
+  //   this.itemNames = this.itemNames.filter(i => i !== value);
+  //   this.itemNamesSubject.next(this.itemNames);
+  // }
 
-  addItemName(value: string) {
-    if (value && this.currentValidItemNames.includes(value)) { // Can be empty string
-      this.itemNames.unshift(value);
-      this.itemNamesSubject.next(this.itemNames);
-    }
-  }
+  // addItemName(value: string) {
+  //   if (value && this.currentValidItemNames.includes(value)) { // Can be empty string
+  //     this.itemNames.unshift(value);
+  //     this.itemNamesSubject.next(this.itemNames);
+  //   }
+  // }
 
-  itemInvalid(value: string, index: number) {
-    let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
+  itemInvalid(item: PricingItemModel, index: number) {
+    // let previousValue = this.itemsForm.get('items')['controls'][index].get('name').value;
     // if (previousValue && !this.itemNames.includes(previousValue)) {
     //   this.addItemName(previousValue);
     // }

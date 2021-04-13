@@ -11,20 +11,22 @@ import { Observable, of } from "rxjs";
 export class AutoCompleteInputComponent implements OnInit, OnDestroy {
 
   data = [];
-  @Input() dataObservable: Observable<string[]> = new Observable();
-  @Input() selectItemObservable: Observable<string> = new Observable();
+  @Input() dataObservable: Observable<any[]> = new Observable();
+  @Input() selectItemObservable: Observable<any> = new Observable(); // On edit case
   @Input() matLabel = "";
   @Input() matErrorMessage = "";
-  @Input() enforeSelection = false;
   @Input() lockOption = false;
   @Input() defaultValue = "";
+  @Input() required = true;
+  @Input() fields: string[] = [];
   @Output() itemSelected = new EventEmitter();
   @Output() inputInvalid = new EventEmitter();
+  @Output() itemCancelled = new EventEmitter();
 
 
-  filteredData: Observable<string[]>;
+  filteredData: Observable<any[]>;
   autoCompleteForm: FormGroup;
-  selectedItem : string;
+  selectedItem : any;
 
   constructor(
     private zone: NgZone
@@ -36,7 +38,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
     this.autoCompleteForm = new FormGroup({
       item: new FormControl({value: this.defaultValue, disabled: this.defaultValue && this.lockOption}, {validators:[this.autoCompleteValidator()]}) // Default value has to be defined for set value to work
     });
-    this.dataObservable.subscribe((data: string[]) => {
+    this.dataObservable.subscribe((data: any[]) => {
       this.zone.run(() => {
         this.data = data;
         this.resetFilteredData();
@@ -48,10 +50,8 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
     })
 
     if (this.defaultValue) {
-      this.itemSelected.emit(this.defaultValue);
+      // this.itemSelected.emit(this.defaultValue);
     }
-
-    // this.autoCompleteForm.markAllAsTouched();
   }
 
   ngOnDestroy() {
@@ -60,8 +60,12 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
 
   autoCompleteValidator(): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
+      if (!this.required && control && !control.value) {
+        return null;
+      }
+
       if (control && control.value) {
-        if ((this.enforeSelection && this.data.includes(control.value)) || !this.enforeSelection)
+        if ((this.data.some(option => this.transformObjectToString(option) == control.value) && this.selectedItem && this.transformObjectToString(this.selectedItem) == control.value))
           return null;
       }
       this.inputInvalid.emit(control.value);
@@ -69,7 +73,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
     };
   }
 
-  setData(data: string[]) {
+  setData(data: any[]) {
     if (!data) return;
     this.zone.run(() => {
       this.data = data;
@@ -79,33 +83,49 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   }
 
   filterItems(value: string) {
-    const filterValue = value.toLowerCase();
-    this.filteredData = of(this.data.filter(option => option.toLowerCase().includes(filterValue)));
+    let transformedValue = value.toLowerCase();
+    this.filteredData = of(this.data.filter(option => this.transformObjectToString(option).toLowerCase().includes(transformedValue)));
   }
 
   resetForm() {
     this.autoCompleteForm.reset();
   }
 
-  public selectItem(value: string) {
+  public selectItem(item: any) {
+    if (!item) {
+      return;
+    }
+    this.selectedItem = item // Has to be before patching
     this.autoCompleteForm.patchValue({
-      item: value
+      item: this.transformObjectToString(item)
     });
 
-    this.selectedItem = value;
-    this.itemSelected.emit(value);
+    this.itemSelected.emit(item);
     this.resetFilteredData(); // Reset the list
-    if (this.enforeSelection) {
-      if (this.lockOption) {
-        this.autoCompleteForm.get('item').disable();
+
+    this.autoCompleteForm.get('item').disable();
+  }
+
+  transformObjectToString(item: any) {
+    let result = []
+    this.fields.forEach(f => {
+      let path = f.split('.'); // For nested path
+      let value = item[path[0]];
+      path.slice(1).forEach(p => {
+        value = value[p]
+      })
+      if (item[f]) {
+        result.push(item[f]);
       }
-    }
+    });
+    return result.join(' | ');
   }
 
   cancelItem() {
     this.selectedItem = null;
-    this.autoCompleteForm.get('item').setValue('');
+    this.autoCompleteForm.get('item').setValue(null);
     this.autoCompleteForm.controls['item'].enable();
+    this.itemCancelled.emit();
     this.resetFilteredData();
   }
 
@@ -114,6 +134,9 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   }
 
   getFormValidity() {
+    if (this.selectedItem && this.transformObjectToString(this.selectedItem) != this.autoCompleteForm.get('item').value) {
+      return false;
+    }
     this.autoCompleteForm.markAllAsTouched();
     return this.autoCompleteForm.valid;
   }

@@ -1,6 +1,5 @@
-import { Component, NgZone, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
 import * as moment from "moment";
 import { ReplaySubject } from "rxjs";
 import { HistoryModel } from "src/app/models/history.model";
@@ -17,20 +16,17 @@ import { AuthService } from "../auth.service";
 })
 export class AdjustCreditFormComponent implements OnInit{
 
-  usersSubject = new ReplaySubject<string[]>();
+  usersSubject = new ReplaySubject<any[]>();
   users: UserModel[];
   currentOrg: OrganizationModel;
   currentUser: UserModel;
   editUser: UserModel;
   creditForm: FormGroup;
   creditHistory: HistoryModel[];
+  userFields = ["name", "userCode", "role", "email"];
 
   constructor(
-    private authService: AuthService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private zone: NgZone
-  ) {}
+    private authService: AuthService) {}
 
   ngOnInit() {
     this.currentUser = this.authService.getMongoDbUser();
@@ -38,7 +34,7 @@ export class AdjustCreditFormComponent implements OnInit{
       this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
         this.users = response.users;
         this.users = this.users.filter(u => u.role == AuthGlobals.roles.Customer);
-        this.usersSubject.next(this.users.map(u => `${u.name} | ${u.userCode} | ${u.credit} | ${u.role} | ${u.email} | ${u.addresses[0].address}${u.addresses[0].addressLineTwo? " " + u.addresses[0].addressLineTwo: ""}`));
+        this.usersSubject.next(this.users);
       });
   }
 
@@ -50,8 +46,8 @@ export class AdjustCreditFormComponent implements OnInit{
     });
   }
 
-  userSelected(value: string) {
-    this.editUser = this.users.filter(u => u.userCode === value.split(" | ")[1])[0];
+  userSelected(user: UserModel) {
+    this.editUser = user;
     this.authService.getUser(this.editUser._id, this.authService.userTypes.MONGO).subscribe(user => {
       this.authService.getHistories(user.creditHistory).subscribe(histories => {
         this.creditHistory = histories;
@@ -60,6 +56,13 @@ export class AdjustCreditFormComponent implements OnInit{
     });
     this.createForm();
     this.creditForm.get('_id').setValue(this.editUser._id);
+  }
+
+  userCancelled() {
+    this.creditForm.reset();
+    this.creditForm = null;
+    this.editUser = null;
+    this.creditHistory = [];
   }
 
   formatDateTime(date: Date) {
@@ -72,7 +75,10 @@ export class AdjustCreditFormComponent implements OnInit{
     }
     this.authService.updateCredit(this.creditForm.getRawValue()).subscribe(() => {
       this.authService.getUser(this.editUser._id, this.authService.userTypes.MONGO).subscribe(user => {
-        this.editUser = user;
+        this.authService.getHistories(user.creditHistory).subscribe(histories => {
+          this.creditHistory = histories;
+          this.editUser = user;
+        });
       });
     });
   }

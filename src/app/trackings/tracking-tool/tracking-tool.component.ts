@@ -81,7 +81,6 @@ export class TrackingToolComponent implements OnInit {
         this.setTrackingDetails(this.tracker);
       }, error => {
         this.isLoading = false;
-        // this.alertService.warn("The status of this package is unknown", GlobalConstants.flashMessageOptions);
       });
   }
 

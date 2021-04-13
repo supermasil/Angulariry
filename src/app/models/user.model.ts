@@ -1,5 +1,4 @@
 import { AddressModel } from "./address.model";
-import { HistoryModel } from "./history.model";
 import { OrganizationModel } from "./organization.model";
 import { RecipientModel } from "./recipient.model";
 

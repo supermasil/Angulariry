@@ -1,5 +1,5 @@
 export class AuthGlobals {
-  // Alert Service
+
   public static roles = Object.freeze({
     SuperAdmin: "SuperAdmin",
     Admin: "Admin",

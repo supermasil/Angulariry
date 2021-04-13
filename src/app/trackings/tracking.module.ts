@@ -16,7 +16,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NotesComponent } from '../custom-components/notes/notes.component';
 import { SaveCancelButtonsModule } from '../custom-components/save-cancel-buttons/save-cancel-buttons.module';
 import { SearchBarModule } from '../custom-components/search-bar/search-bar.module';
-import { TrackingListCommonTemplateModule } from './tracking-list/common-template/tracking-list-common-template.module';
+import { TrackingListCommonTemplateModule } from './tracking-list/tracking-list-common/tracking-list-common.module';
 import { OnlineTrackingFormComponent } from './tracking-create-edit/tracking-forms/online-form.component';
 import { ServicedTrackingFormComponent } from './tracking-create-edit/tracking-forms/serviced-form.component';
 import { InPersonTrackingFormComponent } from './tracking-create-edit/tracking-forms/in-person-form.component';

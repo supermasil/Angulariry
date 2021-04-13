@@ -7,6 +7,7 @@ const MasterTrackingModel = require('../models/tracking-models/master-tracking')
 const CarrierTrackingController = require("../controllers/carrier-trackings");
 const HistoryController = require("../controllers/histories");
 const CommentModel = require('../models/comment');
+const moment = require('moment')
 const db = require('mongoose');
 const S3 = require('../shared/upload-files');
 let assert = require('assert');
@@ -52,7 +53,9 @@ exports.getTrackingTool = async (req, res, next) => {
       resBody: tracker
     });
   } catch (error) {
-    return next(error);
+    return next({
+      error: error
+    })
   }
 };
 
@@ -343,7 +346,9 @@ exports.getTrackings = async (req, res, next) => {
       }
     });
   } catch(error) {
-    next(error);
+    return next({
+      error: error
+    })
   };
 }
 
@@ -368,11 +373,36 @@ getTrackingsHelper = async (type, orgId, query) => {
     queryBody['generalInfo.sender'] = query.sender;
   }
 
+  if (query.trackingStatus) {
+    queryBody['generalInfo.trackingStatus'] = query.trackingStatus;
+  }
+
+  if (query.financialStatus) {
+    queryBody['generalInfo.financialStatus'] = query.financialStatus;
+  }
+
+  if (query.creator) {
+    queryBody['generalInfo.creatorId'] = query.creator;
+  }
+
+  if (query.active != undefined) {
+    queryBody['generalInfo.active'] = query.active;
+  }
+
+  if (query.startTime && query.endTime) {
+    queryBody['createdAt'] = {
+      $gte: new Date(query.startTime),
+      $lt: new Date(query.endTime)
+    };
+  }
+
   if (query.searchTerm) {
     // https://stackoverflow.com/questions/26699885/how-can-i-use-a-regex-variable-in-a-query-for-mongodb
     // https://docs.mongodb.com/manual/reference/operator/query/regex/
     queryBody["trackingNumber"] = new RegExp(query.searchTerm, 'i');
   }
+
+  console.log(queryBody);
 
   let callbackfunction = async documents => {
     return {

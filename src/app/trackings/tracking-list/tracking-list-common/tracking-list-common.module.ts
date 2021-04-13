@@ -8,15 +8,15 @@ import { NgxBarcodeModule } from 'ngx-barcode';
 import { NgxPrintModule } from 'ngx-print';
 import { AngularMaterialModule } from 'src/app/angular-material.module';
 import { PrintFormsModule } from 'src/app/custom-components/printing-forms/printing-forms.module';
-import { TrackingListCommonTemplateComponent } from './tracking-list-common-template.component';
-import { TrackingListItemsCommonTemplateComponent } from './tracking-list-items-common-template.component';
+import { TrackingListCommonComponent } from './tracking-list-common.component';
+import { TrackingListItemsCommonComponent } from './tracking-list-items-common.component';
 
 
 
 @NgModule({
   declarations: [
-    TrackingListCommonTemplateComponent,
-    TrackingListItemsCommonTemplateComponent
+    TrackingListCommonComponent,
+    TrackingListItemsCommonComponent
   ],
   imports: [
     CommonModule,
@@ -30,7 +30,7 @@ import { TrackingListItemsCommonTemplateComponent } from './tracking-list-items-
     NgxQRCodeModule,
     NgxBarcodeModule
   ], exports: [
-    TrackingListCommonTemplateComponent
+    TrackingListCommonComponent
   ]
 })
 export class TrackingListCommonTemplateModule {

@@ -9,11 +9,11 @@ import { TrackingGlobals } from "../../tracking-globals";
 import { TrackingService } from "../../tracking.service";
 
 @Component({
-  selector: 'tracking-list-items-common-template',
-  templateUrl: './tracking-list-items-common-template.component.html',
+  selector: 'tracking-list-items-common',
+  templateUrl: './tracking-list-items-common.component.html',
   styleUrls: ['../tracking-list.component.css'],
 })
-export class TrackingListItemsCommonTemplateComponent implements OnInit {
+export class TrackingListItemsCommonComponent implements OnInit {
   @Input() tracking: any;
   @Input() trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
   @Input() i: number;

@@ -1,7 +1,6 @@
-
 <div class="mx-auto">
   <mat-accordion *ngIf='trackings.length > 0'>
-    <mat-expansion-panel [(expanded)]="expanded[i]" *ngFor='let tracking of trackings, let i = index'>
+    <mat-expansion-panel *ngFor='let tracking of trackings, let i = index'>
       <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.trackingStatus)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
         <mat-panel-title>
           <div class="col">
@@ -25,7 +24,7 @@
               <span class="badge border rounded border-success m-1">{{tracking.carrierTracking?.status}}</span>
             </div>
           </div>
-          <div class="ml-auto">{{globalConstants.formatDateTime(tracking.updatedAt)}}</div>
+          <div class="ml-auto"><span translate>general.update </span>{{globalConstants.formatDateTime(tracking.updatedAt).fromNow()}}</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
 
@@ -63,15 +62,15 @@
                 ></textarea>
             </mat-form-field>
 
-            <div class="mat-h4"><b translate>general.date-time</b> {{globalConstants.now()}}</div>
+            <div class="mat-h4"><b translate>general.date-time</b> {{globalConstants.formatDateTime(tracking.createdAt).local().format('YYYY-MM-DD HH:mm:ss')}}</div>
             <div class="mat-h4"><b translate>general.origin</b> {{tracking.generalInfo.origin}}</div>
             <div class="mat-h4"><b translate>general.destination</b> {{tracking.generalInfo.destination}}</div>
             <div class="mat-h4" *ngIf="tracking.generalInfo.sender"><b translate>general.sender</b> {{tracking.generalInfo.sender.name}} | <b>{{tracking.generalInfo.sender.userCode}}</b> | {{tracking.generalInfo.sender.phoneNumber}}</div>
             <div class="mat-h4" *ngIf="tracking.generalInfo.recipient"><b translate>general.recipient</b> {{tracking.generalInfo.recipient.name}} | <a rel="noopener noreferrer" target="_blank" href="{{tracking.generalInfo.recipient.address.addressUrl}}">{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</a> | {{tracking.generalInfo.recipient.phoneNumber}}</div>
-            <div class="mat-h4" *ngIf="tracking.linkedToCsl"><b translate>tracking-types.consolidated</b> <a [routerLink]="'/trackings/view/' + tracking.linkedToCsl.trackingNumber"> {{tracking.linkedToCsl.trackingNumber}}</a></div>
-            <div class="mat-h4" *ngIf="tracking.linkedToMst"><b translate>tracking-types.master</b> <a [routerLink]="'/trackings/view/' + tracking.linkedToMst.trackingNumber"> {{tracking.linkedToMst.trackingNumber}}</a></div>
+            <div class="mat-h4" *ngIf="tracking.linkedToCsl"><b translate>tracking-types.csl</b> <a [routerLink]="'/trackings/view/' + tracking.linkedToCsl.trackingNumber"> {{tracking.linkedToCsl.trackingNumber}}</a></div>
+            <div class="mat-h4" *ngIf="tracking.linkedToMst"><b translate>tracking-types.mst</b> <a [routerLink]="'/trackings/view/' + tracking.linkedToMst.trackingNumber"> {{tracking.linkedToMst.trackingNumber}}</a></div>
 
-            <div class="row d-flex justify-content-start align-items-center">
+            <!-- <div class="row d-flex justify-content-start align-items-center">
               <ngx-qrcode
                 [elementType]="'url'"
                 [value]="tracking.trackingNumber"
@@ -85,7 +84,7 @@
                 [bc-height]="50"
                 [bc-width]="1">
               </ngx-barcode>
-            </div>
+            </div> -->
           </div>
           <div class="col-lg-6 mt-xs-2 mt-md-0">
             <form class="ml-0" (submit)="onCommentSubmit(tracking._id, tracking.trackingNumber, comment.value); comment.value = ''" (keydown.meta.enter)="onCommentSubmit(tracking._id, tracking.trackingNumber, comment.value); comment.value = ''">
@@ -118,11 +117,11 @@
           </div>
         </div>
 
-        <tracking-list-items-common-template
+        <tracking-list-items-common
           [trackings]="trackings"
           [tracking]="tracking"
           [i]="i">
-        </tracking-list-items-common-template>
+        </tracking-list-items-common>
 
         <!-- Printing section -->
         <div hidden id="print-section{{i}}">
@@ -133,11 +132,11 @@
               [recipient]="tracking.generalInfo.recipient">
             </general-info-print>
 
-            <tracking-list-items-common-template
+            <tracking-list-items-common
               [trackings]="trackings"
               [tracking]="tracking"
               [i]="i">
-            </tracking-list-items-common-template>
+            </tracking-list-items-common>
         </div>
       </ng-template>
 

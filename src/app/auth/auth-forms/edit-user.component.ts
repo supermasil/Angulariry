@@ -14,30 +14,27 @@ import { AuthService } from "../auth.service";
 })
 export class EditUserFormComponent implements OnInit{
 
-  usersSubject = new ReplaySubject<string[]>();
+  usersSubject = new ReplaySubject<UserModel[]>();
+  usersListSubject = new ReplaySubject<{users: UserModel[], count: number}>();
   users: UserModel[];
   currentOrg: OrganizationModel;
   currentUser: UserModel;
 
+  userFields = ["name", "userCode", "role", "email"];
 
   constructor(
     private authService: AuthService,
-    private route: ActivatedRoute,
     private router: Router,
     private zone: NgZone
   ) {}
 
   ngOnInit() {
-    // this.authService.getMongoDbUserListener().subscribe((user: UserModel) => {
-      this.currentUser = this.authService.getMongoDbUser();;
-      // this.authService.getUserOrgListener().subscribe((org: OrganizationModel) => {
-        this.currentOrg = this.authService.getUserOrg();
-        this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
-          this.users = response.users;
-          this.filterUsers();
-        })
-    //   });
-    // });
+    this.currentUser = this.authService.getMongoDbUser();;
+      this.currentOrg = this.authService.getUserOrg();
+      this.authService.getUsers().subscribe((response: {users: UserModel[], count: number}) => {
+        this.users = response.users;
+        this.filterUsers();
+      });
   }
 
   filterUsers() {
@@ -51,13 +48,13 @@ export class EditUserFormComponent implements OnInit{
       this.users = [];
     }
 
-    this.usersSubject.next(this.users.map(u => `${u.name} | ${u.userCode} | ${u.role} | ${u.email} | ${u.addresses[0].address}${u.addresses[0].addressLineTwo? " " + u.addresses[0].addressLineTwo: ""}`));
+    this.usersSubject.next(this.users);
   }
 
-  userSelected(value: string) {
-    let user: UserModel = this.users.filter(u => u.userCode === value.split(" | ")[1])[0];
-    this.zone.run(() => {
-      this.router.navigate([`/auth/users/edit/${user._id}`]);
-    })
+  userSelected(user: UserModel) {
+    // this.zone.run(() => {
+    //   this.router.navigate([`/auth/users/edit/${user._id}`]);
+    // })
+    this.usersListSubject.next({users: [user], count: 1});
   }
 }

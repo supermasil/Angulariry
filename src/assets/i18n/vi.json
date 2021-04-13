@@ -27,7 +27,14 @@
     "custom-pricing": "Giá riêng cho khách",
     "update": "Cập nhật",
     "close": "Đóng",
-    "date-time": "Thời gian"
+    "date-time": "Thời gian",
+    "tracking-types": "Phân loại tracking",
+    "creator": "Người khởi tạo",
+    "true": "Yes",
+    "false": "No",
+    "active": "Đang hoạt động",
+    "inactive": "Không hoạt động",
+    "credit": "Tín dụng"
   },
   "auth": {
     "password": "Mật khẩu",
@@ -72,14 +79,15 @@
     "Customer": "Khách hàng"
   },
   "tracking-types": {
-    "online": "Đơn online",
-    "serviced": "Đơn mua hộ",
-    "in-person": "Đơn gửi tận tay",
-    "consolidated": "Đơn kế toán tổng hợp",
-    "master": "Đơn vận chuyển tổng hợp"
+    "onl": "Đơn online",
+    "sev": "Đơn mua hộ",
+    "inp": "Đơn gửi tận tay",
+    "csl": "Đơn kế toán tổng hợp",
+    "mst": "Đơn vận chuyển tổng hợp"
   },
   "statuses": {
     "consolidated": "Đã thêm vào đơn kế toán tổng hợp",
+    "mastered": "Đã thêm vào đơn vận chuyển tổng hợp",
     "paid": "Đã thanh toán",
     "unpaid": "Chưa thanh toán",
     "partially-paid": "Thanh toán một phần",

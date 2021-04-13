@@ -1,4 +1,4 @@
-import { Component, EventEmitter, NgZone, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, NgZone, OnInit, Output } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { AuthService } from "src/app/auth/auth.service";
@@ -15,6 +15,7 @@ export class SearchBarComponent implements OnInit {
   searchForm: FormGroup;
   scannerOpened = false;
   @Output() onSearchEvent = new EventEmitter<string>();
+  @Input() description = "Search here";
 
   constructor(
     private zone: NgZone,
@@ -36,7 +37,6 @@ export class SearchBarComponent implements OnInit {
     // if (!this.searchForm.get('searchTerm').value) {
     //   return;
     // }
-    console.log("here")
     this.onSearchEvent.emit(this.searchForm.get('searchTerm').value);
   }
 

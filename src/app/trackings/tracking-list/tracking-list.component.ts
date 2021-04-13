@@ -13,6 +13,7 @@ import { UserModel } from "src/app/models/user.model";
 import { ReplaySubject, Subject } from "rxjs";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { ActivatedRoute, Router } from "@angular/router";
+import { GlobalConstants } from "src/app/global-constants";
 
 @Component({
   selector: 'app-tracking-list',
@@ -75,7 +76,7 @@ export class TrackingListComponent {
     this.currentUser = this.authService.getMongoDbUser();
     this.organization = this.authService.getUserOrg();
     this.isLoading = false;
-    this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
+    this.fetchTrackings(GlobalConstants.defaultPageSizes[0], 1, this.currentTrackingType);
   }
 
 
@@ -112,8 +113,11 @@ export class TrackingListComponent {
 
   fetchTrackings(trackingsPerPage: number, currenPage: number, type: string) {
     let sender = this.currentUser.role === AuthGlobals.roles.Customer? this.currentUser._id: null;
-
-    this.trackingService.getTrackings(this.searchTerm, trackingsPerPage, currenPage, type, null, null, sender).subscribe((transformedTrackings) => {
+    let additionalParams = {
+      searchTerm: this.searchTerm,
+      sender: sender
+    }
+    this.trackingService.getTrackings(trackingsPerPage, currenPage, type, additionalParams).subscribe((transformedTrackings) => {
       this.trackingsSubject.next(transformedTrackings);
     });
   }
@@ -131,10 +135,10 @@ export class TrackingListComponent {
     this.resetPaginator();
     this.searchTerm = searchTerm;
     if (!searchTerm) {
-      this.fetchTrackings(TrackingGlobals.defaultPageSizes[0], 1, this.currentTrackingType);
+      this.fetchTrackings(GlobalConstants.defaultPageSizes[0], 1, this.currentTrackingType);
       return;
     }
-    this.fetchTrackings(this.pageData? this.pageData?.pageSize : TrackingGlobals.defaultPageSizes[0], this.pageData? this.pageData.pageIndex + 1: 0 , this.currentTrackingType);
+    this.fetchTrackings(this.pageData? this.pageData?.pageSize : GlobalConstants.defaultPageSizes[0], this.pageData? this.pageData.pageIndex + 1: 1 , this.currentTrackingType);
   }
 
   ngOnDestroy() {

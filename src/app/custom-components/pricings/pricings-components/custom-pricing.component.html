@@ -1,10 +1,9 @@
 <div class="mt-4">
   <auto-complete-input
-    [dataObservable]="userCodes.asObservable()"
+    [dataObservable]="usersSubject.asObservable()"
     (itemSelected)="userSelected($event)"
-    (inputInvalid)="''"
-    [enforeSelection]="true"
     [matLabel]="'general.users' | translate"
+    [fields]="userFields"
     [lockOption]="false"
     [matErrorMessage]="'Please select one from the drowdown only'">
   </auto-complete-input>
@@ -12,12 +11,11 @@
 
 <div class="mt-2">
   <auto-complete-input
-    [dataObservable]="itemNames.asObservable()"
+    [dataObservable]="items.asObservable()"
     (itemSelected)="itemSelected($event)"
-    (inputInvalid)="''"
-    [enforeSelection]="true"
     [matLabel]="'tracking-info.item-name' | translate"
     [lockOption]="false"
+    [fields]="itemFields"
     [matErrorMessage]="'Please select one from the drowdown only'">
   </auto-complete-input>
 </div>

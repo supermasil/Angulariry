@@ -5,11 +5,12 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { AngularFireAuth } from '@angular/fire/auth';
 import * as firebase from 'firebase/app';
-import{ GlobalConstants } from '../global-constants';
-import { AlertService } from '../custom-components/alert-message';
 import { UserModel } from '../models/user.model';
 import { OrganizationModel } from '../models/organization.model';
 import { HistoryModel } from '../models/history.model';
+import { ToastrService } from 'ngx-toastr';
+import { GlobalConstants } from '../global-constants';
+import { SpinnerInterceptor } from '../spinner-interceptor';
 
 const USER_BACKEND_URL = environment.apiURL + "/users/"
 const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
@@ -21,12 +22,14 @@ export class AuthService {
   // private firebaseUserSubject = new ReplaySubject<firebase.User>();
   private mongoDbUserSubject = new ReplaySubject<UserModel>();
   private userOrgSubject = new ReplaySubject<OrganizationModel>();
+  private isAuthLoading = new ReplaySubject<boolean>();
   private firebaseUser: firebase.User;
   private mongoDbUser: UserModel;
   private userOrg: OrganizationModel = null;
   public redirectUrl: string;
   public redirectData = {};
   private loginMode = false;
+
   public userTypes = {
     MONGO: 'mongo',
     FIREBASE: 'firebase'
@@ -36,9 +39,12 @@ export class AuthService {
     private httpClient: HttpClient,
     private router: Router,
     private firebaseAuth: AngularFireAuth,
-    private alertService: AlertService,
+    private toastr: ToastrService,
     private zone: NgZone) {
     this.firebaseAuth.onAuthStateChanged(async firebaseUser => {
+      this.isAuthLoading.next(true);
+      this.authStatusSubject.next(false); // just make it false first before everything else
+      sessionStorage.setItem("isAuthenticated", "false");
       this.firebaseUser = firebaseUser;
       await this.refreshAuthentication(firebaseUser);
     });
@@ -53,7 +59,6 @@ export class AuthService {
           this.userOrg = user.organization;
           return await this.authenticate();
         } else {
-          console.log("here")
           console.log("Firebase and db users aren't the same")
           this.unAuthenticate();
           this.logout();
@@ -94,10 +99,11 @@ export class AuthService {
       // console.log("User authenticated");
       this.redirecting();
       if (this.loginMode) {
-        this.alertService.success("Welcome!", GlobalConstants.flashMessageOptions);
+        this.toastr.success("Welcome!");
         this.loginMode = false;
       }
     });
+    this.isAuthLoading.next(false);
   }
 
   unAuthenticate() {
@@ -106,6 +112,7 @@ export class AuthService {
     this.mongoDbUser = null;
     this.clearSessionStorage();
     // console.log("User unauthenticated");
+    this.isAuthLoading.next(false);
   }
 
   refreshUsers() {
@@ -122,11 +129,11 @@ export class AuthService {
         this.loginMode = true;
         await this.refreshAuthentication(userCredentials.user);
       }).catch(error => {
-        this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+        this.toastr.error(error.message);
       })
     })
     .catch(error => {
-      this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+      this.toastr.error(error.message);
     });
   }
 
@@ -138,15 +145,15 @@ export class AuthService {
         this.router.navigate(["/auth"]);
       });
     }).catch(error => {
-      this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+      this.toastr.error(error.message);
     });
   }
 
   resetPassword(email: string) {
     this.firebaseAuth.sendPasswordResetEmail(email).then(() => {
-      this.alertService.success("Password reset email sent", GlobalConstants.flashMessageOptions);
+      this.toastr.success("Password reset email sent");
     }).catch(error => {
-      this.alertService.error(error.message, GlobalConstants.flashMessageOptions);
+      this.toastr.error(error.message);
     })
   }
 
@@ -175,7 +182,7 @@ export class AuthService {
   }
 
   updateCredit(formData: any) {
-    return this.httpClient.put<{message: string}>(USER_BACKEND_URL + `updateCredit/${formData._id}`, formData);
+    return this.httpClient.put<{message: string, user: UserModel}>(USER_BACKEND_URL + `updateCredit/${formData._id}`, formData);
   }
 
   getHistories(historyList: string[]) {
@@ -214,7 +221,7 @@ export class AuthService {
         this.zone.run(async () => {
           await this.refreshAuthentication(this.firebaseUser);
           this.router.navigate(["/trackings"]);
-          this.alertService.success(`Onboarded to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
+          this.toastr.success(`Onboarded to ${response.organization.name}`);
         });
       });
   }
@@ -230,7 +237,7 @@ export class AuthService {
           if (response.user.active) {
             this.router.navigate(["/trackings"]);
           }
-          this.alertService.success(`Logged in to ${response.organization.name}`, GlobalConstants.flashMessageOptions);
+          this.toastr.success(`Logged in to ${response.organization.name}`);
         });
       });
   }
@@ -295,6 +302,10 @@ export class AuthService {
     return sessionStorage.getItem("isAuthenticated") == "true" ? true : false;
   }
 
+  getIsAuthLoading() {
+    return this.isAuthLoading.asObservable();
+  }
+
   canView(roles: string[]) {
     return roles.includes((JSON.parse(sessionStorage.getItem("mongoDBUser")) as UserModel)?.role);
   }
@@ -312,7 +323,7 @@ export class AuthService {
   }
 
   redirectToMainPageWithMessage(message: string) {
-    this.alertService.error(message, GlobalConstants.flashMessageOptions);
+    this.toastr.error(message);
       this.zone.run(() => {
         this.router.navigate(["/trackings"]);
       });

@@ -54,10 +54,4 @@ export class OnboardingComponent implements OnInit{
   onboard(registerCode: string, referralCode: string) {
     this.authService.onboardToNewOrg(registerCode, referralCode);
   }
-
-  redirect(route: string) {
-    this.zone.run(() => {
-      this.router.navigate([route]);
-    });
-  }
 }

@@ -7,8 +7,7 @@ import { Component404 } from './front-page/404/404.component';
 const routes: Routes = [
   { path: '',
     loadChildren: () => import("./front-page/front-page.module")
-    .then(module => module.FrontPageModule),
-    canActivate: [AuthGuard], data: {roles: AuthGlobals.everyone}},
+    .then(module => module.FrontPageModule)},
   { path: 'trackings',
     loadChildren: () => import("./trackings/tracking.module")
     .then(module => module.TrackingModule)},

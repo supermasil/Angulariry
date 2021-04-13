@@ -49,13 +49,6 @@ export class HeaderComponent implements OnInit, OnDestroy{
     this.authListenerSub.unsubscribe();
   }
 
-  // Always route in a zone to prevent 'https://stackoverflow.com/questions/53645534/navigation-triggered-outside-angular-zone-did-you-forget-to-call-ngzone-run'
-  redirect(route: string) {
-    this.zone.run(() => {
-      this.router.navigate([route]);
-    });
-  }
-
   sideMenuPressed() {
     this.sideMenuClicked.emit();
   }

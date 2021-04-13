@@ -349,13 +349,15 @@ exports.updateUserCredit = async (req, res, next) => {
         let history = (await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, `${currentUser.name} updated ${foundUser.name}'s credit to $${req.body.amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} with note: "${req.body.content}"`, req.params.id, session));
         foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].credit = req.body.amount;
         foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].creditHistory.unshift(history._id);
-        await UserModel.findByIdAndUpdate(req.params.id, foundUser).session(session).then();
-        app.logger.info(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.u_id}`)
-      });
-
-      return next({
-        resCode: 200,
-        message: "update-success"
+        let updatedUser = await UserModel.findByIdAndUpdate(req.params.id, foundUser).session(session).then(user => user);
+        app.logger.info(`updateUserCredit: for user ${req.params.id} with amount ${req.body.amount} by user ${req.userData.u_id}`);
+        return next({
+          resCode: 200,
+          resBody: {
+            message: "update-success",
+            user: updatedUser
+          }
+        });
       });
     });
   } catch (error) {
