@@ -13,7 +13,7 @@ export class GlobalConstants {
     tapToDismiss: false
   };
 
-  public static defaultPageSizes = [5, 20, 50, 100];
+  public static defaultPageSizes = [1, 20, 50, 100];
 
   public static formatDateTime(date: Date) {
     let storedLanguage = localStorage.getItem("language");

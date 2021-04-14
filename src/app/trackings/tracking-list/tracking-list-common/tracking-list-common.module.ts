@@ -33,6 +33,6 @@ import { TrackingListItemsCommonComponent } from './tracking-list-items-common.c
     TrackingListCommonComponent
   ]
 })
-export class TrackingListCommonTemplateModule {
+export class TrackingListCommonModule {
 
 }

@@ -60,13 +60,13 @@ export class TrackingsReportComponent implements OnInit {
   ngOnInit() {
     this.currentUser = this.authService.getMongoDbUser();
     this.trackingsReportForm = new FormGroup({
-      type: new FormControl(null, {validators: [Validators.required]}),
+      type: new FormControl(TrackingGlobals.trackingTypes.ONLINE),
       trackingStatus: new FormControl(null),
       financialStatus: new FormControl(null),
       sender: new FormControl(null),
       creator: new FormControl(null),
-      startTime: new FormControl(null, {validators: [Validators.required]}),
-      endTime: new FormControl(null, {validators: [Validators.required]}),
+      startTime: new FormControl(null),
+      endTime: new FormControl(null),
       active: new FormControl(true)
       // consolidated: new FormControl(null),
       // mastered: new FormControl(null),
@@ -101,8 +101,6 @@ export class TrackingsReportComponent implements OnInit {
   fetchTrackings(trackingsPerPage: number, currentPage: number) {
     let additionalParams = this.trackingsReportForm.getRawValue();
     delete additionalParams['type'];
-
-    console.log(additionalParams)
 
     this.trackingService.getTrackings(trackingsPerPage, currentPage, this.currentTrackingType, additionalParams).subscribe((transformedTrackings) => {
       this.trackingsSubject.next(transformedTrackings);

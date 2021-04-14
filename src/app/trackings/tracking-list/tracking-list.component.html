@@ -4,7 +4,7 @@
   </search-bar>
 
   <!-- Don't remove the canview in mat-tab-group so that index can work -->
-  <mat-tab-group *ngIf="canView(authGlobals.everyone)" (selectedIndexChange)="tabChanged($event)" class="mb-4 greyed-text" [@.disabled]="true" [(selectedIndex)]="selectedIndex">
+  <mat-tab-group *ngIf="canView(authGlobals.everyone)" (selectedIndexChange)="tabChanged($event)" class="mb-4 greyed-text" [(selectedIndex)]="selectedIndex">
     <mat-tab [label]="'tracking-types.onl' | translate" *ngIf="enabled[0]">
       <ng-template matTabContent>
         <tracking-list-common

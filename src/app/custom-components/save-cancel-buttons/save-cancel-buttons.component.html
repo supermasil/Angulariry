@@ -5,13 +5,13 @@
     (click)="saveButtonPressed()"
     type="submit"
     class="mr-2 my-2">
-    Save
+    {{'general.submit' | translate}}
   </button>
   <button
     mat-raised-button
     color="warn"
     class="mr-2 my-2"
     [routerLink]="redirectUrl">
-    Cancel
+    {{'general.cancel' | translate}}
   </button>
 </div>

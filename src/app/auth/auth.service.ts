@@ -9,8 +9,6 @@ import { UserModel } from '../models/user.model';
 import { OrganizationModel } from '../models/organization.model';
 import { HistoryModel } from '../models/history.model';
 import { ToastrService } from 'ngx-toastr';
-import { GlobalConstants } from '../global-constants';
-import { SpinnerInterceptor } from '../spinner-interceptor';
 
 const USER_BACKEND_URL = environment.apiURL + "/users/"
 const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
