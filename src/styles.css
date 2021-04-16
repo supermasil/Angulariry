@@ -97,13 +97,15 @@ mat-form-field {
 }
 
 .is-active {
-  background-color: #673AB7 !important;
-  color: white !important;
+  border-radius: 5px;
+  background: #eceff1;
+  font-weight: bold;
+  color: #673AB7 !important;
 }
 
 .mat-menu-item:hover {
-  background-color: #D1C4E9 !important;
-  color: black !important;
+  font-weight: bold;
+  color: #673AB7 !important;
 }
 
 table {

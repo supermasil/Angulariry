@@ -5,12 +5,14 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NgxQRCodeModule } from '@techiediaries/ngx-qrcode';
 import { NgxBarcodeModule } from 'ngx-barcode';
 import { AngularMaterialModule } from 'src/app/angular-material.module';
+import { BarcodesPrint } from './barcode-print.component';
 import { GeneralInfoPrintComponent } from './general-info-print.component';
 
 
 @NgModule({
   declarations: [
-    GeneralInfoPrintComponent
+    GeneralInfoPrintComponent,
+    BarcodesPrint
   ],
   imports: [
     CommonModule,
@@ -22,7 +24,8 @@ import { GeneralInfoPrintComponent } from './general-info-print.component';
     TranslateModule.forChild()
   ],
   exports: [
-    GeneralInfoPrintComponent
+    GeneralInfoPrintComponent,
+    BarcodesPrint
   ]
 })
 export class PrintFormsModule {

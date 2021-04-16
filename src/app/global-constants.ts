@@ -1,4 +1,5 @@
 import * as moment from "moment";
+import { GeneralMethods } from "./shared/general-methods";
 
 export class GlobalConstants {
   constructor() {
@@ -13,7 +14,7 @@ export class GlobalConstants {
     tapToDismiss: false
   };
 
-  public static defaultPageSizes = [1, 20, 50, 100];
+  public static defaultPageSizes = [5, 20, 50, 100];
 
   public static formatDateTime(date: Date) {
     let storedLanguage = localStorage.getItem("language");
@@ -22,6 +23,6 @@ export class GlobalConstants {
 
   public static now() {
     let storedLanguage = localStorage.getItem("language");
-    return moment().locale(storedLanguage? storedLanguage : "en").format("LLLL");
+    return GeneralMethods.capitalizeFirstLetter(moment().locale(storedLanguage? storedLanguage : "en").format("LLLL"));
   }
 }

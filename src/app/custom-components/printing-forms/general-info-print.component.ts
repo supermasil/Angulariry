@@ -11,7 +11,7 @@ import { UserModel } from "src/app/models/user.model";
 })
 export class GeneralInfoPrintComponent {
   @Input() currentOrg: OrganizationModel;
-  @Input() trackingNumber: string;
+  @Input() tracking: any;
   @Input() sender: UserModel;
   @Input() recipient: RecipientModel;
 

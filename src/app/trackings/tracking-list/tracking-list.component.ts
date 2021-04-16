@@ -57,17 +57,17 @@ export class TrackingListComponent {
         case TrackingGlobals.trackingTypes.ONLINE:
           this.selectedIndex = 0;
           break;
-        case TrackingGlobals.trackingTypes.SERVICED:
+        // case TrackingGlobals.trackingTypes.SERVICED:
+        //   this.selectedIndex = 1;
+        //   break;
+        case TrackingGlobals.trackingTypes.INPERSON:
           this.selectedIndex = 1;
           break;
-        case TrackingGlobals.trackingTypes.INPERSON:
+        case TrackingGlobals.trackingTypes.CONSOLIDATED:
           this.selectedIndex = 2;
           break;
-        case TrackingGlobals.trackingTypes.CONSOLIDATED:
-          this.selectedIndex = 3;
-          break;
         case TrackingGlobals.trackingTypes.MASTER:
-          this.selectedIndex = 4;
+          this.selectedIndex = 3;
           break;
       }
       this.setTab(this.selectedIndex);
@@ -86,19 +86,19 @@ export class TrackingListComponent {
         this.currentTrackingType = TrackingGlobals.trackingTypes.ONLINE;
         this.router.navigate(['/trackings/onl']);
         break;
+      // case 1:
+      //   this.currentTrackingType = TrackingGlobals.trackingTypes.SERVICED;
+      //   this.router.navigate(['/trackings/sev']);
+      //   break;
       case 1:
-        this.currentTrackingType = TrackingGlobals.trackingTypes.SERVICED;
-        this.router.navigate(['/trackings/sev']);
-        break;
-      case 2:
         this.currentTrackingType = TrackingGlobals.trackingTypes.INPERSON;
         this.router.navigate(['/trackings/inp']);
         break;
-      case 3:
+      case 2:
         this.currentTrackingType = TrackingGlobals.trackingTypes.CONSOLIDATED;
         this.router.navigate(['/trackings/csl']);
         break;
-      case 4:
+      case 3:
         this.currentTrackingType = TrackingGlobals.trackingTypes.MASTER;
         this.router.navigate(['/trackings/mst']);
         break;

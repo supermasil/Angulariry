@@ -20,6 +20,10 @@ export class TrackingListItemsCommonComponent implements OnInit {
 
   trackingGlobals = TrackingGlobals;
 
+  onlineInPersonDisplayedColumns = ["item", "declaredValue", "quantity", "insurance", "weight", "weightUnitCharge", "extraCharge", "finalCharge"];
+  consolidatedDisplayedColumns = ["trackingNumber", "payment", "weight", "cost", "trackingStatus"];
+  masterDisplayedColumns = ["trackingNumber", "payment", "weight", "cost", "pallet", "box", "status"];
+
   getBadgeColor = TrackingGlobals.getBadgeColor;
 
   constructor(
@@ -89,5 +93,13 @@ export class TrackingListItemsCommonComponent implements OnInit {
     });
 
     return {weight: totalWeight, cost: totalCost, costVND: totalCostVND};
+  }
+
+  getMasterSubTrackings(tracking: any) {
+    let result = [];
+    for (let box of tracking.boxes) {
+      result.push(...this.combineTrackings(box.onlineTrackings, box.servicedTrackings, box.inPersonSubTrackings));
+    };
+    return result;
   }
 }

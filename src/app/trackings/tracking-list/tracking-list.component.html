@@ -15,7 +15,7 @@
       </ng-template>
     </mat-tab>
 
-    <mat-tab [label]="'tracking-types.sev' | translate" *ngIf="enabled[1] && canView(authGlobals.everyone)">
+    <!-- <mat-tab [label]="'tracking-types.sev' | translate" *ngIf="enabled[1] && canView(authGlobals.everyone)">
       <ng-template matTabContent>
         <tracking-list-common
           (pageDataChangeEvent)="pageDataChanged($event)"
@@ -23,7 +23,7 @@
           [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
         </tracking-list-common>
       </ng-template>
-    </mat-tab>
+    </mat-tab> -->
 
     <mat-tab [label]="'tracking-types.inp' | translate" *ngIf="enabled[2] && canView(authGlobals.everyone)">
       <ng-template matTabContent>

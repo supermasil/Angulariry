@@ -14,9 +14,9 @@
                 <mat-icon>content_copy</mat-icon>
               </a> <b class="mr-1">{{tracking.trackingNumber}}</b>
               </span>
-              <span class="badge mr-1" [ngClass]="getBadgeColor(tracking.generalInfo.trackingStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.trackingStatus | translate}}</span>
-              <span class="badge mr-1" [ngClass]="getBadgeColor(tracking.generalInfo.financialStatus)" style="color: white;">{{'statuses.' + tracking.generalInfo.financialStatus | translate}}</span>
-              <span class="badge mr-1" [ngClass]="getBadgeColor('Consolidated')" style="color: white;" *ngIf="tracking.linkedToCsl?.trackingNumber">{{'statuses.consolidated' | translate}}</span>
+              <span class="badge mr-1 text-white" [ngClass]="getBadgeColor(tracking.generalInfo.trackingStatus)">{{'statuses.' + tracking.generalInfo.trackingStatus | translate}}</span>
+              <span class="badge mr-1 text-white" [ngClass]="getBadgeColor(tracking.generalInfo.financialStatus)">{{'statuses.' + tracking.generalInfo.financialStatus | translate}}</span>
+              <span class="badge mr-1 text-white" [ngClass]="getBadgeColor('Consolidated')" *ngIf="tracking.linkedToCsl?.trackingNumber">{{'statuses.consolidated' | translate}}</span>
             </div>
             <div>
               <span class="badge border rounded border-primary m-1">{{tracking.carrierTracking?.carrierTrackingNumber}}</span>
@@ -127,7 +127,7 @@
         <div hidden id="print-section{{i}}">
             <general-info-print
               [currentOrg]="currentOrg"
-              [trackingNumber]="tracking.trackingNumber"
+              [tracking]="tracking"
               [sender]="tracking.generalInfo.sender"
               [recipient]="tracking.generalInfo.recipient">
             </general-info-print>
@@ -137,6 +137,12 @@
               [tracking]="tracking"
               [i]="i">
             </tracking-list-items-common>
+        </div>
+
+        <div hidden id="print-section-barcodes{{i}}">
+          <barcodes-print
+            [tracking]="tracking">
+          </barcodes-print>
         </div>
       </ng-template>
 
@@ -178,7 +184,8 @@
             <div class="d-flex justify-content-end">
               <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit/' + tracking.trackingNumber.substring(0,3), tracking.trackingNumber]" >Edit</a>
               <!-- <a class="mr-2" mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</a> -->
-              <button mat-mini-fab color="primary" class="mr-4" type="button" ngxPrint printSectionId="print-section{{i}}" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
+              <button mat-mini-fab color="primary" class="mr-4" ngxPrint printSectionId="print-section{{i}}" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
+              <button mat-mini-fab color="accent" class="mr-4" ngxPrint printSectionId="print-section-barcodes{{i}}" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
             </div>
           </div>
         </div>

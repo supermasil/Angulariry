@@ -401,8 +401,6 @@ getTrackingsHelper = async (type, orgId, query) => {
     queryBody["trackingNumber"] = new RegExp(query.searchTerm, 'i');
   }
 
-  console.log(queryBody);
-
   let callbackfunction = async documents => {
     return {
       // No error message needed

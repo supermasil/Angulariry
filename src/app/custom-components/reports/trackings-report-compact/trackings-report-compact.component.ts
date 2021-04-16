@@ -7,6 +7,7 @@ import { InPersonTrackingModel } from "src/app/models/tracking-models/in-person-
 import { MasterTrackingModel } from "src/app/models/tracking-models/master-tracking.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-tracking.model";
+import { TrackingGlobals } from "src/app/trackings/tracking-globals";
 
 @Component({
   selector: 'trackings-report-compact',
@@ -19,6 +20,7 @@ export class TrackingsReportCompactComponent implements OnInit {
   totalTrackings = 0;
   pageSizeOptions = GlobalConstants.defaultPageSizes;
   currentPageSize = this.pageSizeOptions[0];
+  getBadgeColor = TrackingGlobals.getBadgeColor;
 
   @ViewChild('paginator') paginator: MatPaginator;
 

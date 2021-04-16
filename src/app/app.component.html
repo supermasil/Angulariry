@@ -14,79 +14,79 @@
     </div>
     <mat-accordion multi *ngIf="isAuth()" style="margin-bottom: 100px;">
       <mat-expansion-panel>
-        <mat-expansion-panel-header>
+        <mat-expansion-panel-header class="bg-primary mat-elevation-z4">
           <mat-panel-title>
-            <span translate>general.trackings</span>
+            <h3 translate class="text-white font-weight-bold m-0 p-0">general.trackings</h3>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
-            <mat-icon class="ml-auto" color="primary">flight</mat-icon>
+            <mat-icon class="ml-auto" style="color: white;">flight</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{exact: true}"><span translate>tracking-types.onl</span></a>
-        <a mat-menu-item class="nav-link" [routerLink]="'/trackings/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{exact: true}"><span translate>tracking-types.sev</span> (not ready)</a>
+        <a mat-menu-item class="nav-link mt-2" [routerLink]="'/trackings/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{exact: true}"><span translate>tracking-types.onl</span></a>
+        <!-- <a mat-menu-item class="nav-link" [routerLink]="'/trackings/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{exact: true}"><span translate>tracking-types.sev</span> (not ready)</a> -->
         <a mat-menu-item class="nav-link" [routerLink]="'/trackings/inp'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.inp</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/csl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.csl</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/mst'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.mst</span></a>
       </mat-expansion-panel>
 
       <mat-expansion-panel>
-        <mat-expansion-panel-header>
+        <mat-expansion-panel-header class="bg-secondary mat-elevation-z4">
           <mat-panel-title>
-            <span translate>side-nav-bar.new-tracking</span>
+            <h3 translate class="text-white font-weight-bold m-0 p-0">side-nav-bar.new-tracking</h3>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
-            <mat-icon class="ml-auto" color="primary">new_label</mat-icon>
+            <mat-icon class="ml-auto" style="color: white;">new_label</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.everyone)" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.onl</span></a>
-        <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.sev</span> (not ready)</a>
+        <a mat-menu-item class="nav-link mt-2" *ngIf="canView(authGlobals.everyone)" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.onl</span></a>
+        <!-- <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.sev</span> (not ready)</a> -->
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/inp'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.inp</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/csl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.csl</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/mst'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.mst</span></a>
       </mat-expansion-panel>
 
       <mat-expansion-panel *ngIf="canView(authGlobals.managerAdmins)">
-        <mat-expansion-panel-header>
+        <mat-expansion-panel-header class="bg-success mat-elevation-z4">
           <mat-panel-title>
-            <span translate>side-nav-bar.pricing</span>
+            <h3 translate class="text-white font-weight-bold m-0 p-0">side-nav-bar.pricing</h3>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
-            <mat-icon class="ml-auto" color="primary">price_change</mat-icon>
+            <mat-icon class="ml-auto" style="color: white;">price_change</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/pricings/new'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.new-pricing</span></a>
+        <a mat-menu-item class="nav-link mt-2" [routerLink]="'/pricings/new'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.new-pricing</span></a>
         <a mat-menu-item class="nav-link" [routerLink]="'/pricings/edit'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.edit-pricing</span></a>
         <a mat-menu-item class="nav-link" [routerLink]="'/pricings/custom'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.custom-pricing</span></a>
       </mat-expansion-panel>
 
       <mat-expansion-panel *ngIf="canView(authGlobals.internal)">
-        <mat-expansion-panel-header>
+        <mat-expansion-panel-header class="bg-danger mat-elevation-z4">
           <mat-panel-title>
-            <span translate>general.users</span>
+            <h3 translate class="text-white font-weight-bold m-0 p-0">general.users</h3>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
-            <mat-icon class="ml-auto" color="primary">account_circle</mat-icon>
+            <mat-icon class="ml-auto" style="color: white;">account_circle</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/auth/users/new'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.new-user</span></a>
+        <a mat-menu-item class="nav-link mt-2" [routerLink]="'/auth/users/new'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.new-user</span></a>
         <a mat-menu-item class="nav-link" [routerLink]="'/auth/users'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.edit-user</span></a>
         <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.managerAdmins) || canView([authGlobals.roles.Accounting])" [routerLink]="'/auth/users/adjustCredit'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>side-nav-bar.adjust-credit</span></a>
       </mat-expansion-panel>
       <mat-expansion-panel *ngIf="canView(authGlobals.internal)">
-        <mat-expansion-panel-header>
+        <mat-expansion-panel-header class="bg-warning mat-elevation-z4">
           <mat-panel-title>
-            <span translate>side-nav-bar.reports</span>
+            <h3 translate class="text-white font-weight-bold m-0 p-0">side-nav-bar.reports</h3>
           </mat-panel-title>
           <mat-panel-description>
             <!-- Type your name and age -->
-            <mat-icon class="ml-auto" color="primary">account_circle</mat-icon>
+            <mat-icon class="ml-auto" style="color: white;">account_circle</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <a mat-menu-item class="nav-link" [routerLink]="'/reports/trackings'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>general.trackings</span></a>
+        <a mat-menu-item class="nav-link mt-2" [routerLink]="'/reports/trackings'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>general.trackings</span></a>
         <a mat-menu-item class="nav-link" [routerLink]="'/reports/users'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>general.users</span></a>
       </mat-expansion-panel>
       <div class="text-center my-4 text-muted">
@@ -113,7 +113,7 @@
   <a mat-fab color="primary" [matMenuTriggerFor]="aboveMenu" style="position: fixed; bottom: 2em; right: 2em"  *ngIf="isAuth()">
     <mat-icon>add</mat-icon>
   </a>
-  <mat-menu #aboveMenu="matMenu" yPosition="above">
+  <mat-menu #aboveMenu="matMenu" yPosition="above" style="z-index: 9999;">
     <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.everyone)" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.onl</span></a>
     <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.sev</span> (not ready)</a>
     <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/inp'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.inp</span></a>
