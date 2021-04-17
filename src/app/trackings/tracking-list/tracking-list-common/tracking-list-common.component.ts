@@ -32,7 +32,6 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   currentOrg: OrganizationModel;
   authGlobal = AuthGlobals;
   trackingGlobals = TrackingGlobals;
-  getCarrierTracking = getTracking
 
   canView = this.authService.canView;
   isAuth = this.authService.isAuth;
@@ -126,7 +125,6 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   }
 
   getCarrierTrackingUrl(value: string) {
-    let result =  this.getCarrierTracking(value)?.trackingUrl.slice(0, -2) + value;
-    console.log(result);
+    return getTracking(value)?.trackingUrl?.slice(0, -2) + value;
   }
 }

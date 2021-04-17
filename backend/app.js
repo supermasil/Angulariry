@@ -76,8 +76,7 @@ mongoose.connect(`mongodb+srv://supermasil:${process.env.MONGO_ATLAS_PW}@cluster
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers',
-  'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization', 'X-Request-Language');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTION');
   next();
 }); // this is used to allow angular to access backend, it's not needed if using integrated approach

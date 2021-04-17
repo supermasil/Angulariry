@@ -18,7 +18,7 @@ export class GlobalConstants {
 
   public static formatDateTime(date: Date) {
     let storedLanguage = localStorage.getItem("language");
-    return moment(date).locale(storedLanguage? storedLanguage : "en"); //.local().format("MM-DD-YY hh:mm:ss")
+    return moment(date).locale(storedLanguage? storedLanguage : "en").local(); //.local().format("MM-DD-YY hh:mm:ss")
   }
 
   public static now() {
