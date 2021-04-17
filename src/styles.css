@@ -6,6 +6,7 @@ html, body {
 body {
   margin: auto;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  padding-top: 53px;
 }
 
 a {

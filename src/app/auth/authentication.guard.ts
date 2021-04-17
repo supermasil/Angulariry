@@ -4,10 +4,11 @@ import { Injectable, NgZone } from '@angular/core';
 import { AuthService } from './auth.service';
 import { AuthGlobals } from './auth-globals';
 import { ToastrService } from 'ngx-toastr';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router, private zone: NgZone, private toastr: ToastrService) {}
+  constructor(private authService: AuthService, private router: Router, private zone: NgZone, private toastr: ToastrService, private translateService: TranslateService) {}
   route = null;
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | import("@angular/router").UrlTree | Observable<boolean | import("@angular/router").UrlTree> | Promise<boolean | import("@angular/router").UrlTree> {
     this.route = route;
@@ -41,13 +42,17 @@ export class AuthGuard implements CanActivate {
     } else if (isAuth && !this.authService.getUserOrg() && this.authService.getMongoDbUser()?.role != AuthGlobals.roles.SuperAdmin && this.route.url.length > 0) {
       this.zone.run(() => {
         this.router.navigate(["/"]);
-        this.toastr.warning("You have not logged into any organization");
+        this.translateService.get(`error-messages.not-logged-into-any-org`).subscribe(translatedMessage => {
+          this.toastr.warning(translatedMessage);
+        });
       });
       return false;
     } else if (!this.authService.getMongoDbUser().active && this.route.url.length > 0) {
       this.zone.run(() => {
         this.router.navigate(["/"]);
-        this.toastr.error("Your account is inactive with this organization");
+        this.translateService.get(`error-messages.inactive-account`).subscribe(translatedMessage => {
+          this.toastr.warning(translatedMessage);
+        });
       });
       return false;
     }

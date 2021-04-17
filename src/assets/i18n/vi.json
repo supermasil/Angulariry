@@ -146,7 +146,13 @@
     "customer-code-existed": "Mã người sử dụng trùng lặp",
     "referrer-not-found": "Không tìm thấy người giới thiệu",
     "referrer-same-as-user": "Người giới thiệu và người sử dụng phải khác nhau",
-    "already-onboarded": "Đã đăng ký doanh nghiệp này từ trước"
+    "already-onboarded": "Đã đăng ký doanh nghiệp này từ trước",
+    "item-not-set-up-for-route": "Mặt hàng này chưa được cài đặt cho tuyến đường này",
+    "not-logged-into-any-org": "Người dùng chưa được đăng ký với bất kỳ tổ chức nào",
+    "inactive-account": "Tài khoản không còn hoạt động với tổ chức này",
+    "duplicate-origins-destinations": "Trùng điểm xuất phát hoặc điểm đến",
+    "subtracking-with-empty-items-list": "Subtracking không chứa mặt hàng nào không được cho phép",
+    "password-reset-email-sent": "Email để cài lại mật khẩu đã được gửi đi"
   }, "success-messages": {
     "success": "Thành công",
     "creation-success": "Khởi tạo thành công",

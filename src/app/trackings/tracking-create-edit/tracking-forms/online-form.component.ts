@@ -1,5 +1,5 @@
 import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnInit, ViewChild } from "@angular/core";
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatCheckboxChange } from "@angular/material/checkbox";
 import { ActivatedRoute } from '@angular/router';
 import { ReplaySubject } from 'rxjs';
@@ -18,6 +18,7 @@ import { FinalizedInfoComponent } from "../finalized-info/finalized-info.compone
 import { GeneralInfoComponent } from "../general-info/general-info.component";
 import { ItemsListComponent } from '../items-list/items-list.component';
 import { AuthGlobals } from "src/app/auth/auth-globals";
+import { getTracking } from 'ts-tracking-number';
 
 
 @Component({
@@ -27,7 +28,7 @@ import { AuthGlobals } from "src/app/auth/auth-globals";
 })
 export class OnlineTrackingFormComponent implements OnInit, AfterViewChecked{
   onlineForm: FormGroup;
-  carriers = TrackingGlobals.carriers;
+  carriers = Object.values(TrackingGlobals.carriers);
 
   @ViewChild('itemsList') itemsList: ItemsListComponent;
   @ViewChild('fileUploader') fileUploader: FileUploaderComponent;
@@ -130,13 +131,42 @@ scannerOpened = false;
   createOnlineForm(formData: OnlineTrackingModel) {
     let form = new FormGroup({
       _id: new FormControl(formData?._id? formData._id :null),
-      carrierTrackingNumber: new FormControl(formData?.carrierTracking?.carrierTrackingNumber? formData.carrierTracking.carrierTrackingNumber: "", {validators: [Validators.required]}),
+      carrierTrackingNumber: new FormControl(formData?.carrierTracking?.carrierTrackingNumber? formData.carrierTracking.carrierTrackingNumber: "", {validators: [Validators.required, this.trackingNumberValidator()]}),
       carrier: new FormControl(formData?.carrierTracking?.carrier? formData.carrierTracking.carrier: "", {validators: [Validators.required]}),
       received: new FormControl({value: this.trackingGlobals.postReceivedAtOrigin.includes(formData?.generalInfo?.trackingStatus)? true : false, disabled: (!this.canView(this.authGlobals.internal) || this.trackingGlobals.postReadyToFly.includes(formData?.generalInfo?.trackingStatus))}, {validators: [Validators.required]}),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content: ""),
     });
 
     return form
+  }
+
+  trackingNumberValidator(): ValidatorFn {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      if (control && control.value) {
+        let response = getTracking(control.value);
+        console.log(response)
+        if (response) {
+          let carrier = null;
+          if (response.name.includes("USPS")) {
+            carrier = TrackingGlobals.carriers.USPS;
+          } else if (response.name.includes("UPS")) {
+            carrier = TrackingGlobals.carriers.UPS;
+          } else if (response.name.includes("Fedex")) {
+            carrier = TrackingGlobals.carriers.Fedex;
+          } else if (response.name.includes("DHL")) {
+            carrier = TrackingGlobals.carriers.DHLExpress;
+          } else if (response.name.includes("OnTrac")) {
+            carrier = TrackingGlobals.carriers.OnTrac;
+          } else if (response.name.includes("Amazon")) {
+            carrier = TrackingGlobals.carriers.AmazonMws;
+          }
+          this.onlineForm.get("carrier").setValue(carrier);
+          return null;
+        }
+      }
+      this.onlineForm?.get("carrier").setValue(null);
+      return {invalidInput: control.value};
+    };
   }
 
   generalInfoValidity(valid: boolean) {
@@ -180,11 +210,12 @@ scannerOpened = false;
     this.itemsList?.getFormValidity();
     this.finalizedInfo?.getFormValidity();
 
-    console.log(this.onlineForm.valid)
-    console.log(this.generalInfo.getFormValidity())
-    console.log(this.itemsList.getFormValidity())
-    console.log(this.finalizedInfo.getFormValidity())
-    if (!this.onlineForm.valid || !this.generalInfo.getFormValidity() || (this.itemsList && !this.itemsList.getFormValidity()) || (this.finalizedInfo && !this.finalizedInfo.getFormValidity())) {
+    let validity = this.onlineForm.valid && this.generalInfo.getFormValidity()
+    if (this.itemsList?.getRawValues().items.length > 0) {
+      validity = validity && (this.itemsList && this.itemsList.getFormValidity()) && (this.finalizedInfo && this.finalizedInfo.getFormValidity());
+    }
+
+    if (!validity) {
       return;
     }
 

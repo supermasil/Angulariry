@@ -18,6 +18,7 @@ import { ItemsListComponent } from "../items-list/items-list.component";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { TrackingGlobals } from "../../tracking-globals";
 import { ToastrService } from "ngx-toastr";
+import { TranslateService } from "@ngx-translate/core";
 
 
 @Component({
@@ -85,6 +86,7 @@ export class InPersonTrackingFormComponent implements OnInit, AfterViewChecked {
     private pricingService: PricingService,
     private cd: ChangeDetectorRef,
     private toastr: ToastrService,
+    private translateService: TranslateService
   ) {}
 
   ngOnInit() {
@@ -227,6 +229,10 @@ export class InPersonTrackingFormComponent implements OnInit, AfterViewChecked {
 
   getTotalFinalizedInfo() {
     this.resetTotalFinalizedInfo();
+    if (this.itemsListRef.length == 0) {
+      return
+    }
+
     let itemsListsValidity = true;
     this.itemsListRef.forEach((i, index) => {
       itemsListsValidity = i.getFormValidity() && itemsListsValidity;
@@ -288,7 +294,9 @@ export class InPersonTrackingFormComponent implements OnInit, AfterViewChecked {
       i.getFormValidity()
       itemsListsValidity = i.getFormValidity() && itemsListsValidity;
       if (i.getRawValues().items.length == 0) {
-        this.toastr.warning("Subtracking with empty items list is not allowed");
+        this.translateService.get(`error-messages.subtracking-with-empty-items-list`).subscribe(translatedMessage => {
+          this.toastr.warning(translatedMessage);
+        });
         return;
       }
       subTrackings[index]['itemsList'] = i.getRawValues().items;

@@ -1,13 +1,13 @@
 export class TrackingGlobals {
 
-  public static carriers = [
-    "UPS",
-    "Fedex",
-    "USPS",
-    "DHLExpress",
-    "AmazonMws",
-    "OnTrac"
-  ];
+  public static carriers = {
+    "UPS": "UPS",
+    "Fedex": "Fedex",
+    "USPS": "USPS",
+    "DHLExpress": "DHLExpress",
+    "AmazonMws": "AmazonMws",
+    "OnTrac": "OnTrac"
+  };
 
   public static preTransitCodes = [
     "pre_transit"

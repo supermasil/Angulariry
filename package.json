@@ -48,6 +48,7 @@
     "rxjs": "^6.5.5",
     "scandit-sdk": "^5.4.2",
     "scandit-sdk-angular": "^3.1.1",
+    "ts-tracking-number": "^1.0.11",
     "tslib": "^1.10.0",
     "zone.js": "^0.11.1"
   },

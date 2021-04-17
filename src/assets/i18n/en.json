@@ -146,7 +146,13 @@
     "customer-code-existed": "Customer code already existed",
     "referrer-not-found": "Referrer not found",
     "referrer-same-as-user": "Referer can't be the same as user",
-    "already-onboarded": "Already onboarded to this org"
+    "already-onboarded": "Already onboarded to this org",
+    "item-not-set-up-for-route": "Item is not set up for this route",
+    "not-logged-into-any-org": "You are not logged into any organization",
+    "inactive-account": "Your account is inactive",
+    "duplicate-origins-destinations": "Duplicate origins or destinations",
+    "subtracking-with-empty-items-list": "Subtracking with empty items list is not allowed",
+    "password-reset-email-sent": "Password reset email sent"
   }, "success-messages": {
     "success": "Success",
     "creation-success": "Created successfully",

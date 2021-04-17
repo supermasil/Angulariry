@@ -9,6 +9,7 @@ import { UserModel } from '../models/user.model';
 import { OrganizationModel } from '../models/organization.model';
 import { HistoryModel } from '../models/history.model';
 import { ToastrService } from 'ngx-toastr';
+import { TranslateService } from '@ngx-translate/core';
 
 const USER_BACKEND_URL = environment.apiURL + "/users/"
 const ORGANIZATION_BACKEND_URL = environment.apiURL + "/organizations/"
@@ -38,7 +39,8 @@ export class AuthService {
     private router: Router,
     private firebaseAuth: AngularFireAuth,
     private toastr: ToastrService,
-    private zone: NgZone) {
+    private zone: NgZone,
+    private translateService: TranslateService) {
     this.firebaseAuth.onAuthStateChanged(async firebaseUser => {
       this.isAuthLoading.next(true);
       this.authStatusSubject.next(false); // just make it false first before everything else
@@ -149,7 +151,9 @@ export class AuthService {
 
   resetPassword(email: string) {
     this.firebaseAuth.sendPasswordResetEmail(email).then(() => {
-      this.toastr.success("Password reset email sent");
+      this.translateService.get(`success-messages.password-reset-email-sent`).subscribe(translatedMessage => {
+        this.toastr.success(translatedMessage);
+      });
     }).catch(error => {
       this.toastr.error(error.message);
     })
@@ -219,7 +223,9 @@ export class AuthService {
         this.zone.run(async () => {
           await this.refreshAuthentication(this.firebaseUser);
           this.router.navigate(["/trackings"]);
-          this.toastr.success(`Onboarded to ${response.organization.name}`);
+          this.translateService.get(`auth.onboard-to-new-organization`).subscribe(translatedMessage => {
+            this.toastr.success(translatedMessage + " " +response.organization.name);
+          });
         });
       });
   }
@@ -235,7 +241,9 @@ export class AuthService {
           if (response.user.active) {
             this.router.navigate(["/trackings"]);
           }
-          this.toastr.success(`Logged in to ${response.organization.name}`);
+          this.translateService.get(`auth.login`).subscribe(translatedMessage => {
+            this.toastr.success(translatedMessage + " " +response.organization.name);
+          });
         });
       });
   }

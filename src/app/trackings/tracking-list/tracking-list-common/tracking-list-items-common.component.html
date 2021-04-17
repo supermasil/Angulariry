@@ -119,9 +119,9 @@
       <tr mat-footer-row *matFooterRowDef="onlineInPersonDisplayedColumns"></tr>
     </table>
     <div class="row mt-2">
-      <div class="col badge badge-secondary mr-1">{{subTracking.trackingNumber}}</div>
-      <div class="col badge badge-secondary mr-1"><a class="text-white" [routerLink]="'/trackings/view/' + subTracking.linkedToCsl?.trackingNumber"> {{subTracking.linkedToCsl?.trackingNumber}}</a></div>
-      <div class="col badge badge-secondary mr-1"><a class="text-white" [routerLink]="'/trackings/view/' + subTracking.linkedToMst?.trackingNumber"> {{subTracking.linkedToMst?.trackingNumber}}</a></div>
+      <div class="col mr-1"><a [routerLink]="['/trackings/view/' + subTracking.trackingNumber.slice(0, -2)]">{{subTracking.trackingNumber}}</a></div>
+      <div class="col mr-1"><a [routerLink]="'/trackings/view/' + subTracking.linkedToCsl?.trackingNumber"> {{subTracking.linkedToCsl?.trackingNumber}}</a></div>
+      <div class="col mr-1"><a [routerLink]="'/trackings/view/' + subTracking.linkedToMst?.trackingNumber"> {{subTracking.linkedToMst?.trackingNumber}}</a></div>
       <div class="col badge mr-1 text-white" [ngClass]="getBadgeColor(subTracking.generalInfo.trackingStatus)">{{'statuses.' + subTracking.generalInfo.trackingStatus | translate}}</div>
       <div class="col badge mr-1 text-white" [ngClass]="getBadgeColor(subTracking.generalInfo.financialStatus)">{{'statuses.' + subTracking.generalInfo.financialStatus | translate}}</div>
     </div>
@@ -148,7 +148,16 @@
   <table mat-table [dataSource]="combineTrackings(tracking.onlineTrackings, tracking.servicedTrackings, tracking.inPersonSubTrackings)">
     <ng-container matColumnDef="trackingNumber">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>general.tracking-number</span></th>
-      <td mat-cell *matCellDef="let item">{{item?.trackingNumber}}</td>
+      <td mat-cell *matCellDef="let item">
+        <div *ngIf="item?.trackingNumber.substring(0,3) == 'inp'">
+          <a [routerLink]="['/trackings/view/' + item?.trackingNumber.slice(0, -3)]">{{item?.trackingNumber}}</a>
+        </div>
+        <div *ngIf="item?.trackingNumber.substring(0,3) != 'inp'">
+          <a [routerLink]="['/trackings/view/' + item?.trackingNumber]">{{item?.trackingNumber}}</a>
+        </div>
+
+
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="payment">
@@ -203,7 +212,7 @@
   <table mat-table [dataSource]="getMasterSubTrackings(tracking)">
     <ng-container matColumnDef="trackingNumber">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>general.tracking-number</span></th>
-      <td mat-cell *matCellDef="let item">{{item?.trackingNumber}}</td>
+      <td mat-cell *matCellDef="let item"><a [routerLink]="['/trackings/view/' + tracking.trackingNumber]">{{item?.trackingNumber}}</a></td>
     </ng-container>
 
     <ng-container matColumnDef="payment">

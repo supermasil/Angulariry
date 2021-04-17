@@ -3,7 +3,7 @@
 </app-header>
 
 <mat-drawer-container class="side-menu" autosize>
-  <mat-drawer #drawer class="side-menu-nav" mode="side">
+  <mat-drawer #drawer class="side-menu-nav" mode="over">
     <div *ngIf="isAuth()">
       <a mat-button color="primary" class="w-100" [routerLink]="'/'"><mat-icon>home</mat-icon></a>
       <mat-divider></mat-divider>
@@ -115,7 +115,7 @@
   </a>
   <mat-menu #aboveMenu="matMenu" yPosition="above" style="z-index: 9999;">
     <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.everyone)" [routerLink]="'/trackings/create/onl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.onl</span></a>
-    <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.sev</span> (not ready)</a>
+    <!-- <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/sev'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.sev</span> (not ready)</a> -->
     <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/inp'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.inp</span></a>
     <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/csl'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.csl</span></a>
     <a mat-menu-item class="nav-link" *ngIf="canView(authGlobals.internal)" [routerLink]="'/trackings/create/mst'" [routerLinkActive]="['is-active']" [routerLinkActiveOptions]="{ exact: true}"><span translate>tracking-types.mst</span></a>

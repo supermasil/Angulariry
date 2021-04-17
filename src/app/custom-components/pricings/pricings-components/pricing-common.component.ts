@@ -9,6 +9,7 @@ import { UserModel } from "src/app/models/user.model";
 import { AutoCompleteInputComponent } from "../../auto-complete-input/auto-complete-input.component";
 import { trigger, state, style, transition, animate } from "@angular/animations";
 import { ToastrService } from "ngx-toastr";
+import { TranslateService } from "@ngx-translate/core";
 
 @Component({
   selector: 'pricing-common-form',
@@ -50,6 +51,7 @@ export class PricingCommonComponent implements OnInit, AfterViewChecked {
     public pricingService: PricingService,
     private cd: ChangeDetectorRef,
     private toastr: ToastrService,
+    private translateService: TranslateService
   ) {}
 
   ngOnInit() {
@@ -308,7 +310,9 @@ export class PricingCommonComponent implements OnInit, AfterViewChecked {
 
   onSubmit() {
     if (!this.originDestinationValidation()) {
-      this.toastr.warning("Duplicate origins or destinations");
+      this.translateService.get(`error-messages.duplicate-origins-destinations`).subscribe(translatedMessage => {
+        this.toastr.warning(translatedMessage);
+      });
       return;
     }
 

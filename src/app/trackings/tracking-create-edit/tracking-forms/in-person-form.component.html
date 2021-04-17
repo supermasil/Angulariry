@@ -18,92 +18,90 @@
       [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
     </mat-card>
 
-    <mat-card class="m-3 mat-elevation-z2">
-      <form [formGroup]="subTrackingsForm">
-        <div formArrayName="subTrackings" *ngFor="let subTracking of subTrackingsForm.get('subTrackings')['controls']; let i = index;">
-          <div>
-            <mat-card class="m-3 mat-elevation-z2">
-              <div [formGroupName]="i">
-                <div class="row">
-                  <div class="col-lg-4">
-                    <mat-form-field appearance="outline">
-                      <mat-label translate>general.tracking-number</mat-label>
-                      <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
-                      <button
-                        [disabled]="subTracking.get('linkedToCsl').value || subTracking.get('linkedToMst').value"
-                        matSuffix
-                        mat-mini-fab
-                        color="warn"
-                        class="mr-2"
-                        (click)="deleteSubTracking(i, subTracking.get('_id').value)">
-                        <mat-icon>remove_circle</mat-icon>
-                      </button>
-                      <a
-                        matSuffix
-                        mat-mini-fab
-                        color="basic"
-                        [cdkCopyToClipboard]="trackingNumber.value">
-                        <mat-icon>content_copy</mat-icon>
-                      </a>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-lg-3">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Linked To Consolidated</mat-label>
-                      <input type='text' matInput formControlName="linkedToCsl" #linkedToCsl>
-                      <a
-                        matSuffix
-                        mat-mini-fab
-                        color="basic"
-                        [routerLink]="'/trackings/view/' + linkedToCsl.value">
-                        <mat-icon>open_in_new</mat-icon>
-                      </a>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-lg-3">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Linked To Master</mat-label>
-                      <input type='text' matInput formControlName="linkedToMst" #linkedToMst>
-                      <a
-                        matSuffix
-                        mat-mini-fab
-                        color="basic"
-                        [routerLink]="'/trackings/view/' + linkedToMst.value">
-                        <mat-icon>open_in_new</mat-icon>
-                      </a>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-lg-2">
-                    <mat-checkbox matInput formControlName="financialStatus" style="position: relative; bottom: -15px;">Paid</mat-checkbox>
-                  </div>
+    <form [formGroup]="subTrackingsForm">
+      <div formArrayName="subTrackings" *ngFor="let subTracking of subTrackingsForm.get('subTrackings')['controls']; let i = index;">
+        <div>
+          <mat-card class="m-3 mat-elevation-z2">
+            <div [formGroupName]="i">
+              <div class="row">
+                <div class="col-lg-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label translate>general.tracking-number</mat-label>
+                    <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+                    <a
+                      [disabled]="subTracking.get('linkedToCsl').value || subTracking.get('linkedToMst').value"
+                      matSuffix
+                      mat-mini-fab
+                      color="warn"
+                      class="mr-2"
+                      (click)="deleteSubTracking(i, subTracking.get('_id').value)">
+                      <mat-icon>remove_circle</mat-icon>
+                    </a>
+                    <a
+                      matSuffix
+                      mat-mini-fab
+                      color="basic"
+                      [cdkCopyToClipboard]="trackingNumber.value">
+                      <mat-icon>content_copy</mat-icon>
+                    </a>
+                  </mat-form-field>
                 </div>
-
-                <div class="mt-4 mt-lg-0">
-                  <items-list
-                    #itemsList
-                    [pricingObservable]="defaultPricingSubject.asObservable()"
-                    [updateExistingItemsObservable]="updateExistingItemsSubjects[i].asObservable()"
-                    [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
-                    (formValidity)="itemsListValidity($event, i)">
-                  </items-list>
+                <div class="col-lg-3">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Linked To Consolidated</mat-label>
+                    <input type='text' matInput formControlName="linkedToCsl" #linkedToCsl>
+                    <a
+                      matSuffix
+                      mat-mini-fab
+                      color="basic"
+                      [routerLink]="'/trackings/view/' + linkedToCsl.value">
+                      <mat-icon>open_in_new</mat-icon>
+                    </a>
+                  </mat-form-field>
                 </div>
-
-                <div *ngIf="showFinalizedInfo[i]">
-                  <finalized-info
-                    #finalizedInfo
-                    [itemsListObservable]="itemsListSubjects[i].asObservable()"
-                    [costAdjustmentObservable]="costAdjustmentSubjects[i].asObservable()"
-                    [exchangeObservable]="exchangeSubject[i].asObservable()"
-                    (formValidity)="finalizedInfoValidty()">
-                  </finalized-info>
+                <div class="col-lg-3">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Linked To Master</mat-label>
+                    <input type='text' matInput formControlName="linkedToMst" #linkedToMst>
+                    <a
+                      matSuffix
+                      mat-mini-fab
+                      color="basic"
+                      [routerLink]="'/trackings/view/' + linkedToMst.value">
+                      <mat-icon>open_in_new</mat-icon>
+                    </a>
+                  </mat-form-field>
+                </div>
+                <div class="col-lg-2">
+                  <mat-checkbox matInput formControlName="financialStatus" style="position: relative; bottom: -15px;">Paid</mat-checkbox>
                 </div>
               </div>
-            </mat-card>
-          </div>
+
+              <div class="mt-4 mt-lg-0">
+                <items-list
+                  #itemsList
+                  [pricingObservable]="defaultPricingSubject.asObservable()"
+                  [updateExistingItemsObservable]="updateExistingItemsSubjects[i].asObservable()"
+                  [pricingUpdatedObservable]="pricingUpdatedSubject.asObservable()"
+                  (formValidity)="itemsListValidity($event, i)">
+                </items-list>
+              </div>
+
+              <div *ngIf="showFinalizedInfo[i]">
+                <finalized-info
+                  #finalizedInfo
+                  [itemsListObservable]="itemsListSubjects[i].asObservable()"
+                  [costAdjustmentObservable]="costAdjustmentSubjects[i].asObservable()"
+                  [exchangeObservable]="exchangeSubject[i].asObservable()"
+                  (formValidity)="finalizedInfoValidty()">
+                </finalized-info>
+              </div>
+            </div>
+          </mat-card>
         </div>
-      </form>
-      <a mat-mini-fab color="accent" #addItemButton (click)="addSubTracking(null)"><mat-icon>add</mat-icon></a>
-    </mat-card>
+      </div>
+    </form>
+    <a mat-mini-fab color="accent" class="m-3" #addItemButton (click)="addSubTracking(null)"><mat-icon>add</mat-icon></a>
 
     <div *ngIf="showTotalFinalizedInfo">
       <mat-card style="background-color: #673AB7; color: white" class="m-3 mat-elevation-z2">

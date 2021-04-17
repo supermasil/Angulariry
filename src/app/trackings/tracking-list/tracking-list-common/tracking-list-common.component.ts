@@ -14,6 +14,7 @@ import { ServicedTrackingModel } from "src/app/models/tracking-models/serviced-t
 import { UserModel } from "src/app/models/user.model";
 import { TrackingGlobals } from "../../tracking-globals";
 import { TrackingService } from "../../tracking.service";
+import { getTracking } from 'ts-tracking-number';
 
 
 @Component({
@@ -31,6 +32,7 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   currentOrg: OrganizationModel;
   authGlobal = AuthGlobals;
   trackingGlobals = TrackingGlobals;
+  getCarrierTracking = getTracking
 
   canView = this.authService.canView;
   isAuth = this.authService.isAuth;
@@ -121,5 +123,10 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
         this.trackings[index] = response.tracking;
       });
     });
+  }
+
+  getCarrierTrackingUrl(value: string) {
+    let result =  this.getCarrierTracking(value)?.trackingUrl.slice(0, -2) + value;
+    console.log(result);
   }
 }

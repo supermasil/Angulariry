@@ -7,6 +7,7 @@ import { PricingItemModel, PricingModel } from 'src/app/models/pricing.model';
 import { ListItemModel } from 'src/app/models/tracking-models/list-item.model';
 import { TrackingGlobals } from '../../tracking-globals';
 import { ToastrService } from 'ngx-toastr';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'items-list',
@@ -44,7 +45,8 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
   constructor(
     private authService: AuthService,
     private cd: ChangeDetectorRef,
-    private toastr: ToastrService) {
+    private toastr: ToastrService,
+    private translateService: TranslateService) {
   }
 
   ngOnInit() {
@@ -76,7 +78,6 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
       if (this.itemsForm.get('items')['controls'].length == 0) {
         validity = false;
       }
-      console.log(this.itemsForm)
       this.formValidity.emit({valid: validity, data: this.itemsForm.getRawValue()});
     });
 
@@ -145,7 +146,9 @@ export class ItemsListComponent implements OnInit, AfterViewInit, AfterViewCheck
           }
 
         } catch (error) {
-          this.toastr.warning(`Probably this route is not set up for item ${itemName}`);
+          this.translateService.get(`error-messages.item-not-set-up-for-route`).subscribe(translatedMessage => {
+            this.toastr.warning(translatedMessage);
+          });
           this.itemsForm.get('items')['controls'][itemFormIndex].get('unitCharge').setValue(null);
           this.itemsForm.get('items')['controls'][itemFormIndex].get('extraCharge').setValue(null);
         }
