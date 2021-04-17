@@ -3,6 +3,7 @@ const UserController = require("../controllers/users");
 const OnlineTrackingModel = require('../models/tracking-models/online-tracking');
 const ServiceTrackingModel = require('../models/tracking-models/serviced-tracking');
 const InPersonTrackingModel = require('../models/tracking-models/in-person-tracking');
+const InPersonSubTrackingModel = require('../models/tracking-models/in-person-tracking-sub');
 const ConsolidatedTrackingModel = require('../models/tracking-models/consolidated-tracking');
 const MasterTrackingModel = require('../models/tracking-models/master-tracking');
 const db = require('mongoose');
@@ -12,8 +13,9 @@ const TrackingTypes = Object.freeze({
   ONLINE: "onl",
   SERVICED: "sev",
   INPERSON: "inp",
+  INPERSONSUB: "inpsub",
   CONSOLIDATED: "csl",
-  MASTER: "mst"
+  MASTER: "mst",
 });
 
 exports.createComment = async (req, res, next) => {
@@ -38,7 +40,9 @@ exports.createComment = async (req, res, next) => {
 
       let model = null;
 
-      switch(req.body.trackingNumber.substring(0, 3)) {
+      let type = (req.body.trackingNumber.match(/-/g) || []).length == 1? req.body.trackingNumber.substring(0, 3): TrackingTypes.INPERSONSUB;
+
+      switch(type) {
         case TrackingTypes.ONLINE:
           model = OnlineTrackingModel;
           break;
@@ -47,6 +51,9 @@ exports.createComment = async (req, res, next) => {
           break;
         case TrackingTypes.INPERSON:
           model = InPersonTrackingModel;
+          break;
+        case TrackingTypes.INPERSONSUB:
+          model = InPersonSubTrackingModel;
           break;
         case TrackingTypes.CONSOLIDATED:
           model = ConsolidatedTrackingModel;

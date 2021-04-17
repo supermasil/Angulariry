@@ -97,9 +97,14 @@ export class TrackingListItemsCommonComponent implements OnInit {
 
   getMasterSubTrackings(tracking: any) {
     let result = [];
-    for (let box of tracking.boxes) {
-      result.push(...this.combineTrackings(box.onlineTrackings, box.servicedTrackings, box.inPersonSubTrackings));
-    };
+    tracking.boxes.forEach((box: MasterTrackingBox) => {
+      let trackings = this.combineTrackings(box.onlineTrackings, box.servicedTrackings, box.inPersonSubTrackings);
+      trackings.forEach(t => {
+        t.boxNumber = box.boxNumber,
+        t.palletNumber = box.palletNumber
+      })
+      result.push(...trackings);
+    });
     return result;
   }
 }

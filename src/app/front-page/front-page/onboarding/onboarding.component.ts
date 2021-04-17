@@ -29,7 +29,7 @@ export class OnboardingComponent implements OnInit{
   ngOnInit() {
     this.currentUser = this.authService.getMongoDbUser();
     this.currentOrg = this.authService.getUserOrg();
-    this.authService.getManyOrganizations(this.currentUser.organizations.map(o => o.organization)).subscribe((orgs: OrganizationModel[]) => {
+    this.authService.getOrganizationsByIds(this.currentUser.organizations.map(o => o.organization)).subscribe((orgs: OrganizationModel[]) => {
       this.organizations = orgs;
       // let filteredNames = this.organizations.map(o => `${o.name} | ${o.email}`);
       // filteredNames.unshift("Onboard to new organization");

@@ -127,7 +127,7 @@ export class AuthService {
       await this.firebaseAuth.signInWithEmailAndPassword(email, password)
       .then(async (userCredentials) => {
         this.loginMode = true;
-        await this.refreshAuthentication(userCredentials.user);
+        // await this.refreshAuthentication(userCredentials.user); // No need, it will refresh on status change
       }).catch(error => {
         this.toastr.error(error.message);
       })
@@ -248,16 +248,12 @@ export class AuthService {
       });
   }
 
-  getOrganization(id: string) {
-    return this.httpClient.get<OrganizationModel>(ORGANIZATION_BACKEND_URL + id);
-  }
-
   getOrganizations() {
     return this.httpClient.get<{organizations: OrganizationModel[], count: number}>(ORGANIZATION_BACKEND_URL);
   }
 
-  getManyOrganizations(orgIds: string[]) {
-    return this.httpClient.post<OrganizationModel[]>(ORGANIZATION_BACKEND_URL + `getMany`, {orgIds: orgIds});
+  getOrganizationsByIds(orgIds: string[]) {
+    return this.httpClient.get<OrganizationModel[]>(ORGANIZATION_BACKEND_URL + `/${orgIds}`);
   }
 
   deleteOrganization(id: string) {

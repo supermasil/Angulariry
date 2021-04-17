@@ -170,6 +170,7 @@ createUpdateTrackingHelper = async (req, session, type, MODEL) => {
       break;
     case TrackingTypes.MASTER:
       updateBody['boxes'] = req.body.boxes;
+      updateBody['mawb'] = req.body.mawb;
       break;
     default:
       throw new Error("createUpdateTrackingHelper: Tracking type doesn't match any");

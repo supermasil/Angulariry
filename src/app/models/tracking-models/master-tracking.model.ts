@@ -14,6 +14,7 @@ export interface MasterTrackingBox {
 
 export interface MasterTrackingModel { // From backend
   _id: string;
+  mawb: string;
   trackingNumber: string;
   boxes: MasterTrackingBox[];
   generalInfo: GeneralInfoModel;

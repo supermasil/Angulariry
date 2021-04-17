@@ -7,6 +7,7 @@ const GeneralInfoSchema = require('./general-info-schema');
 
 const masterTrackingSchema = mongoose.Schema({
   trackingNumber: {type: String, required: true, unique: true, index: true},
+  mawb: {type: String},
   boxes: [{
     boxNumber: {type: String, required: true},
     palletNumber: {type: String, required: true},

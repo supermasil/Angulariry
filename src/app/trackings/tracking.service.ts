@@ -104,6 +104,10 @@ export class TrackingService{
   }
 
   getTrackingTypeFromString(term: string) {
+    if ((term.match(/-/g) || []).length == 2) {
+      return TrackingGlobals.trackingTypes.INPERSONSUB;
+    }
+
     switch (term.substring(0,3).toLowerCase()) {
       case 'onl':
         return TrackingGlobals.trackingTypes.ONLINE;

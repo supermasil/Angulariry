@@ -106,6 +106,7 @@ export class MasterTrackingFormComponent implements OnInit {
   createMasterForm(formData: MasterTrackingModel) {
     let form = new FormGroup({
       _id: new FormControl(formData?._id? formData._id : null),
+      mawb: new FormControl(formData?.mawb? formData.mawb : ""),
       boxes: new FormArray([]),
       content: new FormControl(formData?.generalInfo?.content? formData.generalInfo.content : "")
     });

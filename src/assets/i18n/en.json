@@ -84,7 +84,8 @@
     "sev": "Serviced",
     "inp": "In Person",
     "csl": "Consolidated",
-    "mst": "Master"
+    "mst": "Master",
+    "inpsub": "In Person Sub"
   },
   "statuses": {
     "consolidated": "Consolidated",

@@ -84,7 +84,8 @@
     "sev": "Đơn mua hộ",
     "inp": "Đơn gửi tận tay",
     "csl": "Đơn kế toán tổng hợp",
-    "mst": "Đơn vận chuyển tổng hợp"
+    "mst": "Đơn vận chuyển tổng hợp",
+    "inpsub": "Đơn gửi tận tay tách rời"
   },
   "statuses": {
     "consolidated": "Đã thêm vào đơn kế toán tổng hợp",

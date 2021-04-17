@@ -81,21 +81,22 @@ locationsSetupHelper = (locations) => {
   return results;
 }
 
-exports.getOrganization = async (req, res, next) => {
+exports.getOrganizationsByIds = async (req, res, next) => {
+  var orgIds = req.params.ids.split(',');
   try {
-    foundOrganization = await this.getOrganizationByIdHelper(req.params.id);
-    if (foundOrganization == null) {
-      throw new Error("Organization is null");
-    }
-    return next({
-      resCode: 200,
-      resBody: foundOrganization
-    });
-  } catch (error) {
+    const orgQuery = OrganizationModel.find({ _id: { "$in" : orgIds} });
+    await orgQuery
+      .then(documents => {
+        return next({
+          resCode: 200,
+          resBody: documents
+        });
+      });
+  } catch(error) {
     return next({
       error: error
-    })
-  }
+    });
+  };
 }
 
 exports.getOrganizations = async (req, res, next) => {
@@ -132,20 +133,21 @@ exports.getOrganizations = async (req, res, next) => {
 }
 
 exports.getManyOrganizations = async (req, res, next) => {
-  try {
-    const orgQuery = OrganizationModel.find({ _id: { "$in" : req.body.orgIds} });
-    await orgQuery
-      .then(documents => {
-        return next({
-          resCode: 200,
-          resBody: documents
-        });
-      });
-  } catch(error) {
-    return next({
-      error: error
-    });
-  };
+  console.log(req.query.orgIds)
+  // try {
+  //   const orgQuery = OrganizationModel.find({ _id: { "$in" : req.params.orgIds} });
+  //   await orgQuery
+  //     .then(documents => {
+  //       return next({
+  //         resCode: 200,
+  //         resBody: documents
+  //       });
+  //     });
+  // } catch(error) {
+  //   return next({
+  //     error: error
+  //   });
+  // };
 }
 
 exports.getOrganizationByIdHelper = async (orgId) => {

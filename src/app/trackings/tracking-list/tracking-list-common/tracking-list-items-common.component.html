@@ -1,4 +1,4 @@
-<div style="overflow-x: auto; white-space: nowrap;" class="mt-4" *ngIf="(tracking.generalInfo.type === trackingGlobals.trackingTypes.ONLINE || tracking.generalInfo.type === trackingGlobals.trackingTypes.SERVICED) && tracking.itemsList.length > 0">
+<div style="overflow-x: auto; white-space: nowrap;" class="mt-4" *ngIf="(tracking.generalInfo.type === trackingGlobals.trackingTypes.ONLINE || tracking.generalInfo.type === trackingGlobals.trackingTypes.SERVICED || tracking.generalInfo.type === trackingGlobals.trackingTypes.INPERSONSUB) && tracking.itemsList.length > 0">
   <table mat-table [dataSource]="tracking.itemsList">
     <ng-container matColumnDef="item">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>tracking-info.item-name</span></th>
@@ -60,7 +60,7 @@
   </div>
 </div>
 
-<div class="mt-4" *ngIf="tracking.generalInfo.type === trackingGlobals.trackingTypes.INPERSON && tracking.subTrackings.length > 0">
+<div class="mt-4" *ngIf="tracking.generalInfo.type == trackingGlobals.trackingTypes.INPERSON && tracking.subTrackings.length > 0">
   <ng-container *ngFor="let subTracking of tracking.subTrackings">
     <table mat-table [dataSource]="subTracking.itemsList">
       <ng-container matColumnDef="item">
@@ -119,7 +119,7 @@
       <tr mat-footer-row *matFooterRowDef="onlineInPersonDisplayedColumns"></tr>
     </table>
     <div class="row mt-2">
-      <div class="col mr-1"><a [routerLink]="['/trackings/view/' + subTracking.trackingNumber.slice(0, -2)]">{{subTracking.trackingNumber}}</a></div>
+      <div class="col mr-1"><a [routerLink]="['/trackings/view/' + subTracking.trackingNumber]">{{subTracking.trackingNumber}}</a></div>
       <div class="col mr-1"><a [routerLink]="'/trackings/view/' + subTracking.linkedToCsl?.trackingNumber"> {{subTracking.linkedToCsl?.trackingNumber}}</a></div>
       <div class="col mr-1"><a [routerLink]="'/trackings/view/' + subTracking.linkedToMst?.trackingNumber"> {{subTracking.linkedToMst?.trackingNumber}}</a></div>
       <div class="col badge mr-1 text-white" [ngClass]="getBadgeColor(subTracking.generalInfo.trackingStatus)">{{'statuses.' + subTracking.generalInfo.trackingStatus | translate}}</div>
@@ -149,11 +149,11 @@
     <ng-container matColumnDef="trackingNumber">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>general.tracking-number</span></th>
       <td mat-cell *matCellDef="let item">
-        <div *ngIf="item?.trackingNumber.substring(0,3) == 'inp'">
-          <a [routerLink]="['/trackings/view/' + item?.trackingNumber.slice(0, -3)]">{{item?.trackingNumber}}</a>
+        <div *ngIf="item.trackingNumber.substring(0,3) == 'inp'">
+          <a [routerLink]="['/trackings/view/' + item.trackingNumber.slice(0, -3)]">{{item.trackingNumber}}</a>
         </div>
-        <div *ngIf="item?.trackingNumber.substring(0,3) != 'inp'">
-          <a [routerLink]="['/trackings/view/' + item?.trackingNumber]">{{item?.trackingNumber}}</a>
+        <div *ngIf="item.trackingNumber.substring(0,3) != 'inp'">
+          <a [routerLink]="['/trackings/view/' + item.trackingNumber]">{{item.trackingNumber}}</a>
         </div>
 
 
@@ -164,8 +164,8 @@
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>general.payment</span></th>
       <td mat-cell *matCellDef="let item">
         <mat-slide-toggle
-          [checked]="item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid"
-          (change)="childTrackingToggle(item, !(item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid), tracking, i);"
+          [checked]="item.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid"
+          (change)="childTrackingToggle(item, !(item.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid), tracking, i);"
           class="mr-2">
         </mat-slide-toggle>
       </td>
@@ -173,12 +173,12 @@
 
     <ng-container matColumnDef="weight">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>tracking-info.weight</span></th>
-      <td mat-cell *matCellDef="let item">Kg {{item?.generalInfo?.totalWeight}}</td>
+      <td mat-cell *matCellDef="let item">Kg {{item.generalInfo?.totalWeight}}</td>
     </ng-container>
 
     <ng-container matColumnDef="cost">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" class="col" translate>tracking-info.final-charge</span></th>
-      <td mat-cell *matCellDef="let item">{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
+      <td mat-cell *matCellDef="let item">{{item.generalInfo?.finalCost | currency: 'USD'}}</td>
     </ng-container>
 
     <ng-container matColumnDef="trackingStatus">
@@ -212,15 +212,15 @@
   <table mat-table [dataSource]="getMasterSubTrackings(tracking)">
     <ng-container matColumnDef="trackingNumber">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>general.tracking-number</span></th>
-      <td mat-cell *matCellDef="let item"><a [routerLink]="['/trackings/view/' + tracking.trackingNumber]">{{item?.trackingNumber}}</a></td>
+      <td mat-cell *matCellDef="let item"><a [routerLink]="['/trackings/view/' + tracking.trackingNumber]">{{item.trackingNumber}}</a></td>
     </ng-container>
 
     <ng-container matColumnDef="payment">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>general.payment</span></th>
       <td mat-cell *matCellDef="let item">
         <mat-slide-toggle
-          [checked]="item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid"
-          (change)="childTrackingToggle(item, !(item?.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid), tracking, i);"
+          [checked]="item.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid"
+          (change)="childTrackingToggle(item, !(item.generalInfo.financialStatus == trackingGlobals.financialStatuses.Paid), tracking, i);"
           class="mr-2">
         </mat-slide-toggle>
       </td>
@@ -228,22 +228,22 @@
 
     <ng-container matColumnDef="weight">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" translate>tracking-info.weight</span></th>
-      <td mat-cell *matCellDef="let item">Kg {{item?.generalInfo?.totalWeight}}</td>
+      <td mat-cell *matCellDef="let item">Kg {{item.generalInfo?.totalWeight}}</td>
     </ng-container>
 
     <ng-container matColumnDef="cost">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" class="col" translate>tracking-info.final-charge</span></th>
-      <td mat-cell *matCellDef="let item">{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
+      <td mat-cell *matCellDef="let item">{{item.generalInfo?.finalCost | currency: 'USD'}}</td>
     </ng-container>
 
     <ng-container matColumnDef="pallet">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" class="col" translate>tracking-info.pallet</span></th>
-      <td mat-cell *matCellDef="let item">{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
+      <td mat-cell *matCellDef="let item">{{item.palletNumber}}</td>
     </ng-container>
 
     <ng-container matColumnDef="box">
       <th mat-header-cell *matHeaderCellDef><span class="pr-2" class="col" translate>tracking-info.box</span></th>
-      <td mat-cell *matCellDef="let item">{{item?.generalInfo?.finalCost | currency: 'USD'}}</td>
+      <td mat-cell *matCellDef="let item">{{item.boxNumber}}</td>
     </ng-container>
 
     <ng-container matColumnDef="status">

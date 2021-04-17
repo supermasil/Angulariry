@@ -45,6 +45,7 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   deliveryCodes = TrackingGlobals.deliveryCodes
   failureCodes = TrackingGlobals.failureCodes;
   globalConstants = GlobalConstants;
+  expanded = [];
 
   @Input() trackingsObservable: Observable<{trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}> = new Observable();
   @Input() resetPaginatorObservable = new Observable()
@@ -65,6 +66,10 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
     this.trackingsObservable.subscribe((data: {trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[], count: number}) => {
       this.trackings = data.trackings;
       this.totalTrackings = data.count;
+      this.expanded = [];
+      this.trackings.forEach(t => {
+        this.expanded.push(false);
+      })
     });
 
     this.resetPaginatorObservable.subscribe(() =>{
@@ -125,6 +130,7 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   }
 
   getCarrierTrackingUrl(value: string) {
-    return getTracking(value)?.trackingUrl?.slice(0, -2) + value;
+    let url = getTracking(value)?.trackingUrl? getTracking(value).trackingUrl.slice(0, -2) + value : "";
+    return url;
   }
 }

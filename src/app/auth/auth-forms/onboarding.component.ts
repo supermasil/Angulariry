@@ -33,8 +33,8 @@ export class OnboardingFormComponentForm implements OnInit {
     this.route.paramMap.subscribe((paramMap) => {
       if (paramMap.has("orgId")) {
         this.mode = 'edit'
-        this.authService.getOrganization(paramMap.get("orgId")).subscribe(organization => {
-          this.organizationOnboardingForm = this.createOrganizationOnboardingForm(organization);
+        this.authService.getOrganizationsByIds([paramMap.get("orgId")]).subscribe(organization => {
+          this.organizationOnboardingForm = this.createOrganizationOnboardingForm(organization[0]);
         }, error => {
           this.authService.redirectToMainPageWithoutMessage();
         });

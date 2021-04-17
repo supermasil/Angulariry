@@ -40,11 +40,11 @@ export class TrackingGlobals {
 
   public static trackingTypes = {
     ONLINE: "onl",
-    SERVICED: "sev",
     INPERSON: "inp",
     CONSOLIDATED: "csl",
     MASTER: "mst",
-    INPERSONSUB: "inpsub"
+    INPERSONSUB: "inpsub",
+    SERVICED: "sev",
   }
 
   public static trackingStatuses = {
