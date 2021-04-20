@@ -11,7 +11,7 @@
 </div>
 
 <form *ngIf="creditForm" [formGroup]='creditForm' (submit)='onSubmit()'>
-  <mat-card class="m-3 mat-elevation-z2">
+  <mat-card class="m-3 mat-elevation-z0">
     <div style="font-size: 3em;" class="my-4">{{editUser.credit | currency: 'USD'}}</div>
 
     <mat-form-field appearance="outline">
@@ -32,7 +32,7 @@
       ></textarea>
     </mat-form-field>
   </mat-card>
-  <mat-card *ngIf="creditHistory?.length > 0" class="m-3 mat-elevation-z2">
+  <mat-card *ngIf="creditHistory?.length > 0" class="m-3 mat-elevation-z0">
     <div class="scroll-box">
       <ng-container *ngFor="let history of creditHistory">
         <div>{{history?.action}}  <span class="dimmed-text">{{formatDateTime(history?.updatedAt)}}</span></div>

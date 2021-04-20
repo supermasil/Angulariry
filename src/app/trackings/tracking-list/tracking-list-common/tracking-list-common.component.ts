@@ -15,6 +15,8 @@ import { UserModel } from "src/app/models/user.model";
 import { TrackingGlobals } from "../../tracking-globals";
 import { TrackingService } from "../../tracking.service";
 import { getTracking } from 'ts-tracking-number';
+import { MatSort } from "@angular/material/sort";
+import { MatTableDataSource } from "@angular/material/table";
 
 
 @Component({
@@ -24,6 +26,9 @@ import { getTracking } from 'ts-tracking-number';
 })
 export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
+  displayedColumns: string[] = ['trackingNumber', 'trackingStatus', 'financialStatus', 'recipient'];
+  dataSource = new MatTableDataSource(this.trackings);
+  @ViewChild(MatSort) sort: MatSort;
 
   totalTrackings = 0;
   pageSizeOptions = GlobalConstants.defaultPageSizes;
@@ -70,6 +75,20 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
       this.trackings.forEach(t => {
         this.expanded.push(false);
       })
+      this.dataSource = new MatTableDataSource(data.trackings);
+      if (data.trackings.length > 0 && data.trackings[0].generalInfo.type == "mst") {
+        this.displayedColumns = this.displayedColumns.slice(0, -1);
+      }
+      this.dataSource.sortingDataAccessor = (item, property) => {
+        switch(property) {
+          case 'trackingNumber': return item.trackingNumber;
+          case 'trackingStatus': return item.generalInfo.trackingStatus;
+          case 'financialStatus': return item.generalInfo.financialStatus;
+          case 'recipient': return item.generalInfo.recipient.name;
+          default: return item[property];
+        }
+      };
+      this.dataSource.sort = this.sort;
     });
 
     this.resetPaginatorObservable.subscribe(() =>{
@@ -88,7 +107,7 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   }
 
   // Change # of trackings per page
-  pageDataChange(pageData: PageEvent) {
+  pageDataChanged(pageData: PageEvent) {
     this.pageDataChangeEvent.emit(pageData);
   }
 

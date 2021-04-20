@@ -1,6 +1,6 @@
 <form *ngIf="signupForm" [formGroup]="signupForm" (submit)='onSignup()' (keydown.enter)="$event.preventDefault()">
   <div>
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <mat-form-field appearance="outline">
         <mat-label translate>auth.full-name</mat-label>
         <input
@@ -61,7 +61,7 @@
     <h3 class="m-3" translate>auth.sender-addresses</h3>
     <div formArrayName="addresses" *ngFor="let item of signupForm.get('addresses')['controls']; let i = index;">
       <div [formGroupName]="i">
-        <mat-card class="m-3 mat-elevation-z2">
+        <mat-card class="m-3 mat-elevation-z0">
           <mat-form-field appearance="outline">
             <mat-label translate>auth.address</mat-label>
             <input
@@ -101,7 +101,7 @@
     <h3 class="m-3" translate>auth.recipient-addresses</h3>
     <div formArrayName="recipients" *ngFor="let item of signupForm.get('recipients')['controls']; let i = index;">
       <div [formGroupName]="i">
-        <mat-card class="m-3 mat-elevation-z2">
+        <mat-card class="m-3 mat-elevation-z0">
           <mat-form-field appearance="outline">
             <mat-label translate>auth.full-name</mat-label>
             <input

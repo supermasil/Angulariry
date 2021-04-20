@@ -22,6 +22,7 @@ import { ServicedTrackingFormComponent } from './tracking-create-edit/tracking-f
 import { InPersonTrackingFormComponent } from './tracking-create-edit/tracking-forms/in-person-form.component';
 import { ConsolidatedTrackingFormComponent } from './tracking-create-edit/tracking-forms/consolidated-form.component';
 import { MasterTrackingFormComponent } from './tracking-create-edit/tracking-forms/master-form.component';
+import { NgxPrintModule } from 'ngx-print';
 
 
 @NgModule({
@@ -51,7 +52,8 @@ import { MasterTrackingFormComponent } from './tracking-create-edit/tracking-for
     SaveCancelButtonsModule,
     TranslateModule.forChild(),
     SearchBarModule,
-    TrackingListCommonModule
+    TrackingListCommonModule,
+    NgxPrintModule
   ]
 })
 export class TrackingModule {

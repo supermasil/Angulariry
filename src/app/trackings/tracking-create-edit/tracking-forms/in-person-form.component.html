@@ -1,6 +1,6 @@
 <div *ngIf="inPersonForm">
   <form [formGroup]="inPersonForm" (submit)="onSave()">
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <general-info
         #generalInfo
         [usersObservable]="usersSubject.asObservable()"
@@ -13,7 +13,7 @@
       </general-info>
     </mat-card>
 
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <file-uploader #fileUploader
       [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
     </mat-card>
@@ -21,7 +21,7 @@
     <form [formGroup]="subTrackingsForm">
       <div formArrayName="subTrackings" *ngFor="let subTracking of subTrackingsForm.get('subTrackings')['controls']; let i = index;">
         <div>
-          <mat-card class="m-3 mat-elevation-z2">
+          <mat-card class="m-3 mat-elevation-z0">
             <div [formGroupName]="i">
               <div class="row">
                 <div class="col-lg-4">
@@ -104,7 +104,7 @@
     <a mat-mini-fab color="accent" class="m-3" #addItemButton (click)="addSubTracking(null)"><mat-icon>add</mat-icon></a>
 
     <div *ngIf="showTotalFinalizedInfo">
-      <mat-card style="background-color: #673AB7; color: white" class="m-3 mat-elevation-z2">
+      <mat-card style="background-color: #673AB7; color: white" class="m-3 mat-elevation-z0">
         <div class="row">
           <div class="col-lg-4">
             <span class="d-block mat-h3"><b>Total weight charge</b></span>

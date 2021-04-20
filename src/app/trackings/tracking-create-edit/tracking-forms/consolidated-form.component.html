@@ -1,7 +1,7 @@
 
 <div *ngIf="consolidatedForm">
   <form [formGroup]="consolidatedForm" (submit)="onSave()">
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <general-info
         #generalInfo
         [usersObservable]="usersSubject.asObservable()"
@@ -148,7 +148,7 @@
         </table>
       </div>
     </div>
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <file-uploader #fileUploader
       [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>
     </mat-card>

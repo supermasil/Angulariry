@@ -1,5 +1,5 @@
 <form *ngIf="organizationOnboardingForm" [formGroup]="organizationOnboardingForm" (submit)='onOrganizationOnboarding()' (keydown.enter)="$event.preventDefault()" class="m-2">
-  <mat-card class="m-3 mat-elevation-z2">
+  <mat-card class="m-3 mat-elevation-z0">
     <mat-form-field appearance="outline">
       <mat-label translate>auth.organization-name</mat-label>
       <input
@@ -35,7 +35,7 @@
 
   <div formArrayName="locations" *ngFor="let item of organizationOnboardingForm.get('locations')['controls']; let i = index;">
     <div [formGroupName]="i">
-      <mat-card class="m-3 mat-elevation-z2">
+      <mat-card class="m-3 mat-elevation-z0">
         <mat-form-field appearance="outline">
           <mat-label translate>auth.location-name</mat-label>
           <input type="text"

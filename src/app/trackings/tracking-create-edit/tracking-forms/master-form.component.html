@@ -1,6 +1,6 @@
 <div *ngIf="masterForm">
   <form [formGroup]="masterForm" (submit)="onSave()">
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <general-info
         #generalInfo
         [usersObservable]="usersSubject.asObservable()"
@@ -26,7 +26,7 @@
     <div *ngIf="showTable">
       <div formArrayName="boxes" *ngFor="let item of masterForm.get('boxes')['controls']; let i = index;">
         <div [formGroupName]="i">
-          <mat-card class="m-3 mat-elevation-z2">
+          <mat-card class="m-3 mat-elevation-z0">
             <div class="row">
               <div class="col-lg-2">
                 <mat-form-field appearance="outline">
@@ -88,7 +88,7 @@
         </div>
       </div>
     </div>
-    <mat-card *ngIf="showTable" class="m-3 mat-elevation-z2">
+    <mat-card *ngIf="showTable" class="m-3 mat-elevation-z0">
       <a mat-mini-fab color="primary" class="float-right" (click)="addbox(null)"><mat-icon>add</mat-icon></a>
       <file-uploader #fileUploader
       [currentFilePathsObservable]="updateExistingImagesSubject.asObservable()"></file-uploader>

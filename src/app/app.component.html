@@ -110,7 +110,7 @@
       </div>
     </main>
   </div>
-  <a mat-fab color="primary" [matMenuTriggerFor]="aboveMenu" style="position: fixed; bottom: 2em; right: 2em"  *ngIf="isAuth()">
+  <a mat-fab color="primary" [matMenuTriggerFor]="aboveMenu" style="position: fixed; bottom: 2em; right: 2em; z-index: 9998;"  *ngIf="isAuth()">
     <mat-icon>add</mat-icon>
   </a>
   <mat-menu #aboveMenu="matMenu" yPosition="above" style="z-index: 9999;">

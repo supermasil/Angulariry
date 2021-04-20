@@ -21,6 +21,9 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
   senders: UserModel[] = [];
   sendersSubject = new BehaviorSubject<UserModel[]>([]);
   recipientsSubject = new BehaviorSubject<RecipientModel[]>([]);
+  selectSenderSubject = new ReplaySubject<UserModel>();
+  selectRecipientSubject = new ReplaySubject<RecipientModel>();
+
   @Input() usersObservable = new Observable<UserModel[]>();
   @Input() defaultLocationsObservable = new Observable<string[]>();
   @Input() trackingNumberObservable = new Observable<string>();
@@ -35,8 +38,6 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
 
   @Output() formValidityStatus = new EventEmitter<boolean>();
   @Output() generalInfoUpdated = new EventEmitter<any>();
-  selectSenderSubject = new ReplaySubject<UserModel>();
-  selectRecipientSubject = new ReplaySubject<RecipientModel>();
 
   @ViewChild('sender') sender: AutoCompleteInputComponent;
   @ViewChild('recipient') recipient: AutoCompleteInputComponent;
@@ -76,6 +77,11 @@ export class GeneralInfoComponent implements OnInit, AfterViewInit{
       }
 
       this.sendersSubject.next(this.senders);
+
+      if (this.currentUser.role == AuthGlobals.roles.Customer) {
+        this.selectSenderSubject.next(this.currentUser);
+        this.disabledFields[3] = true; // to lock it
+      }
 
       this.generalInfoObservable.subscribe((generalInfo: GeneralInfoModel) => {
         this.patchFormValue(generalInfo);

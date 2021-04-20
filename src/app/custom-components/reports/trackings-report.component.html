@@ -1,5 +1,5 @@
 <form [formGroup]="trackingsReportForm" (keydown.enter)="$event.preventDefault()" (submit)="submit()">
-  <mat-card class="m-3 mat-elevation-z2">
+  <mat-card class="m-3 mat-elevation-z0">
     <div class="row">
       <div class="col">
         <mat-form-field appearance="outline">
@@ -129,28 +129,8 @@
   <save-cancel-buttons></save-cancel-buttons>
 </form>
 
-<div class="m-3 d-flex justify-content-end">
-  <mat-button-toggle-group #viewStyle="matButtonToggleGroup">
-    <mat-button-toggle [checked]="true" value="full"><mat-icon>fullscreen</mat-icon></mat-button-toggle>
-    <mat-button-toggle value="compact"><mat-icon>fullscreen_exit</mat-icon></mat-button-toggle>
-  </mat-button-toggle-group>
-</div>
-
-<div class="m-3" *ngIf="viewStyle.value == 'compact'">
-  <div id="print-section">
-    <trackings-report-compact
-      (pageDataChangeEvent)="pageDataChanged($event)"
-      [trackingsObservable]="trackingsSubject.asObservable()"
-      [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
-    </trackings-report-compact>
-  </div>
-  <button mat-mini-fab color="primary" class="mt-4 float-right" type="button" ngxPrint printSectionId="print-section" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
-</div>
-
-<div class="m-3" *ngIf="viewStyle.value == 'full'">
-  <tracking-list-common
-    (pageDataChangeEvent)="pageDataChanged($event)"
-    [trackingsObservable]="trackingsSubject.asObservable()"
-    [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
-  </tracking-list-common>
-</div>
+<tracking-list-common
+  (pageDataChangeEvent)="pageDataChanged($event)"
+  [trackingsObservable]="trackingsSubject.asObservable()"
+  [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+</tracking-list-common>

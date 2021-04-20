@@ -1,6 +1,6 @@
 <div *ngIf="onlineForm">
   <form [formGroup]='onlineForm' (submit)='onSave()'>
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <general-info
         #generalInfo
         [usersObservable]="usersSubject.asObservable()"
@@ -12,7 +12,7 @@
         [disabledFields]="generalInfoDisabledFields">
       </general-info>
     </mat-card>
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <div class="row">
         <mat-form-field appearance="outline" class="col-lg-4">
           <mat-label translate>general.carrier</mat-label>
@@ -46,7 +46,7 @@
       </div>
     </mat-card>
 
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <div class="mt-2">
         <file-uploader
         #fileUploader
@@ -59,7 +59,7 @@
       </div>
     </mat-card>
 
-    <mat-card class="m-3 mat-elevation-z2">
+    <mat-card class="m-3 mat-elevation-z0">
       <items-list
         #itemsList
         [pricingObservable]="defaultPricingSubject.asObservable()"
@@ -69,7 +69,7 @@
       </items-list>
     </mat-card>
 
-    <mat-card *ngIf="showFinalizedInfo" class="m-3 mat-elevation-z2">
+    <mat-card *ngIf="showFinalizedInfo" class="m-3 mat-elevation-z0">
       <finalized-info
         #finalizedInfo
         [itemsListObservable]="itemsListSubject.asObservable()"

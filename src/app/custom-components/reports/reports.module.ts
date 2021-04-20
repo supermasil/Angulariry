@@ -14,7 +14,6 @@ import { CodeScannerModule } from "../code-scanner/code-scanner.module";
 import { SaveCancelButtonsModule } from "../save-cancel-buttons/save-cancel-buttons.module";
 import { SearchBarModule } from "../search-bar/search-bar.module";
 import { ReportsRoutingModule } from "./reports-routing.module";
-import { TrackingsReportCompactComponent } from "./trackings-report-compact/trackings-report-compact.component";
 import { TrackingsReportComponent } from "./trackings-report.component";
 import { UsersReportComponent } from "./users-report.component";
 
@@ -22,8 +21,7 @@ import { UsersReportComponent } from "./users-report.component";
 @NgModule({
   declarations: [
     TrackingsReportComponent,
-    UsersReportComponent,
-    TrackingsReportCompactComponent
+    UsersReportComponent
   ],
   imports: [
     CommonModule,

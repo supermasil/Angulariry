@@ -1,4 +1,12 @@
-<div class="mx-auto">
+<div class="m-3 d-flex justify-content-end align-items-center">
+  <button [hidden]="viewStyle.value != 'compact'" class="mr-3" mat-mini-fab color="primary" ngxPrint printSectionId="print-section-compact" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
+  <mat-button-toggle-group #viewStyle="matButtonToggleGroup">
+    <mat-button-toggle [checked]="true" value="full"><mat-icon>fullscreen</mat-icon></mat-button-toggle>
+    <mat-button-toggle value="compact"><mat-icon>fullscreen_exit</mat-icon></mat-button-toggle>
+  </mat-button-toggle-group>
+</div>
+
+<div class="mx-auto m-3" style="overflow: hidden;" [hidden]="viewStyle.value != 'full'">
   <mat-accordion *ngIf='trackings.length > 0'>
     <mat-expansion-panel *ngFor='let tracking of trackings, let i = index' [(expanded)]="expanded[i]">
       <mat-expansion-panel-header class={{getHeaderColor(tracking.generalInfo.trackingStatus)}} [collapsedHeight]="'*'" [expandedHeight]="'*'">
@@ -185,8 +193,43 @@
       </mat-action-row>
     </mat-expansion-panel>
   </mat-accordion>
-  <mat-paginator #paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [(pageSize)]='currentPageSize' [pageSizeOptions]='pageSizeOptions' (page)='pageDataChange($event)'></mat-paginator>
   <div *ngIf='trackings.length == 0' class="text-center">
     <!-- No data found -->
   </div>
 </div>
+
+
+<div id="print-section-compact">
+  <div class="m-3 mx-auto" [hidden]="viewStyle.value != 'compact' || trackings.length == 0" style="overflow-y: hidden; white-space: nowrap;">
+    <table mat-table [dataSource]="dataSource" matSort>
+      <ng-container [matColumnDef]="displayedColumns[0]">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'general.tracking-number' | translate}}</th>
+        <td mat-cell *matCellDef="let element"> {{element.trackingNumber}} </td>
+      </ng-container>
+
+      <ng-container [matColumnDef]="displayedColumns[1]">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'general.tracking-status' | translate}}</th>
+        <td mat-cell *matCellDef="let element"> <span class="badge mr-1 text-white" [ngClass]="getBadgeColor(element.generalInfo.trackingStatus)">{{'statuses.' + element.generalInfo.trackingStatus | translate}}</span> </td>
+      </ng-container>
+
+      <ng-container [matColumnDef]="displayedColumns[2]">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'general.financial-status' | translate}}</th>
+        <td mat-cell *matCellDef="let element"> <span class="badge mr-1 text-white" [ngClass]="getBadgeColor(element.generalInfo.financialStatus)">{{'statuses.' + element.generalInfo.financialStatus | translate}}</span> </td>
+      </ng-container>
+
+      <ng-container [matColumnDef]="displayedColumns[3]" *ngIf="trackings[0]?.generalInfo.type != trackingGlobals.trackingTypes.MASTER">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{'general.recipient' | translate}}</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="badge badge-light mr-2">{{element.generalInfo.recipient.name}}</span>
+          <span class="badge badge-light mr-2">{{element.generalInfo.recipient.phoneNumber}}</span>
+          <span class="badge badge-light mr-2">{{element.generalInfo.recipient.address.address}}</span>
+          <span class="badge badge-light">{{element.generalInfo.recipient.address.addressLineTwo}}</span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>
+<mat-paginator #paginator *ngIf='trackings.length > 0'[length]='totalTrackings' [(pageSize)]='currentPageSize' [pageSizeOptions]='pageSizeOptions' (page)='pageDataChanged($event)'></mat-paginator>
