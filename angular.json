@@ -46,7 +46,8 @@
               "@firebase/performance",
               "@firebase/remote-config",
               "@firebase/auth"
-            ]
+            ],
+            "deployUrl": "/"
           },
           "configurations": {
             "production": {
