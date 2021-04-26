@@ -47,11 +47,10 @@
                       #origin
                       [dataObservable]="defaultLocations.asObservable()"
                       [defaultValue]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').value"
-                      (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event.name)"
+                      (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event? $event.name: '')"
                       (inputInvalid)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue('')"
                       [fields]="locationFields"
-                      [matLabel]="'general.origin' | translate"
-                      [matErrorMessage]="'Please select one from the drowdown only'">
+                      [matLabel]="'general.origin' | translate">
                     </auto-complete-input>
                     <div class="float-right" style="position: relative; bottom: 67px; right: 40px;">
                       <a
@@ -73,11 +72,10 @@
                               #destination
                               [dataObservable]="defaultLocations.asObservable()"
                               [defaultValue]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').value"
-                              (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event)"
+                              (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event? $event.name: '')"
                               (inputInvalid)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue('')"
                               [fields]="destinationFields"
-                              [matLabel]="'general.destination' | translate"
-                              [matErrorMessage]="'Please select one from the drowdown only'">
+                              [matLabel]="'general.destination' | translate">
                             </auto-complete-input>
 
                             <mat-form-field appearance="outline">
@@ -93,7 +91,7 @@
 
                                 <form *ngIf="mode == 'custom'" [formGroup]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('discounts')['controls'][selectedDiscountIndex]">
                                   <mat-form-field appearance="outline">
-                                    <mat-label translate>general.discount</mat-label>
+                                    <mat-label translate>general.unit-charge-discount</mat-label>
                                     <input matInput type="number" formControlName="perUnitDiscountAmount">
                                   </mat-form-field>
 
@@ -126,7 +124,7 @@
                                 </mat-form-field>
                                 <form *ngIf="mode == 'custom'" [formGroup]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('discounts')['controls'][selectedDiscountIndex]">
                                   <mat-form-field appearance="outline">
-                                    <mat-label translate>general.discount</mat-label>
+                                    <mat-label translate>general.extra-charge-discount</mat-label>
                                     <input matInput type="number" formControlName="extraChargeDiscountAmount">
                                   </mat-form-field>
 

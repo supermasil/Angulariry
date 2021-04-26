@@ -11,7 +11,7 @@ import { AuthService } from "../auth.service";
 @Component({
   selector: 'user-list-common',
   templateUrl: './user-list-common.component.html',
-  styleUrls: []
+  styleUrls: ['./user-list-common.component.css']
 })
 export class UserListCommonComponent implements OnInit {
 

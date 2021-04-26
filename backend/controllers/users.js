@@ -346,7 +346,7 @@ exports.updateUserCredit = async (req, res, next) => {
     await session.withTransaction(async () => {
       let currentUser = await UserModel.findById(req.userData.u_id).then(foundUser => {return foundUser});
       await UserModel.findById(req.params.id).then(async foundUser => {
-        let history = (await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, `${currentUser.name} updated ${foundUser.name}'s credit to $${req.body.amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} with note: "${req.body.content}"`, req.params.id, session));
+        let history = (await HistoryController.createHistoryHelper(req.userData.u_id, req.userData.orgId, `${currentUser.name}: ${foundUser.name}: $${req.body.amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} "${req.body.content}"`, req.params.id, session));
         foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].credit = req.body.amount;
         foundUser.organizations.filter(o => o.organization == req.userData.orgId)[0].creditHistory.unshift(history._id);
         let updatedUser = await UserModel.findByIdAndUpdate(req.params.id, foundUser).session(session).then(user => user);

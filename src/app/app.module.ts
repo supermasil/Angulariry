@@ -73,8 +73,8 @@ export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
 
 export function appInitializerFactory(translate: TranslateService) {
   return () => {
-    let storedLanguage = localStorage.getItem("language");
-    translate.setDefaultLang(storedLanguage ? storedLanguage : 'en');
-    return translate.use(storedLanguage ? storedLanguage : 'en').toPromise();
+    let storedLanguage = localStorage.getItem("weshippee_language");
+    translate.setDefaultLang(storedLanguage ? storedLanguage : 'vi');
+    return translate.use(storedLanguage ? storedLanguage : 'vi').toPromise();
   };
 }

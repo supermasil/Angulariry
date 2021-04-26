@@ -4,7 +4,7 @@ import { AuthGlobals } from './auth-globals';
 import { AdjustCreditFormComponent } from './auth-forms/adjust-credit.component';
 import { EditUserFormComponent } from './auth-forms/edit-user.component';
 import { LoginFormComponent } from './auth-forms/login.component';
-import { OnboardingFormComponentForm } from './auth-forms/onboarding.component';
+import { OrgOnboardingFormComponentForm } from './auth-forms/org-onboarding.component';
 import { SignUpFormComponent } from './auth-forms/signup.component';
 import { AuthGuard } from './authentication.guard';
 
@@ -19,9 +19,9 @@ const routes: Routes = [
     roles: [...AuthGlobals.managerAdmins, AuthGlobals.roles.Accounting]}}, // Lazy loading
   { path: "users/new", component: SignUpFormComponent, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.internal}}, // Lazy loading
-  { path: "orgs/edit/:orgId", component: OnboardingFormComponentForm, canActivate: [AuthGuard], data: {
+  { path: "orgs/edit/:orgId", component: OrgOnboardingFormComponentForm, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.admins}}, // Lazy loading
-  { path: "orgs/new", component: OnboardingFormComponentForm, canActivate: [AuthGuard], data: {
+  { path: "orgs/new", component: OrgOnboardingFormComponentForm, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.roles.SuperAdmin}}, // Lazy loading
 ]
 

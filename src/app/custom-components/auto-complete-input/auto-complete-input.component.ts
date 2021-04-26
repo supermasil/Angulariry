@@ -36,7 +36,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.autoCompleteForm = new FormGroup({
-      item: new FormControl({value: this.defaultValue, disabled: this.defaultValue && this.lockOption}, {validators:[this.autoCompleteValidator()]}) // Default value has to be defined for set value to work
+      item: new FormControl({value: this.defaultValue, disabled: this.defaultValue}, {validators:[this.autoCompleteValidator()]}) // Default value has to be defined for set value to work
     });
     this.dataObservable.subscribe((data: any[]) => {
       this.zone.run(() => {
@@ -89,6 +89,7 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
 
   resetForm() {
     this.autoCompleteForm.reset();
+    this.autoCompleteForm.get("item").enable();
   }
 
   public selectItem(item: any) {
@@ -107,6 +108,10 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
   }
 
   transformObjectToString(item: any) {
+    if (!item) {
+      return;
+    }
+
     let result = []
     this.fields.forEach(f => {
       let path = f.split('.'); // For nested path
@@ -138,6 +143,6 @@ export class AutoCompleteInputComponent implements OnInit, OnDestroy {
       return false;
     }
     this.autoCompleteForm.markAllAsTouched();
-    return this.autoCompleteForm.valid;
+    return this.autoCompleteForm.valid || this.autoCompleteForm.status == "DISABLED";
   }
 }

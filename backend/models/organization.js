@@ -7,8 +7,8 @@ const locationSchema = mongoose.Schema({
   phoneNumber: { type: String, required: true},
   faxNumber: { type: String, default: ""},
   address: AddressSchema,
-  operatingHours: {type: [String], required: true}, //hh:mm:ss - hh:mm:ss
-  operatingDays: {type: [String], required: true}, // Mon, Tues ....
+  operatingHours: {type: [String]}, //hh:mm:ss - hh:mm:ss
+  operatingDays: {type: [String]}, // Mon, Tues ....
   active: {type: Boolean, default: true}
 }, {_id: false});
 

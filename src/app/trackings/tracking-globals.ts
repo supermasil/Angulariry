@@ -108,7 +108,7 @@ export class TrackingGlobals {
       case TrackingGlobals.financialStatuses.PartiallyPaid:
         return "bg-warning"
       case 'Consolidated':
-        return "bg-dark"
+        return "bg-success"
     }
   }
 

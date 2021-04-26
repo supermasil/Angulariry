@@ -309,13 +309,6 @@ export class PricingCommonComponent implements OnInit, AfterViewChecked {
 
 
   onSubmit() {
-    if (!this.originDestinationValidation()) {
-      this.translateService.get(`error-messages.duplicate-origins-destinations`).subscribe(translatedMessage => {
-        this.toastr.warning(translatedMessage);
-      });
-      return;
-    }
-
     let originValidity = true;
     let destinationValidity = true;
 
@@ -335,6 +328,12 @@ export class PricingCommonComponent implements OnInit, AfterViewChecked {
       return
     }
 
+    if (!this.originDestinationValidation()) {
+      this.translateService.get(`error-messages.duplicate-origins-destinations`).subscribe(translatedMessage => {
+        this.toastr.warning(translatedMessage);
+      });
+      return;
+    }
 
     if (this.mode == 'create') {
       this.pricingService.addItems(this.commonPricingForm.getRawValue());

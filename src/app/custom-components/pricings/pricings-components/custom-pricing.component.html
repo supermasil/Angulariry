@@ -4,8 +4,7 @@
     (itemSelected)="userSelected($event)"
     [matLabel]="'general.users' | translate"
     [fields]="userFields"
-    [lockOption]="false"
-    [matErrorMessage]="'Please select one from the drowdown only'">
+    [lockOption]="false">
   </auto-complete-input>
 </div>
 
@@ -15,8 +14,7 @@
     (itemSelected)="itemSelected($event)"
     [matLabel]="'tracking-info.item-name' | translate"
     [lockOption]="false"
-    [fields]="itemFields"
-    [matErrorMessage]="'Please select one from the drowdown only'">
+    [fields]="itemFields">
   </auto-complete-input>
 </div>
 

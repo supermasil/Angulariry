@@ -35,11 +35,12 @@ exports.createUpdateOrganization = async (req, res, next) => {
       }
 
       org.registerCode = registerCode;
-
+      let message = "creation-success";
       if (req.body._id && req.userData.u_id) {
         updatedOrg = await OrganizationModel.findByIdAndUpdate(org._id, org, {new: true}).session(session).then(response => {
           return response;
         });
+        message = "update-success"
       } else {
         updatedOrg = await OrganizationModel.create([org], {session: session}).then(response => {
           return response[0];
@@ -48,7 +49,7 @@ exports.createUpdateOrganization = async (req, res, next) => {
       return next({
         resCode: 200,
         resBody: {
-          message: "creation-success",
+          message: message,
           organization: updatedOrg
         }
       });

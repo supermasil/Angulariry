@@ -105,7 +105,7 @@
           placeholder="Apt/ spc/ #">
         </mat-form-field>
 
-        <ng-container *ngFor="let day of operatingDays; let dayIndex = index">
+        <!-- <ng-container *ngFor="let day of operatingDays; let dayIndex = index">
           <mat-checkbox class="mr-2" (change)="operatingDayChecked(i, dayIndex)" [checked]="organizationOnboardingForm.get('locations').value[i].operatingDays[dayIndex]">
             {{day}}
           </mat-checkbox>
@@ -126,7 +126,7 @@
               [matChipInputAddOnBlur]="false"
               (matChipInputTokenEnd)="addOperatingHoursChip($event, i)">
           </mat-chip-list>
-        </mat-form-field>
+        </mat-form-field> -->
       </mat-card>
 
     </div>

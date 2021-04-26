@@ -1,6 +1,6 @@
 <div class="m-3 d-flex justify-content-end align-items-center">
-  <button [hidden]="viewStyle.value != 'compact'" class="mr-3" mat-mini-fab color="primary" ngxPrint printSectionId="print-section-compact" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
-  <mat-button-toggle-group #viewStyle="matButtonToggleGroup">
+  <button [hidden]="viewStyle.value != 'compact' || trackings?.length == 0" class="mr-3" mat-mini-fab color="primary" ngxPrint printSectionId="print-section-compact" [useExistingCss]="true" [printDelay]="1000"><mat-icon>print</mat-icon></button>
+  <mat-button-toggle-group #viewStyle="matButtonToggleGroup" [hidden]="trackings?.length == 0">
     <mat-button-toggle [checked]="true" value="full"><mat-icon>fullscreen</mat-icon></mat-button-toggle>
     <mat-button-toggle value="compact"><mat-icon>fullscreen_exit</mat-icon></mat-button-toggle>
   </mat-button-toggle-group>
@@ -36,7 +36,7 @@
             </div>
             <!-- Modal -->
             <div class="modal fade" id="modal-{{indexOfelement}}" tabindex="-1" role="dialog" data-backdrop="false">
-              <div class="modal-dialog modal-xl" role="document">
+              <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
                 <div class="modal-content">
                   <div class="modal-body">
                     <img [src]="url" class="w-100">
@@ -185,8 +185,8 @@
             <div class="d-flex justify-content-end">
               <a class="mr-2" *ngIf="canEdit(authGlobal.officers, tracking.generalInfo.creatorId)" mat-button color='primary' [routerLink]="['/trackings/edit/' + tracking.trackingNumber.substring(0,3), tracking.trackingNumber]">Edit</a>
               <!-- <a class="mr-2" mat-button color='warn' (click)='onDelete(tracking._id)'>Delete</a> -->
-              <button mat-mini-fab color="primary" class="mr-4" ngxPrint printSectionId="print-section{{i}}" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
-              <button mat-mini-fab color="accent" class="mr-4" ngxPrint printSectionId="print-section-barcodes{{i}}" [useExistingCss]="true"><mat-icon>print</mat-icon></button>
+              <button mat-mini-fab color="primary" class="mr-4" ngxPrint printSectionId="print-section{{i}}" [useExistingCss]="true" [printDelay]="1000"><mat-icon>print</mat-icon></button>
+              <button mat-mini-fab color="accent" class="mr-4" ngxPrint printSectionId="print-section-barcodes{{i}}" [useExistingCss]="true" [printDelay]="1000"><mat-icon>print</mat-icon></button>
             </div>
           </div>
         </div>

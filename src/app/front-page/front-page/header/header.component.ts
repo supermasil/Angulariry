@@ -56,6 +56,6 @@ export class HeaderComponent implements OnInit, OnDestroy{
   languageChange(language: string) {
     this.translateService.setDefaultLang(language);
     this.translateService.use(language);
-    localStorage.setItem("language", language);
+    localStorage.setItem("weshippee_language", language);
   }
 };

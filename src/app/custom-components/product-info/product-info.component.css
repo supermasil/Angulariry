@@ -1,0 +1,9 @@
+.card-icon {
+  font-size: 60px;
+  position: relative;
+  right: 15px;
+}
+
+.card {
+  min-height: 220px;
+}

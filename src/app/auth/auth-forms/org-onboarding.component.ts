@@ -10,11 +10,11 @@ import { AuthService } from "../auth.service";
 
 
 @Component({
-  selector: 'onboarding-form',
-  templateUrl: './onboarding.component.html',
-  styleUrls: ['./onboarding.component.css']
+  selector: 'org-onboarding-form',
+  templateUrl: './org-onboarding.component.html',
+  styleUrls: ['./org-onboarding.component.css']
 })
-export class OnboardingFormComponentForm implements OnInit {
+export class OrgOnboardingFormComponentForm implements OnInit {
   organizationOnboardingForm: FormGroup;
   readonly separatorKeysCodes: number[] = [ENTER, COMMA];
   operatingDays = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
@@ -66,8 +66,8 @@ export class OnboardingFormComponentForm implements OnInit {
         address: new FormControl({value: location?.address?.address? location.address.address : "", disabled: location?.address?.address? true : false}, {validators: [Validators.required, this.validatorsService.addressValidator()]}),
         addressLineTwo: new FormControl(location?.address?.addressLineTwo? location.address.addressLineTwo : ""),
         addressUrl: new FormControl(location?.address?.addressUrl? location.address.addressUrl : "", {validators: [Validators.required]}),
-        operatingHours: new FormControl(location?.operatingHours? location.operatingHours : [], {validators: [Validators.required]}), //hh:mm:ss - hh:mm:ss, hh:mm:ss - hh:mm:ss, ...
-        operatingDays: new FormControl(location?.operatingDays? location.operatingDays.map(item => item == "true" ? true : false) : [false, false, false, false, false, false, false], {validators: [Validators.required]}), // Mon, Tues ....
+        // operatingHours: new FormControl(location?.operatingHours? location.operatingHours : [], {validators: [Validators.required]}), //hh:mm:ss - hh:mm:ss, hh:mm:ss - hh:mm:ss, ...
+        // operatingDays: new FormControl(location?.operatingDays? location.operatingDays.map(item => item == "true" ? true : false) : [false, false, false, false, false, false, false], {validators: [Validators.required]}), // Mon, Tues ....
       });
 
       results.push(form);

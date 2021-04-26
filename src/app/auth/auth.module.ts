@@ -10,20 +10,21 @@ import { GooglePlaceModule } from "ngx-google-places-autocomplete";
 import { LoginFormComponent } from './auth-forms/login.component';
 import { PasswordResetFormComponent } from './auth-forms/password-reset.component';
 import { SignUpFormComponent } from './auth-forms/signup.component';
-import { OnboardingFormComponentForm } from './auth-forms/onboarding.component';
+import { OrgOnboardingFormComponentForm } from './auth-forms/org-onboarding.component';
 import { AutoCompleteInputModule } from '../custom-components/auto-complete-input/auto-complete-input.module';
 import { EditUserFormComponent } from './auth-forms/edit-user.component';
 import { AdjustCreditFormComponent } from './auth-forms/adjust-credit.component';
 import { NgxCurrencyModule } from 'ngx-currency';
 import { TranslateModule } from '@ngx-translate/core';
 import { UserListCommonModule } from './user-list-common/user-list-common.module';
+import { ProductInfoModule } from '../custom-components/product-info/product-info.module';
 
 @NgModule({
   declarations: [
     LoginFormComponent,
     PasswordResetFormComponent,
     SignUpFormComponent,
-    OnboardingFormComponentForm,
+    OrgOnboardingFormComponentForm,
     EditUserFormComponent,
     AdjustCreditFormComponent
   ],
@@ -39,7 +40,8 @@ import { UserListCommonModule } from './user-list-common/user-list-common.module
     AutoCompleteInputModule,
     NgxCurrencyModule,
     TranslateModule.forChild(),
-    UserListCommonModule
+    UserListCommonModule,
+    ProductInfoModule
   ]
 })
 export class AuthModule {}
