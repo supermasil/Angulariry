@@ -1,0 +1,45 @@
+table {
+  width: 100%;
+}
+
+tr.detail-row {
+  height: 0;
+}
+
+tr.element-row:not(.expanded-row):hover {
+  background: rgb(210, 241, 250);
+}
+
+tr.element-row:not(.expanded-row):active {
+  background: #efefef;
+}
+
+.element-row td {
+  border-bottom-width: 0;
+}
+
+.item-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+.mat-cell {
+  padding: 0 .2rem;
+}
+
+
+.finalizing-table {
+  overflow: auto;
+  min-height: 0px;
+  height: 100%;
+  max-height: 400px;
+}
+
+tr.mat-footer-row {
+  font-weight: bold;
+}
+
+::ng-deep .mat-form-field-infix {
+  width: auto !important;
+}
+

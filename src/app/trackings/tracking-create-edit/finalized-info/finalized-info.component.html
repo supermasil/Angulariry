@@ -1,0 +1,62 @@
+<form [formGroup]="finalizedInfoForm" class="my-4" (keydown.enter)="$event.preventDefault()">
+  <div class="row mt-4">
+    <div class="col-lg-4">
+      <span class="d-block mat-h3"><b translate>tracking-info.total-weight-charge</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalWeightCharge}}</span>
+      <span class="d-block mat-h3"><b translate>tracking-info.total-extra-charge</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalExtraCharge}}</span>
+      <span class="d-block mat-h3"><b translate>tracking-info.total-insurance</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalInsurance}}</span>
+    </div>
+
+    <div class="col-lg-4">
+      <span class="d-block mat-h3"><b translate>tracking-info.total-weight</b></span>
+      <span class="d-block mat-h4">{{totalWeight}}&nbsp;Kg</span>
+      <span class="d-block mat-h3"><b translate>tracking-info.total-saving</b></span>
+      <span class="d-block mat-h4">$&nbsp;{{totalSaving}}</span>
+
+    </div>
+    <div class="col-lg-4">
+      <span class="d-block mat-h3 mb-0"><b translate>tracking-info.cost-adjustment</b></span>
+      <mat-form-field>
+        <input
+        matInput
+        formControlName='costAdjustment'
+        currencyMask
+        [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: true}"
+        (keyup)="getFinalizedInfo()">
+      </mat-form-field>
+
+      <span class="d-block mat-h3 mb-0"><b translate>tracking-info.exchange</b></span>
+      <mat-form-field>
+        <input
+        matInput
+        formControlName='exchange'
+        currencyMask
+        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: false}"
+        (keyup)="getFinalizedInfo()">
+      </mat-form-field>
+
+      <span class="d-block mat-h3 mb-0"><b style="font-size: 1.5rem;" translate>tracking-info.final-cost</b></span>
+      <mat-form-field>
+        <input
+        matInput
+        currencyMask
+        [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: true}"
+        formControlName='finalCost'
+        readonly
+        style="font-size: 1.5rem;">
+      </mat-form-field>
+
+      <mat-form-field>
+        <input
+        matInput
+        currencyMask
+        [options]="{prefix: 'VND ', thousands: ',', decimal: '.', align: 'left', allowNegative: true, precision: 0}"
+        formControlName='finalCostVND'
+        readonly
+        style="font-size: 1.5rem;">
+      </mat-form-field>
+    </div>
+  </div>
+</form>

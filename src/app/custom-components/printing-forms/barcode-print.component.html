@@ -1,0 +1,33 @@
+<div *ngIf="tracking" class="border-dark rounded p-4 my-2">
+  <div class="row d-flex justify-content-center">
+    <ngx-qrcode
+      [elementType]="'url'"
+      [value]="tracking.trackingNumber"
+      [width]="250"
+      errorCorrectionLevel="L">
+    </ngx-qrcode>
+  </div>
+  <div class="row d-flex justify-content-center mt-4">
+    <ngx-barcode
+      [bc-value]="tracking.trackingNumber"
+      [bc-element-type]="'url'"
+      [bc-height]="200"
+      [bc-width]="4">
+    </ngx-barcode>
+  </div>
+  <div class="text-center mt-4">
+    <b style="font-size: 80px;">{{tracking.trackingNumber}}</b>
+    <h1><b translate>general.date-time</b></h1>
+    <h2>{{globalConstants.now()}}</h2>
+    <h1><b translate>general.origin</b></h1>
+    <div><h2>{{tracking.generalInfo.origin}}</h2></div>
+    <h1><b translate>general.destination</b></h1>
+    <div><h2>{{tracking.generalInfo.destination}}</h2></div>
+    <div *ngIf="tracking.generalInfo.recipient">
+      <h1><b translate>general.recipient</b></h1>
+      <div><h2>{{tracking.generalInfo.recipient.name}}</h2></div>
+      <div><h2>{{tracking.generalInfo.recipient.address.address}} {{tracking.generalInfo.recipient.address.addressLineTwo}}</h2></div>
+      <div><h2>{{tracking.generalInfo.recipient.email}} {{tracking.generalInfo.recipient.phoneNumber}}</h2></div>
+    </div>
+  </div>
+</div>

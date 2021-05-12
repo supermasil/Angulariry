@@ -1,0 +1,15 @@
+<div class="mt-2">
+  <auto-complete-input
+    [dataObservable]="usersSubject.asObservable()"
+    (itemSelected)="userSelected($event)"
+    [fields]="userFields"
+    [matLabel]="'general.users' | translate"
+    [lockOption]="false"
+    >
+  </auto-complete-input>
+
+  <user-list-common
+    [usersObservable]="usersListSubject.asObservable()">
+  </user-list-common>
+</div>
+

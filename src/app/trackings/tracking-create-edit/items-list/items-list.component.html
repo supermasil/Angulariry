@@ -1,0 +1,69 @@
+<form [formGroup]="itemsForm">
+  <div formArrayName="items" *ngFor="let item of itemsForm.get('items')['controls']; let i = index;">
+    <div [formGroupName]="i">
+      <div fxLayout="row" fxLayoutGap="10px" fxLayout.lt-md="column">
+        <div fxFlex="30">
+          <auto-complete-input
+            #itemName
+            [dataObservable]="items.asObservable()"
+            [fields]="itemFields"
+            (itemSelected)="itemSelected($event, i)"
+            (inputInvalid)="itemInvalid($event, i)"
+            [defaultValue]="getDefaultValue(i)"
+            [lockOption]="getLockOption(i)"
+            [matLabel]="'tracking-info.item-name' | translate">
+          </auto-complete-input>
+        </div>
+
+        <mat-form-field appearance="outline" fxFlex="10">
+          <mat-label translate>tracking-info.declared-value</mat-label>
+          <input matInput type="number" formControlName="declaredValue" min="0">
+        </mat-form-field>
+
+
+        <mat-form-field appearance="outline" fxFlex="10">
+          <mat-label translate>tracking-info.quantity</mat-label>
+          <input matInput type="number" formControlName="quantity" min="0">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always" fxFlex="10">
+          <mat-label translate>tracking-info.insurance</mat-label>
+          <input matInput type="number" formControlName="insurance">
+          <span style="position: relative; bottom: 4px;" matPrefix>%&nbsp;</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" fxFlex="10">
+          <mat-label translate>tracking-info.weight</mat-label>
+          <input matInput type="number" formControlName="weight" min="0">
+        </mat-form-field>
+    
+        <mat-form-field appearance="outline" floatLabel="always" fxFlex="10">
+          <mat-label>{{'tracking-info.weight-unit-charge' | translate}} (Kg)</mat-label>
+          <input matInput type="number" formControlName="unitCharge" readonly="true">
+          <span style="position: relative; bottom: 4px;" matPrefix>$&nbsp;</span>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" floatLabel="always" fxFlex="20">
+          <mat-label translate>tracking-info.extra-charge</mat-label>
+          <input matInput type="number" formControlName="extraCharge" readonly="true">
+          <span style="position: relative; bottom: 4px;" matPrefix>{{getExtraChargeUnit(i)}}&nbsp;</span>
+          <a
+            matSuffix
+            mat-mini-fab
+            color="warn"
+            (click)="removeItem(i)">
+            <mat-icon>delete</mat-icon>
+          </a>
+        </mat-form-field>
+
+        <!-- <mat-form-field appearance="outline" class="col-lg-2 pl-lg-1">
+          <mat-label>Status</mat-label>
+          <input matInput type="text" formControlName="status" readonly="true">
+        </mat-form-field> -->
+      </div>
+    </div>
+  </div>
+</form>
+
+<a mat-mini-fab color="primary" #addItemButton (click)="addItem(null)"><mat-icon [inline]="true">add</mat-icon></a>
+

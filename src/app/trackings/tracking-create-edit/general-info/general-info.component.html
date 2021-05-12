@@ -1,0 +1,85 @@
+
+  <form [formGroup]="generalInfoForm" (keydown.enter)="$event.preventDefault()">
+    <div fxLayout="row" fxLayoutGap="10px" fxLayout.lt-md="column">
+      <mat-form-field appearance="outline" fxFlex="50">
+        <mat-label translate>general.tracking-number</mat-label>
+        <input type='text' matInput formControlName='trackingNumber' #trackingNumber>
+        <a
+          matSuffix
+          mat-mini-fab
+          color="basic"
+          [cdkCopyToClipboard]="trackingNumber.value">
+          <mat-icon>content_copy</mat-icon>
+        </a>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="25">
+        <mat-label translate>general.tracking-status</mat-label>
+        <mat-select formControlName="trackingStatus">
+          <mat-option *ngFor="let option of trackingStatuses" [value]="option">
+            {{'statuses.' + option | translate}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="25">
+        <mat-label translate>general.financial-status</mat-label>
+        <mat-select formControlName="financialStatus">
+          <mat-option *ngFor="let option of financialStatuses" [value]="option">
+            {{'statuses.' + option | translate}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div fxLayout="row" fxLayoutGap="10px" fxLayout.lt-md="column">
+      <div fxFlex="50" *ngIf="!this.disableSender">
+        <auto-complete-input
+          #sender
+          [selectItemObservable]="selectSenderSubject.asObservable()"
+          [dataObservable]="sendersSubject.asObservable()"
+          (itemSelected)="senderSelected($event)"
+          (itemCancelled)="itemCancelled()"
+          (inputInvalid)="generalInfoForm.get('sender').setValue('')"
+          [fields]="senderFields"
+          [matLabel]="'general.sender' | translate"
+          [lockOption]="disabledFields[3]">
+        </auto-complete-input>
+      </div>
+      <div fxFlex="50" *ngIf="!this.disableRecipient">
+        <auto-complete-input
+          #recipient
+          [selectItemObservable]="selectRecipientSubject.asObservable()"
+          [dataObservable]="recipientsSubject.asObservable()"
+          (itemSelected)="recipientSelected($event)"
+          (inputInvalid)="generalInfoForm.get('recipient').setValue('')"
+          [fields]="recipientFields"
+          [matLabel]="'general.recipient' | translate"
+          [lockOption]="disabledFields[4]">
+        </auto-complete-input>
+      </div>
+    </div>
+
+    <div fxLayout="row" fxLayoutGap="10px" fxLayout.lt-md="column">
+      <div fxFlex="50">
+        <mat-form-field appearance="outline">
+          <mat-label translate>general.origin</mat-label>
+          <mat-select formControlName="origin">
+            <mat-option *ngFor="let option of defaultLocationsObservable | async" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div fxFlex="50">
+        <mat-form-field appearance="outline">
+          <mat-label translate>general.destination</mat-label>
+          <mat-select formControlName="destination">
+            <mat-option *ngFor="let option of defaultLocationsObservable | async" [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </form>

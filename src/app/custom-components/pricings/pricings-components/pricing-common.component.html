@@ -1,0 +1,163 @@
+<div *ngIf="commonPricingForm">
+  <div>
+    <form [formGroup]="commonPricingForm" (submit)="onSubmit()" (keydown.enter)="$event.preventDefault()" class="my-4">
+      <div formArrayName="items" *ngFor="let item of commonPricingForm.get('items')['controls']; let i = index;">
+        <div [formGroupName]="i">
+          <mat-card class="m-3 mat-elevation-z0">
+            <div class="row">
+              <div class="col-md-4">
+                <mat-form-field appearance="outline">
+                  <mat-label translate>tracking-info.item-name</mat-label>
+                  <input matInput type="text" formControlName="name">
+                  <a
+                    *ngIf="commonPricingForm.get('items')['controls'].length > 1"
+                    matSuffix
+                    mat-mini-fab
+                    color="warn"
+                    (click)="removeItem(commonPricingForm, i)">
+                    <mat-icon>delete</mat-icon>
+                  </a>
+                  <mat-error *ngIf="commonPricingForm.get('items')['controls'][i].getError('error', 'name') as error">{{error}}</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4">
+                <mat-form-field appearance="outline">
+                  <mat-label translate>general.unit</mat-label>
+                  <mat-select matInput formControlName="unit" required>
+                    <mat-option *ngFor="let unit of pricingService.units" [value]="unit">
+                      {{unit}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-4">
+                <mat-form-field appearance="outline">
+                  <mat-label translate>general.notes</mat-label>
+                  <input matInput type="text" formControlName="content">
+                </mat-form-field>
+              </div>
+            </div>
+            <div formArrayName="routes" *ngFor="let item of commonPricingForm.get('items')['controls'][i].get('routes')['controls']; let r = index;">
+              <div [formGroupName]="r">
+                <hr>
+                <div class="row">
+                  <div class="col-md-4">
+                    <auto-complete-input
+                      #origin
+                      [dataObservable]="defaultLocations.asObservable()"
+                      [defaultValue]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').value"
+                      (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue($event? $event.name: '')"
+                      (inputInvalid)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('origin').setValue('')"
+                      [fields]="locationFields"
+                      [matLabel]="'general.origin' | translate">
+                    </auto-complete-input>
+                    <div class="float-right" style="position: relative; bottom: 67px; right: 40px;">
+                      <a
+                        *ngIf="commonPricingForm.get('items')['controls'][i].get('routes')['controls'].length > 1"
+                        matSuffix
+                        mat-mini-fab
+                        color="warn"
+                        (click)="removeRoute(commonPricingForm, i, r)">
+                        <mat-icon>delete</mat-icon>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div formArrayName="destinations" *ngFor="let item of commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls']; let d = index;">
+                      <div [formGroupName]="d">
+                        <div class="row">
+                          <div class="col">
+                            <auto-complete-input
+                              #destination
+                              [dataObservable]="defaultLocations.asObservable()"
+                              [defaultValue]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').value"
+                              (itemSelected)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue($event? $event.name: '')"
+                              (inputInvalid)="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('name').setValue('')"
+                              [fields]="destinationFields"
+                              [matLabel]="'general.destination' | translate">
+                            </auto-complete-input>
+
+                            <mat-form-field appearance="outline">
+                              <mat-label translate>tracking-info.weight-unit-charge</mat-label>
+                              <input matInput type="number" formControlName="pricePerUnit">
+                            </mat-form-field>
+                            <div class="row">
+                              <div class="col">
+                                <mat-form-field appearance="outline">
+                                  <mat-label translate>tracking-info.extra-charge</mat-label>
+                                  <input matInput type="number" formControlName="extraCharge">
+                                </mat-form-field>
+
+                                <form *ngIf="mode == 'custom'" [formGroup]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('discounts')['controls'][selectedDiscountIndex]">
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.unit-charge-discount</mat-label>
+                                    <input matInput type="number" formControlName="perUnitDiscountAmount">
+                                  </mat-form-field>
+
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.unit</mat-label>
+                                    <mat-select formControlName="perUnitDiscountUnit">
+                                      <mat-option *ngFor="let unit of pricingService.discountUnits"  [value]="unit">
+                                        {{unit}}
+                                      </mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                                </form>
+                              </div>
+                              <div class="col">
+                                <mat-form-field appearance="outline">
+                                  <mat-label translate>tracking-info.extra-charge-unit</mat-label>
+                                  <mat-select matInput formControlName="extraChargeUnit">
+                                    <mat-option *ngFor="let unit of pricingService.extraChargeUnits" [value]="unit">
+                                      {{unit}}
+                                    </mat-option>
+                                  </mat-select>
+                                  <a
+                                    *ngIf="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'].length > 1"
+                                    matSuffix
+                                    mat-mini-fab
+                                    color="warn"
+                                    (click)="removeDestination(commonPricingForm, i, r, d)">
+                                    <mat-icon>delete</mat-icon>
+                                  </a>
+                                </mat-form-field>
+                                <form *ngIf="mode == 'custom'" [formGroup]="commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('discounts')['controls'][selectedDiscountIndex]">
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.extra-charge-discount</mat-label>
+                                    <input matInput type="number" formControlName="extraChargeDiscountAmount">
+                                  </mat-form-field>
+
+                                  <mat-form-field appearance="outline">
+                                    <mat-label translate>general.unit</mat-label>
+                                    <mat-select matInput formControlName="extraChargeDiscountUnit">
+                                      <mat-option *ngFor="let unit of pricingService.getDiscountUnits(commonPricingForm.get('items')['controls'][i].get('routes')['controls'][r].get('destinations')['controls'][d].get('extraChargeUnit').value)" [value]="unit">
+                                        {{unit}}
+                                      </mat-option>
+                                    </mat-select>
+                                  </mat-form-field>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                  <button type="button" *ngIf="mode == 'create' || mode == 'edit'" mat-raised-button color="primary" (click)="addDestination(commonPricingForm, i, r)">{{'tracking-info.add-destination' | translate}}</button>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end mt-2">
+              <button type="button" *ngIf="mode == 'create' || mode == 'edit'" mat-raised-button color="accent"(click)="addRoute(commonPricingForm, i)">{{'tracking-info.add-origin' | translate}}</button>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+      <a mat-mini-fab *ngIf="mode == 'create'" color="primary" class="float-right mb-4 mr-4" (click)="addItem(commonPricingForm)"><mat-icon>add</mat-icon></a>
+      <save-cancel-buttons></save-cancel-buttons>
+    </form>
+  </div>
+</div>

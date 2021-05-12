@@ -1,0 +1,17 @@
+<div class="m-3">
+  <button
+    mat-raised-button
+    color='primary'
+    (click)="saveButtonPressed()"
+    type="submit"
+    class="mr-2 my-2">
+    {{'general.submit' | translate}}
+  </button>
+  <button
+    mat-raised-button
+    color="warn"
+    class="mr-2 my-2"
+    [routerLink]="redirectUrl">
+    {{'general.cancel' | translate}}
+  </button>
+</div>

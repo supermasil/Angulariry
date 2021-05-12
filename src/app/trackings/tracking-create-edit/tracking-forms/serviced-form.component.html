@@ -1,0 +1,118 @@
+<!-- <form [formGroup]='servicedForm' (submit)='onSave()' class="my-4" (keydown.enter)="$event.preventDefault()">
+  <div formArrayName="items" *ngFor="let item of servicedForm.get('items')['controls']; let i = index;">
+    <mat-card class="mb-4 mat-elevation-z0" [formGroupName]="i">
+      <div class="row">
+        <mat-form-field appearance="outline" class="col-lg">
+          <mat-label>Link</mat-label>
+          <input
+          type='url'
+          matInput
+          formControlName='productLink'>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-lg">
+          <mat-label>Price $</mat-label>
+          <input
+          matInput
+          currencyMask
+          formControlName='productPrice'
+          [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: false, max: 100000}">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-lg">
+          <mat-label>Specifications</mat-label>
+          <input
+          placeholder="Size, color, shape..."
+          matInput
+          type='text'
+          formControlName='specifications'>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-lg">
+          <mat-label>Quantity</mat-label>
+          <input
+          matInput
+          type='number'
+          formControlName='quantity'>
+          <a
+            matSuffix
+            mat-mini-fab
+            color="warn"
+            (click)="removeItem(i)">
+            <mat-icon>delete</mat-icon>
+          </a>
+        </mat-form-field>
+      </div>
+
+      <div class="row">
+        <mat-form-field class="col-lg" appearance="outline">
+          <mat-label>Order Numbers</mat-label>
+          <mat-chip-list #orderNumber>
+            <mat-chip *ngFor="let item of servicedForm.get('items')" [selectable]="true"
+                      [removable]="true" (removed)="removeChipNumber(item, 0, i)">
+              {{item}}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            <input
+                    [matChipInputFor]="orderNumber"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    [matChipInputAddOnBlur]="false"
+                    (matChipInputTokenEnd)="addChipNumber($event, 0, i)">
+          </mat-chip-list>
+        </mat-form-field>
+
+        <mat-form-field class="col-lg" appearance="outline">
+          <mat-label>Tracking Numbers</mat-label>
+          <mat-chip-list #carrierTrackingNumer>
+            <mat-chip *ngFor="let item of " [selectable]="true" [color]="getChipColor(item.status)" selected
+                      [removable]="true" (removed)="removeChipNumber(item.trackingNumber, 1, i)">
+                {{item.trackingNumber}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            <input
+                    [matChipInputFor]="carrierTrackingNumer"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    [matChipInputAddOnBlur]="false"
+                    (matChipInputTokenEnd)="addChipNumber($event, 1, i)">
+          </mat-chip-list>
+        </mat-form-field>
+      </div>
+
+    </mat-card>
+  </div>
+  <a mat-mini-fab color="primary" class="float-right mb-4 mt-2" style="margin-right: 13px;" (click)="addItem()"><mat-icon>add</mat-icon></a>
+
+  <div class="mt-4 mb-2">
+    <file-uploader></file-uploader>
+  </div>
+
+  <items-list #itemsList></items-list>
+
+
+
+  <mat-form-field appearance="outline" class="mt-4">
+    <mat-label>Notes</mat-label>
+    <textarea
+    matInput
+    rows='10'
+    formControlName='content'
+    ></textarea>
+    <mat-error>Please enter some post content</mat-error>
+  </mat-form-field>
+
+  <div class="mt-2">
+    <button
+    mat-raised-button
+    color='primary'
+    type='submit'
+    class="mr-2">
+    Save
+    </button>
+    <button
+      mat-raised-button
+      color='warn'
+      type=''>
+      Cancel
+    </button>
+  </div>
+</form> -->

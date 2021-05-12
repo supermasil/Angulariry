@@ -1,0 +1,23 @@
+
+<div *ngIf="autoCompleteForm">
+  <form [formGroup]="autoCompleteForm" class="w-100">
+    <mat-form-field appearance="outline" matTooltip="{{input.value}}">
+      <mat-label>{{matLabel}}</mat-label>
+      <input type="text"
+              #input
+              matInput
+              formControlName="item"
+              (input)="filterItems($event.target.value)"
+              [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectItem($event.option.value)" autoActiveFirstOption="true">
+        <mat-option *ngFor="let option of filteredData | async" [value]="option">
+          <span matTooltip="{{transformObjectToString(option)}}">{{transformObjectToString(option)}}</span>
+        </mat-option>
+      </mat-autocomplete>
+      <button *ngIf="autoCompleteForm.controls['item'].value && !lockOption" matSuffix mat-icon-button (click)="cancelItem()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-error>{{matErrorMessage}}</mat-error>
+    </mat-form-field>
+  </form>
+</div>

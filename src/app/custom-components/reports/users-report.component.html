@@ -1,0 +1,69 @@
+<form [formGroup]="usersReportForm" (keydown.enter)="$event.preventDefault()" (submit)="submit()">
+  <mat-card class="m-3 mat-elevation-z0">
+    <div class="row">
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>auth.role</mat-label>
+          <mat-select formControlName="role">
+            <mat-option [value]="null"></mat-option>
+            <mat-option *ngFor="let type of authGlobals.nonSuperAdmin" [value]="type">
+              {{"roles." + type | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>general.active</mat-label>
+          <mat-select formControlName="active">
+            <mat-option *ngFor="let option of [true, false]" [value]="option">
+              {{'general.' + option | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="row">
+          <div class="col-4">
+            <mat-form-field appearance="outline">
+              <mat-select formControlName="comparison">
+                <mat-option *ngFor="let option of comparisons" [value]="option">
+                  {{option}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-8">
+            <mat-form-field appearance="outline">
+              <mat-label translate>general.credit</mat-label>
+              <input matInput type="number" formControlName="credit">
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <auto-complete-input
+          #sender
+          [selectItemObservable]="selectSenderSubject.asObservable()"
+          [required]="false"
+          [dataObservable]="sendersSubject.asObservable()"
+          (itemSelected)="creatorSelected($event)"
+          (itemCancelled)="creatorCancelled()"
+          [fields]="senderFields"
+          [matLabel]="'general.creator' | translate">
+        </auto-complete-input>
+      </div>
+    </div>
+  </mat-card>
+  <save-cancel-buttons></save-cancel-buttons>
+</form>
+
+<div class="m-3">
+  <user-list-common
+    (pageDataChangeEvent)="pageDataChanged($event)"
+    [usersObservable]="usersSubject.asObservable()"
+    [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+  </user-list-common>
+</div>

@@ -1,0 +1,35 @@
+<div>
+  <a
+    [disabled]="disableUploader"
+    mat-mini-fab
+    color='primary'
+    (click)='filePicker.click()'>
+    <mat-icon [inline]="true" style="position: absolute; right: 11px; bottom: 9px; font-size: 20px;">add_a_photo</mat-icon>
+  </a>
+  <input type="file" hidden [disabled]="disableUploader" #filePicker (change)='onFilePicked($event)'>
+  <mat-error *ngIf="fileUploaderForm.get('fileValidator').invalid">Invalid input type, only images are supported</mat-error>
+</div>
+
+<div class="row px-2 mt-4">
+  <ng-container *ngFor="let url of filesPreview; let indexOfelement=index;">
+    <div class='image-preview d-inline-flex float-left' data-toggle="modal" [attr.data-target]="'#modal-'+ indexOfelement">
+      <img [src]="url">
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modal-{{indexOfelement}}" tabindex="-1" role="dialog" data-backdrop="false">
+      <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+          <div class="modal-body">
+            <img [src]="url" class="w-100">
+          </div>
+          <div class="modal-footer">
+            <button type="button" mat-raised-button color='basic' data-dismiss="modal">Close</button>
+            <button type="button" class="ml-2" mat-raised-button color='warn' data-dismiss="modal" (click)="deleteFile(indexOfelement, url)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+

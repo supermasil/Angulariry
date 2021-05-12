@@ -1,0 +1,136 @@
+<form [formGroup]="trackingsReportForm" (keydown.enter)="$event.preventDefault()" (submit)="submit()">
+  <mat-card class="m-3 mat-elevation-z0">
+    <div class="row">
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>general.tracking-types</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let type of trackingGlobals.allTrackingTypes" [value]="type">
+              {{"tracking-types." + type | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>general.active</mat-label>
+          <mat-select formControlName="active">
+            <mat-option *ngFor="let option of [true, false]" [value]="option">
+              {{'general.' + option | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>general.tracking-status</mat-label>
+          <mat-select formControlName="trackingStatus">
+            <mat-option [value]="null"></mat-option>
+            <mat-option *ngFor="let status of trackingGlobals.allTrackingStatuses" [value]="status">
+              {{"statuses." + status | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>general.financial-status</mat-label>
+          <mat-select formControlName="financialStatus">
+            <mat-option [value]="null"></mat-option>
+            <mat-option *ngFor="let status of trackingGlobals.allFinancialStatuses" [value]="status">
+              {{"statuses." + status | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <auto-complete-input
+          #sender
+          [selectItemObservable]="selectSenderSubject.asObservable()"
+          [required]="false"
+          [dataObservable]="sendersSubject.asObservable()"
+          (itemSelected)="senderSelected($event)"
+          (itemCancelled)="senderCancelled()"
+          [fields]="senderFields"
+          [matLabel]="'general.sender' | translate">
+        </auto-complete-input>
+      </div>
+      <div class="col">
+        <auto-complete-input
+          #creator
+          [selectItemObservable]="selectSenderSubject.asObservable()"
+          [required]="false"
+          [dataObservable]="sendersSubject.asObservable()"
+          (itemSelected)="creatorSelected($event)"
+          (itemCancelled)="creatorCancelled()"
+          [fields]="creatorFields"
+          [matLabel]="'general.creator' | translate">
+        </auto-complete-input>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <!-- User mat-icon instead https://github.com/h2qutc/angular-material-components/issues/170 -->
+        <mat-form-field appearance="outline">
+          <input matInput [ngxMatDatetimePicker]="startTime" placeholder="Start time" [readonly]="true" formControlName="startTime"
+            [min]="minDate" [max]="maxDate">
+            <button mat-icon-button matSuffix (click)="startTime.open(); $event.stopPropagation();">
+              <mat-icon>today</mat-icon>
+            </button>
+          <ngx-mat-datetime-picker #startTime [showSpinners]="showSpinners" [showSeconds]="showSeconds"
+            [stepHour]="stepHour" [stepMinute]="stepMinute" [stepSecond]="stepSecond" [touchUi]="touchUi"
+            [color]="color" [enableMeridian]="enableMeridian">
+          </ngx-mat-datetime-picker>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <input matInput [ngxMatDatetimePicker]="endTime" placeholder="End time" [readonly]="true" formControlName="endTime"
+            [min]="minDate" [max]="maxDate">
+            <button mat-icon-button matSuffix (click)="endTime.open(); $event.stopPropagation();">
+              <mat-icon>today</mat-icon>
+            </button>
+          <ngx-mat-datetime-picker #endTime [showSpinners]="showSpinners" [showSeconds]="showSeconds"
+            [stepHour]="stepHour" [stepMinute]="stepMinute" [stepSecond]="stepSecond" [touchUi]="touchUi"
+            [color]="color" [enableMeridian]="enableMeridian">
+          </ngx-mat-datetime-picker>
+        </mat-form-field>
+      </div>
+    </div>
+    <!-- <div class="row">
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>statuses.consolidated</mat-label>
+          <mat-select formControlName="consolidated">
+            <mat-option [value]="null"></mat-option>
+            <mat-option *ngFor="let option of [true, false]" [value]="option">
+              {{'general.' + option | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col">
+        <mat-form-field appearance="outline">
+          <mat-label translate>statuses.mastered</mat-label>
+          <mat-select formControlName="mastered">
+            <mat-option [value]="null"></mat-option>
+            <mat-option *ngFor="let option of [true, false]" [value]="option">
+              {{'general.' + option | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div> -->
+  </mat-card>
+  <save-cancel-buttons></save-cancel-buttons>
+</form>
+
+<tracking-list-common
+  (pageDataChangeEvent)="pageDataChanged($event)"
+  [trackingsObservable]="trackingsSubject.asObservable()"
+  [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+</tracking-list-common>

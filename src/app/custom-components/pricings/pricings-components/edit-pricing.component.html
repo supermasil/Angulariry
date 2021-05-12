@@ -1,0 +1,14 @@
+<div class="mt-4">
+  <auto-complete-input
+    [dataObservable]="items.asObservable()"
+    (itemSelected)="itemSelected($event)"
+    [fields]="itemFields"
+    [matLabel]="'tracking-info.item-name' | translate"
+    [lockOption]="false">
+  </auto-complete-input>
+</div>
+
+<pricing-common-form
+  [mode]="'edit'"
+  [selectedItemObservable]="selectedItemSubject.asObservable()">
+</pricing-common-form>

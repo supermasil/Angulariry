@@ -1,0 +1,178 @@
+<form *ngIf="signupForm" [formGroup]="signupForm" (submit)='onSignup()' (keydown.enter)="$event.preventDefault()">
+  <div>
+    <mat-card class="m-3 mat-elevation-z0">
+      <mat-form-field appearance="outline">
+        <mat-label translate>auth.full-name</mat-label>
+        <input
+        matInput
+        placeholder='John Doe'
+        formControlName='name'
+        required
+        >
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input
+        matInput
+        placeholder='johndoe@abc.com'
+        formControlName='email'
+        required
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label translate>auth.password</mat-label>
+        <input
+        type="password"
+        matInput
+        placeholder='Password'
+        formControlName='password'
+        autocomplete="false"
+        required
+        >
+        <mat-error translate>auth.at-least-6-chars</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <!-- [preferredCountries]="['us', 'vn']" -->
+        <lac-mat-country-selector matPrefix [selectorFor]="phoneNumber"
+          [onlyCountries]="['us', 'vn']"
+          [showDialCode]="false"
+          [disableSearch]="false"
+          searchPlaceholder="Search..."
+          style="position: relative; bottom: 6px;"
+          >
+        </lac-mat-country-selector>
+        <mat-label translate>auth.phone-number</mat-label>
+        <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
+        </lac-mat-tel-input>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label translate>auth.role</mat-label>
+        <mat-select matInput formControlName="role">
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{'roles.' + role | translate}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-card>
+
+    <h3 class="m-3" translate>auth.sender-addresses</h3>
+    <div formArrayName="addresses" *ngFor="let item of signupForm.get('addresses')['controls']; let i = index;">
+      <div [formGroupName]="i">
+        <mat-card class="m-3 mat-elevation-z0">
+          <mat-form-field appearance="outline">
+            <mat-label translate>auth.address</mat-label>
+            <input
+            type="text"
+            matInput
+            ngx-google-places-autocomplete
+            formControlName="address"
+            placeholder="Please make sure to only select suggested address from Google"
+            (onAddressChange)="onAddressChange($event, 'addresses', i)"
+            required>
+            <button mat-button *ngIf="signupForm.get('addresses')['controls'][i].controls['address'].value" matSuffix mat-icon-button aria-label="Clear" (click)="onAddressCancel('addresses', i);">
+              <mat-icon>close</mat-icon>
+            </button>
+            <mat-error translate>auth.select-only-suggested-address</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label translate>auth.address-line-2</mat-label>
+            <input
+            type="text"
+            matInput
+            formControlName="addressLineTwo"
+            placeholder="Apt/ spc/ #">
+            <a *ngIf="i > 0"
+              matSuffix
+              mat-mini-fab
+              color="warn"
+              (click)="removeAddressOrRecipient('addresses', i)">
+              <mat-icon>delete</mat-icon>
+            </a>
+          </mat-form-field>
+        </mat-card>
+      </div>
+    </div>
+    <!-- <div class="mb-4 d-flex justify-content-end">
+      <a mat-mini-fab color="primary" (click)="addAddressOrRecipient('addresses')"><mat-icon>add</mat-icon></a>
+    </div> -->
+    <h3 class="m-3" translate>auth.recipient-addresses</h3>
+    <div formArrayName="recipients" *ngFor="let item of signupForm.get('recipients')['controls']; let i = index;">
+      <div [formGroupName]="i">
+        <mat-card class="m-3 mat-elevation-z0">
+          <mat-form-field appearance="outline">
+            <mat-label translate>auth.full-name</mat-label>
+            <input
+            matInput
+            placeholder='John Doe'
+            formControlName='name'
+            required
+            >
+            <mat-error *ngIf="signupForm.get('recipients')['controls'][i].getError('error', 'name') as error">{{error}}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input
+            matInput
+            placeholder='johndoe@abc.com'
+            formControlName='email'
+            required
+            >
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <!-- [preferredCountries]="['us', 'vn']" -->
+            <lac-mat-country-selector matPrefix [selectorFor]="phoneNumber"
+              [onlyCountries]="['us', 'vn']"
+              [showDialCode]="false"
+              [disableSearch]="false"
+              searchPlaceholder="Search..."
+              style="position: relative; bottom: 6px;"
+              >
+            </lac-mat-country-selector>
+            <mat-label translate>auth.phone-number</mat-label>
+            <lac-mat-tel-input #phoneNumber formControlName="phoneNumber" required>
+            </lac-mat-tel-input>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label translate>auth.address</mat-label>
+            <input
+            type="text"
+            matInput
+            ngx-google-places-autocomplete
+            formControlName="address"
+            placeholder="Please make sure to only select suggested address from Google"
+            (onAddressChange)="onAddressChange($event, 'recipients', i)"
+            required>
+            <button mat-button *ngIf="signupForm.get('recipients')['controls'][i].controls['address'].value" matSuffix mat-icon-button aria-label="Clear" (click)="onAddressCancel('recipients', i);">
+              <mat-icon>close</mat-icon>
+            </button>
+            <mat-error translate>auth.select-only-suggested-address</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label translate>auth.address-line-2</mat-label>
+            <input
+            type="text"
+            matInput
+            formControlName="addressLineTwo"
+            placeholder="Apt/ spc/ #">
+            <a
+              matSuffix
+              mat-mini-fab
+              color="warn"
+              (click)="removeAddressOrRecipient('recipients', i)">
+              <mat-icon>delete</mat-icon>
+            </a>
+          </mat-form-field>
+        </mat-card>
+      </div>
+    </div>
+    <a mat-mini-fab color="primary" (click)="addAddressOrRecipient('recipients')" class="m-3 float-right"><mat-icon>add</mat-icon></a>
+    <button *ngIf="!isLoading && mode === 'create'" class="m-3" mat-raised-button color='accent' type="submit">{{'auth.signup' | translate}}</button>
+    <button *ngIf="!isLoading && mode === 'edit'" class="m-3" mat-raised-button color='accent' type="submit">{{'general.update' | translate}}</button>
+    <mat-progress-spinner *ngIf="isLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+  </div>
+</form>
+
+

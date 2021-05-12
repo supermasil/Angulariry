@@ -1,0 +1,12 @@
+<form [formGroup]='notesForm' class="m-3">
+  <mat-form-field appearance="outline">
+    <mat-label translate>general.notes</mat-label>
+    <textarea
+    matInput
+    rows='2'
+    cdkTextareaAutosize
+    (change)="contentEmit($event.value)"
+    formControlName='content'
+    ></textarea>
+  </mat-form-field>
+</form>

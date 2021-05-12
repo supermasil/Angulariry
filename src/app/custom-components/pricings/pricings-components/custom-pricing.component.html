@@ -1,0 +1,25 @@
+<div class="mt-4">
+  <auto-complete-input
+    [dataObservable]="usersSubject.asObservable()"
+    (itemSelected)="userSelected($event)"
+    [matLabel]="'general.users' | translate"
+    [fields]="userFields"
+    [lockOption]="false">
+  </auto-complete-input>
+</div>
+
+<div class="mt-2">
+  <auto-complete-input
+    [dataObservable]="items.asObservable()"
+    (itemSelected)="itemSelected($event)"
+    [matLabel]="'tracking-info.item-name' | translate"
+    [lockOption]="false"
+    [fields]="itemFields">
+  </auto-complete-input>
+</div>
+
+<pricing-common-form
+  [mode]="'custom'"
+  [selectedItemObservable]="selectedItemSubject.asObservable()"
+  [selectedUserObservable]="selectedUserSubject.asObservable()">
+</pricing-common-form>

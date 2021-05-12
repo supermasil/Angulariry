@@ -1,0 +1,16 @@
+<div class="mt-3">
+  <search-bar
+  (onSearchEvent)="onFuzzySearch($event)"
+  [description]="'onl-12345...'">
+  </search-bar>
+</div>
+
+<tracking-list-common
+  (pageDataChangeEvent)="pageDataChanged($event)"
+  [trackingsObservable]="trackingsSubject.asObservable()"
+  [resetPaginatorObservable]="resetPaginatorSubject.asObservable()">
+</tracking-list-common>
+
+<!-- <div *ngIf="!showingResults">
+  <product-info></product-info>
+</div> -->

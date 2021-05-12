@@ -1,0 +1,44 @@
+<div class="mt-4">
+  <auto-complete-input
+    [dataObservable]="usersSubject.asObservable()"
+    (itemSelected)="userSelected($event)"
+    (itemCancelled)="userCancelled()"
+    [fields]="userFields"
+    [matLabel]="'general.users' | translate"
+    [lockOption]="false">
+  </auto-complete-input>
+</div>
+
+<form *ngIf="creditForm" [formGroup]='creditForm' (submit)='onSubmit()'>
+  <mat-card class="m-3 mat-elevation-z0">
+    <div style="font-size: 3em;" class="my-4">{{editUser.credit | currency: 'USD'}}</div>
+
+    <mat-form-field appearance="outline">
+      <input
+      matInput
+      formControlName='amount'
+      currencyMask
+      [options]="{prefix: '$ ', thousands: ',', decimal: '.', align: 'left', allowNegative: true}">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label translate>general.notes</mat-label>
+      <textarea
+      matInput
+      rows='2'
+      cdkTextareaAutosize
+      formControlName='content'
+      ></textarea>
+    </mat-form-field>
+  </mat-card>
+  <mat-card *ngIf="creditHistory?.length > 0" class="m-3 mat-elevation-z0">
+    <div class="scroll-box">
+      <ng-container *ngFor="let history of creditHistory">
+        <div>{{history?.action}}  <span class="dimmed-text">{{formatDateTime(history?.updatedAt)}}</span></div>
+        <hr>
+      </ng-container>
+    </div>
+  </mat-card>
+  <button class="m-3" mat-raised-button color='accent' type='submit'>{{'general.update' | translate}}</button>
+</form>
+

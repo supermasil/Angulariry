@@ -1,0 +1,73 @@
+<mat-form-field class="mt-4">
+  <mat-label>Filter</mat-label>
+  <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input>
+</mat-form-field>
+
+<table mat-table
+      [dataSource]="dataSource" multiTemplateDataRows
+      matSort>
+
+  <ng-container matColumnDef="select">
+    <th mat-header-cell *matHeaderCellDef>
+      <mat-checkbox (change)="$event ? masterToggle() : null;"
+                    [checked]="filterselection.hasValue() && isAllSelected"
+                    [indeterminate]="filterselection.hasValue() && !isAllSelected"
+                    [aria-label]="checkboxLabel()">
+      </mat-checkbox>
+    </th>
+    <td mat-cell *matCellDef="let row">
+      <mat-checkbox (click)="$event.stopPropagation()"
+                    (change)="$event ? rowSelectionClicked(row) : null"
+                    [checked]="selection.isSelected(row)"
+                    [aria-label]="checkboxLabel(row)">
+      </mat-checkbox>
+    </td>
+  </ng-container>
+
+  <!-- Column data -->
+  <ng-container matColumnDef="trackingNumber" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="sortClicked();">{{'general.tracking-number' | translate}}</th>
+    <td mat-cell *matCellDef="let element"> {{element.generalInfo.trackingNumber}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="trackingStatus" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="sortClicked();">{{'general.tracking-status' | translate}}</th>
+    <td mat-cell *matCellDef="let element"> {{'statuses.' + element.generalInfo.trackingStatus | translate}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="financialStatus" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="sortClicked();">{{'general.financial-status' | translate}}</th>
+    <td mat-cell *matCellDef="let element"> {{'statuses.' + element.generalInfo.financialStatus | translate}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="recipientsaddress" >
+    <th mat-header-cell *matHeaderCellDef mat-sort-header (click)="sortClicked();">{{'general.recipients-address' | translate}}</th>
+    <td mat-cell *matCellDef="let element"> {{element.generalInfo.recipient.address.address}} </td>
+  </ng-container>
+
+
+  <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+  <!-- no <th></th> -->
+  <ng-container matColumnDef="expandedDetail">
+    <td mat-cell *matCellDef="let element" [attr.colspan]="definedColumns.length">
+      <div class="item-detail"
+          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+        <div class="mb-4">
+          {{element.description}}
+        </div>
+      </div>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="definedColumns"></tr>
+  <tr mat-row *matRowDef="let element; columns: definedColumns;"
+      class="element-row"
+      [class.expanded-row]="expandedElement === element"
+      (click)="expandedElement = expandedElement === element ? null : element">
+  </tr>
+  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+  <tr class="mat-row" *matNoDataRow>
+    <!-- <td class="mat-cell" colspan="4">No data found</td> -->
+  </tr>
+</table>
+<mat-paginator [pageSizeOptions]="globalConstants.defaultPageSizes"></mat-paginator>

@@ -1,0 +1,47 @@
+<div class="mx-auto">
+  <mat-accordion *ngIf='users?.length > 0'>
+    <mat-expansion-panel *ngFor='let user of users, let i = index'>
+      <mat-expansion-panel-header [collapsedHeight]="'*'" [expandedHeight]="'*'">
+        <mat-panel-title>
+          <b><mat-icon>person</mat-icon>{{user.name}}</b>
+        </mat-panel-title>
+        <mat-panel-description>
+          <b><mat-icon>account_balance</mat-icon>{{user.credit | currency: 'USD'}}</b>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <ng-template matExpansionPanelContent>
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="mat-h4"><mat-icon>tag</mat-icon><b translate>auth.user-code</b> {{user.userCode}}</div>
+            <div class="mat-h4"><mat-icon>mail</mat-icon><b>Email</b> {{user.email}}</div>
+            <div class="mat-h4"><mat-icon>call</mat-icon><b translate>auth.phone-number</b> {{user.phoneNumber}}</div>
+          </div>
+          <div class="col-lg-6">
+            <div class="mat-h4"><mat-icon>home</mat-icon><b translate>auth.address</b> {{user.addresses[0].address}} {{user.addresses[0].addressLineTwo}}</div>
+            <div class="mat-h4"><mat-icon>face</mat-icon><b translate>auth.role</b> {{user.role}}</div>
+            <div class="mat-h4"><mat-icon>person_add</mat-icon><b translate>general.creator</b> {{user.creatorId}}</div>
+            <div class="mat-h4"><mat-icon>toggle_on</mat-icon><b translate *ngIf="user.active">auth.active</b><b translate *ngIf="!user.active">auth.inactive</b></div>
+          </div>
+        </div>
+
+        <!-- Printing section -->
+        <div hidden id="print-section{{i}}">
+          <!-- <tracking-list-items-common
+            [trackings]="trackings"
+            [tracking]="tracking"
+            [i]="i">
+          </tracking-list-items-common> -->
+        </div>
+      </ng-template>
+
+      <mat-action-row>
+        <a class="mr-2" *ngIf="canEdit(authGlobals.officers)" mat-button color='primary' [routerLink]="['/auth/users/edit/' + user._id]" >Edit</a>
+      </mat-action-row>
+    </mat-expansion-panel>
+  </mat-accordion>
+  <mat-paginator #paginator *ngIf='users?.length > 1'[length]='totalUsers' [(pageSize)]='currentPageSize' [pageSizeOptions]='pageSizeOptions' (page)='pageDataChange($event)'></mat-paginator>
+  <div *ngIf='users?.length == 0' class="text-center">
+    <!-- No data found -->
+  </div>
+</div>

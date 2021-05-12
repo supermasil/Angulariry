@@ -1,0 +1,40 @@
+<nav class="navbar navbar-expand-sm navbar-dark fixed-top mat-elevation-z4">
+  <a class="navbar-brand" (click)="sideMenuPressed()"><mat-icon>near_me</mat-icon> (beta)</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <!-- <li class="nav-item" *ngIf="isAuth()">
+        <a class="nav-link" (click)="redirect('/trackings/tracking-tool')">Tracking Tool</a>
+      </li> -->
+    </ul>
+
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a mat-button [matMenuTriggerFor]="createMenu" style="padding: 0; color: white;" class="mx-2"><mat-icon>language</mat-icon></a>
+        <mat-menu #createMenu="matMenu">
+          <a mat-menu-item class="nav-link" (click)="languageChange('vi')">Tiếng Việt</a>
+          <a mat-menu-item class="nav-link" (click)="languageChange('en')">English</a>
+        </mat-menu>
+      </li>
+      <li class="nav-item" *ngIf="isAuth()">
+        <a mat-button [matMenuTriggerFor]="currentUserMenu" style="padding: 0; color: white;" class="mx-2">{{user?.name}}</a>
+        <mat-menu #currentUserMenu="matMenu">
+          <a mat-menu-item class="nav-link" style="font-size: 2em;" *ngIf="user">{{user.userCode}}</a>
+          <a mat-menu-item class="nav-link" [routerLinkActive]="['is-active']" *ngIf="user" [routerLink]="'/auth/users/edit/' + user._id" [routerLinkActiveOptions]="{ exact: true}">{{'auth.profile' | translate}}</a>
+          <a mat-menu-item class="nav-link" (click)="onLogOut()">{{'auth.logout' | translate}}</a>
+          <mat-divider></mat-divider>
+          <a mat-menu-item class="nav-link" style="color: grey;">{{'roles.' + user?.role | translate}}</a>
+          <a mat-menu-item class="nav-link" style="color: grey;">{{user?.credit | currency: 'USD'}}</a>
+          <a mat-menu-item class="nav-link" style="color: grey;">{{(user?.active? 'auth.active' : 'auth.inactive') | translate}}</a>
+        </mat-menu>
+      </li>
+      <li class="nav-item" *ngIf="isAuth()">
+        <app-onboarding></app-onboarding>
+      </li>
+    </ul>
+  </div>
+</nav>
+

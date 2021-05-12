@@ -1,0 +1,42 @@
+
+<form [formGroup]="searchForm" (submit)="onSearch()" class="my-4">
+  <div @fadeInUp
+      class="border rounded-full bg-card py-2 pl-6 pr-3 text-secondary max-w-xl mx-auto shadow-8"
+      fxLayout="row"
+      fxLayoutAlign="start center">
+    <a
+      *ngIf="!isCustomer()"
+      mat-mini-fab
+      color='primary'
+      class="rounded-full"
+      (click)="openScanner()"
+      fxFlex="none">
+      <mat-icon>qr_code</mat-icon>
+    </a>
+    <input class="border-0 ml-4 placeholder:text-secondary subheading-2 outline-none font-medium w-0 bg-card"
+            fxFlex="auto"
+            placeholder="Search for answers..."
+            type="text"
+            matInput
+            formControlName='searchTerm'
+            #input>
+    <button
+      *ngIf="input.value.length > 0"
+      matSuffix
+      mat-icon-button
+      type="button"
+      (click)="clearContent()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <a
+      mat-mini-fab
+      color='primary'
+      (click)="onSearch()"
+      class="rounded-full"
+      fxFlex="none">
+      <mat-icon>search</mat-icon>
+    </a>
+  </div>
+</form>
+
+<app-code-scanner *ngIf="scannerOpened">Code Scanner</app-code-scanner>

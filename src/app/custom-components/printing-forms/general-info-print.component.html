@@ -1,0 +1,52 @@
+<div class="d-flex align-items-center justify-content-between border border-dark rounded p-4 my-2">
+  <h1><b>{{currentOrg.name}}</b></h1>
+  <ng-container *ngFor="let location of currentOrg.locations">
+    <div>
+      <div><b>{{location.name}}</b></div>
+      <div>{{location.phoneNumber}}</div>
+      <div>{{location.address.address}} {{location.address.addressLineTwo}}</div>
+    </div>
+  </ng-container>
+</div>
+<div class="d-flex align-items-center justify-content-between border border-dark rounded p-4 my-2">
+  <div *ngIf="tracking">
+    <ngx-qrcode
+      [elementType]="'url'"
+      [value]="tracking.trackingNumber"
+      cssClass="aclass"
+      errorCorrectionLevel="L">
+    </ngx-qrcode>
+  </div>
+  <div *ngIf="tracking">
+    <ngx-barcode
+      [bc-value]="tracking.trackingNumber"
+      [bc-display-value]="true"
+      [bc-element-type]="'url'"
+      [bc-height]="50"
+      [bc-width]="1">
+    </ngx-barcode>
+  </div>
+  <div>
+    <div><b translate>general.date-time</b></div>
+    <div>{{globalConstants.now()}}</div>
+    <div><b translate>general.origin</b></div>
+    <div>{{tracking.generalInfo.origin}}</div>
+    <div><b translate>general.destination</b></div>
+    <div>{{tracking.generalInfo.destination}}</div>
+  </div>
+</div>
+<div class="d-flex align-items-center justify-content-between border border-dark rounded p-4 my-2">
+  <div *ngIf="sender">
+    <div><b translate>general.sender</b></div>
+    <div>{{sender.name}} <b>{{sender.userCode}}</b></div>
+    <div>{{sender.phoneNumber}}</div>
+    <div>{{sender.email}}</div>
+  </div>
+  <div *ngIf="recipient">
+    <div><b translate>general.recipient</b></div>
+    <div>{{recipient.name}}</div>
+    <div>{{recipient.address.address}} {{recipient.address.addressLineTwo}}</div>
+    <div>{{recipient.email}} {{recipient.phoneNumber}}</div>
+  </div>
+</div>
+
