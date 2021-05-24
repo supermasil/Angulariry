@@ -1,0 +1,52 @@
+<div class="dropdown">
+  <div class="dropdown-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <div fxLayout="row" fxLayoutAlign="start center">
+      <div class="dropdown-heading-icon" fxLayout="row" fxLayoutAlign="center center">
+        <mat-icon [icIcon]="icBuilding"></mat-icon>
+      </div>
+      <div class="dropdown-heading">{{org?.name}}</div>
+    </div>
+  </div>
+
+  <div class="dropdown-content">
+    <a (click)="item.click"
+       *ngFor="let item of items"
+       [routerLink]="item.route"
+       class="notification"
+       fxLayout="row"
+       fxLayoutAlign="start center"
+       matRipple>
+      <mat-icon [icIcon]="item.icon"
+                [ngClass]="item.colorClass"
+                class="notification-icon"
+                fxFlex="none"></mat-icon>
+      <div fxFlex="auto">
+        <div class="notification-label">{{ item.label | translate}}</div>
+        <div class="notification-description">{{ item.description }}</div>
+      </div>
+      <mat-icon *ngIf="['2'].includes(item.id)" [icIcon]="icChevronRight" class="notification-chevron" fxFlex="none"></mat-icon>
+    </a>
+  </div>
+
+  <div class="dropdown-footer" fxLayout="row" fxLayoutAlign="space-between center">
+    <button [matMenuTriggerFor]="orgListMenu" class="dropdown-footer-select" mat-button type="button" color="primary">
+      <mat-icon [icIcon]="icBuilding"></mat-icon>
+      <span>Log in to org</span>
+      <mat-icon [icIcon]="icArrowDropDown" class="dropdown-footer-select-caret"></mat-icon>
+    </button>
+    <button class="dropdown-footer-select" mat-button type="button" (click)="openDialog()" color="primary">
+      <mat-icon [icIcon]="icOutlineNewLabel"></mat-icon>
+      <span> {{'auth.onboard-to-new-organization' | translate}}</span>
+    </button>
+  </div>
+</div>
+
+<mat-menu #orgListMenu="matMenu" xPosition="before" yPosition="below">
+  <button (click)="companySelected(i)"
+          *ngFor="let org of organizations; let i = index"
+          mat-menu-item
+          fxLayoutAlign="start center">
+    <ic-icon [icon]="icChevronRight" class="notification-chevron" fxFlex="none"></ic-icon>
+    <span>{{ org.name}} {{org.email}}</span>
+  </button>
+</mat-menu>

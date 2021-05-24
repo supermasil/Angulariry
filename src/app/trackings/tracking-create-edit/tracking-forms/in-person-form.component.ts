@@ -10,7 +10,7 @@ import { GeneralInfoModel } from "src/app/models/tracking-models/general-info.mo
 import { InPersonSubTrackingModel, InPersonTrackingModel } from "src/app/models/tracking-models/in-person-tracking.model";
 import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
 import { UserModel } from "src/app/models/user.model";
-import { PricingService } from "src/app/custom-components/pricings/pricing.service";
+import { PricingService } from "src/app/pages/pricings/pricing.service";
 import { TrackingService } from "../../tracking.service";
 import { FinalizedInfoComponent } from "../finalized-info/finalized-info.component";
 import { GeneralInfoComponent } from "../general-info/general-info.component";

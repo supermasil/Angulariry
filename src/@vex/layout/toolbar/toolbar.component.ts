@@ -1,8 +1,6 @@
 import { Component, ElementRef, HostBinding, Input, OnInit } from '@angular/core';
 import { LayoutService } from '../../services/layout.service';
 import icBookmarks from '@iconify/icons-ic/twotone-bookmarks';
-import emojioneUS from '@iconify/icons-emojione/flag-for-flag-united-states';
-import emojioneDE from '@iconify/icons-emojione/flag-for-flag-germany';
 import icMenu from '@iconify/icons-ic/twotone-menu';
 import { ConfigService } from '../../services/config.service';
 import { map } from 'rxjs/operators';
@@ -18,6 +16,11 @@ import icArrowDropDown from '@iconify/icons-ic/twotone-arrow-drop-down';
 import { PopoverService } from '../../components/popover/popover.service';
 import { MegaMenuComponent } from '../../components/mega-menu/mega-menu.component';
 import icSearch from '@iconify/icons-ic/twotone-search';
+import { UserModel } from 'src/app/models/user.model';
+import { AuthService } from 'src/app/auth/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ToolbarOrgOnboardComponent } from './toolbar-org/toolbar-org-onboard/toolbar-org-onboard.component';
+import icOutlineNewLabel from '@iconify/icons-ic/open-in-new';
 
 @Component({
   selector: 'vex-toolbar',
@@ -41,8 +44,6 @@ export class ToolbarComponent implements OnInit {
 
   icSearch = icSearch;
   icBookmarks = icBookmarks;
-  emojioneUS = emojioneUS;
-  emojioneDE = emojioneDE;
   icMenu = icMenu;
   icPersonAdd = icPersonAdd;
   icAssignmentTurnedIn = icAssignmentTurnedIn;
@@ -52,13 +53,23 @@ export class ToolbarComponent implements OnInit {
   icReceipt = icReceipt;
   icDoneAll = icDoneAll;
   icArrowDropDown = icArrowDropDown;
+  icOutlineNewLabel = icOutlineNewLabel;
+
+  user: UserModel;
+  isLoading = true;
 
   constructor(private layoutService: LayoutService,
               private configService: ConfigService,
               private navigationService: NavigationService,
-              private popoverService: PopoverService) { }
+              private popoverService: PopoverService,
+              private authService: AuthService,
+              private dialog: MatDialog) { }
 
   ngOnInit() {
+    this.authService.getMongoDbUserListener().subscribe(user => {
+      this.user = this.authService.getMongoDbUser();
+      this.isLoading = false;
+    });
   }
 
   openQuickpanel() {
@@ -92,5 +103,11 @@ export class ToolbarComponent implements OnInit {
 
   openSearch() {
     this.layoutService.openSearch();
+  }
+
+  openDialog() {
+    this.dialog.open(ToolbarOrgOnboardComponent, {
+      width: '400px'
+    });
   }
 }

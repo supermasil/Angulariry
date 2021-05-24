@@ -12,7 +12,7 @@ import { AuthService } from "../auth.service";
 @Component({
   selector: 'adjust-credit-form',
   templateUrl: './adjust-credit.component.html',
-  styleUrls: ['./adjust-credit.component.css']
+  styleUrls: ['./adjust-credit.component.css', '../auth.component.css']
 })
 export class AdjustCreditFormComponent implements OnInit{
 

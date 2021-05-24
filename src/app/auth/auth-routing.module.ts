@@ -7,27 +7,30 @@ import { LoginFormComponent } from './auth-forms/login.component';
 import { OrgOnboardingFormComponentForm } from './auth-forms/org-onboarding.component';
 import { SignUpFormComponent } from './auth-forms/signup.component';
 import { AuthGuard } from './authentication.guard';
+import { PasswordResetFormComponent } from './auth-forms/password-reset.component';
 
 
 const routes: Routes = [
   { path: '', component: LoginFormComponent},
-  { path: "users/edit/:userId", component: SignUpFormComponent, canActivate: [AuthGuard], data: {
-    roles: AuthGlobals.everyone}}, // Lazy loading
+  { path: "register", component: SignUpFormComponent},
+  { path: "forgot-password", component: PasswordResetFormComponent},
   { path: "users", component: EditUserFormComponent, canActivate: [AuthGuard], data: {
-    roles: AuthGlobals.internal}}, // Lazy loading
+    roles: AuthGlobals.internal}},
+  { path: "users/edit/:userId", component: SignUpFormComponent, canActivate: [AuthGuard], data: {
+    roles: AuthGlobals.everyone}},
   { path: "users/adjustCredit", component: AdjustCreditFormComponent, canActivate: [AuthGuard], data: {
-    roles: [...AuthGlobals.managerAdmins, AuthGlobals.roles.Accounting]}}, // Lazy loading
+    roles: [...AuthGlobals.managerAdmins, AuthGlobals.roles.Accounting]}},
   { path: "users/new", component: SignUpFormComponent, canActivate: [AuthGuard], data: {
-    roles: AuthGlobals.internal}}, // Lazy loading
+    roles: AuthGlobals.internal}},
   { path: "orgs/edit/:orgId", component: OrgOnboardingFormComponentForm, canActivate: [AuthGuard], data: {
-    roles: AuthGlobals.admins}}, // Lazy loading
+    roles: AuthGlobals.admins}},
   { path: "orgs/new", component: OrgOnboardingFormComponentForm, canActivate: [AuthGuard], data: {
-    roles: AuthGlobals.roles.SuperAdmin}}, // Lazy loading
+    roles: AuthGlobals.roles.SuperAdmin}},
 ]
 
 @NgModule({
   imports: [
-    RouterModule.forChild(routes) // Lazy loading, will merge with root eventually
+    RouterModule.forChild(routes)
   ],
   exports: [RouterModule]
 })

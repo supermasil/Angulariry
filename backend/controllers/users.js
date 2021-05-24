@@ -294,7 +294,7 @@ exports.onBoardUserToOrg = async (req, res, next) => {
     return next({
       error: error,
       resCode: 500,
-      resBody: {message: error.message.includes("onBoardUserToOrgHelper") ? error.message.split(':')[2] : "something-went-wrong"}
+      resBody: {message: error.message.includes("onBoardUserToOrgHelper") ? error.message.split(': ')[2] : "something-went-wrong"}
     });
   }
 }
@@ -303,7 +303,9 @@ onBoardUserToOrgHelper = async (u_id, registerCode, referralCode) => {
   try {
     return await UserModel.findById(u_id).then(async foundUser => {
       let org = await OrganizationController.getOrganizationByRegisterCodeHelper(registerCode);
-      assert(org != null, "Org is null");
+      if (org == null) {
+        throw new Error("onBoardUserToOrgHelper: org-not-found");
+      }
       let referrer = null;
       if (referralCode) {
         referrer = await getUserByUserCodeHelper(referralCode, org._id);

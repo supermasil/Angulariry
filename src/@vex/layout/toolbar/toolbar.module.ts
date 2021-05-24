@@ -15,6 +15,9 @@ import { RouterModule } from '@angular/router';
 import { NavigationItemModule } from '../../components/navigation-item/navigation-item.module';
 import { MegaMenuModule } from '../../components/mega-menu/mega-menu.module';
 import { ContainerModule } from '../../directives/container/container.module';
+import { ToolbarOrgModule } from './toolbar-org/toolbar-org.module';
+import { ToolbarLanguageModule } from './toolbar-language/toolbar-language.module';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @NgModule({
@@ -28,13 +31,16 @@ import { ContainerModule } from '../../directives/container/container.module';
     MatRippleModule,
     ToolbarNotificationsModule,
     ToolbarUserModule,
+    ToolbarOrgModule,
     ToolbarSearchModule,
     IconModule,
     NavigationModule,
     RouterModule,
     NavigationItemModule,
     MegaMenuModule,
-    ContainerModule
+    ContainerModule,
+    ToolbarLanguageModule,
+    TranslateModule.forChild()
   ],
   exports: [ToolbarComponent]
 })

@@ -1,0 +1,18 @@
+<button [matMenuTriggerFor]="languageMenu" mat-icon-button type="button">
+	<mat-icon *ngIf="localStorage.getItem('weshippee_language') == 'en'" [icIcon]="emojioneUS"></mat-icon>
+	<mat-icon *ngIf="localStorage.getItem('weshippee_language') == 'vi'" [icIcon]="emojioneVN"></mat-icon>
+</button>
+
+<mat-menu #languageMenu="matMenu" overlapTrigger="false" xPosition="before" yPosition="below">
+	<button mat-menu-item
+		(click)="languageChange('en')">
+		<mat-icon [icIcon]="emojioneUS"></mat-icon>
+		<span>English</span>
+	</button>
+
+	<button mat-menu-item
+		(click)="languageChange('vi')">
+		<mat-icon [icIcon]="emojioneVN"></mat-icon>
+		<span>Tiếng Việt</span>
+	</button>
+</mat-menu>

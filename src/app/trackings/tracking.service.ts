@@ -104,6 +104,8 @@ export class TrackingService{
   }
 
   getTrackingTypeFromString(term: string) {
+    if (!term) return null;
+    
     if ((term.match(/-/g) || []).length == 2) {
       return TrackingGlobals.trackingTypes.INPERSONSUB;
     }

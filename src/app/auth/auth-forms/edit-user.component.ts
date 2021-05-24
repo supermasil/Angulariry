@@ -10,7 +10,7 @@ import { AuthService } from "../auth.service";
 @Component({
   selector: 'edit-user-form',
   templateUrl: './edit-user.component.html',
-  styleUrls: ['./edit-user.component.css']
+  styleUrls: ['../auth.component.css']
 })
 export class EditUserFormComponent implements OnInit{
 

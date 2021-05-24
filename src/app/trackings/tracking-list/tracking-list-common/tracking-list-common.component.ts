@@ -17,18 +17,13 @@ import { TrackingService } from "../../tracking.service";
 import { getTracking } from 'ts-tracking-number';
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { fadeInUp400ms } from "src/@vex/animations/fade-in-up.animation";
-import { stagger40ms } from "src/@vex/animations/stagger.animation";
 
 
 @Component({
   selector: 'tracking-list-common',
   templateUrl: './tracking-list-common.component.html',
   styleUrls: ['../tracking-list.component.css'],
-  animations: [
-    fadeInUp400ms,
-    stagger40ms
-  ]
+  animations: []
 })
 export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   trackings: (OnlineTrackingModel | ServicedTrackingModel | InPersonTrackingModel | ConsolidatedTrackingModel | MasterTrackingModel)[] = [];
@@ -43,6 +38,7 @@ export class TrackingListCommonComponent implements OnInit, AfterViewChecked {
   currentOrg: OrganizationModel;
   authGlobal = AuthGlobals;
   trackingGlobals = TrackingGlobals;
+  viewStyle = "full";
 
   canView = this.authService.canView;
   isAuth = this.authService.isAuth;

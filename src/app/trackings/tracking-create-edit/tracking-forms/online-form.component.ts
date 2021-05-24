@@ -11,7 +11,7 @@ import { GeneralInfoModel } from "src/app/models/tracking-models/general-info.mo
 import { ListItemModel } from "src/app/models/tracking-models/list-item.model";
 import { OnlineTrackingModel } from "src/app/models/tracking-models/online-tracking.model";
 import { UserModel } from "src/app/models/user.model";
-import { PricingService } from "src/app/custom-components/pricings/pricing.service";
+import { PricingService } from "src/app/pages/pricings/pricing.service";
 import { TrackingGlobals } from "../../tracking-globals";
 import { TrackingService } from '../../tracking.service';
 import { FinalizedInfoComponent } from "../finalized-info/finalized-info.component";

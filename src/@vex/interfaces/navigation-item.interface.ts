@@ -29,7 +29,7 @@ export interface NavigationDropdown {
 }
 
 export interface NavigationSubheading {
-  type: 'subheading';
+type: 'subheading';
   label: string;
   children: Array<NavigationLink | NavigationDropdown>;
 }

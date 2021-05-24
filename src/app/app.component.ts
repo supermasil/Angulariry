@@ -4,7 +4,6 @@ import { Settings } from 'luxon';
 import { DOCUMENT } from '@angular/common';
 import { Platform } from '@angular/cdk/platform';
 import { NavigationService } from '../@vex/services/navigation.service';
-import icLayers from '@iconify/icons-ic/twotone-layers';
 import { LayoutService } from '../@vex/services/layout.service';
 import { ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
@@ -13,13 +12,20 @@ import { SplashScreenService } from '../@vex/services/splash-screen.service';
 import { Style, StyleService } from '../@vex/services/style.service';
 import { ConfigName } from '../@vex/interfaces/config-name.model';
 
+import homeTwotone from '@iconify/icons-ic/twotone-home';
+import twotoneEarbuds from '@iconify/icons-ic/twotone-earbuds';
+import twotoneDataSaverOn from '@iconify/icons-ic/twotone-data-saver-on';
+import twotoneCalculate from '@iconify/icons-ic/twotone-calculate';
+import twotoneAccountCircle from '@iconify/icons-ic/twotone-account-circle';
+
+
 @Component({
-  selector: 'vex-root',
+  selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'vex';
+  title = 'Weshippee';
 
   constructor(private configService: ConfigService,
               private styleService: StyleService,
@@ -79,9 +85,138 @@ export class AppComponent {
     this.navigationService.items = [
       {
         type: 'link',
-        label: 'Dashboard',
+        label: 'AIO',
+        route: '/aio',
+        icon: homeTwotone
+      },
+      {
+        type: 'link',
+        label: 'Home',
         route: '/',
-        icon: icLayers
+        icon: homeTwotone
+      },
+      {
+        type: 'subheading',
+        label: 'Trackings',
+        children: [
+          {
+            type: 'link',
+            label: 'View Trackings',
+            route: '/trackings',
+            icon: twotoneEarbuds
+          },
+          {
+            type: 'dropdown',
+            label: 'Create Trackings',
+            icon: twotoneDataSaverOn,
+            children: [
+              {
+                type: 'link',
+                label: 'Online',
+                route: '/trackings/create/onl'
+              },
+              {
+                type: 'link',
+                label: 'In Person',
+                route: '/trackings/create/inp'
+              },
+              {
+                type: 'link',
+                label: 'Consolidated',
+                route: '/trackings/create/csl'
+              },
+              {
+                type: 'link',
+                label: 'Master',
+                route: '/trackings/create/mst'
+              }
+            ]
+          }, 
+        ]
+      },
+      {
+        type: 'subheading',
+        label: 'Pricing Management',
+        children: [
+          {
+            type: 'dropdown',
+            label: 'Pricing',
+            icon: twotoneCalculate,
+            children: [
+              {
+                type: 'link',
+                label: 'Create New Item',
+                route: '/pricings/new'
+              },
+              {
+                type: 'link',
+                label: 'Edit Item',
+                route: '/pricings/edit'
+              },
+              {
+                type: 'link',
+                label: 'Custom Pricing',
+                route: '/pricings/custom'
+              }
+            ]
+          }, 
+        ]
+      },
+      {
+        type: 'subheading',
+        label: 'Users Management',
+        children: [
+          {
+            type: 'dropdown',
+            label: 'Users',
+            icon: twotoneAccountCircle,
+            children: [
+              {
+                type: 'link',
+                label: 'View User',
+                route: '/auth/users'
+              },
+              {
+                type: 'link',
+                label: 'Adjust Credit',
+                route: '/auth/users/adjustCredit'
+              },
+              {
+                type: 'link',
+                label: 'New User',
+                route: '/auth/users/new'
+              },
+              {
+                type: 'link',
+                label: 'New Organization',
+                route: '/auth/orgs/new'
+              }
+            ]
+          }, 
+        ]
+      },
+      {
+        type: 'subheading',
+        label: 'Reports',
+        children: [
+          {
+            type: 'dropdown',
+            label: 'Reports',
+            icon: twotoneAccountCircle,
+            children: [
+              {
+                type: 'link',
+                label: 'Trackings Report',
+                route: '/reports/trackings'
+              },
+              {
+                type: 'link',
+                label: 'Users Report',
+                route: '/reports/users'
+              }
+            ]
+          }, 
+        ]
       }
     ];
   }

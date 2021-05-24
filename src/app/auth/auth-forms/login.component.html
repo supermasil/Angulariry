@@ -1,37 +1,51 @@
-<form *ngIf="loginForm" [formGroup]='loginForm' (submit)='onLogin()'>
-  <div class="row">
-    <div class="col-lg-4">
-      <mat-card class="m-3 mr-lg-0 mat-elevation-z0" style="height: 250px">
+<div class="w-full h-full" fxLayout="column" fxLayoutAlign="center center">
+  <div @fadeInUp class="card overflow-hidden w-full max-w-xs">
+    
+    <div class="p-6 pb-0" fxLayout="column" fxLayoutAlign="center center">
+      <div class="fill-current text-center">
+        <img class="w-16" src="assets/img/demo/logo.svg">
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <h2 class="title m-0" translate>general.welcome-back</h2>
+      <h4 class="body-2 text-secondary m-0" translate>general.please-fill-up</h4>
+    </div>
+
+    <form *ngIf="loginForm" [formGroup]="loginForm" (submit)='onLogin()' class="p-6" fxLayout="column">
         <mat-form-field appearance="outline">
           <mat-label>Email</mat-label>
           <input
-          matInput
-          placeholder='johndoe@abc.com'
-          formControlName='email'
-          >
+            matInput
+            placeholder='johndoe@abc.com'
+            formControlName='email'>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label translate>auth.password</mat-label>
           <input
-          type="password"
-          matInput
-          placeholder='Password'
-          formControlName='password'
-          autocomplete="false"
-          >
+            type="password"
+            matInput
+            placeholder='Password'
+            formControlName='password'
+            autocomplete="false">
         </mat-form-field>
-        <button *ngIf="!buttonIsLoading" mat-raised-button color='accent' type='submit'>{{'auth.login' | translate}}</button>
-        <mat-progress-spinner *ngIf="buttonIsLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
-      </mat-card>
-    </div>
-    <div class="col-lg-8 d-none d-lg-block">
-      <mat-card class="m-3 ml-lg-0 mat-elevation-z0" style="height: 250px; overflow-y: hidden;">
-        <img class="center-of-container w-100" src="https://preview.colorlib.com/theme/bootstrap/login-form-07/images/undraw_remotely_2j6y.svg" alt="">
-      </mat-card>
-    </div>
-    <product-info></product-info>
+        <div fxLayout="column" fxLayoutGap="16px">
+          <div fxLayout="row" fxLayoutAlign="space-between center">
+            <toolbar-language></toolbar-language>
+            <!-- <mat-checkbox class="caption" color="primary">Remember Me</mat-checkbox> -->
+            <a [routerLink]="['/auth/forgot-password']" class="caption" translate>auth.forgot-password</a>
+          </div>
+
+          <button *ngIf="!buttonIsLoading" mat-raised-button color='accent' type='submit'>{{'auth.login' | translate}}</button>
+          <mat-progress-spinner *ngIf="buttonIsLoading" color="primary" mode="indeterminate" diameter="30"></mat-progress-spinner>
+
+          <p class="text-secondary text-center">
+            <a [routerLink]="['/auth/register']" translate>auth.register</a>
+          </p>
+        </div>
+    </form>
   </div>
-</form>
+</div>
 
 
 

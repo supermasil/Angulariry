@@ -7,30 +7,48 @@ import { UserModel } from "src/app/models/user.model";
 import { ValidatorsService } from "src/app/validators.service";
 import { AuthService } from "../auth.service";
 import { AuthGlobals } from "../auth-globals";
-
+import { fadeInUp400ms } from "src/@vex/animations/fade-in-up.animation";
+import icDoneAll from '@iconify/icons-ic/twotone-done-all';
+import { StepperOrientation } from "@angular/cdk/stepper";
+import { Observable } from "rxjs";
+import { BreakpointObserver } from "@angular/cdk/layout";
+import { map } from "rxjs/operators";
 
 @Component({
   selector: 'signup-form',
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css']
+  styleUrls: ['../auth.component.css'],
+  animations: [
+    fadeInUp400ms,
+  ]
 })
 export class SignUpFormComponent implements OnInit, OnDestroy {
-  signupForm: FormGroup;
+  signupForm1: FormGroup;
+  signupForm2: FormGroup;
+  signupForm3: FormGroup;
   isLoading = false;
   mode = "create";
+  stepperOrientation: Observable<StepperOrientation>;
 
   roles = AuthGlobals.everyone;
+  authGlobals = AuthGlobals;
 
   // mongoDbUserSubscription: Subscription;
   currentUser: UserModel;
   editUser: UserModel;
 
+  icDoneAll = icDoneAll;
+  
   constructor(
     private authService: AuthService,
     private route: ActivatedRoute,
     private validatorsService: ValidatorsService,
+    private breakpointObserver: BreakpointObserver,
     private zone: NgZone
-  ) {}
+  ) {
+    this.stepperOrientation = breakpointObserver.observe('(min-width: 800px)')
+      .pipe(map(({matches}) => matches ? 'horizontal' : 'vertical'));
+  }
 
   ngOnInit() {
     this.currentUser = this.authService.getMongoDbUser();
@@ -42,11 +60,15 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
           this.checkAuthorization();
             this.zone.run(() => {
               this.createSignUpForm(user);
+              this.createSenderForm(user);
+              this.createRecipientForm(user);
             })
           });
       } else { // Create case
         this.zone.run(() => {
           this.createSignUpForm(null);
+          this.createSenderForm(null);
+          this.createRecipientForm(null);
         });
       }
     });
@@ -58,12 +80,12 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
 
   recipientNamesValidator(): ValidatorFn {
     return (control: AbstractControl): {[key: string]: any} | null => {
-      if (!this.signupForm) {
+      if (!this.signupForm3) {
         return null;
       }
       if ((control && control.value)) {
-        let currentFormItems = this.signupForm.get('recipients')['controls'].map(item => item['controls'].name.value.toLowerCase());// Tricky as fuck, can't use .value because the value is not updated
-        this.signupForm.get('recipients')['controls'].forEach(element => {
+        let currentFormItems = this.signupForm3.get('recipients')['controls'].map(item => item['controls'].name.value.toLowerCase());// Tricky as fuck, can't use .value because the value is not updated
+        this.signupForm3.get('recipients')['controls'].forEach(element => {
           if (currentFormItems.filter(item => item === element['controls'].name.value.toLowerCase()).length > 1) {
             element['controls'].name.setErrors({error: "Duplicate item name"});
           } else {
@@ -83,17 +105,27 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   }
 
   createSignUpForm(formData: any) {
-    this.signupForm =  new FormGroup({
+    this.signupForm1 = new FormGroup({
       _id: new FormControl(formData?._id? formData._id : null),
       name: new FormControl(formData?.name? formData.name : "", {validators: [Validators.required]}),
       email: new FormControl({value: formData?.email? formData.email : "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.email]}),
       password: new FormControl({value: "", disabled: formData?._id? true : false}, {validators: [Validators.required, Validators.minLength(6)]}),
       phoneNumber: new FormControl(formData?.phoneNumber? formData.phoneNumber : "", {validators: [phoneNumberValidator, Validators.required]}),
-      addresses: new FormArray(formData?.addresses && formData.addresses.length > 0 ? this.createAddresses(formData.addresses) : this.createAddresses([null])),
-      recipients: new FormArray(formData?.recipients && formData.recipients.length > 0 ? this.createRecipients(formData.recipients): this.createRecipients([])),
       role: new FormControl(formData?.role? formData.role : null),
     });
     this.validateRoles();
+  }
+
+  createSenderForm(formData: any) {
+    this.signupForm2 = new FormGroup({
+      addresses: new FormArray(formData?.addresses && formData.addresses.length > 0 ? this.createAddresses(formData.addresses) : this.createAddresses([null]))
+    })
+  }
+
+  createRecipientForm(formData: any) {
+    this.signupForm3 = new FormGroup({
+      recipients: new FormArray(formData?.recipients && formData.recipients.length > 0 ? this.createRecipients(formData.recipients): this.createRecipients([]))
+    })
   }
 
   checkAuthorization() {
@@ -105,14 +137,14 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
         || (AuthGlobals.officers.includes(this.currentUser.role) && this.editUser.role == AuthGlobals.roles.Customer)) {
         return true;
       }
-      this.authService.redirectToMainPageWithMessage("You're not authorized");
+      this.authService.redirectToMainPageWithMessage("not-authorized", 400);
       return false;
     }
   }
 
   validateRoles() {
     if (this.mode == "create" || AuthGlobals.nonAdmin.includes(this.currentUser.role) || this.currentUser._id == this.editUser._id) {
-      this.signupForm.get("role").disable();
+      this.signupForm1.get("role").disable();
     } else if (this.currentUser.role == AuthGlobals.roles.Admin) {
       this.roles = AuthGlobals.nonAdmin;
     } else {
@@ -155,31 +187,48 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
     if (!address.formatted_address) {
       return;
     }
-    this.signupForm.get(field)['controls'][index].controls['address'].setValue(address.formatted_address);
-    this.signupForm.get(field)['controls'][index].controls['address'].disable();
-    this.signupForm.get(field)['controls'][index].controls['addressUrl'].setValue(address.url);
+
+    let form: FormGroup;
+
+    if (field == "addresses") {
+      form = this.signupForm2;
+    } else if (field == "recipients") {
+      form = this.signupForm3;
+    }
+    form.get(field)['controls'][index].controls['address'].setValue(address.formatted_address);
+    form.get(field)['controls'][index].controls['address'].disable();
+    form.get(field)['controls'][index].controls['addressUrl'].setValue(address.url);
   }
 
   onAddressCancel(field: string, index: number) {
-    this.signupForm.get(field)['controls'][index].controls['address'].setValue('');
-    this.signupForm.get(field)['controls'][index].controls['addressUrl'].setValue('');
-    this.signupForm.get(field)['controls'][index].controls['address'].enable();
+    let form: FormGroup;
+
+    if (field == "addresses") {
+      form = this.signupForm2;
+    } else if (field == "recipients") {
+      form = this.signupForm3;
+    }
+
+    form.get(field)['controls'][index].controls['address'].setValue('');
+    form.get(field)['controls'][index].controls['addressUrl'].setValue('');
+    form.get(field)['controls'][index].controls['address'].enable();
   }
 
   addAddressOrRecipient(field: string) {
     if (field === 'addresses') {
-      (this.signupForm.get(field) as FormArray).push(this.createAddresses([null])[0]);
+      (this.signupForm2.get(field) as FormArray).push(this.createAddresses([null])[0]);
     } else if (field === 'recipients') {
-      (this.signupForm.get(field) as FormArray).push(this.createRecipients([null])[0]);
+      (this.signupForm3.get(field) as FormArray).push(this.createRecipients([null])[0]);
     }
   }
 
   removeAddressOrRecipient(field: string, i: number) {
-    if(field == 'addresses' && (this.signupForm.get(field) as FormArray).length == 1) {
+    if(field == 'addresses' && (this.signupForm2.get(field) as FormArray).length == 1) {
       return;
+    } else if (field === 'recipients') {
+      (this.signupForm3.get(field) as FormArray).removeAt(i);
+      this.recipientNamesValidator()(new FormControl(" ")); // Trigger validation when removing a recipient
     }
-    (this.signupForm.get(field) as FormArray).removeAt(i);
-    this.recipientNamesValidator()(new FormControl(" ")); // Trigger validation when removing a recipient
   }
 
   setButtonTimeOut() {
@@ -188,13 +237,21 @@ export class SignUpFormComponent implements OnInit, OnDestroy {
   }
 
   async onSignup() {
-    console.log("here")
-    this.signupForm.markAllAsTouched(); // deal with phone number validator empty issue
-    if (this.signupForm.invalid) {
+  
+    this.signupForm1.markAllAsTouched(); // deal with phone number validator empty issue
+
+    if (this.signupForm1.invalid || this.signupForm2.invalid || this.signupForm3.invalid) {
       return;
     }
     this.setButtonTimeOut();
-    let andLogin = this.currentUser? false : true;
-    await this.authService.createUpdateUser(this.signupForm.getRawValue(), andLogin);
+    let andLogin = this.currentUser? false : true; // Login after sign up if a new user
+
+    let finalForm = this.signupForm1.getRawValue();
+    finalForm['addresses'] = this.signupForm2.getRawValue()['addresses'];
+    finalForm['recipients'] = this.signupForm3.getRawValue()['recipients'];
+
+    console.log(finalForm);
+
+    await this.authService.createUpdateUser(finalForm, andLogin);
   }
 }

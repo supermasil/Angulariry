@@ -37,12 +37,17 @@
     "false": "No",
     "active": "Active",
     "inactive": "Inactive",
-    "credit": "Credit"
+    "credit": "Credit",
+    "back": "Back",
+    "next": "Next",
+    "please-fill-up": "Please fill up the information below",
+    "welcome-back": "Welcome back!"
   },
   "auth": {
     "password": "Password",
     "login": "Log in",
     "logout": "Log out",
+    "register": "Register new account",
     "active": "Active account",
     "inactive": "Inactive account",
     "forgot-password": "Forgot password",
@@ -51,7 +56,7 @@
     "edit-user": "Edit user",
     "new-organization": "New organization",
     "edit-organization": "Edit organization",
-    "onboard-to-new-organization": "Onboard to new organization",
+    "onboard-to-new-organization": "Onboard",
     "select-user-to-edit": "Select user to edit",
     "full-name": "Full name",
     "phone-number": "Phone number",
@@ -69,7 +74,8 @@
     "organization-name": "Organization's name",
     "location-name": "Location name",
     "fax-number": "Fax number",
-    "operating-times": "Operating times"
+    "operating-times": "Operating times",
+    "personal-info": "Personal info"
   },
   "roles": {
     "SuperAdmin": "SuperAdmin",
@@ -150,13 +156,15 @@
     "customer-code-existed": "Customer code already existed",
     "referrer-not-found": "Referrer not found",
     "referrer-same-as-user": "Referer can't be the same as user",
+    "org-not-found": "Organization not found",
     "already-onboarded": "Already onboarded to this org",
     "item-not-set-up-for-route": "Item is not set up for this route",
     "not-logged-into-any-org": "You are not logged into any organization",
     "inactive-account": "Your account is inactive",
     "duplicate-origins-destinations": "Duplicate origins or destinations",
     "subtracking-with-empty-items-list": "Subtracking with empty items list is not allowed",
-    "password-reset-email-sent": "Password reset email sent"
+    "password-reset-email-sent": "Password reset email sent",
+    "not-authorized": "Not authorized"
   }, "success-messages": {
     "success": "Success",
     "creation-success": "Created successfully",

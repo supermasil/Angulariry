@@ -63,7 +63,7 @@ export class AuthGuard implements CanActivate {
   checkAuthorization(roles: string[]) {
     let result = roles.includes(this.authService.getMongoDbUser()?.role);
     if (!result) {
-      this.authService.redirectToMainPageWithMessage("You're not authorized");
+      this.authService.redirectToMainPageWithMessage("not-authorized", 400);
       return false;
     }
     return true

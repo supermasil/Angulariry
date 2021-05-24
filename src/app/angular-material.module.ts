@@ -30,6 +30,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { IconModule } from '@visurel/iconify-angular';
 
 
 @NgModule({
@@ -64,7 +65,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatTooltipModule,
     MatSnackBarModule,
     MatSidenavModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    IconModule
   ]
 })
 

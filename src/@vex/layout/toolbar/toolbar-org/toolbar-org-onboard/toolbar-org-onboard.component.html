@@ -1,0 +1,49 @@
+<!-- <div>
+  <div mat-dialog-title fxLayout="row" fxLayoutAlign="space-between center">
+    <div></div>
+    <button type="button" mat-icon-button (click)="close()">
+        <mat-icon [icIcon]="icClose"></mat-icon>
+    </button>
+  </div>
+  
+  
+</div> -->
+
+    
+<div class="p-6 pb-0" fxLayout="column" fxLayoutAlign="center center">
+  <div class="fill-current text-center">
+    <img class="w-16" src="assets/img/demo/logo.svg">
+  </div>
+</div>
+
+<div class="text-center my-4">
+  <h2 class="title m-0" translate>general.welcome-back</h2>
+  <h4 class="body-2 text-secondary m-0" translate>general.please-fill-up</h4>
+</div>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline">
+    <mat-label translate>auth.register-code</mat-label>
+    <input
+    #registerCode
+    type="text"
+    required
+    matInput>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label translate>auth.referral-code</mat-label>
+    <input
+    #referralCode
+    type="text"
+    matInput>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions fxLayoutAlign="end">
+  <button mat-raised-button class="mb-4" [disabled]="!registerCode.value" color='primary' (click)="onboard(registerCode.value, referralCode.value); close()">{{'general.update' | translate}}</button>
+</mat-dialog-actions>
+
+
+
+
+

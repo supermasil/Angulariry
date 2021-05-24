@@ -5,7 +5,7 @@ const checkAuth = require("../middleware/check-auth");
 
 router.post('/', checkAuth.isAuthenticated, OrganizationController.createUpdateOrganization);
 
-router.get('/:ids', OrganizationController.getOrganizationsByIds) // Get one
+router.get('/orgs/:ids', OrganizationController.getOrganizationsByIds) // Get one
 
 router.get('/', checkAuth.isAuthenticated, OrganizationController.getOrganizations); // Get All
 

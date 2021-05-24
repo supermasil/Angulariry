@@ -1,9 +1,15 @@
 <div class="toolbar w-full px-gutter" fxLayout="row" fxLayoutAlign="start center" vexContainer>
-  <button (click)="openSidenav()" [fxHide]="!mobileQuery" mat-icon-button type="button">
-    <mat-icon [icIcon]="icMenu"></mat-icon>
-  </button>
-
-  <a *ngIf="isVerticalLayout$ | async"
+  <div class="mx-1 flex items-center">
+    <div class="fill-current text-center px-2">
+      <img class="w-6" src="assets/img/demo/logo.svg">
+    </div>
+  
+    <button (click)="openSidenav()" [fxHide]="!mobileQuery" mat-icon-button type="button" class="px-1">
+      <mat-icon [icIcon]="icMenu"></mat-icon>
+    </button>  
+  </div>
+  
+  <!-- <a *ngIf="isVerticalLayout$ | async"
      [routerLink]="['/']"
      class="ltr:mr-4 rtl:ml-4 block"
      fxLayout="row"
@@ -78,48 +84,45 @@
        fxLayout="row"
        fxLayoutAlign="start center">
     <vex-navigation-item *ngFor="let item of navigationItems" [item]="item"></vex-navigation-item>
-  </div>
+  </div> -->
 
   <span fxFlex></span>
 
-  <div class="-mx-1 flex items-center">
-    <div class="px-1">
-      <button (click)="openSearch()" mat-icon-button type="button">
-        <mat-icon [icIcon]="icSearch"></mat-icon>
-      </button>
+  <div class="mx-1 flex items-center">
+    <div *ngIf="!isLoading && user?.organization" class="mx-1 flex items-center">
+      <div class="px-1">
+        <button (click)="openSearch()" mat-icon-button type="button">
+          <mat-icon [icIcon]="icSearch"></mat-icon>
+        </button>
+      </div>
+      <div class="px-1">
+        <vex-toolbar-user></vex-toolbar-user>
+      </div>
+      <div class="px-1">
+        <vex-toolbar-org></vex-toolbar-org>
+      </div>
     </div>
-
-    <div class="px-1">
+    
+    <!-- <div class="px-1">
       <vex-toolbar-notifications></vex-toolbar-notifications>
-    </div>
+    </div> -->
 
-    <div class="px-1">
+    <!-- <div class="px-1">
       <button (click)="openQuickpanel()" mat-icon-button type="button">
         <mat-icon [icIcon]="icBookmarks"></mat-icon>
       </button>
-    </div>
+    </div> -->
 
+    <div class="px-1" *ngIf="!isLoading && !user?.organization">
+      <button mat-button type="button" (click)="openDialog()" color="primary">
+        <mat-icon [icIcon]="icOutlineNewLabel"></mat-icon><span> {{'auth.onboard-to-new-organization' | translate}}</span>
+      </button>
+    </div>
+  
     <div class="px-1">
-      <button [matMenuTriggerFor]="languageMenu" mat-icon-button type="button">
-        <mat-icon [icIcon]="emojioneUS"></mat-icon>
-      </button>
+      <toolbar-language></toolbar-language>
     </div>
 
-    <div class="px-1">
-      <vex-toolbar-user></vex-toolbar-user>
-    </div>
-
-    <mat-menu #languageMenu="matMenu" overlapTrigger="false" xPosition="before" yPosition="below">
-      <button mat-menu-item>
-        <mat-icon [icIcon]="emojioneUS"></mat-icon>
-        <span>English</span>
-      </button>
-
-      <button mat-menu-item>
-        <mat-icon [icIcon]="emojioneDE"></mat-icon>
-        <span>German</span>
-      </button>
-    </mat-menu>
   </div>
 </div>
 

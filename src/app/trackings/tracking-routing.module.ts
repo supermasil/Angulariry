@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGlobals } from '../auth/auth-globals';
 import { AuthGuard } from '../auth/authentication.guard';
-import { FrontPageComponent } from '../front-page/front-page.component';
+import { FrontPageComponent } from '../pages/front-page/front-page.component';
 import { ConsolidatedTrackingFormComponent } from './tracking-create-edit/tracking-forms/consolidated-form.component';
 import { InPersonTrackingFormComponent } from './tracking-create-edit/tracking-forms/in-person-form.component';
 import { MasterTrackingFormComponent } from './tracking-create-edit/tracking-forms/master-form.component';
@@ -14,7 +14,7 @@ import { TrackingToolComponent } from './tracking-tool/tracking-tool.component';
 
 
 const routes: Routes = [
-  { path: '', component: TrackingListComponent, canActivate: [AuthGuard], data: {
+  { path: '', redirectTo: '/trackings/onl', pathMatch: 'full', component: TrackingListComponent, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}},
   { path: ':type', component: TrackingListComponent, canActivate: [AuthGuard], data: {
     roles: AuthGlobals.everyone}},

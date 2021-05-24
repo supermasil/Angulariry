@@ -5,6 +5,7 @@ import { Error404RoutingModule } from './error-404-routing.module';
 import { Error404Component } from './error-404.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { IconModule } from '@visurel/iconify-angular';
+import { AngularMaterialModule } from 'src/app/angular-material.module';
 
 
 @NgModule({
@@ -13,7 +14,8 @@ import { IconModule } from '@visurel/iconify-angular';
     CommonModule,
     Error404RoutingModule,
     FlexLayoutModule,
-    IconModule
+    IconModule,
+    AngularMaterialModule
   ]
 })
 export class Error404Module {

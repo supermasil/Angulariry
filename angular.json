@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "vex": {
+    "weshippee": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -12,7 +12,7 @@
       },
       "root": "",
       "sourceRoot": "src",
-      "prefix": "vex",
+      "prefix": "weshippee",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -80,18 +80,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "vex:build"
+            "browserTarget": "weshippee:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "vex:build:production"
+              "browserTarget": "weshippee:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "vex:build"
+            "browserTarget": "weshippee:build"
           }
         },
         "test": {
@@ -128,16 +128,16 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "vex:serve"
+            "devServerTarget": "weshippee:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "vex:serve:production"
+              "devServerTarget": "weshippee:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "vex"
+  "defaultProject": "weshippee"
 }

@@ -51,7 +51,6 @@ export class TrackingListComponent {
 
   async ngOnInit() {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
     this.route.params.subscribe(val => {
       switch (this.route.snapshot.paramMap.get('type')) {
         case TrackingGlobals.trackingTypes.ONLINE:

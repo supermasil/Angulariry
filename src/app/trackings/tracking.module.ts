@@ -23,8 +23,7 @@ import { InPersonTrackingFormComponent } from './tracking-create-edit/tracking-f
 import { ConsolidatedTrackingFormComponent } from './tracking-create-edit/tracking-forms/consolidated-form.component';
 import { MasterTrackingFormComponent } from './tracking-create-edit/tracking-forms/master-form.component';
 import { NgxPrintModule } from 'ngx-print';
-import { IconModule } from '@visurel/iconify-angular';
-import { MatIconModule } from '@angular/material/icon';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 @NgModule({
@@ -55,7 +54,8 @@ import { MatIconModule } from '@angular/material/icon';
     TranslateModule.forChild(),
     SearchBarModule,
     TrackingListCommonModule,
-    NgxPrintModule
+    NgxPrintModule,
+    FlexLayoutModule
   ]
 })
 export class TrackingModule {

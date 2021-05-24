@@ -1,12 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { MenuItem } from '../interfaces/menu-item.interface';
 import { trackById } from '../../../../utils/track-by';
 import icPerson from '@iconify/icons-ic/twotone-person';
 import icSettings from '@iconify/icons-ic/twotone-settings';
 import icAccountCircle from '@iconify/icons-ic/twotone-account-circle';
-import icMoveToInbox from '@iconify/icons-ic/twotone-move-to-inbox';
-import icListAlt from '@iconify/icons-ic/twotone-list-alt';
-import icTableChart from '@iconify/icons-ic/twotone-table-chart';
 import icCheckCircle from '@iconify/icons-ic/twotone-check-circle';
 import icAccessTime from '@iconify/icons-ic/twotone-access-time';
 import icDoNotDisturb from '@iconify/icons-ic/twotone-do-not-disturb';
@@ -17,8 +14,15 @@ import icBusiness from '@iconify/icons-ic/twotone-business';
 import icVerifiedUser from '@iconify/icons-ic/twotone-verified-user';
 import icLock from '@iconify/icons-ic/twotone-lock';
 import icNotificationsOff from '@iconify/icons-ic/twotone-notifications-off';
+import icConfirmationNumber from '@iconify/icons-ic/outline-confirmation-number';
+import icCameraFront from '@iconify/icons-ic/baseline-camera-front';
+import icAttachMoney from '@iconify/icons-ic/baseline-attach-money';
+
 import { Icon } from '@visurel/iconify-angular';
 import { PopoverRef } from '../../../../components/popover/popover-ref';
+import { AuthService } from 'src/app/auth/auth.service';
+import { UserModel } from 'src/app/models/user.model';
+import { formatCurrency } from '@angular/common';
 
 export interface OnlineStatus {
   id: 'online' | 'away' | 'dnd' | 'offline';
@@ -34,41 +38,6 @@ export interface OnlineStatus {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ToolbarUserDropdownComponent implements OnInit {
-
-  items: MenuItem[] = [
-    {
-      id: '1',
-      icon: icAccountCircle,
-      label: 'My Profile',
-      description: 'Personal Information',
-      colorClass: 'text-teal',
-      route: '/apps/social'
-    },
-    {
-      id: '2',
-      icon: icMoveToInbox,
-      label: 'My Inbox',
-      description: 'Messages & Latest News',
-      colorClass: 'text-primary',
-      route: '/apps/chat'
-    },
-    {
-      id: '3',
-      icon: icListAlt,
-      label: 'My Projects',
-      description: 'Tasks & Active Projects',
-      colorClass: 'text-amber',
-      route: '/apps/scrumboard'
-    },
-    {
-      id: '4',
-      icon: icTableChart,
-      label: 'Billing Information',
-      description: 'Pricing & Current Plan',
-      colorClass: 'text-purple',
-      route: '/pages/pricing'
-    }
-  ];
 
   statuses: OnlineStatus[] = [
     {
@@ -109,10 +78,53 @@ export class ToolbarUserDropdownComponent implements OnInit {
   icLock = icLock;
   icNotificationsOff = icNotificationsOff;
 
+  user: UserModel = null;
+  items: MenuItem[];
+
   constructor(private cd: ChangeDetectorRef,
-              private popoverRef: PopoverRef<ToolbarUserDropdownComponent>) { }
+              private popoverRef: PopoverRef<ToolbarUserDropdownComponent>,
+              private authService: AuthService) { }
+
 
   ngOnInit() {
+    this.authService.getMongoDbUserListener().subscribe(user => {
+      this.user = this.authService.getMongoDbUser();
+      this.items = [
+        {
+          id: '1',
+          icon: icConfirmationNumber,
+          label: this.user?.userCode,
+          description: '',
+          colorClass: 'text-red',
+          route: null
+        },
+        {
+          id: '2',
+          icon: icAccountCircle,
+          label: 'auth.profile',
+          description: '',
+          colorClass: 'text-teal',
+          route: '/auth/users/edit/' + this.user?._id
+        },
+        {
+          id: '3',
+          icon: icAttachMoney,
+          label: formatCurrency(this.user?.credit, "en", "$"),
+          description: '',
+          colorClass: 'text-amber',
+          route: null
+        },
+        {
+          id: '4',
+          icon: icCameraFront,
+          label: 'roles.' + this.user?.role,
+          description: '',
+          colorClass: 'text-purple',
+          route: null
+        }
+      ];
+      this.cd.detectChanges();
+    });
   }
 
   setStatus(status: OnlineStatus) {
@@ -122,5 +134,9 @@ export class ToolbarUserDropdownComponent implements OnInit {
 
   close() {
     this.popoverRef.close();
+  }
+
+  onLogOut() {
+    this.authService.logout();
   }
 }

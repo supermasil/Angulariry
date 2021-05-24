@@ -13,8 +13,8 @@ export class SpinnerInterceptor implements HttpInterceptor{
         this.spinner.show("spinner", {
           type: "ball-triangle-path",
           size: "large",
-          bdColor: "rgba(255,250,250,0.8)",
-          color: "#673AB7"
+          bdColor: "rgba(var(--color-primary), .3",
+          color: "rgba(var(--color-primary), 1)"
         });
       });
 

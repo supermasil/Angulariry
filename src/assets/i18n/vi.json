@@ -37,12 +37,17 @@
     "false": "No",
     "active": "Đang hoạt động",
     "inactive": "Không hoạt động",
-    "credit": "Tín dụng"
+    "credit": "Tín dụng",
+    "back": "Quay lại",
+    "next": "Kế tiếp",
+    "please-fill-up": "Xin vui lòng điền thông tin bên dưới",
+    "welcome-back": "Xin chào!"
   },
   "auth": {
     "password": "Mật khẩu",
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
+    "register": "Đăng ký tài khoản mới",
     "forgot-password": "Quên mật khẩu",
     "active": "Tài khoản đang hoạt động",
     "inactive": "Tài khoản không còn hoạt động",
@@ -51,7 +56,7 @@
     "edit-user": "Điều chỉnh thông tin người dùng",
     "new-organization": "Tạo doanh nghiệp mới",
     "edit-organization": "Điều chỉnh thông tin doanh nghiệp",
-    "onboard-to-new-organization": "Gia nhập công ty mới",
+    "onboard-to-new-organization": "Gia nhập",
     "select-user-to-edit": "Chọn người đùng để điều chỉnh",
     "full-name": "Tên đầy đủ",
     "phone-number": "Số điện thoại",
@@ -69,7 +74,8 @@
     "organization-name": "Tên doanh nghiệp",
     "location-name": "Tên địa điểm hoạt động",
     "fax-number": "Số fax",
-    "operating-times": "Giờ hoạt động"
+    "operating-times": "Giờ hoạt động",
+    "personal-info": "Thông tin cá nhân"
   },
   "roles": {
     "SuperAdmin": "Siêu quản trị",
@@ -149,6 +155,7 @@
     "tracking-number-existed": "Số vận đơn trùng lặp",
     "customer-code-existed": "Mã người sử dụng trùng lặp",
     "referrer-not-found": "Không tìm thấy người giới thiệu",
+    "org-not-found": "Không tìm thấy tổ chức",
     "referrer-same-as-user": "Người giới thiệu và người sử dụng phải khác nhau",
     "already-onboarded": "Đã đăng ký doanh nghiệp này từ trước",
     "item-not-set-up-for-route": "Mặt hàng này chưa được cài đặt cho tuyến đường này",
@@ -156,7 +163,8 @@
     "inactive-account": "Tài khoản không còn hoạt động với tổ chức này",
     "duplicate-origins-destinations": "Trùng điểm xuất phát hoặc điểm đến",
     "subtracking-with-empty-items-list": "Subtracking không chứa mặt hàng nào không được cho phép",
-    "password-reset-email-sent": "Email để cài lại mật khẩu đã được gửi đi"
+    "password-reset-email-sent": "Email để cài lại mật khẩu đã được gửi đi",
+    "not-authorized": "Không được phép truy cập"
   }, "success-messages": {
     "success": "Thành công",
     "creation-success": "Khởi tạo thành công",

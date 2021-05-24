@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, NgZone, OnInit, Output } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 import { fadeInUp400ms } from "src/@vex/animations/fade-in-up.animation";
-import { stagger40ms } from "src/@vex/animations/stagger.animation";
 import { AuthGlobals } from "src/app/auth/auth-globals";
 import { AuthService } from "src/app/auth/auth.service";
 import { CodeScannerService } from "../code-scanner/code-scanner.service";

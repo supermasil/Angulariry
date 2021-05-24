@@ -253,7 +253,7 @@ export class AuthService {
   }
 
   getOrganizationsByIds(orgIds: string[]) {
-    return this.httpClient.get<OrganizationModel[]>(ORGANIZATION_BACKEND_URL + `/${orgIds}`);
+    return this.httpClient.get<OrganizationModel[]>(ORGANIZATION_BACKEND_URL + `/orgs/${orgIds}`);
   }
 
   deleteOrganization(id: string) {
@@ -324,11 +324,20 @@ export class AuthService {
     return sessionStorage.getItem("utoken");
   }
 
-  redirectToMainPageWithMessage(message: string) {
-    this.toastr.error(message);
+  redirectToMainPageWithMessage(message: string, status?: number) {
+    this.translateService.get(`error-messages.${message}`).subscribe(translatedMessage => {
+      if (status == 400) {
+        this.toastr.warning(translatedMessage);
+      } else if (status == 500) {
+        this.toastr.error(translatedMessage);
+      } else if (status = 200) {
+        this.toastr.error(translatedMessage);
+      }
+
       this.zone.run(() => {
         this.router.navigate(["/trackings"]);
       });
+    });
   }
 
   redirectToMainPageWithoutMessage() {

@@ -12,7 +12,7 @@ import { AuthService } from "../auth.service";
 @Component({
   selector: 'org-onboarding-form',
   templateUrl: './org-onboarding.component.html',
-  styleUrls: ['./org-onboarding.component.css']
+  styleUrls: ['../auth.component.css']
 })
 export class OrgOnboardingFormComponentForm implements OnInit {
   organizationOnboardingForm: FormGroup;

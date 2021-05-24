@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@easypost/api": "^3.9.1",
+    "@iconify-icons/ic": "^1.1.4",
     "aws-sdk": "^2.797.0",
     "body-parser": "^1.19.0",
     "cls-rtracer": "^2.6.0",
@@ -17,6 +18,7 @@
     "mongoose-fuzzy-searching": "^2.0.2",
     "mongoose-unique-validator": "^2.0.3",
     "multer": "^1.4.2",
+    "ngx-google-places-autocomplete": "^2.0.5",
     "nodemon": "^2.0.6",
     "winston": "^3.3.3"
   }

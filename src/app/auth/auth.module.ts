@@ -15,9 +15,12 @@ import { AutoCompleteInputModule } from '../custom-components/auto-complete-inpu
 import { EditUserFormComponent } from './auth-forms/edit-user.component';
 import { AdjustCreditFormComponent } from './auth-forms/adjust-credit.component';
 import { NgxCurrencyModule } from 'ngx-currency';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { UserListCommonModule } from './user-list-common/user-list-common.module';
 import { ProductInfoModule } from '../custom-components/product-info/product-info.module';
+import { HttpClient } from '@angular/common/http';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { ToolbarLanguageModule } from 'src/@vex/layout/toolbar/toolbar-language/toolbar-language.module';
 
 @NgModule({
   declarations: [
@@ -39,9 +42,21 @@ import { ProductInfoModule } from '../custom-components/product-info/product-inf
     GooglePlaceModule,
     AutoCompleteInputModule,
     NgxCurrencyModule,
-    TranslateModule.forChild(),
+    ToolbarLanguageModule,
+    TranslateModule.forChild({ // This is needed
+      loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+              }
+
+      }),
     UserListCommonModule,
     ProductInfoModule
   ]
 })
 export class AuthModule {}
+
+export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
+  return new TranslateHttpLoader(http);
+}
